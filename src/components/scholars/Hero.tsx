@@ -3,9 +3,9 @@ import { ArrowUpRight } from "lucide-react";
 import { WA_LINK } from "@/lib/scholars-data";
 import heroCampus from "@/assets/hero-campus.jpg";
 // Optional mobile-specific crop. Add a file at `src/assets/hero-campus-mobile.jpg` to override on small screens.
-// To override the mobile hero image, place a file at `public/hero-campus-mobile.jpg`.
-// Using the `public/` folder avoids build-time import errors when the file is absent.
-const heroCampusMobilePath = "/hero-campus-mobile.jpg";
+// Mobile hero image candidates in `public/` (order = priority).
+// First priority: provided image file the user specified.
+const heroCampusMobilePath = "/15976d71-f6b3-4da2-8736-137bca2bec49.png";
 
 const TICKER = [
   "Allegheny College",
