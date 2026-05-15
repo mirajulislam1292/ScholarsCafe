@@ -57,6 +57,11 @@ jobs:
               mv $TEMP_DIR $REMOTE_DIR; \
               quit"
 
+          echo "Also mirroring built files into remote root (non-destructive) so site is served regardless of configured webroot"
+          # Mirror to remote root without deleting other server folders (non-destructive)
+          lftp -u "$FTP_USER","$FTP_PASSWORD" -p "$PORT" "$FTP_HOST" -e \
+            "set ssl:verify-certificate no; mirror -R --parallel=5 --verbose dist/client /; quit"
+
           echo "Deploy complete. Backup saved as: $BACKUP_DIR"
 name: Deploy to Hostinger
 
