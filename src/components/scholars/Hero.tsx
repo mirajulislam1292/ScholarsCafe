@@ -2,6 +2,10 @@ import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { WA_LINK } from "@/lib/scholars-data";
 import heroCampus from "@/assets/hero-campus.jpg";
+// Optional mobile-specific crop. Add a file at `src/assets/hero-campus-mobile.jpg` to override on small screens.
+// To override the mobile hero image, place a file at `public/hero-campus-mobile.jpg`.
+// Using the `public/` folder avoids build-time import errors when the file is absent.
+const heroCampusMobilePath = "/hero-campus-mobile.jpg";
 
 const TICKER = [
   "Allegheny College",
@@ -53,13 +57,16 @@ export function Hero() {
     >
       {/* full-bleed cinematic campus photo */}
       <div className="absolute inset-0 -z-20">
-        <img
-          src={heroCampus}
-          alt="Historic university campus at golden hour"
-          width={1920}
-          height={1280}
-          className="h-full w-full object-cover object-top md:object-center"
-        />
+        <picture>
+          <source srcSet={heroCampusMobilePath} media="(max-width: 768px)" />
+          <img
+            src={heroCampus}
+            alt="Historic university campus at golden hour"
+            width={1920}
+            height={1280}
+            className="h-full w-full object-cover object-top md:object-center"
+          />
+        </picture>
       </div>
 
       {/* dramatic gradient + vignette overlays (Crimson-style shadow) */}
