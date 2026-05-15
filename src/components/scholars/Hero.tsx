@@ -58,13 +58,17 @@ export function Hero() {
           alt="Historic university campus at golden hour"
           width={1920}
           height={1280}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-top md:object-center"
         />
       </div>
 
       {/* dramatic gradient + vignette overlays (Crimson-style shadow) */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(7,18,42,0.96)_0%,rgba(7,18,42,0.78)_38%,rgba(7,18,42,0.35)_70%,rgba(7,18,42,0.55)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(7,18,42,0.55)_70%,rgba(7,18,42,0.95)_100%)]" />
+      {/* desktop: deeper dramatic overlays */}
+      <div className="pointer-events-none absolute inset-0 -z-10 hidden md:block bg-[linear-gradient(90deg,rgba(7,18,42,0.96)_0%,rgba(7,18,42,0.78)_38%,rgba(7,18,42,0.35)_70%,rgba(7,18,42,0.55)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 hidden md:block bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(7,18,42,0.55)_70%,rgba(7,18,42,0.95)_100%)]" />
+      {/* mobile: lighter overlays so the hero image reads better on small screens */}
+      <div className="pointer-events-none absolute inset-0 -z-10 md:hidden bg-[linear-gradient(90deg,rgba(7,18,42,0.7)_0%,rgba(7,18,42,0.55)_38%,rgba(7,18,42,0.18)_70%,rgba(7,18,42,0.32)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 md:hidden bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(7,18,42,0.35)_70%,rgba(7,18,42,0.7)_100%)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-48 bg-gradient-to-b from-transparent to-[var(--navy-deep)]" />
       {/* subtle grid */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
