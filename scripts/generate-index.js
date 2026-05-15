@@ -6,7 +6,7 @@ async function generateIndexHtml() {
   const clientDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'client');
   const serverEntryPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'server', 'index.js');
   const serverEntry = await import(pathToFileURL(serverEntryPath).href);
-  const response = await serverEntry.default.fetch(new Request('http://localhost/'));
+  const response = await serverEntry.default.fetch(new Request('https://example.com/'));
 
   if (!response.ok) {
     throw new Error(`SSR render failed with status ${response.status}`);

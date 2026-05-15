@@ -7,12 +7,22 @@ import dotenv from 'dotenv';
 // Load .env file
 dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), '..', '.env') });
 
-const FTP_HOST = process.env.FTP_HOST || '82.25.83.46';
-const FTP_USER = process.env.FTP_USER || 'u814252648.adminsc';
+const FTP_HOST = process.env.FTP_HOST;
+const FTP_USER = process.env.FTP_USER;
 const FTP_PORT = parseInt(process.env.FTP_PORT || '21', 10);
 const FTP_PASS = process.env.FTP_PASS || process.env.FTP_PASSWORD;
 const REMOTE_DIR = process.env.FTP_DIR;
 const LOCAL_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'client');
+
+if (!FTP_HOST) {
+  console.error('[ERROR] FTP_HOST environment variable not set');
+  process.exit(1);
+}
+
+if (!FTP_USER) {
+  console.error('[ERROR] FTP_USER environment variable not set');
+  process.exit(1);
+}
 
 if (!FTP_PASS) {
   console.error('[ERROR] FTP_PASS environment variable not set');
@@ -34,7 +44,7 @@ const FTP_CONFIG = {
 async function generateIndexHtml(clientDir) {
   const serverEntryPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'server', 'index.js');
   const serverEntry = await import(pathToFileURL(serverEntryPath).href);
-  const response = await serverEntry.default.fetch(new Request('http://localhost/'));
+  const response = await serverEntry.default.fetch(new Request('https://example.com/'));
   if (!response.ok) throw new Error(`SSR render failed with status ${response.status}`);
   const html = await response.text();
   writeFileSync(join(clientDir, 'index.html'), html);
