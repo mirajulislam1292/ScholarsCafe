@@ -1,10 +1,10 @@
+jobs:
 name: Build and Deploy to Hostinger
 
 on:
   push:
     branches: [ "main" ]
   schedule:
-    # Daily at 02:00 UTC
     - cron: '0 2 * * *'
   workflow_dispatch: {}
 
@@ -18,7 +18,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install dependencies
         run: npm ci
@@ -26,7 +26,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to Hostinger (atomic) via lftp
+      - name: Deploy via deploy.js (uses FTP and applies permission fixes)
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USER }}
@@ -34,68 +34,4 @@ jobs:
           FTP_PORT: ${{ secrets.FTP_PORT }}
           FTP_DIR: ${{ secrets.FTP_DIR }}
         run: |
-          set -euo pipefail
-          echo "Installing lftp..."
-          sudo apt-get update -y
-          sudo apt-get install -y lftp
-
-          PORT=${FTP_PORT:-21}
-          REMOTE_DIR=${FTP_DIR:-public_html}
-          TIMESTAMP=$(date -u +%Y%m%dT%H%M%SZ)
-          TEMP_DIR=${REMOTE_DIR}_tmp_${TIMESTAMP}
-          BACKUP_DIR=${REMOTE_DIR}_bak_${TIMESTAMP}
-
-          echo "Uploading to temporary remote directory: $TEMP_DIR"
-          lftp -u "$FTP_USER","$FTP_PASSWORD" -p "$PORT" "$FTP_HOST" -e \
-            "set ssl:verify-certificate no; mirror -R --parallel=5 --verbose dist/client $TEMP_DIR; quit"
-
-          echo "Swapping $REMOTE_DIR -> $BACKUP_DIR and promoting $TEMP_DIR -> $REMOTE_DIR"
-          # Move live dir to backup (if exists) and move temp into place
-          lftp -u "$FTP_USER","$FTP_PASSWORD" -p "$PORT" "$FTP_HOST" -e \
-            "set ssl:verify-certificate no; \
-              if [ -d $REMOTE_DIR ]; then mv $REMOTE_DIR $BACKUP_DIR; fi; \
-              mv $TEMP_DIR $REMOTE_DIR; \
-              quit"
-
-          echo "Also mirroring built files into remote root (non-destructive) so site is served regardless of configured webroot"
-          # Mirror to remote root without deleting other server folders (non-destructive)
-          lftp -u "$FTP_USER","$FTP_PASSWORD" -p "$PORT" "$FTP_HOST" -e \
-            "set ssl:verify-certificate no; mirror -R --parallel=5 --verbose dist/client /; quit"
-
-          echo "Deploy complete. Backup saved as: $BACKUP_DIR"
-name: Deploy to Hostinger
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Build the project
-        run: npm run build
-
-      - name: Deploy via FTP
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_PORT: ${{ secrets.FTP_PORT }}
-          FTP_DIR: /home/u814252648/domains/scholarscafe.com/public_html
-        run: |
-          # Use the existing deploy script
           node scripts/deploy.js

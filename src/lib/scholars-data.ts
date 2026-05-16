@@ -1,7 +1,7 @@
 import type { ScholarIconName } from "./scholar-icon-types";
 
 export const WA_LINK = "https://wa.me/8801560001325";
-export const EMAIL = "contact.scholarscafe@gmail.com";
+export const EMAIL = "contact@scholarscafe.com";
 export const PHONE = "+880 1560-001325";
 
 export const COUNTRIES = [
