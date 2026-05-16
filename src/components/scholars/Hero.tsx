@@ -153,55 +153,11 @@ export function Hero() {
               </a>
             </motion.div>
 
-            <div className="mt-8 grid grid-cols-2 gap-3 lg:hidden">
-              <div className="rounded-3xl border border-white/15 bg-white/5 p-4 text-white backdrop-blur-sm">
-                <div className="font-display text-3xl font-extrabold leading-none">
-                  100<span className="text-sky">+</span>
-                </div>
-                <div className="mt-2 text-[11px] uppercase tracking-[0.16em] text-white/65">
-                  Students placed worldwide
-                </div>
-              </div>
-              <div className="rounded-3xl border border-white/15 bg-white/5 p-4 text-white backdrop-blur-sm">
-                <div className="font-display text-3xl font-extrabold leading-none">
-                  11<span className="text-sky">+</span>
-                </div>
-                <div className="mt-2 text-[11px] uppercase tracking-[0.16em] text-white/65">
-                  Countries covered
-                </div>
-              </div>
-            </div>
+            
           </div>
 
           {/* right column — editorial stat block */}
-          <motion.aside
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5, duration: 0.7 }}
-            className="hidden flex-col justify-end gap-8 border-l border-white/15 pl-8 backdrop-blur-[2px] lg:flex lg:pl-12"
-          >
-            <div>
-              <div className="font-display text-7xl font-extrabold leading-none text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.5)]">
-                100<span className="text-sky">+</span>
-              </div>
-              <div className="mt-3 text-sm uppercase tracking-[0.18em] text-white/65">
-                Students placed worldwide
-              </div>
-            </div>
-            <div className="border-t border-white/15 pt-8">
-              <div className="font-display text-7xl font-extrabold leading-none text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.5)]">
-                11<span className="text-sky">+</span>
-              </div>
-              <div className="mt-3 text-sm uppercase tracking-[0.18em] text-white/65">
-                Countries · USA · UK · DE
-              </div>
-            </div>
-            <p className="border-t border-white/15 pt-8 text-[15px] leading-relaxed text-white/75">
-              <span className="font-display text-2xl text-white">"</span>
-              Real mentors. Honest advice. The forms, essays, and quiet 1 a.m. WhatsApp
-              messages — all of it, together.
-            </p>
-          </motion.aside>
+          
         </div>
 
         {/* university ticker */}
