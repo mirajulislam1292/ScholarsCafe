@@ -163,6 +163,28 @@ async function deploy() {
       await uploadFile(f.localPath, f.remotePath);
     }
 
+    // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
+    try {
+      console.log('[...] Fixing remote permissions (this may be slow)...');
+      const permClient = createClient();
+      await connect(permClient);
+      // Directories -> 755, Files -> 644. Use SITE CHMOD where supported; ignore errors.
+      for (const d of dirs) {
+        try {
+          await permClient.send(`SITE CHMOD 755 ${d.remotePath}`);
+        } catch (_) {}
+      }
+      for (const f of files) {
+        try {
+          await permClient.send(`SITE CHMOD 644 ${f.remotePath}`);
+        } catch (_) {}
+      }
+      permClient.close();
+      console.log('[OK] Remote permissions updated (best-effort)');
+    } catch (e) {
+      console.log('[WARN] Could not update remote permissions:', e.message || e);
+    }
+
     console.log('[OK] Deploy complete!');
     process.exit(0);
   } catch (err) {
