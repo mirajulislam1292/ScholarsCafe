@@ -16,7 +16,7 @@ export function Destinations() {
               <h2 className="mt-5 editorial-h2">
                 Choose a country.
                 <br />
-                <span className="italic font-light text-sky" style={{ fontFamily: "Georgia, serif" }}>
+                <span className="font-display italic font-light text-sky">
                   We'll handle the rest.
                 </span>
               </h2>

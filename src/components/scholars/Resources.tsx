@@ -29,7 +29,7 @@ export function Resources() {
               <h2 className="mt-5 editorial-h2">
                 Every guide we wish we had
                 <br />
-                <span className="italic font-light text-sky" style={{ fontFamily: "Georgia, serif" }}>
+                <span className="font-display italic font-light text-sky">
                   when we were applying.
                 </span>
               </h2>

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { Menu, X, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { WA_LINK } from "@/lib/scholars-data";
@@ -19,6 +18,10 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
     onScroll();
@@ -34,7 +37,7 @@ export function Navbar() {
         }`}
       >
         <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-5 md:px-8">
-          <Link to="/" className="flex items-center gap-2">
+          <button type="button" onClick={scrollToTop} className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy text-white">
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
                 <path d="M12 2L3 7v6c0 5 4 8 9 9 5-1 9-4 9-9V7l-9-5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
@@ -45,7 +48,7 @@ export function Navbar() {
               <span className={scrolled ? "text-navy" : "text-white"}>Scholars</span>
               <span className="text-sky"> Cafe</span>
             </span>
-          </Link>
+          </button>
 
           <nav className="hidden items-center gap-7 lg:flex">
             {NAV.map((item) => (
@@ -91,7 +94,9 @@ export function Navbar() {
             className="fixed inset-0 z-[2000] bg-navy-deep p-6 lg:hidden"
           >
             <div className="flex items-center justify-between">
-              <span className="font-display text-2xl text-white">Scholars <span className="text-sky">Cafe</span></span>
+              <button onClick={scrollToTop} className="font-display text-2xl text-white">
+                Scholars <span className="text-sky">Cafe</span>
+              </button>
               <button onClick={() => setOpen(false)} aria-label="Close" className="text-white"><X className="h-7 w-7" /></button>
             </div>
             <nav className="mt-12 flex flex-col gap-6">

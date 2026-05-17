@@ -16,7 +16,6 @@ import { Resources } from "@/components/scholars/Resources";
 import { Newsletter } from "@/components/scholars/Newsletter";
 import { Contact } from "@/components/scholars/Contact";
 import { Footer } from "@/components/scholars/Footer";
-import { FloatingButtons } from "@/components/scholars/FloatingButtons";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -52,7 +51,6 @@ function Index() {
         <Contact />
       </main>
       <Footer />
-      <FloatingButtons />
     </div>
   );
 }

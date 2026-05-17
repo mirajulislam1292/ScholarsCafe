@@ -54,10 +54,7 @@ export function WorldMap() {
             <h2 className="mt-5 editorial-h2 text-white">
               The world,
               <br />
-              <span
-                className="italic font-light text-sky-light"
-                style={{ fontFamily: "Georgia, serif" }}
-              >
+              <span className="font-display italic font-light text-sky-light">
                 at your fingertips.
               </span>
             </h2>
@@ -94,6 +91,7 @@ export function WorldMap() {
                     const iso = geo.properties.iso_a3 || geo.id;
                     const dest = ISO_TO_DESTINATION[iso];
                     const isActive = !!dest;
+                    const isBangladesh = iso === "BGD";
                     return (
                       <Geography
                         key={geo.rsmKey}
@@ -103,7 +101,11 @@ export function WorldMap() {
                         onClick={() => isActive && dest && setActive(dest)}
                         style={{
                           default: {
-                            fill: isActive
+                            fill: isBangladesh
+                              ? hover === iso
+                                ? "var(--gold-deep)"
+                                : "var(--gold)"
+                              : isActive
                               ? hover === iso
                                 ? "#0ea5e9"
                                 : "#1e3a6b"
@@ -111,11 +113,11 @@ export function WorldMap() {
                             stroke: "#07142a",
                             strokeWidth: 0.5,
                             outline: "none",
-                            cursor: isActive ? "pointer" : "default",
+                            cursor: isActive || isBangladesh ? "pointer" : "default",
                             transition: "fill 0.2s ease",
                           },
                           hover: {
-                            fill: isActive ? "#38bdf8" : "#13294b",
+                            fill: isBangladesh ? "var(--gold-deep)" : isActive ? "#38bdf8" : "#13294b",
                             outline: "none",
                           },
                           pressed: { fill: "#0284c7", outline: "none" },

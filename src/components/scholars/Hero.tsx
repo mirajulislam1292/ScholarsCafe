@@ -1,55 +1,22 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { WA_LINK } from "@/lib/scholars-data";
+import { UNIVERSITY_ACCEPTANCES } from "@/lib/university-acceptances";
 import heroCampus from "@/assets/hero-campus.jpg";
 // Optional mobile-specific crop. Add a file at `src/assets/hero-campus-mobile.jpg` to override on small screens.
 // Mobile hero image candidates in `public/` (order = priority).
 // First priority: provided image file the user specified.
 const heroCampusMobilePath = "/15976d71-f6b3-4da2-8736-137bca2bec49.png";
 
-const TICKER = [
-  "Allegheny College",
-  "Augustana College",
-  "Beloit College",
-  "Calvin University",
-  "Centre College",
-  "Clark University",
-  "Caldwell University",
-  "Denison University",
-  "DePauw University",
-  "Florida Southern College",
-  "Franklin & Marshall College",
-  "Furman University",
-  "Gettysburg College",
-  "Hope College",
-  "Illinois Tech",
-  "Iowa State University",
-  "Knox College",
-  "Kent State University",
-  "Lake Forest College",
-  "Lawrence University",
-  "Luther College",
-  "University of Maryland",
-  "Millsaps College",
-  "NJIT",
-  "NYIT",
-  "Penn State",
-  "Purdue University",
-  "Rhodes College",
-  "Sewanee University",
-  "Sweet Briar College",
-  "Temple University",
-  "University of Connecticut",
-  "University of Delaware",
-  "Union College",
-  "VCU",
-  "Wabash College",
-  "Whitman College",
-  "Whitworth University",
-  "Wofford College",
-];
+const ACCEPTANCE_RAIL = UNIVERSITY_ACCEPTANCES;
 
 export function Hero() {
+  const reduceMotion = Boolean(useReducedMotion());
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <section
       id="top"
@@ -88,8 +55,7 @@ export function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.6 }}
-              className="mb-4 italic text-lg text-sky-light/90 md:text-xl"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+              className="mb-4 font-display italic text-lg text-sky-light/90 md:text-xl"
             >
               Thousands Apply. Few Stand Out.
             </motion.p>
@@ -109,8 +75,7 @@ export function Hero() {
                 initial={{ opacity: 0, y: 80 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="block italic font-light text-sky-light"
-                style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                className="font-display block italic font-light text-sky-light"
               >
                 acceptance.
               </motion.span>
@@ -162,29 +127,50 @@ export function Hero() {
 
         {/* university ticker */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="mt-16 border-t border-white/15 pb-8 pt-8 md:mt-24 md:pb-10"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.7, ease: "easeOut" }}
+          className="mt-16 pb-8 md:mt-24 md:pb-10"
         >
           <div className="mb-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
             <span className="h-px w-10 bg-white/30" />
             Where our students are heading
           </div>
-          <div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
-            <div className="flex w-max animate-marquee gap-8 md:gap-12">
-              {[...TICKER, ...TICKER].map((u, i) => (
-                <span
-                  key={i}
-                  className="font-display whitespace-nowrap text-xl font-bold text-white/40 hover:text-white/90 md:text-3xl"
-                >
-                  {u}
-                </span>
+          <motion.div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_7%,black_93%,transparent)]">
+            <div
+              className={`flex w-max items-center gap-8 md:gap-12 [will-change:transform] ${reduceMotion ? "motion-reduce:animate-none" : "animate-marquee"}`}
+              style={reduceMotion ? { animationPlayState: "paused" } : { animationDuration: "92s" }}
+            >
+              {[...ACCEPTANCE_RAIL, ...ACCEPTANCE_RAIL].map((item, index) => (
+                <AcceptanceRailItem key={`${item.name}-${index}`} name={item.name} logo={item.logo} onClick={scrollToTop} />
               ))}
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>
+  );
+}
+
+type AcceptanceRailItemProps = {
+  name: string;
+  logo: string;
+  onClick: () => void;
+};
+
+function AcceptanceRailItem({ name, logo, onClick }: AcceptanceRailItemProps) {
+  return (
+    <button type="button" onClick={onClick} className="inline-flex shrink-0 items-center gap-3 whitespace-nowrap px-1 py-2 text-white/72 transition-colors hover:text-white">
+      <img
+        src={logo}
+        alt={`${name} logo`}
+        loading="lazy"
+        decoding="async"
+        className="h-10 w-10 shrink-0 object-contain opacity-85 drop-shadow-[0_0_18px_rgba(255,255,255,0.12)] md:h-11 md:w-11"
+      />
+      <span className="font-sans text-[14px] font-medium tracking-[-0.01em] md:text-[15px]">
+        {name}
+      </span>
+    </button>
   );
 }

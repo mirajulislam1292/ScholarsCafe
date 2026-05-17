@@ -1,15 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-@import url("https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap");
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: "Syne", "Clash Display", sans-serif;
-  --font-sans: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -127,12 +126,12 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-sans);
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     -webkit-font-smoothing: antialiased;
     line-height: 1.75;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.01em;
@@ -140,7 +139,7 @@
 }
 
 @layer utilities {
-  .font-display { font-family: var(--font-display); }
+  .font-display { font-family: 'Plus Jakarta Sans', sans-serif !important; }
   .bg-hero-gradient { background: var(--gradient-hero); }
   .bg-dark-gradient { background: var(--gradient-dark); }
   .bg-newsletter-gradient { background: var(--gradient-newsletter); }
@@ -227,22 +226,22 @@
   background: currentColor;
   display: inline-block;
 }
-.editorial-h2 {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(2.25rem, 4.5vw, 3.75rem);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: var(--foreground);
-  text-wrap: balance;
-}
-.editorial-display {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(3rem, 7vw, 6.5rem);
-  line-height: 0.95;
-  letter-spacing: -0.035em;
-}
+  .editorial-h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 4.5vw, 3.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+    text-wrap: balance;
+  }
+  .editorial-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(3rem, 7vw, 6.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+  }
 .surface-elevated { background-color: var(--card); }
 .text-on-dark { color: rgba(255, 255, 255, 0.78); }
 
