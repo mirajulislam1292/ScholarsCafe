@@ -16,11 +16,21 @@ const LOCAL_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'c
 
 function normalizeRemoteDir(remoteDir) {
   if (!remoteDir) return remoteDir;
-  if (remoteDir === '/') return remoteDir;
+  if (remoteDir === '/' || remoteDir === '.') return remoteDir;
   return remoteDir.replace(/\/+$/, '');
 }
 
-const REMOTE_DIR = normalizeRemoteDir(RAW_REMOTE_DIR);
+function resolveRemoteDir(remoteDir) {
+  const normalized = normalizeRemoteDir(remoteDir);
+
+  if (!normalized || normalized === '.') {
+    return 'public_html';
+  }
+
+  return normalized;
+}
+
+const REMOTE_DIR = resolveRemoteDir(RAW_REMOTE_DIR);
 
 if (!FTP_HOST) {
   console.error('[ERROR] FTP_HOST environment variable not set');
