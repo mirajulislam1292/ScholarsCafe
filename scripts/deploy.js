@@ -11,8 +11,18 @@ const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PORT = parseInt(process.env.FTP_PORT || '21', 10);
 const FTP_PASS = process.env.FTP_PASS || process.env.FTP_PASSWORD;
-const REMOTE_DIR = process.env.FTP_DIR;
+const RAW_REMOTE_DIR = process.env.FTP_DIR;
 const LOCAL_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'client');
+
+function normalizeRemoteDir(remoteDir) {
+  if (!remoteDir) return remoteDir;
+  if (remoteDir === '/') return remoteDir;
+  return remoteDir.replace(/\/+$/, '');
+}
+
+const REMOTE_DIR = normalizeRemoteDir(RAW_REMOTE_DIR);
+const DEPLOY_STAGING_DIR = `${REMOTE_DIR}__deploy_${Date.now()}`;
+const DEPLOY_BACKUP_DIR = `${REMOTE_DIR}__backup_${Date.now()}`;
 
 if (!FTP_HOST) {
   console.error('[ERROR] FTP_HOST environment variable not set');
@@ -114,6 +124,21 @@ async function ensureDir(client, remotePath) {
   }
 }
 
+async function tryRemoveDir(client, remotePath) {
+  try {
+    await client.removeDir(remotePath);
+  } catch (_) {}
+}
+
+async function tryRename(client, fromPath, toPath) {
+  try {
+    await client.rename(fromPath, toPath);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 async function collectFiles(localPath, remotePath, list = []) {
   const entries = readdirSync(localPath);
 
@@ -143,11 +168,11 @@ async function deploy() {
 
     console.log('[...] Connecting to Hostinger FTP...');
 
-    // First pass: create all directories using one connection
+    // First pass: create all directories in a staging folder using one connection
     const client = createClient();
     await connect(client);
-    console.log('[...] Creating remote directories...');
-    const allItems = await collectFiles(LOCAL_DIR, REMOTE_DIR);
+    console.log(`[...] Creating staging directories at ${DEPLOY_STAGING_DIR}...`);
+    const allItems = await collectFiles(LOCAL_DIR, DEPLOY_STAGING_DIR);
     const dirs = allItems.filter(i => i.type === 'dir');
     for (const d of dirs) {
       console.log(`  [DIR] ${d.remotePath}`);
@@ -155,34 +180,56 @@ async function deploy() {
     }
     client.close();
 
-    // Second pass: upload each file with its own fresh connection (avoids keepalive conflicts)
+    // Second pass: upload each file into the staging folder with its own fresh connection
     const files = allItems.filter(i => i.type === 'file');
-    console.log(`[...] Uploading ${files.length} files...`);
+    console.log(`[...] Uploading ${files.length} files to staging...`);
     for (const f of files) {
       console.log(`  [UP] ${f.remotePath}`);
       await uploadFile(f.localPath, f.remotePath);
     }
 
-    // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
+    // Swap the staging folder into place atomically if the FTP server supports rename.
     try {
+      console.log('[...] Swapping staging folder into place...');
+      const swapClient = createClient();
+      await connect(swapClient);
+
+      // Best effort: remove any stale backup first.
+      await tryRemoveDir(swapClient, DEPLOY_BACKUP_DIR);
+
+      // Move current live site out of the way, then promote staging to live.
+      const liveMoved = await tryRename(swapClient, REMOTE_DIR, DEPLOY_BACKUP_DIR);
+      const stagingPromoted = await tryRename(swapClient, DEPLOY_STAGING_DIR, REMOTE_DIR);
+
+      if (!stagingPromoted) {
+        throw new Error(`Could not promote staging folder ${DEPLOY_STAGING_DIR} to ${REMOTE_DIR}`);
+      }
+
+      if (!liveMoved) {
+        console.log('[WARN] Live folder could not be backed up before swap; staging was still promoted');
+      }
+
+      // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
       console.log('[...] Fixing remote permissions (this may be slow)...');
       const permClient = createClient();
       await connect(permClient);
-      // Directories -> 755, Files -> 644. Use SITE CHMOD where supported; ignore errors.
       for (const d of dirs) {
+        const liveDir = d.remotePath.replace(DEPLOY_STAGING_DIR, REMOTE_DIR);
         try {
-          await permClient.send(`SITE CHMOD 755 ${d.remotePath}`);
+          await permClient.send(`SITE CHMOD 755 ${liveDir}`);
         } catch (_) {}
       }
       for (const f of files) {
+        const liveFile = f.remotePath.replace(DEPLOY_STAGING_DIR, REMOTE_DIR);
         try {
-          await permClient.send(`SITE CHMOD 644 ${f.remotePath}`);
+          await permClient.send(`SITE CHMOD 644 ${liveFile}`);
         } catch (_) {}
       }
       permClient.close();
-      console.log('[OK] Remote permissions updated (best-effort)');
+      swapClient.close();
+      console.log('[OK] Atomic deploy complete');
     } catch (e) {
-      console.log('[WARN] Could not update remote permissions:', e.message || e);
+      console.log('[WARN] Atomic swap/permissions step failed:', e.message || e);
     }
 
     console.log('[OK] Deploy complete!');
