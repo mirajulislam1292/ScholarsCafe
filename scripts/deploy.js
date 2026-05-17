@@ -32,6 +32,20 @@ function resolveRemoteDir(remoteDir) {
 
 const REMOTE_DIR = resolveRemoteDir(RAW_REMOTE_DIR);
 
+function buildTargetDirs(primaryDir) {
+  const candidates = [
+    primaryDir,
+    'public_html',
+    'domains/scholarscafe.com/public_html',
+  ]
+    .map(normalizeRemoteDir)
+    .filter(Boolean);
+
+  return [...new Set(candidates)];
+}
+
+const DEPLOY_TARGET_DIRS = buildTargetDirs(REMOTE_DIR);
+
 if (!FTP_HOST) {
   console.error('[ERROR] FTP_HOST environment variable not set');
   process.exit(1);
@@ -174,46 +188,48 @@ async function deploy() {
 
     console.log('[...] Connecting to Hostinger FTP...');
 
-    // First pass: create all directories in the live folder using one connection
-    const client = createClient();
-    await connect(client);
-    console.log(`[...] Creating remote directories at ${REMOTE_DIR}...`);
-    const allItems = await collectFiles(LOCAL_DIR, REMOTE_DIR);
-    const dirs = allItems.filter(i => i.type === 'dir');
-    for (const d of dirs) {
-      console.log(`  [DIR] ${d.remotePath}`);
-      await ensureDir(client, d.remotePath);
-    }
-    client.close();
-
-    // Second pass: upload each file directly into the live folder.
-    // Upload .htaccess early and index.html last so Hostinger never serves a partial site.
-    const files = sortDeployFiles(allItems.filter(i => i.type === 'file'));
-    console.log(`[...] Uploading ${files.length} files to live folder...`);
-    for (const f of files) {
-      console.log(`  [UP] ${f.remotePath}`);
-      await uploadFile(f.localPath, f.remotePath);
-    }
-
-    // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
-    try {
-      console.log('[...] Fixing remote permissions (this may be slow)...');
-      const permClient = createClient();
-      await connect(permClient);
+    for (const targetDir of DEPLOY_TARGET_DIRS) {
+      // First pass: create all directories in the target folder using one connection
+      const client = createClient();
+      await connect(client);
+      console.log(`[...] Creating remote directories at ${targetDir}...`);
+      const allItems = await collectFiles(LOCAL_DIR, targetDir);
+      const dirs = allItems.filter(i => i.type === 'dir');
       for (const d of dirs) {
-        try {
-          await permClient.send(`SITE CHMOD 755 ${d.remotePath}`);
-        } catch (_) {}
+        console.log(`  [DIR] ${d.remotePath}`);
+        await ensureDir(client, d.remotePath);
       }
+      client.close();
+
+      // Second pass: upload each file directly into the target folder.
+      // Upload .htaccess early and index.html last so Hostinger never serves a partial site.
+      const files = sortDeployFiles(allItems.filter(i => i.type === 'file'));
+      console.log(`[...] Uploading ${files.length} files to ${targetDir}...`);
       for (const f of files) {
-        try {
-          await permClient.send(`SITE CHMOD 644 ${f.remotePath}`);
-        } catch (_) {}
+        console.log(`  [UP] ${f.remotePath}`);
+        await uploadFile(f.localPath, f.remotePath);
       }
-      permClient.close();
-      console.log('[OK] Remote permissions updated (best-effort)');
-    } catch (e) {
-      console.log('[WARN] Could not update remote permissions:', e.message || e);
+
+      // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
+      try {
+        console.log('[...] Fixing remote permissions (this may be slow)...');
+        const permClient = createClient();
+        await connect(permClient);
+        for (const d of dirs) {
+          try {
+            await permClient.send(`SITE CHMOD 755 ${d.remotePath}`);
+          } catch (_) {}
+        }
+        for (const f of files) {
+          try {
+            await permClient.send(`SITE CHMOD 644 ${f.remotePath}`);
+          } catch (_) {}
+        }
+        permClient.close();
+        console.log('[OK] Remote permissions updated (best-effort)');
+      } catch (e) {
+        console.log('[WARN] Could not update remote permissions:', e.message || e);
+      }
     }
 
     console.log('[OK] Deploy complete!');
