@@ -24,7 +24,7 @@ function resolveRemoteDir(remoteDir) {
   const normalized = normalizeRemoteDir(remoteDir);
 
   if (!normalized || normalized === '.') {
-    return 'public_html';
+    return '.';
   }
 
   return normalized;
@@ -34,12 +34,13 @@ const REMOTE_DIR = resolveRemoteDir(RAW_REMOTE_DIR);
 
 function buildTargetDirs(primaryDir) {
   const candidates = [
+    '.',
     primaryDir,
     'public_html',
     'domains/scholarscafe.com/public_html',
   ]
     .map(normalizeRemoteDir)
-    .filter(Boolean);
+    .filter(dir => dir !== undefined && dir !== null);
 
   return [...new Set(candidates)];
 }
@@ -159,6 +160,18 @@ async function ensureDir(client, remotePath) {
   }
 }
 
+async function ensureRemotePath(client, remotePath) {
+  if (!remotePath || remotePath === '.') return;
+
+  const segments = remotePath.split('/').filter(Boolean);
+  let currentPath = remotePath.startsWith('/') ? '/' : '';
+
+  for (const segment of segments) {
+    currentPath = currentPath ? `${currentPath.replace(/\/$/, '')}/${segment}` : segment;
+    await ensureDir(client, currentPath);
+  }
+}
+
 async function collectFiles(localPath, remotePath, list = []) {
   const entries = readdirSync(localPath);
 
@@ -189,51 +202,87 @@ async function deploy() {
     console.log('[...] Connecting to Hostinger FTP...');
 
     for (const targetDir of DEPLOY_TARGET_DIRS) {
-      // First pass: create all directories in the target folder using one connection
-      const client = createClient();
-      await connect(client);
-      console.log(`[...] Creating remote directories at ${targetDir}...`);
-      const allItems = await collectFiles(LOCAL_DIR, targetDir);
-      const dirs = allItems.filter(i => i.type === 'dir');
-      for (const d of dirs) {
-        console.log(`  [DIR] ${d.remotePath}`);
-        await ensureDir(client, d.remotePath);
-      }
-      client.close();
-
-      // Second pass: upload each file directly into the target folder.
-      // Upload .htaccess early and index.html last so Hostinger never serves a partial site.
-      const files = sortDeployFiles(allItems.filter(i => i.type === 'file'));
-      console.log(`[...] Uploading ${files.length} files to ${targetDir}...`);
-      for (const f of files) {
-        console.log(`  [UP] ${f.remotePath}`);
-        await uploadFile(f.localPath, f.remotePath);
-      }
-
-      // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
       try {
-        console.log('[...] Fixing remote permissions (this may be slow)...');
-        const permClient = createClient();
-        await connect(permClient);
+        // First pass: create all directories in the target folder using one connection
+        const client = createClient();
+        await connect(client);
+        console.log(`[...] Creating remote directories at ${targetDir}...`);
+        await ensureRemotePath(client, targetDir);
+        const allItems = await collectFiles(LOCAL_DIR, targetDir);
+        const dirs = allItems.filter(i => i.type === 'dir');
         for (const d of dirs) {
-          try {
-            await permClient.send(`SITE CHMOD 755 ${d.remotePath}`);
-          } catch (_) {}
+          console.log(`  [DIR] ${d.remotePath}`);
+          await ensureDir(client, d.remotePath);
         }
+        client.close();
+
+        // Second pass: upload each file directly into the target folder.
+        // Upload .htaccess early and index.html last so Hostinger never serves a partial site.
+        const files = sortDeployFiles(allItems.filter(i => i.type === 'file'));
+        console.log(`[...] Uploading ${files.length} files to ${targetDir}...`);
         for (const f of files) {
-          try {
-            await permClient.send(`SITE CHMOD 644 ${f.remotePath}`);
-          } catch (_) {}
+          console.log(`  [UP] ${f.remotePath}`);
+          await uploadFile(f.localPath, f.remotePath);
         }
-        permClient.close();
-        console.log('[OK] Remote permissions updated (best-effort)');
-      } catch (e) {
-        console.log('[WARN] Could not update remote permissions:', e.message || e);
+
+        // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
+        try {
+          console.log('[...] Fixing remote permissions (this may be slow)...');
+          const permClient = createClient();
+          await connect(permClient);
+          for (const d of dirs) {
+            try {
+              await permClient.send(`SITE CHMOD 755 ${d.remotePath}`);
+            } catch (_) {}
+          }
+          for (const f of files) {
+            try {
+              await permClient.send(`SITE CHMOD 644 ${f.remotePath}`);
+            } catch (_) {}
+          }
+          permClient.close();
+          console.log('[OK] Remote permissions updated (best-effort)');
+        } catch (e) {
+          console.log('[WARN] Could not update remote permissions:', e.message || e);
+        }
+
+        console.log(`[OK] Deploy complete for target ${targetDir}`);
+        // Verify remote site files exist (index.html and .htaccess) to avoid 403s.
+        try {
+          const verifyClient = createClient();
+          await connect(verifyClient);
+          const indexRemote = (targetDir && targetDir !== '.') ? `${targetDir}/index.html` : 'index.html';
+          const htaccessRemote = (targetDir && targetDir !== '.') ? `${targetDir}/.htaccess` : '.htaccess';
+
+          const indexExists = await verifyClient.size(indexRemote).then(s => s > 0).catch(() => false);
+          const htExists = await verifyClient.size(htaccessRemote).then(s => s >= 0).catch(() => false);
+          verifyClient.close();
+
+          if (!indexExists) {
+            console.log(`[WARN] Verification failed: ${indexRemote} missing or empty on target ${targetDir}`);
+            // Try next deploy target
+            continue;
+          }
+
+          if (!htExists) {
+            console.log(`[WARN] Verification failed: ${htaccessRemote} missing on target ${targetDir}`);
+            // Try next deploy target
+            continue;
+          }
+
+          console.log(`[OK] Remote verification succeeded for ${targetDir}`);
+          process.exit(0);
+        } catch (e) {
+          console.log(`[WARN] Remote verification error for ${targetDir}: ${e.message || e}`);
+          // Try next deploy target
+          continue;
+        }
+      } catch (targetErr) {
+        console.log(`[WARN] Deploy to ${targetDir} failed: ${targetErr.message || targetErr}`);
       }
     }
 
-    console.log('[OK] Deploy complete!');
-    process.exit(0);
+    throw new Error('All deploy targets failed');
   } catch (err) {
     console.error('[ERROR] Deploy failed:', err.message);
     process.exit(1);
