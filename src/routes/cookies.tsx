@@ -7,13 +7,21 @@ import { EMAIL } from "@/lib/scholars-data";
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
+<<<<<<< HEAD
       { title: "Cookie Notice — Scholars Cafe" },
+=======
+      { title: "Cookie Notice - Scholars Cafe" },
+>>>>>>> eba62a0 (Update stats and team bios)
       {
         name: "description",
         content:
           "How Scholars Cafe uses cookies and similar technologies on its website, and how you can control them.",
       },
+<<<<<<< HEAD
       { property: "og:title", content: "Cookie Notice — Scholars Cafe" },
+=======
+      { property: "og:title", content: "Cookie Notice - Scholars Cafe" },
+>>>>>>> eba62a0 (Update stats and team bios)
       {
         property: "og:description",
         content:
@@ -47,7 +55,11 @@ function CookiesPage() {
 
         <h3>Strictly necessary</h3>
         <p>
+<<<<<<< HEAD
           Required for the site to function — for example, remembering your
+=======
+          Required for the site to function - for example, remembering your
+>>>>>>> eba62a0 (Update stats and team bios)
           theme choice (light / dark mode) and that you've closed the
           floating WhatsApp prompt. These cannot be turned off.
         </p>
@@ -56,7 +68,11 @@ function CookiesPage() {
         <p>
           We may use privacy-respecting analytics (like Plausible or Vercel
           Analytics) to understand which pages and resources are most useful.
+<<<<<<< HEAD
           These tools record only aggregate, anonymous data — no personal
+=======
+          These tools record only aggregate, anonymous data - no personal
+>>>>>>> eba62a0 (Update stats and team bios)
           identifiers, no cross-site tracking.
         </p>
 

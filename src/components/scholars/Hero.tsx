@@ -88,7 +88,11 @@ export function Hero() {
               className="mt-6 max-w-xl text-[16px] leading-[1.7] text-white/80 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] md:mt-10 md:text-[17px]"
             >
               We mentor ambitious Bangladeshi students from a first conversation to an
+<<<<<<< HEAD
               acceptance letter — covering applications, scholarships, and the entire
+=======
+              acceptance letter - covering applications, scholarships, and the entire
+>>>>>>> eba62a0 (Update stats and team bios)
               admissions journey across 11+ countries.
             </motion.p>
 
@@ -121,7 +125,11 @@ export function Hero() {
             
           </div>
 
+<<<<<<< HEAD
           {/* right column — editorial stat block */}
+=======
+          {/* right column - editorial stat block */}
+>>>>>>> eba62a0 (Update stats and team bios)
           
         </div>
 

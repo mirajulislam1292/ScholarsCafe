@@ -7,13 +7,21 @@ import { EMAIL } from "@/lib/scholars-data";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
+<<<<<<< HEAD
       { title: "Terms of Service — Scholars Cafe" },
+=======
+      { title: "Terms of Service - Scholars Cafe" },
+>>>>>>> eba62a0 (Update stats and team bios)
       {
         name: "description",
         content:
           "The terms that govern your use of Scholars Cafe's admissions consultancy, test prep, and related services.",
       },
+<<<<<<< HEAD
       { property: "og:title", content: "Terms of Service — Scholars Cafe" },
+=======
+      { property: "og:title", content: "Terms of Service - Scholars Cafe" },
+>>>>>>> eba62a0 (Update stats and team bios)
       {
         property: "og:description",
         content:
@@ -32,7 +40,11 @@ function TermsPage() {
         kicker="Legal"
         title="Terms of Service"
         updated="May 2026"
+<<<<<<< HEAD
         intro="By engaging Scholars Cafe — for a consultation, test prep, or any of our admissions programs — you agree to the following terms. They are written in plain language so you know exactly what to expect from us, and what we expect from you."
+=======
+        intro="By engaging Scholars Cafe - for a consultation, test prep, or any of our admissions programs - you agree to the following terms. They are written in plain language so you know exactly what to expect from us, and what we expect from you."
+>>>>>>> eba62a0 (Update stats and team bios)
       >
         <h2>1. The services we provide</h2>
         <p>
@@ -74,8 +86,13 @@ function TermsPage() {
 
         <h2>5. Confidentiality</h2>
         <p>
+<<<<<<< HEAD
           We treat everything you share — academic records, family finances,
           personal essays — as confidential. We will never use your story or
+=======
+          We treat everything you share - academic records, family finances,
+          personal essays - as confidential. We will never use your story or
+>>>>>>> eba62a0 (Update stats and team bios)
           documents publicly without explicit written permission. (See our
           Privacy Policy for full details.)
         </p>

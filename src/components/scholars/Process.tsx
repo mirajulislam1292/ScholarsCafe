@@ -12,7 +12,11 @@ export function Process() {
             From conversation to acceptance.
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
+<<<<<<< HEAD
             A six-step path designed to take the chaos out of admissions — and replace it with structure, strategy, and momentum.
+=======
+            A six-step path designed to take the chaos out of admissions - and replace it with structure, strategy, and momentum.
+>>>>>>> eba62a0 (Update stats and team bios)
           </p>
         </Reveal>
 

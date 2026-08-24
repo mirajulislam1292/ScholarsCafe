@@ -15,7 +15,11 @@ export function FAQ() {
             Frequently Asked Questions
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
+<<<<<<< HEAD
             Everything you want to know — answered honestly.
+=======
+            Everything you want to know - answered honestly.
+>>>>>>> eba62a0 (Update stats and team bios)
           </p>
         </Reveal>
 
