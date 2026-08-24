@@ -45,15 +45,18 @@ jobs:
 
       - name: Verify site is live
         run: |
-          echo "Verifying https://scholarscafe.com/ is serving HTTP 200..."
-          for i in 1 2 3; do
-            status=$(curl -s -o /dev/null -w "%{http_code}" https://scholarscafe.com/ || echo "000")
-            echo "Attempt $i: HTTP $status"
-            if [ "$status" = "200" ]; then
-              echo "Site is live"
-              exit 0
-            fi
-            sleep 5
+          for domain in scholarscafe.com www.scholarscafe.com; do
+            echo "Verifying https://$domain/ is serving HTTP 200..."
+            for i in 1 2 3; do
+              status=$(curl -s -o /dev/null -w "%{http_code}" "https://$domain/" || echo "000")
+              echo "$domain attempt $i: HTTP $status"
+              if [ "$status" = "200" ]; then
+                break
+              fi
+              if [ "$i" = "3" ]; then
+                echo "$domain did not return 200 after 3 tries"
+                exit 1
+              fi
+              sleep 5
+            done
           done
-          echo "Site did not return 200 after 3 tries"
-          exit 1

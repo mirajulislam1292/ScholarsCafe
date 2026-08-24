@@ -34,10 +34,10 @@ const REMOTE_DIR = resolveRemoteDir(RAW_REMOTE_DIR);
 
 function buildTargetDirs(primaryDir) {
   const candidates = [
-    '.',
     primaryDir,
-    'public_html',
     'domains/scholarscafe.com/public_html',
+    'public_html',
+    '.',
   ]
     .map(normalizeRemoteDir)
     .filter(dir => dir !== undefined && dir !== null);
