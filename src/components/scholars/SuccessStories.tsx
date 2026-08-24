@@ -36,7 +36,7 @@ export function SuccessStories() {
             Real Students. Real Results.
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600 dark:text-white/70">
-            Every success story started with a conversation. Here's what happens when preparation meets opportunity — and the right guidance.
+            Every success story started with a conversation. Here's what happens when preparation meets opportunity and the right guidance.
           </p>
         </Reveal>
 

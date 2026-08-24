@@ -15,13 +15,13 @@ export function About() {
             </h2>
             <div className="mt-6 space-y-4 text-[15px] leading-[1.85] text-white/75">
               <p>
-                Scholars Cafe is a Bangladeshi study abroad consultancy with one unwavering mission: to make world-class international education genuinely accessible to every deserving student — regardless of financial background or family connections.
+                Scholars Cafe is a Bangladeshi study abroad consultancy with one unwavering mission: to make world-class international education genuinely accessible to every deserving student, regardless of financial background or family connections.
               </p>
               <p>
-                We know exactly what Bangladeshi students face. Complex application portals in English. Financial aid forms that require documents you've never heard of. Confusing test requirements. Essay prompts that ask you to "be yourself" without any guidance on what that means. We've been there — and we built Scholars Cafe to be the guide we wished we had.
+                We know exactly what Bangladeshi students face. Complex application portals in English. Financial aid forms that require documents you've never heard of. Confusing test requirements. Essay prompts that ask you to "be yourself" without any guidance on what that means. We've been there, and we built Scholars Cafe to be the guide we wished we had.
               </p>
               <p>
-                Our team is passionate, experienced, and entirely student-first. We don't just process applications — we build relationships, strategies, and futures.
+                Our team is passionate, experienced, and entirely student-first. We don't just process applications. We build relationships, strategies, and futures.
               </p>
             </div>
 
@@ -29,7 +29,7 @@ export function About() {
               <div className="flex gap-3 text-[15px] leading-relaxed text-white/85">
                 <Target className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-light" strokeWidth={2} aria-hidden />
                 <div>
-                  <span className="font-bold">Our mission:</span> To empower every Bangladeshi student with the mentorship, strategy, and resources to unlock world-class international education — from their first SAT session to their visa approval day.
+                  <span className="font-bold">Our mission:</span> To empower every Bangladeshi student with the mentorship, strategy, and resources to unlock world-class international education, from their first SAT session to their visa approval day.
                 </div>
               </div>
             </div>
@@ -71,7 +71,7 @@ export function About() {
               <div className="flex flex-col items-center rounded-2xl border-2 border-dashed border-white/20 p-8 text-center md:flex-row md:justify-between md:text-left">
                 <div>
                   <div className="font-display text-lg font-bold">Join Our Team</div>
-                  <p className="mt-1 text-sm text-white/60">We're hiring — see open roles and help build the future of Bangladeshi study abroad.</p>
+                  <p className="mt-1 text-sm text-white/60">We're hiring. See open roles and help build the future of Bangladeshi study abroad.</p>
                 </div>
                 <a className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-bold text-white hover:bg-[#0284c7] md:mt-0" href="#contact">
                   Apply <ArrowRight className="h-4 w-4" />

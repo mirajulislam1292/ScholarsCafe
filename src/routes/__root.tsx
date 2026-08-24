@@ -72,10 +72,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Scholars Cafe — Your Dream University Starts Here" },
+      { title: "Scholars Cafe - Your Dream University Starts Here" },
       { name: "description", content: "Bangladesh's #1 study abroad consultancy. Expert mentorship for USA, UK, Canada, Germany & 8+ more countries." },
       { name: "author", content: "Scholars Cafe" },
-      { property: "og:title", content: "Scholars Cafe — Your Dream University Starts Here" },
+      { property: "og:title", content: "Scholars Cafe - Your Dream University Starts Here" },
       { property: "og:description", content: "From Bangladesh to the World. Expert university admissions, scholarship strategy, and test prep." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

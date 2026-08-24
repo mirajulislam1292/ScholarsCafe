@@ -22,7 +22,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/55">
-              Your gateway to global education. Scholars Cafe is Bangladesh's dedicated study abroad consultancy — helping ambitious students reach their dream universities worldwide.
+              Your gateway to global education. Scholars Cafe is Bangladesh's dedicated study abroad consultancy, helping ambitious students reach their dream universities worldwide.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <FootIcon href="https://www.facebook.com/profile.php?id=61571394902795"><Facebook className="h-4 w-4" /></FootIcon>
@@ -43,8 +43,6 @@ export function Footer() {
               { label: "Full Scholarship Track", href: "/#programs" },
               { label: "General Admission Track", href: "/#programs" },
               { label: "File Opening Service", href: "/#programs" },
-              { label: "SAT Preparation", href: "/#test-prep" },
-              { label: "IELTS / TOEFL / DET", href: "/#test-prep" },
             ]}
           />
           <Col

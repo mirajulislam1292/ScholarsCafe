@@ -7,7 +7,6 @@ import { WorldMap } from "@/components/scholars/WorldMap";
 import { Programs } from "@/components/scholars/Programs";
 import { Services } from "@/components/scholars/Services";
 import { Process } from "@/components/scholars/Process";
-import { TestPrep } from "@/components/scholars/TestPrep";
 import { UniversityExplorer } from "@/components/scholars/UniversityExplorer";
 import { SuccessStories } from "@/components/scholars/SuccessStories";
 import { FAQ } from "@/components/scholars/FAQ";
@@ -33,7 +32,6 @@ function Index() {
         <Programs />
         <Services />
         <Process />
-        <TestPrep />
         <UniversityExplorer />
         <SuccessStories />
         <FAQ />

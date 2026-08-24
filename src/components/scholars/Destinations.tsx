@@ -22,14 +22,14 @@ export function Destinations() {
               </h2>
             </div>
             <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              Our deepest expertise is the USA — where Bangladeshi students consistently
+              Our deepest expertise is the USA, where Bangladeshi students consistently
               earn need-based scholarships at top liberal arts colleges. We also support
               applications across Europe, Asia, and beyond.
             </p>
           </div>
         </Reveal>
 
-        {/* Featured country — large editorial card */}
+        {/* Featured country, large editorial card */}
         <Reveal delay={0.1}>
           <a
             href={WA_LINK}
@@ -66,7 +66,7 @@ export function Destinations() {
           </a>
         </Reveal>
 
-        {/* Other countries — minimal editorial grid */}
+        {/* Other countries, minimal editorial grid */}
         <RevealStagger className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[28px] border border-border bg-border md:grid-cols-3 lg:grid-cols-4">
           {others.map((c) => (
             <StaggerItem key={c.name}>

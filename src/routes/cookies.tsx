@@ -7,13 +7,13 @@ import { EMAIL } from "@/lib/scholars-data";
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
-      { title: "Cookie Notice — Scholars Cafe" },
+      { title: "Cookie Notice - Scholars Cafe" },
       {
         name: "description",
         content:
           "How Scholars Cafe uses cookies and similar technologies on its website, and how you can control them.",
       },
-      { property: "og:title", content: "Cookie Notice — Scholars Cafe" },
+      { property: "og:title", content: "Cookie Notice - Scholars Cafe" },
       {
         property: "og:description",
         content:
@@ -47,7 +47,7 @@ function CookiesPage() {
 
         <h3>Strictly necessary</h3>
         <p>
-          Required for the site to function — for example, remembering your
+          Required for the site to function, for example, remembering your
           theme choice (light / dark mode) and that you've closed the
           floating WhatsApp prompt. These cannot be turned off.
         </p>
@@ -56,7 +56,7 @@ function CookiesPage() {
         <p>
           We may use privacy-respecting analytics (like Plausible or Vercel
           Analytics) to understand which pages and resources are most useful.
-          These tools record only aggregate, anonymous data — no personal
+          These tools record only aggregate, anonymous data. No personal
           identifiers, no cross-site tracking.
         </p>
 

@@ -60,7 +60,7 @@ export function WorldMap() {
             </h2>
           </div>
           <p className="max-w-md text-[15px] leading-relaxed text-white/65">
-            Hover the map. Click a glowing pin to open the country dossier —
+            Hover the map. Click a glowing pin to open the country dossier.
             top universities, scholarships, intake calendar, and visa notes.
           </p>
         </div>

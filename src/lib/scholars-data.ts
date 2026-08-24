@@ -20,10 +20,10 @@ export const COUNTRIES = [
 ];
 
 export const STATS = [
-  { value: 11, suffix: "+", label: "Countries Covered" },
+  { value: 12, suffix: "+", label: "Study Destinations" },
   { value: 100, suffix: "%", label: "Dedicated Support" },
-  { value: 4, suffix: "", label: "Test Prep Programs" },
-  { value: 0, suffix: "Free", label: "Initial Consultation", text: "Free" },
+  { value: 30, suffix: " min", label: "Free Consultation" },
+  { value: 500, suffix: "+", label: "Students Learning" },
 ];
 
 export const PROGRAMS: { id: string; icon: ScholarIconName; badge: string; title: string; price: string; description: string; features: string[]; cta: string; featured: boolean }[] = [
@@ -34,7 +34,7 @@ export const PROGRAMS: { id: string; icon: ScholarIconName; badge: string; title
     title: "Full Scholarship Track",
     price: "Custom pricing · Book a call for quote",
     description:
-      "Our flagship program for students aiming at need-based and merit-based scholarships at elite universities — from Ivy League to top liberal arts colleges.",
+      "Our flagship program for students aiming at need-based and merit-based scholarships at elite universities, from Ivy League to top liberal arts colleges.",
     features: [
       "Personalized college list (15–20 universities)",
       "CSS Profile + ISFAA full guidance",
@@ -53,7 +53,7 @@ export const PROGRAMS: { id: string; icon: ScholarIconName; badge: string; title
     title: "General Admission Track",
     price: "Tiered packages · See pricing",
     description:
-      "Structured, mentor-led admissions support for students applying to top universities worldwide — without the scholarship intensity.",
+      "Structured, mentor-led admissions support for students applying to top universities worldwide, without the scholarship intensity.",
     features: [
       "University shortlisting (10–12 schools)",
       "Application form completion",
@@ -90,7 +90,7 @@ export const SERVICES: { icon: ScholarIconName; title: string; desc: string }[] 
   { icon: "target" satisfies ScholarIconName, title: "Personalized Pathway Planning", desc: "Tailored country, university and timeline strategy from day one." },
   { icon: "pen-line" satisfies ScholarIconName, title: "Essay & SOP Coaching", desc: "Multiple drafts, real feedback, voice that admissions remembers." },
   { icon: "banknote" satisfies ScholarIconName, title: "CSS Profile & ISFAA", desc: "Every field explained. Every document gathered. Done right." },
-  { icon: "library" satisfies ScholarIconName, title: "College List Building", desc: "Reach, target, safety — calibrated to your profile and finances." },
+  { icon: "library" satisfies ScholarIconName, title: "College List Building", desc: "Reach, target, safety, calibrated to your profile and finances." },
   { icon: "school" satisfies ScholarIconName, title: "Teacher Portal Support", desc: "We walk your teachers through recommendation submissions." },
   { icon: "compass" satisfies ScholarIconName, title: "Counselor Portal Support", desc: "School counselor section coordination so nothing slips." },
   { icon: "stamp" satisfies ScholarIconName, title: "F-1 Visa Preparation", desc: "DS-160, SEVIS, financial docs, and full mock interviews." },
@@ -101,7 +101,7 @@ export const PROCESS: { n: number; icon: ScholarIconName; title: string; desc: s
   { n: 1, icon: "message-circle" satisfies ScholarIconName, title: "Discovery Call", desc: "A free, honest conversation about your goals, profile, and realistic options." },
   { n: 2, icon: "compass" satisfies ScholarIconName, title: "Strategy & Roadmap", desc: "Country mix, college list, timeline, and a personalized prep plan." },
   { n: 3, icon: "trending-up" satisfies ScholarIconName, title: "Profile Building", desc: "Test prep, extracurricular shaping, and academic positioning." },
-  { n: 4, icon: "file-text" satisfies ScholarIconName, title: "Application Preparation", desc: "Essays, forms, portals, financial aid — every part, together, step by step." },
+  { n: 4, icon: "file-text" satisfies ScholarIconName, title: "Application Preparation", desc: "Essays, forms, portals, financial aid, every part together step by step." },
   { n: 5, icon: "send" satisfies ScholarIconName, title: "Submit & Follow Up", desc: "On-time submissions, response tracking, and quick follow-ups." },
   { n: 6, icon: "party-popper" satisfies ScholarIconName, title: "Acceptance & Next Steps", desc: "Offer evaluation, aid negotiation, visa, departure." },
 ];
@@ -113,7 +113,7 @@ export const TESTS = [
     badge: "🇺🇸 Required for US Admission",
     accent: "#0EA5E9",
     description:
-      "The SAT is the cornerstone of most US university applications. Our structured mentorship covers Math, Reading & Writing, vocabulary, and exam-day strategy — tailored to each student.",
+      "The SAT is the cornerstone of most US university applications. Our structured mentorship covers Math, Reading & Writing, vocabulary, and exam-day strategy, tailored to each student.",
     features: [
       "Math + Evidence-Based Reading & Writing",
       "Practice tests with performance analytics",
@@ -146,7 +146,7 @@ export const TESTS = [
     badge: "USA · Europe · Global",
     accent: "#F59E0B",
     description:
-      "TOEFL iBT is widely accepted at US universities. We focus on integrated tasks, note-taking, and academic English — what TOEFL rewards most.",
+      "TOEFL iBT is widely accepted at US universities. We focus on integrated tasks, note-taking, and academic English, what TOEFL rewards most.",
     features: [
       "Reading + Listening + Speaking + Writing",
       "Integrated task practice",
@@ -162,7 +162,7 @@ export const TESTS = [
     badge: "Fast & affordable",
     accent: "#22C55E",
     description:
-      "The modern alternative — taken online in 1 hour, results in 48 hours, accepted by 5,000+ institutions including many top US universities.",
+      "The modern alternative, taken online in 1 hour with results in 48 hours, accepted by 5,000+ institutions including many top US universities.",
     features: [
       "Full test format walkthrough",
       "Video interview preparation",
@@ -232,7 +232,7 @@ export const TESTIMONIALS = [
     destination: "🇺🇸 USA Liberal Arts College",
     year: "Class of 2024",
     quote:
-      "I had no idea where to start with US college applications. Common App, CSS Profile, financial aid forms — it felt impossible. The team at Scholars Cafe broke everything down for me. My mentor was available whenever I had a question, and we worked through every essay together — five drafts, genuine feedback, real improvement. I ended up getting into a top liberal arts college with a need-based aid package that covers more than half my tuition. It changed my life.",
+      "I had no idea where to start with US college applications. Common App, CSS Profile, financial aid forms, it felt impossible. The team at Scholars Cafe broke everything down for me. My mentor was available whenever I had a question, and we worked through every essay together: five drafts, genuine feedback, real improvement. I ended up getting into a top liberal arts college with a need-based aid package that covers more than half my tuition. It changed my life.",
     outcome: "50%+ need-based financial aid",
     color: "from-sky to-navy",
   },
@@ -242,7 +242,7 @@ export const TESTIMONIALS = [
     destination: "🇬🇧 UK University",
     year: "Class of 2024",
     quote:
-      "My IELTS score was holding me back. I had the grades, I had the motivation, but I kept scoring Band 6.5 on my own. After just 6 weeks of preparation with Scholars Cafe, I hit Band 7.5. Their speaking mocks were especially helpful — feedback no online course ever gave me. I applied to UK universities and got an offer from my first-choice institution. The visa guidance was incredible — I walked into my appointment completely calm.",
+      "My IELTS score was holding me back. I had the grades, I had the motivation, but I kept scoring Band 6.5 on my own. After just 6 weeks of preparation with Scholars Cafe, I hit Band 7.5. Their speaking mocks were especially helpful, with feedback no online course ever gave me. I applied to UK universities and got an offer from my first-choice institution. The visa guidance was incredible, and I walked into my appointment completely calm.",
     outcome: "IELTS 7.5 · First-choice offer",
     color: "from-fuchsia-500 to-navy",
   },
@@ -262,7 +262,7 @@ export const TESTIMONIALS = [
     destination: "🇰🇷 South Korea (GKS)",
     year: "Class of 2024",
     quote:
-      "I never thought South Korea was an option for me until Scholars Cafe introduced me to the GKS scholarship. They helped me with every part — language assessment, study plan, professor contact emails — everything. I got accepted with a full scholarship: tuition, dormitory, monthly stipend. This is a life I never imagined I could have.",
+      "I never thought South Korea was an option for me until Scholars Cafe introduced me to the GKS scholarship. They helped me with every part: language assessment, study plan, professor contact emails, everything. I got accepted with a full scholarship covering tuition, dormitory, and monthly stipend. This is a life I never imagined I could have.",
     outcome: "Full GKS scholarship",
     color: "from-amber-500 to-navy",
   },
@@ -271,15 +271,15 @@ export const TESTIMONIALS = [
 export const FAQS = [
   {
     q: "Who is Scholars Cafe for?",
-    a: "Scholars Cafe is for Bangladeshi students at any stage of the study abroad journey — from those just exploring options to students actively applying. We work with grades 9–12 and gap year students, and we also support parents who want to understand the process alongside their children.",
+    a: "Scholars Cafe is for Bangladeshi students at any stage of the study abroad journey, from those just exploring options to students actively applying. We work with grades 9–12 and gap year students, and we also support parents who want to understand the process alongside their children.",
   },
   {
     q: "What countries do you support applications for?",
-    a: "Our primary expertise is USA university admissions. We also support UK, Canada, Germany, Sweden, Netherlands, Finland, New Zealand, Hungary, South Korea, Turkey, and Spain. If you have a specific country not on this list, reach out — we can often still help.",
+    a: "Our primary expertise is USA university admissions. We also support UK, Canada, Germany, Sweden, Netherlands, Finland, New Zealand, Hungary, South Korea, Turkey, and Spain. If you have a specific country not on this list, reach out. We can often still help.",
   },
   {
     q: "What is the Full Scholarship Track and who should apply?",
-    a: "Our flagship program for students targeting need-based or merit-based scholarships at elite universities, particularly in the USA. It is best suited for students with a strong academic profile (GPA 3.5+ or equivalent) and demonstrated financial need, aiming for universities that meet 100% of demonstrated need — including liberal arts colleges and Ivy League schools.",
+    a: "Our flagship program for students targeting need-based or merit-based scholarships at elite universities, particularly in the USA. It is best suited for students with a strong academic profile (GPA 3.5+ or equivalent) and demonstrated financial need, aiming for universities that meet 100% of demonstrated need, including liberal arts colleges and Ivy League schools.",
   },
   {
     q: "What is the difference between the CSS Profile and ISFAA?",
@@ -290,16 +290,16 @@ export const FAQS = [
     a: "Many top US universities have moved to test-optional policies, but a strong SAT score (1450+) significantly strengthens applications and may be required for merit scholarships. We recommend all students preparing for US applications to take the SAT.",
   },
   {
-    q: "Which English proficiency test should I take — IELTS, TOEFL, or DET?",
+    q: "Which English proficiency test should I take: IELTS, TOEFL, or DET?",
     a: "It depends on your target countries and universities. IELTS is widely used for UK, Canada, Australia, and New Zealand. TOEFL is preferred by many US universities. The DET is the most affordable and convenient and is accepted by 5,000+ institutions. During your free consultation, we help you decide.",
   },
   {
     q: "How much does Scholars Cafe charge for its services?",
-    a: "Pricing depends on the services you select. Individual services are priced separately, and full program tracks are quoted based on your specific needs. Full transparency — you'll always know exactly what you're paying for. Book a free consultation to walk through all options with no pressure.",
+    a: "Pricing depends on the services you select. Individual services are priced separately, and full program tracks are quoted based on your specific needs. Full transparency: you'll always know exactly what you're paying for. Book a free consultation to walk through all options with no pressure.",
   },
   {
     q: "When should I start working with Scholars Cafe?",
-    a: "The earlier the better. Ideally, students should begin US applications in Grade 11 or early Grade 12 (August–September). For scholarship-focused tracks, starting in Grade 10 gives time to build extracurriculars and prepare for tests. Even if you're already in Grade 12, we can still help — contact us immediately.",
+    a: "The earlier the better. Ideally, students should begin US applications in Grade 11 or early Grade 12 (August–September). For scholarship-focused tracks, starting in Grade 10 gives time to build extracurriculars and prepare for tests. Even if you're already in Grade 12, we can still help. Contact us immediately.",
   },
   {
     q: "Do you help with visa applications?",
@@ -307,13 +307,13 @@ export const FAQS = [
   },
   {
     q: "Can I reach you on WhatsApp?",
-    a: "Absolutely. WhatsApp is our primary communication channel — +880 1560-001325. Our team responds within 24 hours on weekdays.",
+    a: "Absolutely. WhatsApp is our primary communication channel: +880 1560-001325. Our team responds within 24 hours on weekdays.",
   },
 ];
 
 export const VALUES: { icon: ScholarIconName; title: string; desc: string }[] = [
-  { icon: "target" satisfies ScholarIconName, title: "Expert Mentorship", desc: "Consultants with deep US and global admissions knowledge — not agents, but mentors who care about your outcome." },
-  { icon: "globe" satisfies ScholarIconName, title: "International Reach", desc: "11+ countries. Hundreds of universities. A network built over years of real-world application experience." },
+  { icon: "target" satisfies ScholarIconName, title: "Expert Mentorship", desc: "Consultants with deep US and global admissions knowledge. Not agents, but mentors who care about your outcome." },
+  { icon: "globe" satisfies ScholarIconName, title: "International Reach", desc: "12+ countries. Hundreds of universities. A network built over years of real-world application experience." },
   { icon: "heart" satisfies ScholarIconName, title: "Student-First", desc: "Every student gets dedicated attention, honest advice, and real support. We never give generic guidance." },
   { icon: "unlock" satisfies ScholarIconName, title: "Free Knowledge", desc: "Our blog, social media, and free resources exist because we believe knowledge shouldn't be locked behind a paywall." },
 ];
@@ -321,17 +321,17 @@ export const VALUES: { icon: ScholarIconName; title: string; desc: string }[] = 
 export const TEAM = [
   { initials: "SK", name: "Sadia Khan", role: "Head of US Admissions", bio: "10+ years guiding students to Ivy League and liberal arts colleges." },
   { initials: "AR", name: "Arif Rahman", role: "Scholarship Strategist", bio: "Specialist in CSS Profile, ISFAA and need-based aid positioning." },
-  { initials: "MH", name: "Maliha Hossain", role: "Test Prep Lead", bio: "SAT, IELTS, TOEFL, DET — turns scores into stories." },
-  { initials: "NF", name: "Nabil Faisal", role: "Visa & Departures", bio: "F-1, study permits, and that first month abroad — handled." },
+  { initials: "MH", name: "Maliha Hossain", role: "Test Prep Lead", bio: "SAT, IELTS, TOEFL, DET. Turns scores into stories." },
+  { initials: "NF", name: "Nabil Faisal", role: "Visa & Departures", bio: "F-1, study permits, and that first month abroad, handled." },
 ];
 
 export type ResourceCategory = "Essays" | "Applications" | "Scholarships" | "Test Prep" | "Visa" | "Compare";
 
 export const RESOURCE_CATEGORIES: { id: ResourceCategory; label: string; desc: string }[] = [
   { id: "Essays", label: "Essays & Personal Statements", desc: "Brainstorm, draft, and revise stories admissions remember." },
-  { id: "Applications", label: "Applications & Strategy", desc: "Common App, UCAS, and country-specific portals — without the panic." },
+  { id: "Applications", label: "Applications & Strategy", desc: "Common App, UCAS, and country-specific portals without the panic." },
   { id: "Scholarships", label: "Scholarships & Financial Aid", desc: "Need-based, merit, and the forms that unlock them." },
-  { id: "Test Prep", label: "Test Prep", desc: "SAT, IELTS, TOEFL, DET — strategies that move the needle." },
+  { id: "Test Prep", label: "Test Prep", desc: "SAT, IELTS, TOEFL, DET. Strategies that move the needle." },
   { id: "Visa", label: "Visa & Pre-Departure", desc: "From DS-160 to your first month abroad." },
   { id: "Compare", label: "Country & University Compare", desc: "Side-by-side breakdowns to help you choose." },
 ];
@@ -353,7 +353,7 @@ export const RESOURCES: Resource[] = [
     icon: "map",
     title: "The Complete USA Application Guide for Bangladeshi Students",
     teaser:
-      "From building a college list and writing essays to CSS Profile, ISFAA, and visa interviews — the only walkthrough you need, written specifically for students applying from Bangladesh.",
+      "From building a college list and writing essays to CSS Profile, ISFAA, and visa interviews, the only walkthrough you need, written specifically for students applying from Bangladesh.",
     readTime: "32 min read",
     featured: true,
   },
@@ -372,7 +372,7 @@ export const RESOURCES: Resource[] = [
     icon: "pen-line",
     title: "21 Common App Essay Examples (and Why They Worked)",
     teaser:
-      "Real successful essays broken down line by line — what made the opening hook, where the writer earned trust, and how the ending stuck the landing.",
+      "Real successful essays broken down line by line: what made the opening hook, where the writer earned trust, and how the ending stuck the landing.",
     readTime: "24 min read",
   },
   {
@@ -400,7 +400,7 @@ export const RESOURCES: Resource[] = [
     icon: "library",
     title: "Building a Smart College List: Reach, Target, Safety",
     teaser:
-      "The 12-school framework we use with every Scholars Cafe student — calibrated to your academic profile, finances, and risk tolerance.",
+      "The 12-school framework we use with every Scholars Cafe student, calibrated to your academic profile, finances, and risk tolerance.",
     readTime: "14 min read",
   },
   {
@@ -427,7 +427,7 @@ export const RESOURCES: Resource[] = [
     icon: "plane",
     title: "F-1 Student Visa: The Complete Interview Prep Guide",
     teaser:
-      "DS-160 walkthrough, SEVIS payment, document checklist, and the 30 most-asked questions at the Dhaka US Embassy — with strong sample answers.",
+      "DS-160 walkthrough, SEVIS payment, document checklist, and the 30 most-asked questions at the Dhaka US Embassy, with strong sample answers.",
     readTime: "20 min read",
   },
   {
@@ -436,7 +436,7 @@ export const RESOURCES: Resource[] = [
     icon: "scale",
     title: "USA vs UK vs Canada vs Germany: Which Is Right For You?",
     teaser:
-      "True 4-year cost, scholarship reality, work rights after graduation, and quality-of-life — compared honestly for a Bangladeshi applicant in 2025.",
+      "True 4-year cost, scholarship reality, work rights after graduation, and quality-of-life, compared honestly for a Bangladeshi applicant in 2025.",
     readTime: "17 min read",
   },
   {
@@ -454,7 +454,7 @@ export const RESOURCES: Resource[] = [
     icon: "luggage",
     title: "Pre-Departure Checklist: Your First 30 Days Abroad",
     teaser:
-      "Banking, SIMs, dorms, course registration, and the small things nobody warns you about — built for first-time international students.",
+      "Banking, SIMs, dorms, course registration, and the small things nobody warns you about, built for first-time international students.",
     readTime: "11 min read",
   },
 ];

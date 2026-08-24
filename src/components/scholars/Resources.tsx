@@ -36,12 +36,12 @@ export function Resources() {
             </div>
             <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
               Information shouldn't be locked behind a paywall. Every guide, checklist,
-              and breakdown below is free — no email required, no upsell.
+              and breakdown below is free. No email required, no upsell.
             </p>
           </div>
         </Reveal>
 
-        {/* Featured articles — magazine layout */}
+        {/* Featured articles, magazine layout */}
         {filter === "All" && featured.length > 0 && (
           <RevealStagger className="mt-16 grid gap-6 md:grid-cols-2">
             {featured.map((r) => (

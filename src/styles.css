@@ -57,7 +57,7 @@
 :root {
   --radius: 0.75rem;
 
-  /* Brand palette — exact hex from spec */
+  /* Brand palette, exact hex from spec */
   --navy: #0c2d5e;
   --navy-deep: #060f1e;
   --midnight: #0f3a7a;

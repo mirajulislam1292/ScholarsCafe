@@ -118,7 +118,7 @@ export const DESTINATIONS: DestinationDetail[] = [
     tag: "SI scholarship",
     tagline: "Uppsala · Lund · KTH",
     blurb:
-      "Innovation, design, and sustainability — taught entirely in English. The Swedish Institute scholarship covers tuition, living, and travel.",
+      "Innovation, design, and sustainability, taught entirely in English. The Swedish Institute scholarship covers tuition, living, and travel.",
     image: seImg,
     universities: [
       { name: "Uppsala University", city: "Uppsala", highlight: "Sweden's oldest" },
