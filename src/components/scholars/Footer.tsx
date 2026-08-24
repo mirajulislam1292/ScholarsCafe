@@ -22,11 +22,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/55">
-<<<<<<< HEAD
               Your gateway to global education. Scholars Cafe is Bangladesh's dedicated study abroad consultancy — helping ambitious students reach their dream universities worldwide.
-=======
-              Your gateway to global education. Scholars Cafe is Bangladesh's dedicated study abroad consultancy - helping ambitious students reach their dream universities worldwide.
->>>>>>> eba62a0 (Update stats and team bios)
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <FootIcon href="https://www.facebook.com/profile.php?id=61571394902795"><Facebook className="h-4 w-4" /></FootIcon>

@@ -23,11 +23,7 @@ export function Newsletter() {
             Get Free Scholarship Alerts & Study Tips
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-white/80">
-<<<<<<< HEAD
             Join 500+ Bangladeshi students who get weekly scholarship deadlines, application tips, country guides, and university news — completely free.
-=======
-            Join 500+ Bangladeshi students who get weekly scholarship deadlines, application tips, country guides, and university news - completely free.
->>>>>>> eba62a0 (Update stats and team bios)
           </p>
 
           {!done ? (
@@ -63,11 +59,7 @@ export function Newsletter() {
                 <span>You're in! Welcome to the Scholars Cafe community.</span>
                 <PartyPopper className="h-6 w-6 text-sky-light" strokeWidth={1.75} aria-hidden />
               </div>
-<<<<<<< HEAD
               <div className="mt-1 text-sm text-white/70">Check your inbox — your first guide is on its way.</div>
-=======
-              <div className="mt-1 text-sm text-white/70">Check your inbox - your first guide is on its way.</div>
->>>>>>> eba62a0 (Update stats and team bios)
             </motion.div>
           )}
 

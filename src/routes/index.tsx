@@ -7,10 +7,7 @@ import { WorldMap } from "@/components/scholars/WorldMap";
 import { Programs } from "@/components/scholars/Programs";
 import { Services } from "@/components/scholars/Services";
 import { Process } from "@/components/scholars/Process";
-<<<<<<< HEAD
 import { TestPrep } from "@/components/scholars/TestPrep";
-=======
->>>>>>> eba62a0 (Update stats and team bios)
 import { UniversityExplorer } from "@/components/scholars/UniversityExplorer";
 import { SuccessStories } from "@/components/scholars/SuccessStories";
 import { FAQ } from "@/components/scholars/FAQ";
@@ -22,21 +19,6 @@ import { Footer } from "@/components/scholars/Footer";
 
 export const Route = createFileRoute("/")({
   component: Index,
-  head: () => ({
-    meta: [
-<<<<<<< HEAD
-      { title: "Scholars Cafe — Your Dream University Starts Here" },
-      { name: "description", content: "Bangladesh's #1 study abroad consultancy. Expert mentorship for USA, UK, Canada, Germany & 8+ more countries. Scholarships, SAT/IELTS/TOEFL prep, visa guidance — from application to acceptance." },
-      { property: "og:title", content: "Scholars Cafe — Your Dream University Starts Here" },
-      { property: "og:description", content: "From Bangladesh to the World. Expert university admissions, scholarship strategy, and test prep — built for ambitious Bangladeshi students." },
-=======
-      { title: "Scholars Cafe - Your Dream University Starts Here" },
-      { name: "description", content: "Bangladesh's #1 study abroad consultancy. Expert mentorship for USA, UK, Canada, Germany & 8+ more countries. Scholarships, SAT/IELTS/TOEFL prep, visa guidance - from application to acceptance." },
-      { property: "og:title", content: "Scholars Cafe - Your Dream University Starts Here" },
-      { property: "og:description", content: "From Bangladesh to the World. Expert university admissions, scholarship strategy, and test prep - built for ambitious Bangladeshi students." },
->>>>>>> eba62a0 (Update stats and team bios)
-    ],
-  }),
 });
 
 function Index() {
@@ -51,10 +33,7 @@ function Index() {
         <Programs />
         <Services />
         <Process />
-<<<<<<< HEAD
         <TestPrep />
-=======
->>>>>>> eba62a0 (Update stats and team bios)
         <UniversityExplorer />
         <SuccessStories />
         <FAQ />

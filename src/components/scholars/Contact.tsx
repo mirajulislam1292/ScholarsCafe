@@ -23,11 +23,7 @@ export function Contact() {
             Let's Plan Your Future Together
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
-<<<<<<< HEAD
             Have a question? Ready to start? Just reach out — we respond within 24 hours and always give honest, personalized advice.
-=======
-            Have a question? Ready to start? Just reach out - we respond within 24 hours and always give honest, personalized advice.
->>>>>>> eba62a0 (Update stats and team bios)
           </p>
         </Reveal>
 
