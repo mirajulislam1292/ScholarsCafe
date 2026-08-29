@@ -79,7 +79,7 @@ async function generateIndexHtml(clientDir) {
   const serverEntry = await import(pathToFileURL(serverEntryPath).href);
   const response = await serverEntry.default.fetch(new Request('https://example.com/'));
   if (!response.ok) throw new Error(`SSR render failed with status ${response.status}`);
-  const html = (await response.text()).replaceAll('/assets/', './assets/');
+  const html = await response.text();
   writeFileSync(join(clientDir, 'index.html'), html);
   console.log('[OK] Generated SSR index.html');
 }
@@ -87,13 +87,14 @@ async function generateIndexHtml(clientDir) {
 function createClient() {
   const client = new Client();
   client.ftp.verbose = false;
-  // Extend socket timeout to 5 minutes to handle large file uploads
-  client.ftp.socket.setTimeout(300000);
   return client;
 }
 
 async function connect(client) {
   await client.access(FTP_CONFIG);
+  if (client.ftp && client.ftp.socket) {
+    client.ftp.socket.setTimeout(300000);
+  }
 }
 
 // Delete a remote file silently (used to clean up orphaned .in. temp files)
@@ -195,6 +196,25 @@ async function collectFiles(localPath, remotePath, list = []) {
   return list;
 }
 
+async function remoteFileExists(client, remotePath) {
+  try {
+    const s = await client.size(remotePath);
+    if (s >= 0) return true;
+  } catch (_) {
+    // FTP 'SIZE' command often fails on hidden files like .htaccess on Hostinger.
+    // Fallback to directory listing check.
+    try {
+      const dir = remotePath.includes('/') ? remotePath.substring(0, remotePath.lastIndexOf('/')) : '.';
+      const base = remotePath.includes('/') ? remotePath.substring(remotePath.lastIndexOf('/') + 1) : remotePath;
+      const list = await client.list(dir || '.');
+      return list.some(item => item.name === base);
+    } catch (_) {
+      return false;
+    }
+  }
+  return false;
+}
+
 async function deploy() {
   try {
     await generateIndexHtml(LOCAL_DIR);
@@ -254,8 +274,8 @@ async function deploy() {
           const indexRemote = (targetDir && targetDir !== '.') ? `${targetDir}/index.html` : 'index.html';
           const htaccessRemote = (targetDir && targetDir !== '.') ? `${targetDir}/.htaccess` : '.htaccess';
 
-          const indexExists = await verifyClient.size(indexRemote).then(s => s > 0).catch(() => false);
-          const htExists = await verifyClient.size(htaccessRemote).then(s => s >= 0).catch(() => false);
+          const indexExists = await remoteFileExists(verifyClient, indexRemote);
+          const htExists = await remoteFileExists(verifyClient, htaccessRemote);
           verifyClient.close();
 
           if (!indexExists) {

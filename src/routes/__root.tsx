@@ -97,6 +97,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
+        <base href="/" />
         <HeadContent />
       </head>
       <body className="overflow-x-hidden bg-background text-foreground">

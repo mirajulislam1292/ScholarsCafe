@@ -12,7 +12,7 @@ async function generateIndexHtml() {
     throw new Error(`SSR render failed with status ${response.status}`);
   }
 
-  const html = (await response.text()).replaceAll('/assets/', './assets/');
+  const html = await response.text();
   writeFileSync(join(clientDir, 'index.html'), html);
   console.log('[OK] Generated SSR index.html');
 }
