@@ -131,6 +131,14 @@ function render() {
     renderMessages().catch(report);
     return;
   }
+  if (section === "Private feedback" || section === "Newsletter") {
+    renderSubmissions().catch(report);
+    return;
+  }
+  if (section === "Email delivery") {
+    renderMail().catch(report);
+    return;
+  }
   const bar = node("div", undefined, "toolbar");
   bar.append(node("p", "Manage " + names[section].toLowerCase()));
   if (section !== "copy")
@@ -318,6 +326,27 @@ async function renderMessages() {
   }
   if (!rows.length) $("screen").append(node("p", "No messages yet.", "empty"));
 }
+async function renderSubmissions() {
+  const kind = section === "Newsletter" ? "newsletter" : "feedback";
+  const rows = (await api("submissions")).items.filter((row) => row.kind === kind);
+  $("screen").append(node("p", kind === "newsletter" ? "Signups are recorded with consent. This dashboard does not send newsletter campaigns. Honor unsubscribe requests before contacting subscribers." : "Private feedback is never published automatically.", "muted"));
+  for (const row of rows) {
+    const card = node("article", undefined, "card");
+    card.append(node("h2", row.name || row.email), node("p", row.email), node("p", row.message), node("p", new Date(row.created_at).toLocaleString(), "muted"));
+    if (kind === "newsletter") card.append(row.unsubscribed_at ? node("p", "Unsubscribed", "badge") : button("Mark unsubscribed", async () => { await api("submissions/" + row.id + "/unsubscribe", {}); render(); }));
+    $("screen").append(card);
+  }
+  if (!rows.length) $("screen").append(node("p", "No entries yet.", "empty"));
+}
+async function renderMail() {
+  const result = await api("mail-status");
+  $("screen").append(node("p", result.configured ? "Notifications go to contact@scholarscafe.com. Your original messages remain in the dashboard." : "Mailbox delivery is not connected yet. Entries are saved here and notifications are queued until the mailbox password is configured.", "card"));
+  for (const row of result.items) {
+    const card = node("div", undefined, "card row");
+    card.append(node("span", row.subject), node("span", row.sent_at ? "Sent" : row.attempts >= 5 ? "Delivery failed — check mailbox settings" : "Queued", "badge"));
+    $("screen").append(card);
+  }
+}
 try {
   me = await api("me");
   await refresh();
@@ -327,7 +356,7 @@ try {
   for (const key of [
     "Overview",
     ...Object.keys(names),
-    ...(me.role === "editor" ? [] : ["Access", "Messages", "Activity"]),
+    ...(me.role === "editor" ? [] : ["Access", "Messages", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
   ]) {
     const b = button(names[key] || key, () => navigate(key));
     b.dataset.section = key;

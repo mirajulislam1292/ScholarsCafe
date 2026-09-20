@@ -3,11 +3,58 @@ import assert from "node:assert/strict";
 import request from "supertest";
 import { createApp } from "./app.js";
 import { canManage, trustedGoogleIdentity, recordInput } from "./security.js";
+import { createMailer, deliverMail } from "./mail.js";
 const config = {
   ADMIN_ORIGIN: "https://admin.scholarscafe.com",
   PUBLIC_ORIGIN: "https://scholarscafe.com",
   GOOGLE_CLIENT_ID: "test",
 };
+test("Newsletter requires consent and queues delivery atomically without exposing duplicate subscribers", async () => {
+  let inserts = 0;
+  let queued = 0;
+  const store = { transaction: (fn) => fn({}), query: async (sql) => {
+    if (sql.startsWith("INSERT IGNORE INTO submissions")) return { affectedRows: inserts++ === 0 ? 1 : 0 };
+    if (sql.startsWith("INSERT INTO mail_outbox")) { queued++; return {}; }
+    throw Error("Unexpected query");
+  }};
+  const app = createApp(store, config);
+  const send = (body) => request(app).post("/public/newsletter").set("Origin", config.PUBLIC_ORIGIN).send(body);
+  await send({ email: "student@example.com", consent: false }).expect(400);
+  for (let i = 0; i < 2; i++) await send({ email: "student@example.com", consent: true }).expect(201, { ok: true });
+  assert.equal(queued, 1);
+});
+test("Private submissions and mail status cannot be read by editors or anonymous visitors", async () => {
+  const app = createApp({ session: async () => ({ id: "1", role: "editor", csrf: "abc" }) }, config);
+  for (const endpoint of ["submissions", "mail-status", "inquiries"]) {
+    await request(app).get("/api/" + endpoint).expect(401);
+    await request(app).get("/api/" + endpoint).set("Cookie", "__Host-sc_session=" + "a".repeat(64)).expect(403);
+  }
+});
+test("Persistent abuse limit stops submissions before database writes", async () => {
+  const app = createApp({ checkRateLimit: async () => false, query: () => { throw Error("must not write"); } }, config);
+  await request(app).post("/public/feedback").set("Origin", config.PUBLIC_ORIGIN).send({}).expect(429);
+});
+test("Publishing rechecks revoked access inside the transaction", async () => {
+  const app = createApp({ session: async () => ({ id: "1", role: "owner", csrf: "abc" }), transaction: (fn) => fn({}), query: async (sql) => {
+    assert.match(sql, /^SELECT role,active FROM users/);
+    return [{ role: "editor", active: 1 }];
+  } }, config);
+  await request(app).post("/api/content/example/publish").set("Cookie", "__Host-sc_session=" + "a".repeat(64)).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send({version: 1}).expect(403);
+});
+test("Mail stays disabled without credentials; configured delivery has a fixed recipient", async () => {
+  assert.equal(createMailer({}), null);
+  const queries = [];
+  const store = { transaction: (fn) => fn({}), query: async (sql) => {
+    queries.push(sql);
+    return sql.startsWith("SELECT") ? [{ id: "test", subject: "Inquiry", body: "Hello", reply_to: "student@example.com" }] : {};
+  } };
+  await deliverMail(store, { sendMail: async (mail) => {
+    assert.equal(mail.to, "contact@scholarscafe.com");
+    assert.equal(mail.replyTo, "student@example.com");
+    assert.equal(mail.html, undefined);
+  } });
+  assert.ok(queries.some((sql) => sql.includes("sent_at=UTC_TIMESTAMP()")));
+});
 test("Role management prevents editor escalation and admin ownership grants", () => {
   for (const target of ["owner", "admin", "editor"])
     for (const role of ["owner", "admin", "editor"])

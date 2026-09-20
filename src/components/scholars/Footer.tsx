@@ -19,12 +19,7 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
-                <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                  <path d="M12 2L3 7v6c0 5 4 8 9 9 5-1 9-4 9-9V7l-9-5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                  <path d="M8 11l3 3 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+              <img src="/brand-mark.png" alt="" className="brand-mark" width="44" height="44" />
               <span className="font-display text-xl font-extrabold"><CmsText id="Footer.05d3d9ddab08">
                 Scholars </CmsText><span className="text-sky"><CmsText id="Footer.0d5f2e74a9f6">Cafe</CmsText></span>
               </span>

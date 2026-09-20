@@ -43,7 +43,11 @@ const text = z.string().max(100000);
 const safeUrl = z
   .string()
   .max(2000)
-  .refine((s) => !s || /^https:\/\//.test(s), "Use an HTTPS URL");
+  .refine((s) => {
+    if (!s) return true;
+    try { const url = new URL(s); return url.protocol === "https:" && !url.username && !url.password; }
+    catch { return false; }
+  }, "Use an HTTPS URL without embedded credentials");
 const fields = {
   mentors: z.object({ name: text, role: text, bio: text, photo: safeUrl, initials: text }),
   blogs: z.object({

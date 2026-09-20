@@ -16,6 +16,7 @@ import { Newsletter } from "@/components/scholars/Newsletter";
 import { Contact } from "@/components/scholars/Contact";
 import { Footer } from "@/components/scholars/Footer";
 import { BlogPosts } from "@/components/scholars/BlogPosts";
+import { FeedbackForm } from "@/components/scholars/FeedbackForm";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -41,6 +42,7 @@ function Index() {
         <BlogPosts />
         <Newsletter />
         <Contact />
+        <FeedbackForm />
       </main>
       <Footer />
     </div>

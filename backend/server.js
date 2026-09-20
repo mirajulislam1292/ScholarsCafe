@@ -1,5 +1,6 @@
 import { Store } from "./store.js";
 import { createApp } from "./app.js";
+import { createMailer, deliverMail } from "./mail.js";
 
 for (const key of [
   "DB_HOST",
@@ -28,6 +29,16 @@ async function start() {
     600000,
   );
   cleanup.unref();
+  const mailer = createMailer(process.env);
+  let delivering = false;
+  const mailTimer = setInterval(async () => {
+    if (delivering || !mailer) return;
+    delivering = true;
+    try { await deliverMail(store, mailer); }
+    catch { console.error("Mailbox queue check failed"); }
+    finally { delivering = false; }
+  }, 15000);
+  mailTimer.unref();
   const server = createApp(store, process.env).listen(Number(process.env.PORT || 3000), "0.0.0.0");
   process.on("SIGTERM", () => server.close(() => store.pool.end().then(() => process.exit(0))));
 }

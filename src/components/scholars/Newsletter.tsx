@@ -10,6 +10,22 @@ export function Newsletter() {
 
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  async function subscribe(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fields = new FormData(e.currentTarget);
+    setSending(true); setError("");
+    try {
+      const response = await fetch(import.meta.env.VITE_CONTENT_API + "/public/newsletter", {
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "omit",
+        body: JSON.stringify({ email, consent: fields.get("consent") === "on", website: fields.get("website") || "" }),
+      });
+      if (!response.ok) throw new Error("Could not save your signup. Please try again later.");
+      setDone(true);
+    } catch (e) { setError(e instanceof Error ? e.message : "Unable to connect."); }
+    finally { setSending(false); }
+  }
 
   return (
     <section id="newsletter" className="bg-newsletter-gradient py-24 md:py-32">
@@ -32,23 +48,33 @@ export function Newsletter() {
 
           {!done ? (
             <form
-              onSubmit={(e) => { e.preventDefault(); if (email) setDone(true); }}
-              className="mx-auto mt-10 flex max-w-[520px] overflow-hidden rounded-full border-[1.5px] border-white/25 bg-white/10 backdrop-blur-sm focus-within:border-sky"
+              onSubmit={subscribe}
+              className="mx-auto mt-10 max-w-[520px]"
             >
+              <div className="flex overflow-hidden rounded-full border border-white/40 bg-white/10">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={cmsLabel("Newsletter.label.3ffc275e3d21","Enter your email address")}
-                className="flex-1 bg-transparent px-6 py-4 text-[15px] text-white placeholder:text-white/45 focus:outline-none"
+                aria-label="Email address"
+                className="min-w-0 flex-1 bg-transparent px-6 py-4 text-[15px] text-white placeholder:text-white/70 focus:outline-none"
               />
               <button
                 type="submit"
-                className="bg-sky px-7 py-4 text-[15px] font-bold text-white transition-colors hover:bg-[#0284c7]"
+                disabled={sending}
+                className="bg-sky px-7 py-4 text-[15px] font-bold text-white transition-colors hover:bg-[#335579]"
               ><CmsText id="Newsletter.d0f736aa267d">
                 Subscribe →
               </CmsText></button>
+              </div>
+              <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+              <label className="mt-4 flex items-start gap-3 text-left text-sm text-white/90">
+                <input name="consent" type="checkbox" required className="mt-1" />
+                <span>I agree to receive scholarship news by email. I can ask to unsubscribe at any time. <a href="/privacy" className="underline">Privacy policy</a></span>
+              </label>
+              {error && <p role="alert" className="mt-3 text-white">{error}</p>}
             </form>
           ) : (
             <motion.div
@@ -63,11 +89,11 @@ export function Newsletter() {
                 <span><CmsText id="Newsletter.66023af1bfb0">You're in! Welcome to the Scholars Cafe community.</CmsText></span>
                 <PartyPopper className="h-6 w-6 text-sky-light" strokeWidth={1.75} aria-hidden />
               </div>
-              <div className="mt-1 text-sm text-white/70"><CmsText id="Newsletter.30bb66fc7ef2">Check your inbox. Your first guide is on its way.</CmsText></div>
+              <div className="mt-1 text-sm text-white/90">Your signup is saved. Thank you for joining our mailing list.</div>
             </motion.div>
           )}
 
-          <div className="mt-6 text-[13px] text-white/35"><CmsText id="Newsletter.378bc71951e5">No spam, ever. Unsubscribe with one click, anytime.</CmsText></div>
+          <div className="mt-6 text-[13px] text-white/80">To unsubscribe, email contact@scholarscafe.com.</div>
         </Reveal>
       </div>
     </section>

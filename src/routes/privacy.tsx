@@ -38,9 +38,11 @@ function PrivacyPage() {
       <LegalPage
         kicker="Legal"
         title={cmsLabel("privacy.label.506ff3946215","Privacy Policy")}
-        updated="May 2026"
+        updated="September 2026"
         intro={cmsLabel("privacy.label.f452be0c5041","Scholars Cafe (we, us, our) is committed to protecting the privacy of every student and family that trusts us with their study abroad journey. This policy explains what we collect, why we collect it, and the choices you have.")}
       >
+        <h2>Website messages, feedback, and newsletter signups</h2>
+        <p>Contact forms store your name, email, phone number, and message in our Hostinger database. Feedback is private and is not automatically published. Newsletter signups record your email and consent time. Authorized owners and admins can review these records. Notifications may also be sent to our contact@scholarscafe.com mailbox. To unsubscribe or request removal of a website submission, email contact@scholarscafe.com.</p>
         <h2><CmsText id="privacy.331e44fd15c9">1. Information we collect</CmsText></h2>
         <p><CmsText id="privacy.99a90c40c9ee">
           To support your university applications we may collect: your name,

@@ -5,7 +5,7 @@ const Content = createContext<Item[] | null>(null);
 export function useCmsLookup() {
   const items = useContext(Content);
   const copy = Object.assign(
-    {},
+    Object.create(null),
     ...(items || []).filter((i) => i.kind === "copy").map((i) => i.data),
   );
   return (key: string, fallback: string) =>
@@ -67,7 +67,7 @@ export function useCmsCollection<T>(
 export function useCmsValue<T>(key: string, fallback: T): T {
   const items = useContext(Content);
   const copy = Object.assign(
-    {},
+    Object.create(null),
     ...(items || []).filter((i) => i.kind === "copy").map((i) => i.data),
   );
   function visit(value: unknown, path: string): unknown {
@@ -75,8 +75,8 @@ export function useCmsValue<T>(key: string, fallback: T): T {
       const next = copy[path];
       if (typeof next !== "string") return value;
       if (
-        /^(https?:|mailto:|tel:|#|\/)/.test(value) &&
-        !/^(https:\/\/|mailto:|tel:|#|\/(?!\/))/.test(next)
+        (/^(https?:|mailto:|tel:|#|\/)/.test(value) || /(?:url|link|href|src|image|photo)$/i.test(path)) &&
+        (!/^(https:\/\/|mailto:|tel:|#|\/(?!\/))/.test(next) || /[\u0000-\u0020\\]/.test(next))
       )
         return value;
       return next;

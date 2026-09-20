@@ -1,6 +1,6 @@
 import mysql from "mysql2/promise";
 import { readFile } from "node:fs/promises";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 
 export class Store {
   constructor(config) {
@@ -76,5 +76,13 @@ export class Store {
   async clean() {
     await this.query("DELETE FROM sessions WHERE expires_at<UTC_TIMESTAMP()");
     await this.query("DELETE FROM oauth_attempts WHERE expires_at<UTC_TIMESTAMP()");
+    await this.query("DELETE FROM rate_limits WHERE expires_at<UTC_TIMESTAMP()");
+  }
+  async checkRateLimit(scope, identity, limit, seconds) {
+    const window = Math.floor(Date.now() / (seconds * 1000));
+    const key = createHash("sha256").update(`${scope}:${identity}:${window}`).digest("hex");
+    await this.query("INSERT INTO rate_limits (bucket,hits,expires_at) VALUES (?,1,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE hits=hits+1", [key, (window + 1) * seconds]);
+    const rows = await this.query("SELECT hits FROM rate_limits WHERE bucket=?", [key]);
+    return rows[0].hits <= limit;
   }
 }

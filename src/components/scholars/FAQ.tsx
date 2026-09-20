@@ -72,7 +72,7 @@ export function FAQ() {
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7]"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#335579]"
           >
             <MessageCircle className="h-4 w-4" aria-hidden /><CmsText id="FAQ.13cd408610e3">
             WhatsApp us

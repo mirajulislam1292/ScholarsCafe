@@ -1,7 +1,7 @@
 :root {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: #142a3a;
-  background: #f5f6f3;
+  color: #263f5d;
+  background: #edf7fd;
   font-synthesis: none;
 }
 * {
@@ -26,21 +26,21 @@ select {
 button,
 .primary {
   cursor: pointer;
-  border: 1px solid #dce2de;
+  border: 1px solid #c0e6fd;
   border-radius: 9px;
   padding: 11px 17px;
   background: white;
-  color: #173d38;
+  color: #3f6593;
   text-decoration: none;
   font-weight: 600;
 }
 button:hover {
-  background: #edf3ee;
+  background: #e5f3fc;
 }
 .primary {
-  background: #174e45;
+  background: #3f6593;
   color: white;
-  border-color: #174e45;
+  border-color: #3f6593;
   display: inline-block;
 }
 h1,
@@ -58,7 +58,7 @@ h2 {
   font-size: 10px;
   letter-spacing: 0.18em;
   font-weight: 800;
-  color: #667b73;
+  color: #496b90;
 }
 .brand {
   font-weight: 900;
@@ -88,7 +88,7 @@ h2 {
   margin: 24px 0;
 }
 .muted {
-  color: #708078;
+  color: #496b90;
   font-size: 13px;
 }
 aside {
@@ -97,7 +97,7 @@ aside {
   height: 100vh;
   padding: 32px 22px;
   background: #fff;
-  border-right: 1px solid #e1e6e0;
+  border-right: 1px solid #c0e6fd;
   display: flex;
   flex-direction: column;
   gap: 25px;
@@ -110,15 +110,15 @@ nav button {
   text-align: left;
   border: 0;
   background: transparent;
-  color: #62736c;
+  color: #496b90;
 }
 nav button.active {
-  color: #174e45;
-  background: #e6efea;
+  color: #3f6593;
+  background: #c0e6fd;
 }
 .site-link {
   margin-top: auto;
-  color: #174e45;
+  color: #3f6593;
   font-size: 13px;
 }
 main {
@@ -134,7 +134,7 @@ header {
 }
 #identity {
   font-size: 12px;
-  color: #61746a;
+  color: #496b90;
 }
 .grid {
   display: grid;
@@ -143,7 +143,7 @@ header {
 }
 .card {
   background: white;
-  border: 1px solid #e0e5de;
+  border: 1px solid #c0e6fd;
   border-radius: 16px;
   padding: 25px;
   margin-bottom: 18px;
@@ -166,13 +166,13 @@ header {
 }
 .row {
   justify-content: space-between;
-  border-bottom: 1px solid #edf0ea;
+  border-bottom: 1px solid #e5f3fc;
   padding: 16px 0;
 }
 .badge {
   font-size: 11px;
-  background: #eaf2eb;
-  color: #215842;
+  background: #c0e6fd;
+  color: #3f6593;
   padding: 5px 9px;
   border-radius: 100px;
 }
@@ -187,11 +187,11 @@ textarea,
 select {
   display: block;
   width: 100%;
-  border: 1px solid #cdd7cc;
+  border: 1px solid #80aad3;
   background: #fff;
   border-radius: 8px;
   padding: 12px;
-  color: #18322a;
+  color: #263f5d;
 }
 textarea {
   min-height: 110px;
@@ -220,11 +220,11 @@ input[type="checkbox"] {
 .empty {
   padding: 35px;
   text-align: center;
-  color: #708078;
+  color: #496b90;
 }
 details {
   padding: 14px 0;
-  border-bottom: 1px solid #e0e5de;
+  border-bottom: 1px solid #c0e6fd;
 }
 summary {
   cursor: pointer;
@@ -239,7 +239,7 @@ td,
 th {
   text-align: left;
   padding: 13px;
-  border-bottom: 1px solid #e0e5de;
+  border-bottom: 1px solid #c0e6fd;
   word-break: break-word;
 }
 button:disabled {

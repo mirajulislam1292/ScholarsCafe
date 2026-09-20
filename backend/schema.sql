@@ -50,3 +50,30 @@ CREATE TABLE IF NOT EXISTS inquiries (
   message TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS submissions (
+  id CHAR(36) PRIMARY KEY,
+  kind ENUM('feedback','newsletter') NOT NULL,
+  email VARCHAR(254) NOT NULL,
+  name VARCHAR(160) NOT NULL DEFAULT '',
+  message TEXT NOT NULL,
+  consent_at DATETIME NULL,
+  unsubscribed_at DATETIME NULL,
+  dedupe_key VARCHAR(254) NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX kind_created (kind,created_at)
+);
+CREATE TABLE IF NOT EXISTS mail_outbox (
+  id CHAR(36) PRIMARY KEY,
+  subject VARCHAR(160) NOT NULL,
+  body TEXT NOT NULL,
+  reply_to VARCHAR(254) NULL,
+  attempts INT NOT NULL DEFAULT 0,
+  sent_at DATETIME NULL,
+  next_attempt_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS rate_limits (
+  bucket CHAR(64) PRIMARY KEY,
+  hits INT NOT NULL DEFAULT 1,
+  expires_at DATETIME NOT NULL
+);

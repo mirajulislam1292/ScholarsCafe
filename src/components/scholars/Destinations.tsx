@@ -40,7 +40,7 @@ export function Destinations() {
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-14 grid overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-navy via-midnight to-[#0369a1] p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:grid-cols-[1fr_1.2fr] md:p-12"
+            className="group mt-14 grid overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-navy via-midnight to-[#5b86b6] p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:grid-cols-[1fr_1.2fr] md:p-12"
           >
             <div className="flex flex-col justify-between gap-8">
               <div>

@@ -2,8 +2,24 @@
   "name": "scholars-cafe-admin",
   "private": true,
   "type": "module",
-  "scripts": {"start": "node server.js", "test": "node --test", "build": "node --check server.js"},
-  "engines": {"node": ">=22"},
-  "dependencies": {"express": "^5.1.0", "helmet": "^8.1.0", "google-auth-library": "^10.3.0", "mysql2": "^3.15.0", "zod": "^3.24.2", "express-rate-limit": "^8.1.0"},
-  "devDependencies": {"supertest": "^7.1.4"}
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "build": "node --check server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "google-auth-library": "^10.3.0",
+    "helmet": "^8.1.0",
+    "mysql2": "^3.15.0",
+    "nodemailer": "^10.0.10",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
 }
