@@ -138,7 +138,7 @@ export function UniversityExplorer() {
       {selected && (
         <div
           onClick={() => setSelected(null)}
-          className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[3000] flex items-center justify-center bg-navy/20 p-4 backdrop-blur-sm"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -164,7 +164,7 @@ export function UniversityExplorer() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-sky"
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-navy"
             ><CmsText id="UniversityExplorer.cdb1b2633afe">
               Apply with Scholars Cafe </CmsText><ArrowRight className="h-4 w-4" />
             </a>

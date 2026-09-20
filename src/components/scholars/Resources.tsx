@@ -53,24 +53,24 @@ export function Resources() {
               <StaggerItem key={r.title}>
                 <a
                   href="#newsletter"
-                  className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-navy to-midnight p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:p-10"
+                  className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-sky/20 bg-sky-soft p-8 text-navy transition-all hover:-translate-y-1 hover:border-sky/50 hover:bg-white hover:shadow-card-hover md:p-10"
                 >
-                  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
-                    <span className="h-px w-8 bg-gold" /><CmsText id="Resources.2c8f9493f691">
+                  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-sky">
+                    <span className="h-px w-8 bg-sky" /><CmsText id="Resources.2c8f9493f691">
                     Featured · </CmsText>{r.category}
                   </div>
                   <h3 className="mt-8 font-display text-3xl font-extrabold leading-tight md:text-4xl">
                     {r.title}
                   </h3>
-                  <p className="mt-5 flex-1 text-[15px] leading-relaxed text-white/75">
+                  <p className="mt-5 flex-1 text-[15px] leading-relaxed text-navy/70">
                     {r.teaser}
                   </p>
-                  <div className="mt-8 flex items-center justify-between border-t border-white/15 pt-5">
-                    <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.16em] text-white/55">
+                  <div className="mt-8 flex items-center justify-between border-t border-sky/20 pt-5">
+                    <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.16em] text-navy/55">
                       <Clock className="h-3.5 w-3.5" />
                       {r.readTime}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-light"><CmsText id="Resources.e103ed64a00f">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky"><CmsText id="Resources.e103ed64a00f">
                       Read guide
                       </CmsText><ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
                     </span>

@@ -8,7 +8,7 @@ export function Services() {
   const SERVICES = useCmsValue("data.SERVICES", CMS_DEFAULT_SERVICES);
 
   return (
-    <section id="services" className="bg-[#F8FAFC] py-24 md:py-32 dark:bg-navy-deep">
+    <section id="services" className="bg-sky-soft py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky"><CmsText id="Services.6fc361952438">Individual Services</CmsText></span>

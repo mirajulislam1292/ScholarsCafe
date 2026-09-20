@@ -40,30 +40,28 @@ export function Destinations() {
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-14 grid overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-navy via-midnight to-[#0369a1] p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:grid-cols-[1fr_1.2fr] md:p-12"
+            className="group mt-14 grid overflow-hidden rounded-[28px] border border-sky/20 bg-sky-soft p-8 text-navy transition-all hover:-translate-y-1 hover:border-sky/50 hover:bg-white hover:shadow-card-hover md:grid-cols-[1fr_1.2fr] md:p-12"
           >
             <div className="flex flex-col justify-between gap-8">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold"><CmsText id="Destinations.843edef03d51">
-                  ★ Primary focus
-                </CmsText></div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky">Primary focus</div>
                 <div className="mt-6 text-8xl md:text-9xl">{featured.flag}</div>
               </div>
               <div className="font-display text-5xl font-extrabold md:text-6xl">
                 {featured.name}
               </div>
             </div>
-            <div className="flex flex-col justify-between gap-8 border-t border-white/15 pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
+            <div className="flex flex-col justify-between gap-8 border-t border-sky/20 pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-light">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky">
                   {featured.tag}
                 </div>
-                <p className="mt-4 text-2xl font-light leading-snug text-white/85 md:text-3xl">
+                <p className="mt-4 text-2xl font-light leading-snug text-navy/80 md:text-3xl">
                   {featured.note}<CmsText id="Destinations.86139d839425">. We've built our practice around helping Bangladeshi
                   students unlock 50–100% need-based aid at top US universities.
                 </CmsText></p>
               </div>
-              <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-sky-light"><CmsText id="Destinations.6855b9eac5c4">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-sky"><CmsText id="Destinations.6855b9eac5c4">
                 Explore USA pathway
                 </CmsText><ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
               </div>

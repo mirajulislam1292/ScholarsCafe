@@ -40,16 +40,12 @@ export function Navbar() {
     <>
       <header
         className={`fixed inset-x-0 top-0 z-[1000] transition-all duration-300 ${
-          scrolled ? "glass-nav shadow-nav h-[64px]" : "bg-transparent h-[72px]"
+          scrolled ? "glass-nav shadow-nav h-[64px]" : "bg-white/95 h-[72px] border-b border-sky/10"
         }`}
       >
         <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-5 md:px-8">
-          <button type="button" onClick={scrollToTop} className="flex items-center gap-2">
+          <button type="button" onClick={scrollToTop} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover" aria-label="Scholars Cafe home">
             <span className="brand-mark" aria-hidden="true" />
-            <span className="font-display text-xl font-extrabold">
-              <span className={scrolled ? "text-navy" : "text-white"}><CmsText id="Navbar.05d3d9ddab08">Scholars</CmsText></span>
-              <span className="text-sky"><CmsText id="Navbar.0d5f2e74a9f6"> Cafe</CmsText></span>
-            </span>
           </button>
 
           <nav className="hidden items-center gap-7 lg:flex">
@@ -58,7 +54,7 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`group relative text-[15px] font-medium transition-colors ${
-                  scrolled ? "text-slate-600 hover:text-navy" : "text-white/85 hover:text-white"
+                  "text-navy/70 hover:text-sky"
                 }`}
               >
                 {item.label}
@@ -79,7 +75,7 @@ export function Navbar() {
             <button
               onClick={() => setOpen(true)}
               aria-label={cmsLabel("Navbar.label.99af6606ff9d","Menu")}
-              className={`lg:hidden ${scrolled ? "text-navy" : "text-white"}`}
+              className="text-navy lg:hidden"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -93,13 +89,11 @@ export function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[2000] bg-navy-deep p-6 lg:hidden"
+            className="fixed inset-0 z-[2000] bg-sky-soft p-6 lg:hidden"
           >
             <div className="flex items-center justify-between">
-              <button onClick={scrollToTop} className="font-display text-2xl text-white"><CmsText id="Navbar.05d3d9ddab08">
-                Scholars </CmsText><span className="text-sky"><CmsText id="Navbar.0d5f2e74a9f6">Cafe</CmsText></span>
-              </button>
-              <button onClick={() => setOpen(false)} aria-label={cmsLabel("Navbar.label.7d9eb7acb13e","Close")} className="text-white"><X className="h-7 w-7" /></button>
+              <button onClick={scrollToTop} className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-card" aria-label="Scholars Cafe home"><span className="brand-mark" aria-hidden="true" /></button>
+              <button onClick={() => setOpen(false)} aria-label={cmsLabel("Navbar.label.7d9eb7acb13e","Close")} className="text-navy"><X className="h-7 w-7" /></button>
             </div>
             <nav className="mt-12 flex flex-col gap-6">
               {NAV.map((item, i) => (
@@ -110,7 +104,7 @@ export function Navbar() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.08 * i }}
-                  className="text-2xl font-semibold text-white"
+                  className="text-2xl font-semibold text-navy transition-colors hover:text-sky"
                 >
                   {item.label}
                 </motion.a>

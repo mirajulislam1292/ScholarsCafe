@@ -57,20 +57,20 @@
 :root {
   --radius: 0.75rem;
 
-  /* Brand palette, exact hex from spec */
+  /* Four-color frontend system: navy, sky, soft sky, white. */
   --navy: #0c2d5e;
-  --navy-deep: #060f1e;
-  --midnight: #0f3a7a;
-  --steel: #1e4080;
+  --navy-deep: #0c2d5e;
+  --midnight: #0c2d5e;
+  --steel: #0c2d5e;
   --sky: #0ea5e9;
-  --sky-deep: #0284c7;
-  --sky-light: #7dd3fc;
-  --sky-tint: #e0f2fe;
+  --sky-deep: #0ea5e9;
+  --sky-light: #f0f9ff;
+  --sky-tint: #f0f9ff;
   --sky-soft: #f0f9ff;
-  --gold: #fbbf24;
-  --gold-deep: #f59e0b;
-  --whatsapp: #25d366;
-  --success: #22c55e;
+  --gold: #0ea5e9;
+  --gold-deep: #0ea5e9;
+  --whatsapp: #0ea5e9;
+  --success: #0ea5e9;
 
   /* Shadcn semantic tokens mapped to brand */
   --background: #ffffff;
@@ -81,24 +81,24 @@
   --popover-foreground: #0c2d5e;
   --primary: #0c2d5e;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
+  --secondary: #f0f9ff;
   --secondary-foreground: #0c2d5e;
-  --muted: #f8fafc;
-  --muted-foreground: #475569;
+  --muted: #f0f9ff;
+  --muted-foreground: #0c2d5e;
   --accent: #0ea5e9;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
+  --border: rgba(14, 165, 233, 0.2);
+  --input: rgba(14, 165, 233, 0.24);
   --ring: #0ea5e9;
 
   /* Gradients */
-  --gradient-hero: linear-gradient(135deg, #0c2d5e 0%, #0f3a7a 45%, #0369a1 100%);
-  --gradient-dark: linear-gradient(180deg, #060f1e 0%, #0c2d5e 100%);
-  --gradient-card-hover: linear-gradient(135deg, #0ea5e9 0%, #0c2d5e 100%);
-  --gradient-gold: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
-  --gradient-newsletter: linear-gradient(135deg, #0c2d5e 0%, #1a4a9e 100%);
+  --gradient-hero: #f0f9ff;
+  --gradient-dark: #f0f9ff;
+  --gradient-card-hover: #f0f9ff;
+  --gradient-gold: #0ea5e9;
+  --gradient-newsletter: #f0f9ff;
 
   /* Shadows */
   --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -307,13 +307,18 @@
   }
 }
 
-/* Use the image alpha as the logo shape, without a background tile. */
+/* Use the image alpha as a solid mark inside the white logo tile. */
 .brand-mark {
   display: inline-block;
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
-  background: linear-gradient(145deg, #e0f2fe 0%, #7dd3fc 45%, #0ea5e9 100%);
+  background: #0ea5e9;
   -webkit-mask: url('/brand-mark.png') center / contain no-repeat;
   mask: url('/brand-mark.png') center / contain no-repeat;
 }
+
+/* Keep all general copy inside the four-color system. */
+.text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700 { color: rgba(12, 45, 94, 0.68); }
+.bg-slate-50, .bg-slate-100 { background-color: #f0f9ff; }
+.border-slate-100, .border-slate-200, .border-slate-300 { border-color: rgba(14, 165, 233, 0.18); }

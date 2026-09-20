@@ -69,7 +69,7 @@ export function SuccessStories() {
                   <div className="font-display text-6xl leading-none text-sky/15"><CmsText id="SuccessStories.8a331fdde703">"</CmsText></div>
                   <p className="mt-2 text-[15px] italic leading-[1.85] text-slate-600 dark:text-white/75">{testimonial.quote}</p>
                   <div className="mt-7 flex items-center gap-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} font-display text-base font-extrabold text-white`}>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky font-display text-base font-extrabold text-white">
                       {testimonial.initials}
                     </div>
                     <div>
@@ -77,12 +77,12 @@ export function SuccessStories() {
                       <div className="text-[13px] font-semibold text-sky-deep dark:text-sky-light">{testimonial.destination}</div>
                       <div className="text-[12px] text-slate-500 dark:text-white/55">{testimonial.year}</div>
                     </div>
-                    <div className="ml-auto flex gap-0.5 text-gold">
+                    <div className="ml-auto flex gap-0.5 text-sky">
                       {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-current" />)}
                     </div>
                   </div>
                 </div>
-                <div className="mt-7 bg-gradient-to-r from-sky to-navy px-9 py-4 text-center text-sm font-bold text-white">
+                <div className="mt-7 bg-sky px-9 py-4 text-center text-sm font-bold text-white">
                   {testimonial.outcome}
                 </div>
               </motion.article>
