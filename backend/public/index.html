@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Scholars Cafe · Studio</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="login" class="login">
+      <div class="brand">SC<span>Scholars Cafe</span></div>
+      <p class="eyebrow">YOUR EDITORIAL WORKSPACE</p>
+      <h1>Good guidance.<br />Beautifully shared.</h1>
+      <p>Manage the people, stories and programs behind Scholars Cafe.</p>
+      <a class="primary" href="/auth/google">Continue with Google →</a>
+      <p class="muted">Access is limited to approved accounts.</p>
+    </div>
+    <div id="workspace" hidden>
+      <aside>
+        <div class="brand">SC<span>Scholars Cafe</span></div>
+        <p class="eyebrow">CONTENT STUDIO</p>
+        <nav id="nav"></nav>
+        <a href="https://scholarscafe.com" target="_blank" rel="noopener" class="site-link"
+          >Visit website ↗</a
+        ><button id="logout">Sign out</button>
+      </aside>
+      <main>
+        <header>
+          <div>
+            <p class="eyebrow">SCHOLARS CAFE / WORKSPACE</p>
+            <h1 id="heading">Overview</h1>
+          </div>
+          <span id="identity"></span>
+        </header>
+        <p id="notice" role="status" aria-live="polite"></p>
+        <div id="screen"></div>
+      </main>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

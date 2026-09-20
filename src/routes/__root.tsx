@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { ContentProvider } from "@/lib/cms";
 
 function NotFoundComponent() {
   return (
@@ -76,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Bangladesh's #1 study abroad consultancy. Expert mentorship for USA, UK, Canada, Germany & 8+ more countries." },
       { name: "author", content: "Scholars Cafe" },
       { property: "og:title", content: "Scholars Cafe - Your Dream University Starts Here" },
-      { property: "og:description", content: "From Bangladesh to the World. Expert university admissions, scholarship strategy, and test prep." },
+      { property: "og:description", content: "From Bangladesh to the World. Expert university admissions, scholarship strategy, and visa guidance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -113,7 +114,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <ContentProvider><Outlet /></ContentProvider>
     </QueryClientProvider>
   );
 }

@@ -1,3 +1,4 @@
+import { CmsText } from "@/lib/cms";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
@@ -23,17 +24,17 @@ export function LegalPage({
             to="/"
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" /><CmsText id="LegalPage.76c5505ff2e2">
             Back to home
-          </Link>
+          </CmsText></Link>
           <div className="mt-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-sky">
             {kicker}
           </div>
           <h1 className="mt-4 font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-6xl">
             {title}
           </h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Last updated: {updated}
+          <p className="mt-3 text-sm text-muted-foreground"><CmsText id="LegalPage.ba34a96f2969">
+            Last updated: </CmsText>{updated}
           </p>
           <p className="mt-8 text-lg leading-relaxed text-muted-foreground">
             {intro}

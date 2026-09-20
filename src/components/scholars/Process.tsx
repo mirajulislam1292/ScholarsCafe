@@ -1,19 +1,23 @@
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import { PROCESS } from "@/lib/scholars-data";
+import { PROCESS as CMS_DEFAULT_PROCESS } from "@/lib/scholars-data";
 import { ScholarIcon } from "./ScholarIcon";
 
 export function Process() {
+  const PROCESS = useCmsValue("data.PROCESS", CMS_DEFAULT_PROCESS);
+
   return (
     <section className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">How It Works</span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
+          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky"><CmsText id="Process.c1879525c75c">How It Works</CmsText></span>
+          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy"><CmsText id="Process.0de600876bfd">
             From conversation to acceptance.
-          </h2>
-          <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
+          </CmsText></h2>
+          <p className="mt-5 text-[17px] leading-relaxed text-slate-600"><CmsText id="Process.a5a96a06b61f">
             A six-step path designed to take the chaos out of admissions and replace it with structure, strategy, and momentum.
-          </p>
+          </CmsText></p>
         </Reveal>
 
         <div className="relative mt-20">
@@ -28,8 +32,8 @@ export function Process() {
                     <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-sky-tint text-sky-deep">
                       <ScholarIcon name={step.icon} className="h-6 w-6" />
                     </div>
-                    <h3 className="mt-3 font-display text-xl font-bold text-navy">
-                      Step {step.n}: {step.title}
+                    <h3 className="mt-3 font-display text-xl font-bold text-navy"><CmsText id="Process.8e6a6cca7aae">
+                      Step </CmsText>{step.n}<CmsText id="Process.e7ac0786668e">: </CmsText>{step.title}
                     </h3>
                     <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{step.desc}</p>
                   </div>
@@ -48,3 +52,5 @@ export function Process() {
     </section>
   );
 }
+
+const PROCESS = CMS_DEFAULT_PROCESS;

@@ -23,6 +23,9 @@ dist-ssr
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+.cms-data.mjs
+backend/.env*
+!backend/.env.example
 
 # Editor directories and files
 .vscode/*
