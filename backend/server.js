@@ -18,13 +18,20 @@ for (const key of ["ADMIN_ORIGIN", "PUBLIC_ORIGIN"]) {
   if (url.protocol !== "https:" || url.origin !== process.env[key])
     throw new Error("An exact HTTPS origin is required: " + key);
 }
-const store = new Store(process.env);
-await store.initialize();
-await store.clean();
-const cleanup = setInterval(
-  () => store.clean().catch(() => console.error("Session cleanup failed")),
-  600000,
-);
-cleanup.unref();
-const server = createApp(store, process.env).listen(Number(process.env.PORT || 3000), "0.0.0.0");
-process.on("SIGTERM", () => server.close(() => store.pool.end().then(() => process.exit(0))));
+// LiteSpeed loads the entry point with require(), so avoid top-level await.
+async function start() {
+  const store = new Store(process.env);
+  await store.initialize();
+  await store.clean();
+  const cleanup = setInterval(
+    () => store.clean().catch(() => console.error("Session cleanup failed")),
+    600000,
+  );
+  cleanup.unref();
+  const server = createApp(store, process.env).listen(Number(process.env.PORT || 3000), "0.0.0.0");
+  process.on("SIGTERM", () => server.close(() => store.pool.end().then(() => process.exit(0))));
+}
+start().catch((error) => {
+  console.error("Admin startup failed:", error.code || error.name);
+  process.exit(1);
+});

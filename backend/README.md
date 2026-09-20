@@ -7,11 +7,12 @@ directory as the source of a separate Hostinger Node.js website. Node 22,
 
 ## Current delivery status
 
-Code is implemented locally. Hostinger site `admin.scholarscafe.com` and
-database `u814252648_sccms` have been provisioned on account `u814252648`.
-Google Cloud client registration, server environment configuration, production
-deployment and live MySQL/sign-in verification are still required. Do not
-describe the admin as live until those checks pass.
+Deployed to Hostinger on 2026-09-20. The admin login page, database initialization,
+published content API, and Google authorization redirect passed live checks.
+Anonymous admin requests return 401. The public site is deployed with the CMS
+endpoint enabled. Credentials are stored in Hostinger server environment variables.
+The owner must still complete a real Google sign-in; authenticated publishing,
+role changes, and revocation remain to be verified in production.
 
 ## Required configuration
 
