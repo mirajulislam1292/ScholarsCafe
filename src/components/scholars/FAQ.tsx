@@ -30,7 +30,7 @@ export function FAQ() {
             {FAQS.map((f, i) => {
               const isOpen = open === i;
               return (
-                <div key={f.q} className={isOpen ? "bg-sky-soft" : ""}>
+                <div key={f.q} className={isOpen ? "bg-sky-deep" : ""}>
                   <button
                     onClick={() => setOpen(isOpen ? null : i)}
                     className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
@@ -49,7 +49,7 @@ export function FAQ() {
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="overflow-hidden"
                       >
-                        <p className="px-6 pb-6 text-[15px] leading-[1.85] text-navy/75">{f.a}</p>
+                        <p className="px-6 pb-6 text-[15px] leading-[1.85] text-white/85">{f.a}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>

@@ -47,41 +47,41 @@ export function WorldMap() {
   return (
     <section
       id="world-map"
-      className="relative overflow-hidden bg-white py-24 md:py-32"
+      className="relative overflow-hidden bg-[var(--navy-deep)] py-24 md:py-32"
     >
       {/* atmospheric grid */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(14,165,233,0.04)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
 
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-10">
         <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
           <div>
-            <span className="kicker text-sky"><CmsText id="WorldMap.505e4469013d">Interactive · 12 countries</CmsText></span>
-            <h2 className="mt-5 editorial-h2 text-navy"><CmsText id="WorldMap.a9ae2d28e56c">
+            <span className="kicker text-sky-light"><CmsText id="WorldMap.505e4469013d">Interactive · 12 countries</CmsText></span>
+            <h2 className="mt-5 editorial-h2 text-white"><CmsText id="WorldMap.a9ae2d28e56c">
               The world,
               </CmsText><br />
-              <span className="font-display italic font-light text-sky"><CmsText id="WorldMap.2febf7eba7ba">
+              <span className="font-display italic font-light text-sky-light"><CmsText id="WorldMap.2febf7eba7ba">
                 at your fingertips.
               </CmsText></span>
             </h2>
           </div>
-          <p className="max-w-md text-[15px] leading-relaxed text-navy/65"><CmsText id="WorldMap.f503db4e7679">
+          <p className="max-w-md text-[15px] leading-relaxed text-white/65"><CmsText id="WorldMap.f503db4e7679">
             Hover the map. Click a glowing pin to open the country dossier.
             top universities, scholarships, intake calendar, and visa notes.
           </CmsText></p>
         </div>
 
-        <div className="mt-12 rounded-[28px] border border-sky/20 bg-sky-soft p-6 shadow-card md:hidden">
-          <div className="kicker text-sky"><CmsText id="WorldMap.e7c82c52e445">Mobile view</CmsText></div>
-          <h3 className="mt-4 font-display text-3xl font-extrabold text-navy"><CmsText id="WorldMap.a2a8327445d1">
+        <div className="mt-12 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] p-6 shadow-2xl md:hidden">
+          <div className="kicker text-sky-light"><CmsText id="WorldMap.e7c82c52e445">Mobile view</CmsText></div>
+          <h3 className="mt-4 font-display text-3xl font-extrabold text-white"><CmsText id="WorldMap.a2a8327445d1">
             Explore destinations without clipping.
           </CmsText></h3>
-          <p className="mt-3 text-sm leading-relaxed text-navy/70"><CmsText id="WorldMap.9e881762227e">
+          <p className="mt-3 text-sm leading-relaxed text-white/70"><CmsText id="WorldMap.9e881762227e">
             The interactive world map is available on larger screens. On mobile, use the country chips below to open each destination dossier.
           </CmsText></p>
         </div>
 
         {/* the map */}
-        <div className="relative mt-12 hidden overflow-hidden rounded-[28px] border border-sky/20 bg-sky-soft shadow-card md:block">
+        <div className="relative mt-12 hidden overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] shadow-2xl md:block">
           <div className="aspect-[16/9] w-full">
             {mounted && (
             <ComposableMap
@@ -108,24 +108,24 @@ export function WorldMap() {
                           default: {
                             fill: isBangladesh
                               ? hover === iso
-                                ? "#0c2d5e"
-                                : "#0ea5e9"
+                                ? "var(--gold-deep)"
+                                : "var(--gold)"
                               : isActive
                               ? hover === iso
-                                ? "#0c2d5e"
-                                : "#0ea5e9"
-                              : "#ffffff",
-                            stroke: "#f0f9ff",
+                                ? "#0ea5e9"
+                                : "#1e3a6b"
+                              : "#13294b",
+                            stroke: "#07142a",
                             strokeWidth: 0.5,
                             outline: "none",
                             cursor: isActive || isBangladesh ? "pointer" : "default",
                             transition: "fill 0.2s ease",
                           },
                           hover: {
-                            fill: isBangladesh ? "#0c2d5e" : isActive ? "#0c2d5e" : "#ffffff",
+                            fill: isBangladesh ? "var(--gold-deep)" : isActive ? "#38bdf8" : "#13294b",
                             outline: "none",
                           },
-                          pressed: { fill: "#0c2d5e", outline: "none" },
+                          pressed: { fill: "#0284c7", outline: "none" },
                         }}
                       />
                     );
@@ -150,12 +150,12 @@ export function WorldMap() {
                   >
                     <circle
                       r={hover === d.iso ? 7 : 4}
-                      fill="#0ea5e9"
+                      fill="#38bdf8"
                       stroke="#fff"
                       strokeWidth={1.5}
                       style={{ transition: "r 0.2s" }}
                     />
-                    <circle r={10} fill="#0ea5e9" opacity={0.25}>
+                    <circle r={10} fill="#38bdf8" opacity={0.25}>
                       <animate
                         attributeName="r"
                         from="6"
@@ -181,7 +181,7 @@ export function WorldMap() {
           </div>
 
           {/* legend */}
-          <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-sky/20 bg-white px-4 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-navy/70 shadow-card">
+          <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/70 backdrop-blur">
             <span className="h-2 w-2 animate-pulse rounded-full bg-sky" /><CmsText id="WorldMap.cb9605d35507">
             Click a glowing pin
           </CmsText></div>
@@ -193,7 +193,7 @@ export function WorldMap() {
             <button
               key={d.iso}
               onClick={() => setActive(d)}
-              className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-sky/20 bg-white px-4 py-2 text-sm font-medium text-navy/80 transition-all hover:-translate-y-0.5 hover:border-sky hover:bg-sky-soft hover:text-sky"
+              className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition-all hover:-translate-y-0.5 hover:border-sky hover:bg-sky/15 hover:text-white"
             >
               <span className="text-base">{d.flag}</span>
               {d.name}
@@ -228,7 +228,7 @@ function DossierModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 z-[2500] flex items-end justify-center bg-navy/20 p-0 backdrop-blur-sm md:items-center md:p-6"
+      className="fixed inset-0 z-[2500] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm md:items-center md:p-6"
     >
       <motion.div
         initial={{ y: 60, opacity: 0 }}
@@ -247,9 +247,9 @@ function DossierModal({
               className="absolute inset-0 h-full w-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-white/70" />
-            <div className="absolute inset-x-0 bottom-0 p-7 text-navy">
-              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-sky">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-7 text-white">
+              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-light">
                 {dest.tag}
               </div>
               <div className="mt-3 flex items-end gap-4">
@@ -258,7 +258,7 @@ function DossierModal({
                   {dest.name}
                 </h3>
               </div>
-              <p className="mt-3 text-sm italic text-navy/80">{dest.tagline}</p>
+              <p className="mt-3 text-sm italic text-white/80">{dest.tagline}</p>
             </div>
           </div>
 
