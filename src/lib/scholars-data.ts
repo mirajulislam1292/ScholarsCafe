@@ -100,79 +100,13 @@ export const SERVICES: { icon: ScholarIconName; title: string; desc: string }[] 
 export const PROCESS: { n: number; icon: ScholarIconName; title: string; desc: string }[] = [
   { n: 1, icon: "message-circle" satisfies ScholarIconName, title: "Discovery Call", desc: "A free, honest conversation about your goals, profile, and realistic options." },
   { n: 2, icon: "compass" satisfies ScholarIconName, title: "Strategy & Roadmap", desc: "Country mix, college list, timeline, and a personalized prep plan." },
-  { n: 3, icon: "trending-up" satisfies ScholarIconName, title: "Profile Building", desc: "Test prep, extracurricular shaping, and academic positioning." },
+  { n: 3, icon: "trending-up" satisfies ScholarIconName, title: "Profile Building", desc: "Extracurricular shaping and academic positioning." },
   { n: 4, icon: "file-text" satisfies ScholarIconName, title: "Application Preparation", desc: "Essays, forms, portals, financial aid, every part together step by step." },
   { n: 5, icon: "send" satisfies ScholarIconName, title: "Submit & Follow Up", desc: "On-time submissions, response tracking, and quick follow-ups." },
   { n: 6, icon: "party-popper" satisfies ScholarIconName, title: "Acceptance & Next Steps", desc: "Offer evaluation, aid negotiation, visa, departure." },
 ];
 
-export const TESTS = [
-  {
-    abbr: "SAT",
-    full: "Scholastic Aptitude Test",
-    badge: "🇺🇸 Required for US Admission",
-    accent: "#0EA5E9",
-    description:
-      "The SAT is the cornerstone of most US university applications. Our structured mentorship covers Math, Reading & Writing, vocabulary, and exam-day strategy, tailored to each student.",
-    features: [
-      "Math + Evidence-Based Reading & Writing",
-      "Practice tests with performance analytics",
-      "Artemis Critical Reading Program",
-      "SAT vocabulary & comprehension building",
-      "Timed mock exams",
-      "Personalized 8 / 12 / 16-week schedules",
-    ],
-    target: "Our students regularly achieve 1450+",
-  },
-  {
-    abbr: "IELTS",
-    full: "International English Language Testing System",
-    badge: "🇬🇧 UK · Canada · Australia · NZ",
-    accent: "#8B5CF6",
-    description:
-      "Accepted by 11,000+ institutions worldwide. We coach all four bands so your overall score reflects what you're truly capable of.",
-    features: [
-      "Listening, Reading, Writing, Speaking",
-      "Examiner-standard speaking mocks",
-      "Task 1 + Task 2 writing templates",
-      "Reading speed & comprehension",
-      "Listening section strategies",
-    ],
-    target: "Target: Band 7.0+",
-  },
-  {
-    abbr: "TOEFL",
-    full: "Test of English as a Foreign Language (iBT)",
-    badge: "USA · Europe · Global",
-    accent: "#F59E0B",
-    description:
-      "TOEFL iBT is widely accepted at US universities. We focus on integrated tasks, note-taking, and academic English, what TOEFL rewards most.",
-    features: [
-      "Reading + Listening + Speaking + Writing",
-      "Integrated task practice",
-      "Speaking fluency & pronunciation",
-      "Academic writing structure",
-      "Full-length practice tests",
-    ],
-    target: "Target: 100+ iBT",
-  },
-  {
-    abbr: "DET",
-    full: "Duolingo English Test",
-    badge: "Fast & affordable",
-    accent: "#22C55E",
-    description:
-      "The modern alternative, taken online in 1 hour with results in 48 hours, accepted by 5,000+ institutions including many top US universities.",
-    features: [
-      "Full test format walkthrough",
-      "Video interview preparation",
-      "Writing sample coaching",
-      "Adaptive test strategies",
-      "Score interpretation & target planning",
-    ],
-    target: "Target: 120+",
-  },
-];
+export const TESTS = [];
 
 export type University = {
   name: string;
@@ -321,7 +255,6 @@ export const VALUES: { icon: ScholarIconName; title: string; desc: string }[] = 
 export const TEAM = [
   { initials: "SK", name: "Sadia Khan", role: "Head of US Admissions", bio: "10+ years guiding students to Ivy League and liberal arts colleges." },
   { initials: "AR", name: "Arif Rahman", role: "Scholarship Strategist", bio: "Specialist in CSS Profile, ISFAA and need-based aid positioning." },
-  { initials: "MH", name: "Maliha Hossain", role: "Test Prep Lead", bio: "SAT, IELTS, TOEFL, DET. Turns scores into stories." },
   { initials: "NF", name: "Nabil Faisal", role: "Visa & Departures", bio: "F-1, study permits, and that first month abroad, handled." },
 ];
 
@@ -331,7 +264,6 @@ export const RESOURCE_CATEGORIES: { id: ResourceCategory; label: string; desc: s
   { id: "Essays", label: "Essays & Personal Statements", desc: "Brainstorm, draft, and revise stories admissions remember." },
   { id: "Applications", label: "Applications & Strategy", desc: "Common App, UCAS, and country-specific portals without the panic." },
   { id: "Scholarships", label: "Scholarships & Financial Aid", desc: "Need-based, merit, and the forms that unlock them." },
-  { id: "Test Prep", label: "Test Prep", desc: "SAT, IELTS, TOEFL, DET. Strategies that move the needle." },
   { id: "Visa", label: "Visa & Pre-Departure", desc: "From DS-160 to your first month abroad." },
   { id: "Compare", label: "Country & University Compare", desc: "Side-by-side breakdowns to help you choose." },
 ];
@@ -402,24 +334,6 @@ export const RESOURCES: Resource[] = [
     teaser:
       "The 12-school framework we use with every Scholars Cafe student, calibrated to your academic profile, finances, and risk tolerance.",
     readTime: "14 min read",
-  },
-  {
-    tag: "Test Prep",
-    category: "Test Prep",
-    icon: "trending-up",
-    title: "SAT Prep Roadmap: 12 Weeks From Diagnostic to Target",
-    teaser:
-      "Week-by-week study schedule starting from a baseline score, with free Khan Academy + Bluebook resources sequenced for maximum gain.",
-    readTime: "12 min read",
-  },
-  {
-    tag: "Test Prep",
-    category: "Test Prep",
-    icon: "trending-up",
-    title: "IELTS Band 7+: The Speaking & Writing Scripts That Work",
-    teaser:
-      "Our examiner-trained playbook for Tasks 1 & 2, plus the speaking framework that turned Band 6.5 students into 7.5 in six weeks.",
-    readTime: "15 min read",
   },
   {
     tag: "Visa",

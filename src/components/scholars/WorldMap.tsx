@@ -1,3 +1,6 @@
+import {useCmsLookup} from "@/lib/cms";
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import {
   ComposableMap,
@@ -12,7 +15,7 @@ import {
   ISO_TO_DESTINATION,
   type DestinationDetail,
 } from "@/lib/destinations-data";
-import { WA_LINK } from "@/lib/scholars-data";
+import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 
 const GEO_URL =
   "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -34,6 +37,8 @@ const MARKERS: Record<string, [number, number]> = {
 };
 
 export function WorldMap() {
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   const [active, setActive] = useState<DestinationDetail | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -50,29 +55,29 @@ export function WorldMap() {
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-10">
         <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
           <div>
-            <span className="kicker text-sky-light">Interactive · 12 countries</span>
-            <h2 className="mt-5 editorial-h2 text-white">
+            <span className="kicker text-sky-light"><CmsText id="WorldMap.505e4469013d">Interactive · 12 countries</CmsText></span>
+            <h2 className="mt-5 editorial-h2 text-white"><CmsText id="WorldMap.a9ae2d28e56c">
               The world,
-              <br />
-              <span className="font-display italic font-light text-sky-light">
+              </CmsText><br />
+              <span className="font-display italic font-light text-sky-light"><CmsText id="WorldMap.2febf7eba7ba">
                 at your fingertips.
-              </span>
+              </CmsText></span>
             </h2>
           </div>
-          <p className="max-w-md text-[15px] leading-relaxed text-white/65">
+          <p className="max-w-md text-[15px] leading-relaxed text-white/65"><CmsText id="WorldMap.f503db4e7679">
             Hover the map. Click a glowing pin to open the country dossier.
             top universities, scholarships, intake calendar, and visa notes.
-          </p>
+          </CmsText></p>
         </div>
 
         <div className="mt-12 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] p-6 shadow-2xl md:hidden">
-          <div className="kicker text-sky-light">Mobile view</div>
-          <h3 className="mt-4 font-display text-3xl font-extrabold text-white">
+          <div className="kicker text-sky-light"><CmsText id="WorldMap.e7c82c52e445">Mobile view</CmsText></div>
+          <h3 className="mt-4 font-display text-3xl font-extrabold text-white"><CmsText id="WorldMap.a2a8327445d1">
             Explore destinations without clipping.
-          </h3>
-          <p className="mt-3 text-sm leading-relaxed text-white/70">
+          </CmsText></h3>
+          <p className="mt-3 text-sm leading-relaxed text-white/70"><CmsText id="WorldMap.9e881762227e">
             The interactive world map is available on larger screens. On mobile, use the country chips below to open each destination dossier.
-          </p>
+          </CmsText></p>
         </div>
 
         {/* the map */}
@@ -177,9 +182,9 @@ export function WorldMap() {
 
           {/* legend */}
           <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/70 backdrop-blur">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-sky" />
+            <span className="h-2 w-2 animate-pulse rounded-full bg-sky" /><CmsText id="WorldMap.cb9605d35507">
             Click a glowing pin
-          </div>
+          </CmsText></div>
         </div>
 
         {/* country chip rail */}
@@ -213,6 +218,10 @@ function DossierModal({
   dest: DestinationDetail;
   onClose: () => void;
 }) {
+ const cmsLabel = useCmsLookup();
+
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -258,7 +267,7 @@ function DossierModal({
             <button
               onClick={onClose}
               className="absolute right-5 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-muted"
-              aria-label="Close"
+              aria-label={cmsLabel("WorldMap.label.7d9eb7acb13e","Close")}
             >
               <X className="h-4 w-4" />
             </button>
@@ -269,17 +278,17 @@ function DossierModal({
 
             {/* quick facts */}
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Fact icon={<Calendar className="h-4 w-4" />} label="Intake" value={dest.intake} />
-              <Fact icon={<Wallet className="h-4 w-4" />} label="Cost" value={dest.avgCost} />
-              <Fact icon={<Languages className="h-4 w-4" />} label="Language" value={dest.language} />
-              <Fact icon={<Stamp className="h-4 w-4" />} label="Visa" value={dest.visaNote} />
+              <Fact icon={<Calendar className="h-4 w-4" />} label={cmsLabel("WorldMap.label.6b627d1cb766","Intake")} value={dest.intake} />
+              <Fact icon={<Wallet className="h-4 w-4" />} label={cmsLabel("WorldMap.label.204a5eb2cd28","Cost")} value={dest.avgCost} />
+              <Fact icon={<Languages className="h-4 w-4" />} label={cmsLabel("WorldMap.label.a4fe65264ef7","Language")} value={dest.language} />
+              <Fact icon={<Stamp className="h-4 w-4" />} label={cmsLabel("WorldMap.label.a725bda1f33e","Visa")} value={dest.visaNote} />
             </div>
 
             {/* what we cover */}
             <div className="mt-6">
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky">
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky"><CmsText id="WorldMap.fb3d81a82385">
                 What we handle
-              </div>
+              </CmsText></div>
               <ul className="mt-3 grid grid-cols-1 gap-2">
                 {dest.highlights.map((h) => (
                   <li
@@ -295,9 +304,9 @@ function DossierModal({
 
             {/* universities */}
             <div className="mt-6">
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky">
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky"><CmsText id="WorldMap.bbb77a237ffd">
                 Notable universities
-              </div>
+              </CmsText></div>
               <ul className="mt-3 divide-y divide-border">
                 {dest.universities.map((u) => (
                   <li key={u.name} className="flex items-start gap-3 py-3">
@@ -307,7 +316,7 @@ function DossierModal({
                       <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3" />
                         {u.city}
-                        <span>·</span>
+                        <span><CmsText id="WorldMap.a137f17a19a0">·</CmsText></span>
                         <span>{u.highlight}</span>
                       </div>
                     </div>
@@ -321,9 +330,9 @@ function DossierModal({
               target="_blank"
               rel="noopener noreferrer"
               className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky px-6 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
-            >
-              Plan my {dest.name} application
-              <ArrowUpRight className="h-4 w-4" />
+            ><CmsText id="WorldMap.3ce3ad639329">
+              Plan my </CmsText>{dest.name}<CmsText id="WorldMap.1fe289205936"> application
+              </CmsText><ArrowUpRight className="h-4 w-4" />
             </a>
           </div>
         </div>
@@ -341,6 +350,8 @@ function Fact({
   label: string;
   value: string;
 }) {
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <div className="rounded-xl border border-border bg-secondary/40 p-3">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -351,3 +362,5 @@ function Fact({
     </div>
   );
 }
+
+const WA_LINK = CMS_DEFAULT_WA_LINK;

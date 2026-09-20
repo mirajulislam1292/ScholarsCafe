@@ -300,8 +300,20 @@
 .dark .shadow-nav { box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important; }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Use the image alpha as the logo shape, without a background tile. */
+.brand-mark {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #e0f2fe 0%, #7dd3fc 45%, #0ea5e9 100%);
+  -webkit-mask: url('/brand-mark.png') center / contain no-repeat;
+  mask: url('/brand-mark.png') center / contain no-repeat;
 }

@@ -1,6 +1,9 @@
+import {useCmsLookup} from "@/lib/cms";
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
-import { WA_LINK } from "@/lib/scholars-data";
+import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { UNIVERSITY_ACCEPTANCES } from "@/lib/university-acceptances";
 import heroCampus from "@/assets/hero-campus.jpg";
 // Optional mobile-specific crop. Add a file at `src/assets/hero-campus-mobile.jpg` to override on small screens.
@@ -11,6 +14,11 @@ const heroCampusMobilePath = "/15976d71-f6b3-4da2-8736-137bca2bec49.png";
 const ACCEPTANCE_RAIL = UNIVERSITY_ACCEPTANCES;
 
 export function Hero() {
+ const cmsLabel = useCmsLookup();
+
+  const headline = useCmsValue('local.headline',['Where','ambition','meets']);
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   const reduceMotion = Boolean(useReducedMotion());
 
   const scrollToTop = () => {
@@ -28,7 +36,7 @@ export function Hero() {
           <source srcSet={heroCampusMobilePath} media="(max-width: 768px)" />
           <img
             src={heroCampus}
-            alt="Historic university campus at golden hour"
+            alt={cmsLabel("Hero.label.5611a31dca90","Historic university campus at golden hour")}
             width={1920}
             height={1280}
             className="h-full w-full object-cover object-top md:object-center"
@@ -56,11 +64,11 @@ export function Hero() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.6 }}
               className="mb-4 font-display italic text-lg text-sky-light/90 md:text-xl"
-            >
+            ><CmsText id="Hero.f3f277c44b6e">
               Thousands Apply. Few Stand Out.
-            </motion.p>
+            </CmsText></motion.p>
             <h1 className="font-display text-[clamp(2.35rem,14vw,7rem)] font-extrabold leading-[0.95] tracking-[-0.035em] text-white [text-shadow:0_2px_30px_rgba(0,0,0,0.45)] md:text-[clamp(2.75rem,8vw,7rem)] md:leading-[0.92]">
-              {["Where", "ambition", "meets"].map((word, i) => (
+              {headline.map((word, i) => (
                 <motion.span
                   key={word}
                   initial={{ opacity: 0, y: 80 }}
@@ -76,9 +84,9 @@ export function Hero() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="font-display block italic font-light text-sky-light"
-              >
+              ><CmsText id="Hero.5fcef7e1a94c">
                 acceptance.
-              </motion.span>
+              </CmsText></motion.span>
             </h1>
 
             <motion.p
@@ -86,11 +94,11 @@ export function Hero() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7, duration: 0.6 }}
               className="mt-6 max-w-xl text-[16px] leading-[1.7] text-white/80 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] md:mt-10 md:text-[17px]"
-            >
+            ><CmsText id="Hero.91b0af9f861a">
               We mentor ambitious Bangladeshi students from a first conversation to an
               acceptance letter, covering applications, scholarships, and the entire
               admissions journey across 12 study destinations.
-            </motion.p>
+            </CmsText></motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -103,17 +111,17 @@ export function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-sky px-7 py-4 text-[15px] font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button sm:w-auto"
-              >
+              ><CmsText id="Hero.009fe0d39178">
                 Book a free strategy call
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
+                </CmsText><ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
               </a>
               <a
                 href="#programs"
                 className="group inline-flex w-full items-center justify-center gap-2 px-2 py-3 text-[15px] font-semibold text-white sm:w-auto sm:py-4"
               >
-                <span className="border-b border-white/40 pb-0.5 transition-colors group-hover:border-white">
+                <span className="border-b border-white/40 pb-0.5 transition-colors group-hover:border-white"><CmsText id="Hero.f4685c1f868b">
                   Explore programs
-                </span>
+                </CmsText></span>
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
               </a>
             </motion.div>
@@ -133,9 +141,9 @@ export function Hero() {
           className="mt-16 pb-8 md:mt-24 md:pb-10"
         >
           <div className="mb-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
-            <span className="h-px w-10 bg-white/30" />
+            <span className="h-px w-10 bg-white/30" /><CmsText id="Hero.a73b267ead09">
             Where our students are heading
-          </div>
+          </CmsText></div>
           <motion.div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_7%,black_93%,transparent)]">
             <div
               className={`flex w-max items-center gap-8 md:gap-12 [will-change:transform] ${reduceMotion ? "motion-reduce:animate-none" : "animate-marquee"}`}
@@ -159,6 +167,8 @@ type AcceptanceRailItemProps = {
 };
 
 function AcceptanceRailItem({ name, logo, onClick }: AcceptanceRailItemProps) {
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <button type="button" onClick={onClick} className="inline-flex shrink-0 items-center gap-3 whitespace-nowrap px-1 py-2 text-white/72 transition-colors hover:text-white">
       <img
@@ -174,3 +184,5 @@ function AcceptanceRailItem({ name, logo, onClick }: AcceptanceRailItemProps) {
     </button>
   );
 }
+
+const WA_LINK = CMS_DEFAULT_WA_LINK;
