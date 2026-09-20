@@ -85,7 +85,7 @@ export function Contact() {
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-sky px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#335579] hover:shadow-button"
+                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-sky px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
               >
                 <MessageCircle className="h-4 w-4" aria-hidden /><CmsText id="Contact.6262cd58b9d5">
                 WhatsApp us now →

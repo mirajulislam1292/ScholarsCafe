@@ -96,7 +96,7 @@ export function SuccessStories() {
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-7 py-3.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#335579] hover:shadow-button"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-7 py-3.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
           ><CmsText id="SuccessStories.fc4e64953206">
             Book a Free Consultation →
           </CmsText></a>

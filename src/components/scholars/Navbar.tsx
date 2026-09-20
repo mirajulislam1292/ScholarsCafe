@@ -45,10 +45,10 @@ export function Navbar() {
       >
         <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-5 md:px-8">
           <button type="button" onClick={scrollToTop} className="flex items-center gap-2">
-            <img src="/brand-mark.png" alt="" className="brand-mark" width="44" height="44" />
+            <span className="brand-mark" aria-hidden="true" />
             <span className="font-display text-xl font-extrabold">
               <span className={scrolled ? "text-navy" : "text-white"}><CmsText id="Navbar.05d3d9ddab08">Scholars</CmsText></span>
-              <span className={scrolled ? "text-sky" : "text-sky-light"}><CmsText id="Navbar.0d5f2e74a9f6"> Cafe</CmsText></span>
+              <span className="text-sky"><CmsText id="Navbar.0d5f2e74a9f6"> Cafe</CmsText></span>
             </span>
           </button>
 
@@ -72,7 +72,7 @@ export function Navbar() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#335579] hover:shadow-button md:inline-flex"
+              className="hidden items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button md:inline-flex"
             >
               <Phone className="h-4 w-4" /><CmsText id="Navbar.33b0f3e06600"> Book a Free Call
             </CmsText></a>

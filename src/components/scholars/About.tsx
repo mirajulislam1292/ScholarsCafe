@@ -79,7 +79,7 @@ export function About() {
                   <div className="font-display text-lg font-bold"><CmsText id="About.9d698add0344">Join Our Team</CmsText></div>
                   <p className="mt-1 text-sm text-white/60"><CmsText id="About.ca0ddff4273e">We're hiring. See open roles and help build the future of Bangladeshi study abroad.</CmsText></p>
                 </div>
-                <a className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-bold text-white hover:bg-[#335579] md:mt-0" href="#contact"><CmsText id="About.31e392d1c037">
+                <a className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-bold text-white hover:bg-[#0284c7] md:mt-0" href="#contact"><CmsText id="About.31e392d1c037">
                   Apply </CmsText><ArrowRight className="h-4 w-4" />
                 </a>
               </div>

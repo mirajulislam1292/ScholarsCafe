@@ -64,7 +64,7 @@ export function Newsletter() {
               <button
                 type="submit"
                 disabled={sending}
-                className="bg-sky px-7 py-4 text-[15px] font-bold text-white transition-colors hover:bg-[#335579]"
+                className="bg-sky px-7 py-4 text-[15px] font-bold text-white transition-colors hover:bg-[#0284c7]"
               ><CmsText id="Newsletter.d0f736aa267d">
                 Subscribe →
               </CmsText></button>

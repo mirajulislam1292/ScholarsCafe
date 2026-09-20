@@ -70,7 +70,7 @@ export function WorldMap() {
           </CmsText></p>
         </div>
 
-        <div className="mt-12 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#3f6593] to-[#2e4c6e] p-6 shadow-2xl md:hidden">
+        <div className="mt-12 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] p-6 shadow-2xl md:hidden">
           <div className="kicker text-sky-light"><CmsText id="WorldMap.e7c82c52e445">Mobile view</CmsText></div>
           <h3 className="mt-4 font-display text-3xl font-extrabold text-white"><CmsText id="WorldMap.a2a8327445d1">
             Explore destinations without clipping.
@@ -81,7 +81,7 @@ export function WorldMap() {
         </div>
 
         {/* the map */}
-        <div className="relative mt-12 hidden overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-[#3f6593] to-[#2e4c6e] shadow-2xl md:block">
+        <div className="relative mt-12 hidden overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] shadow-2xl md:block">
           <div className="aspect-[16/9] w-full">
             {mounted && (
             <ComposableMap
@@ -112,20 +112,20 @@ export function WorldMap() {
                                 : "var(--gold)"
                               : isActive
                               ? hover === iso
-                                ? "#3f6593"
-                                : "#80aad3"
-                              : "#5b86b6",
-                            stroke: "#2e4c6e",
+                                ? "#0ea5e9"
+                                : "#1e3a6b"
+                              : "#13294b",
+                            stroke: "#07142a",
                             strokeWidth: 0.5,
                             outline: "none",
                             cursor: isActive || isBangladesh ? "pointer" : "default",
                             transition: "fill 0.2s ease",
                           },
                           hover: {
-                            fill: isBangladesh ? "var(--gold-deep)" : isActive ? "#c0e6fd" : "#5b86b6",
+                            fill: isBangladesh ? "var(--gold-deep)" : isActive ? "#38bdf8" : "#13294b",
                             outline: "none",
                           },
-                          pressed: { fill: "#335579", outline: "none" },
+                          pressed: { fill: "#0284c7", outline: "none" },
                         }}
                       />
                     );
@@ -150,12 +150,12 @@ export function WorldMap() {
                   >
                     <circle
                       r={hover === d.iso ? 7 : 4}
-                      fill="#c0e6fd"
+                      fill="#38bdf8"
                       stroke="#fff"
                       strokeWidth={1.5}
                       style={{ transition: "r 0.2s" }}
                     />
-                    <circle r={10} fill="#c0e6fd" opacity={0.25}>
+                    <circle r={10} fill="#38bdf8" opacity={0.25}>
                       <animate
                         attributeName="r"
                         from="6"
@@ -329,7 +329,7 @@ function DossierModal({
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky px-6 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#335579] hover:shadow-button"
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky px-6 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
             ><CmsText id="WorldMap.3ce3ad639329">
               Plan my </CmsText>{dest.name}<CmsText id="WorldMap.1fe289205936"> application
               </CmsText><ArrowUpRight className="h-4 w-4" />

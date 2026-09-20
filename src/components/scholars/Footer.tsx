@@ -19,7 +19,7 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/brand-mark.png" alt="" className="brand-mark" width="44" height="44" />
+              <span className="brand-mark" aria-hidden="true" />
               <span className="font-display text-xl font-extrabold"><CmsText id="Footer.05d3d9ddab08">
                 Scholars </CmsText><span className="text-sky"><CmsText id="Footer.0d5f2e74a9f6">Cafe</CmsText></span>
               </span>

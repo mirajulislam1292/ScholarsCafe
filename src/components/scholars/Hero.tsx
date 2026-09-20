@@ -46,11 +46,11 @@ export function Hero() {
 
       {/* dramatic gradient + vignette overlays (Crimson-style shadow) */}
       {/* desktop: deeper dramatic overlays */}
-      <div className="pointer-events-none absolute inset-0 -z-10 hidden md:block bg-[linear-gradient(90deg,rgba(38,63,93,0.96)_0%,rgba(38,63,93,0.78)_38%,rgba(38,63,93,0.35)_70%,rgba(38,63,93,0.55)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 hidden md:block bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(38,63,93,0.55)_70%,rgba(38,63,93,0.95)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 hidden md:block bg-[linear-gradient(90deg,rgba(7,18,42,0.96)_0%,rgba(7,18,42,0.78)_38%,rgba(7,18,42,0.35)_70%,rgba(7,18,42,0.55)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 hidden md:block bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(7,18,42,0.55)_70%,rgba(7,18,42,0.95)_100%)]" />
       {/* mobile: lighter overlays so the hero image reads better on small screens */}
-      <div className="pointer-events-none absolute inset-0 -z-10 md:hidden bg-[linear-gradient(90deg,rgba(38,63,93,0.7)_0%,rgba(38,63,93,0.55)_38%,rgba(38,63,93,0.18)_70%,rgba(38,63,93,0.32)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 md:hidden bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(38,63,93,0.35)_70%,rgba(38,63,93,0.7)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 md:hidden bg-[linear-gradient(90deg,rgba(7,18,42,0.7)_0%,rgba(7,18,42,0.55)_38%,rgba(7,18,42,0.18)_70%,rgba(7,18,42,0.32)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 md:hidden bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(7,18,42,0.35)_70%,rgba(7,18,42,0.7)_100%)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-48 bg-gradient-to-b from-transparent to-[var(--navy-deep)]" />
       {/* subtle grid */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
@@ -110,7 +110,7 @@ export function Hero() {
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-sky px-7 py-4 text-[15px] font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#335579] hover:shadow-button sm:w-auto"
+                className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-sky px-7 py-4 text-[15px] font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button sm:w-auto"
               ><CmsText id="Hero.009fe0d39178">
                 Book a free strategy call
                 </CmsText><ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
