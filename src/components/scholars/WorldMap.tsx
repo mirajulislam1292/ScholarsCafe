@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-  Marker,
-} from "react-simple-maps";
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import { motion, AnimatePresence } from "motion/react";
-import { X, MapPin, GraduationCap, Calendar, Wallet, Languages, Stamp, ArrowUpRight } from "lucide-react";
 import {
-  DESTINATIONS,
-  ISO_TO_DESTINATION,
-  type DestinationDetail,
-} from "@/lib/destinations-data";
+  X,
+  MapPin,
+  GraduationCap,
+  Calendar,
+  Wallet,
+  Languages,
+  Stamp,
+  ArrowUpRight,
+} from "lucide-react";
+import { DESTINATIONS, ISO_TO_DESTINATION, type DestinationDetail } from "@/lib/destinations-data";
 import { WA_LINK } from "@/lib/scholars-data";
 
-const GEO_URL =
-  "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 // approximate longitude/latitude for marker pins
 const MARKERS: Record<string, [number, number]> = {
@@ -50,7 +49,6 @@ export function WorldMap() {
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-10">
         <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
           <div>
-            <span className="kicker text-sky-light">Interactive · 12 countries</span>
             <h2 className="mt-5 editorial-h2 text-white">
               The world,
               <br />
@@ -59,10 +57,6 @@ export function WorldMap() {
               </span>
             </h2>
           </div>
-          <p className="max-w-md text-[15px] leading-relaxed text-white/65">
-            Hover the map. Click a glowing pin to open the country dossier.
-            top universities, scholarships, intake calendar, and visa notes.
-          </p>
         </div>
 
         <div className="mt-12 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] p-6 shadow-2xl md:hidden">
@@ -71,7 +65,8 @@ export function WorldMap() {
             Explore destinations without clipping.
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-white/70">
-            The interactive world map is available on larger screens. On mobile, use the country chips below to open each destination dossier.
+            The interactive world map is available on larger screens. On mobile, use the country
+            chips below to open each destination dossier.
           </p>
         </div>
 
@@ -79,99 +74,103 @@ export function WorldMap() {
         <div className="relative mt-12 hidden overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] shadow-2xl md:block">
           <div className="aspect-[16/9] w-full">
             {mounted && (
-            <ComposableMap
-              projectionConfig={{ scale: 155, center: [15, 25] }}
-              width={980}
-              height={520}
-              style={{ width: "100%", height: "100%" }}
-            >
-              <Geographies geography={GEO_URL}>
-                {({ geographies }: { geographies: any[] }) =>
-                  geographies.map((geo: any) => {
-                    const iso = geo.properties.iso_a3 || geo.id;
-                    const dest = ISO_TO_DESTINATION[iso];
-                    const isActive = !!dest;
-                    const isBangladesh = iso === "BGD";
-                    return (
-                      <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        onMouseEnter={() => isActive && setHover(iso)}
-                        onMouseLeave={() => setHover(null)}
-                        onClick={() => isActive && dest && setActive(dest)}
-                        style={{
-                          default: {
-                            fill: isBangladesh
-                              ? hover === iso
+              <ComposableMap
+                projectionConfig={{ scale: 155, center: [15, 25] }}
+                width={980}
+                height={520}
+                style={{ width: "100%", height: "100%" }}
+              >
+                <Geographies geography={GEO_URL}>
+                  {({ geographies }: { geographies: any[] }) =>
+                    geographies.map((geo: any) => {
+                      const iso = geo.properties.iso_a3 || geo.id;
+                      const dest = ISO_TO_DESTINATION[iso];
+                      const isActive = !!dest;
+                      const isBangladesh = iso === "BGD";
+                      return (
+                        <Geography
+                          key={geo.rsmKey}
+                          geography={geo}
+                          onMouseEnter={() => isActive && setHover(iso)}
+                          onMouseLeave={() => setHover(null)}
+                          onClick={() => isActive && dest && setActive(dest)}
+                          style={{
+                            default: {
+                              fill: isBangladesh
+                                ? hover === iso
+                                  ? "var(--gold-deep)"
+                                  : "var(--gold)"
+                                : isActive
+                                  ? hover === iso
+                                    ? "#0ea5e9"
+                                    : "#1e3a6b"
+                                  : "#13294b",
+                              stroke: "#07142a",
+                              strokeWidth: 0.5,
+                              outline: "none",
+                              cursor: isActive || isBangladesh ? "pointer" : "default",
+                              transition: "fill 0.2s ease",
+                            },
+                            hover: {
+                              fill: isBangladesh
                                 ? "var(--gold-deep)"
-                                : "var(--gold)"
-                              : isActive
-                              ? hover === iso
-                                ? "#0ea5e9"
-                                : "#1e3a6b"
-                              : "#13294b",
-                            stroke: "#07142a",
-                            strokeWidth: 0.5,
-                            outline: "none",
-                            cursor: isActive || isBangladesh ? "pointer" : "default",
-                            transition: "fill 0.2s ease",
-                          },
-                          hover: {
-                            fill: isBangladesh ? "var(--gold-deep)" : isActive ? "#38bdf8" : "#13294b",
-                            outline: "none",
-                          },
-                          pressed: { fill: "#0284c7", outline: "none" },
-                        }}
+                                : isActive
+                                  ? "#38bdf8"
+                                  : "#13294b",
+                              outline: "none",
+                            },
+                            pressed: { fill: "#0284c7", outline: "none" },
+                          }}
+                        />
+                      );
+                    })
+                  }
+                </Geographies>
+                {DESTINATIONS.map((d) => {
+                  const coord = MARKERS[d.iso];
+                  if (!coord) return null;
+                  return (
+                    <Marker
+                      key={d.iso}
+                      coordinates={coord}
+                      onClick={() => setActive(d)}
+                      onMouseEnter={() => setHover(d.iso)}
+                      onMouseLeave={() => setHover(null)}
+                      style={{
+                        default: { cursor: "pointer" },
+                        hover: { cursor: "pointer" },
+                        pressed: { cursor: "pointer" },
+                      }}
+                    >
+                      <circle
+                        r={hover === d.iso ? 7 : 4}
+                        fill="#38bdf8"
+                        stroke="#fff"
+                        strokeWidth={1.5}
+                        style={{ transition: "r 0.2s" }}
                       />
-                    );
-                  })
-                }
-              </Geographies>
-              {DESTINATIONS.map((d) => {
-                const coord = MARKERS[d.iso];
-                if (!coord) return null;
-                return (
-                  <Marker
-                    key={d.iso}
-                    coordinates={coord}
-                    onClick={() => setActive(d)}
-                    onMouseEnter={() => setHover(d.iso)}
-                    onMouseLeave={() => setHover(null)}
-                    style={{
-                      default: { cursor: "pointer" },
-                      hover: { cursor: "pointer" },
-                      pressed: { cursor: "pointer" },
-                    }}
-                  >
-                    <circle
-                      r={hover === d.iso ? 7 : 4}
-                      fill="#38bdf8"
-                      stroke="#fff"
-                      strokeWidth={1.5}
-                      style={{ transition: "r 0.2s" }}
-                    />
-                    <circle r={10} fill="#38bdf8" opacity={0.25}>
-                      <animate
-                        attributeName="r"
-                        from="6"
-                        to="14"
-                        dur="2s"
-                        begin="0s"
-                        repeatCount="indefinite"
-                      />
-                      <animate
-                        attributeName="opacity"
-                        from="0.5"
-                        to="0"
-                        dur="2s"
-                        begin="0s"
-                        repeatCount="indefinite"
-                      />
-                    </circle>
-                  </Marker>
-                );
-              })}
-            </ComposableMap>
+                      <circle r={10} fill="#38bdf8" opacity={0.25}>
+                        <animate
+                          attributeName="r"
+                          from="6"
+                          to="14"
+                          dur="2s"
+                          begin="0s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="opacity"
+                          from="0.5"
+                          to="0"
+                          dur="2s"
+                          begin="0s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                    </Marker>
+                  );
+                })}
+              </ComposableMap>
             )}
           </div>
 
@@ -206,13 +205,7 @@ export function WorldMap() {
   );
 }
 
-function DossierModal({
-  dest,
-  onClose,
-}: {
-  dest: DestinationDetail;
-  onClose: () => void;
-}) {
+function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -245,9 +238,7 @@ function DossierModal({
               </div>
               <div className="mt-3 flex items-end gap-4">
                 <span className="text-6xl">{dest.flag}</span>
-                <h3 className="font-display text-4xl font-extrabold leading-none">
-                  {dest.name}
-                </h3>
+                <h3 className="font-display text-4xl font-extrabold leading-none">{dest.name}</h3>
               </div>
               <p className="mt-3 text-sm italic text-white/80">{dest.tagline}</p>
             </div>
@@ -263,15 +254,17 @@ function DossierModal({
               <X className="h-4 w-4" />
             </button>
 
-            <p className="text-[15px] leading-relaxed text-muted-foreground">
-              {dest.blurb}
-            </p>
+            <p className="text-[15px] leading-relaxed text-muted-foreground">{dest.blurb}</p>
 
             {/* quick facts */}
             <div className="mt-6 grid grid-cols-2 gap-3">
               <Fact icon={<Calendar className="h-4 w-4" />} label="Intake" value={dest.intake} />
               <Fact icon={<Wallet className="h-4 w-4" />} label="Cost" value={dest.avgCost} />
-              <Fact icon={<Languages className="h-4 w-4" />} label="Language" value={dest.language} />
+              <Fact
+                icon={<Languages className="h-4 w-4" />}
+                label="Language"
+                value={dest.language}
+              />
               <Fact icon={<Stamp className="h-4 w-4" />} label="Visa" value={dest.visaNote} />
             </div>
 
@@ -282,10 +275,7 @@ function DossierModal({
               </div>
               <ul className="mt-3 grid grid-cols-1 gap-2">
                 {dest.highlights.map((h) => (
-                  <li
-                    key={h}
-                    className="flex items-start gap-2 text-sm text-foreground"
-                  >
+                  <li key={h} className="flex items-start gap-2 text-sm text-foreground">
                     <span className="mt-2 inline-block h-1 w-3 flex-shrink-0 bg-sky" />
                     {h}
                   </li>
@@ -332,15 +322,7 @@ function DossierModal({
   );
 }
 
-function Fact({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border bg-secondary/40 p-3">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">

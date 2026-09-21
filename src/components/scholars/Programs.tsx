@@ -13,7 +13,8 @@ export function Programs() {
             Choose Your Path to the World
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
-            Whether you're chasing full scholarships or standard admission, we have a structured, mentor-led program built around your goals.
+            Whether you're chasing full scholarships or standard admission, we have a structured,
+            mentor-led program built around your goals.
           </p>
         </Reveal>
 
@@ -40,15 +41,21 @@ export function Programs() {
                 <div className="mt-6">
                   <ScholarIcon
                     name={p.icon}
-                    className={`h-14 w-14 ${p.featured ? "text-gold" : "text-sky-deep"}`}
+                    className={`h-14 w-14 ${p.featured ? "text-white" : "text-sky-deep"}`}
                     strokeWidth={1.5}
                   />
                 </div>
-                <h3 className={`mt-4 font-display text-2xl font-extrabold ${p.featured ? "text-white" : "text-navy"}`}>
+                <h3
+                  className={`mt-4 font-display text-2xl font-extrabold ${p.featured ? "text-white" : "text-navy"}`}
+                >
                   {p.title}
                 </h3>
-                <p className={`mt-2 text-sm ${p.featured ? "text-white/50" : "text-slate-500"}`}>{p.price}</p>
-                <p className={`mt-5 text-[15px] leading-relaxed ${p.featured ? "text-white/80" : "text-slate-600"}`}>
+                <p className={`mt-2 text-sm ${p.featured ? "text-white/50" : "text-slate-500"}`}>
+                  {p.price}
+                </p>
+                <p
+                  className={`mt-5 text-[15px] leading-relaxed ${p.featured ? "text-white/80" : "text-slate-600"}`}
+                >
                   {p.description}
                 </p>
                 <ul className="mt-6 space-y-3">

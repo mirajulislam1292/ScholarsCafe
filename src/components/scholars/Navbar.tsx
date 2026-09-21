@@ -39,14 +39,21 @@ export function Navbar() {
           <button type="button" onClick={scrollToTop} className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy text-white">
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                <path d="M12 2L3 7v6c0 5 4 8 9 9 5-1 9-4 9-9V7l-9-5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                <path d="M8 11l3 3 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path
+                  d="M12 2L3 7v6c0 5 4 8 9 9 5-1 9-4 9-9V7l-9-5z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8 11l3 3 5-6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
-            <span className="font-display text-xl font-extrabold">
-              <span className={scrolled ? "text-navy" : "text-white"}>Scholars</span>
-              <span className="text-sky"> Cafe</span>
-            </span>
           </button>
 
           <nav className="hidden items-center gap-7 lg:flex">
@@ -96,7 +103,9 @@ export function Navbar() {
               <button onClick={scrollToTop} className="font-display text-2xl text-white">
                 Scholars <span className="text-sky">Cafe</span>
               </button>
-              <button onClick={() => setOpen(false)} aria-label="Close" className="text-white"><X className="h-7 w-7" /></button>
+              <button onClick={() => setOpen(false)} aria-label="Close" className="text-white">
+                <X className="h-7 w-7" />
+              </button>
             </div>
             <nav className="mt-12 flex flex-col gap-6">
               {NAV.map((item, i) => (
@@ -114,8 +123,22 @@ export function Navbar() {
               ))}
             </nav>
             <div className="absolute inset-x-6 bottom-10 flex gap-3">
-              <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-full bg-whatsapp py-3 text-center font-semibold text-white">WhatsApp</a>
-              <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-full bg-sky py-3 text-center font-semibold text-white">Book Call</a>
+              <a
+                href={WA_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 rounded-full bg-whatsapp py-3 text-center font-semibold text-white"
+              >
+                WhatsApp
+              </a>
+              <a
+                href={WA_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 rounded-full bg-sky py-3 text-center font-semibold text-white"
+              >
+                Book Call
+              </a>
             </div>
           </motion.div>
         )}

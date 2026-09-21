@@ -22,9 +22,9 @@ export function Destinations() {
               </h2>
             </div>
             <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              Our deepest expertise is the USA, where Bangladeshi students consistently
-              earn need-based scholarships at top liberal arts colleges. We also support
-              applications across Europe, Asia, and beyond.
+              Our deepest expertise is the USA, where Bangladeshi students consistently earn
+              need-based scholarships at top liberal arts colleges. We also support applications
+              across Europe, Asia, and beyond.
             </p>
           </div>
         </Reveal>
@@ -39,9 +39,6 @@ export function Destinations() {
           >
             <div className="flex flex-col justify-between gap-8">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
-                  ★ Primary focus
-                </div>
                 <div className="mt-6 text-8xl md:text-9xl">{featured.flag}</div>
               </div>
               <div className="font-display text-5xl font-extrabold md:text-6xl">
@@ -50,12 +47,9 @@ export function Destinations() {
             </div>
             <div className="flex flex-col justify-between gap-8 border-t border-white/15 pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-light">
-                  {featured.tag}
-                </div>
                 <p className="mt-4 text-2xl font-light leading-snug text-white/85 md:text-3xl">
-                  {featured.note}. We've built our practice around helping Bangladeshi
-                  students unlock 50–100% need-based aid at top US universities.
+                  {featured.note}. We've built our practice around helping Bangladeshi students
+                  unlock 50–100% need-based aid at top US universities.
                 </p>
               </div>
               <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-sky-light">
@@ -75,11 +69,9 @@ export function Destinations() {
                   <span className="text-4xl">{c.flag}</span>
                   <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                 </div>
-                <h3 className="mt-8 font-display text-xl font-bold text-foreground">
-                  {c.name}
-                </h3>
+                <h3 className="mt-8 font-display text-xl font-bold text-foreground">{c.name}</h3>
                 <div className="mt-2 text-[13px] text-muted-foreground">{c.note}</div>
-                <div className="mt-5 inline-block border-t border-sky pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky">
+                <div className="mt-5 inline-block border-t border-border pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-deep">
                   {c.tag}
                 </div>
               </div>
