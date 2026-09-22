@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 
-export function CountUp({ end, suffix = "", duration = 2000, text }: { end: number; suffix?: string; duration?: number; text?: string }) {
+export function CountUp({
+  end,
+  suffix = "",
+  duration = 2000,
+  text,
+}: {
+  end: number;
+  suffix?: string;
+  duration?: number;
+  text?: string;
+}) {
   const [val, setVal] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const started = useRef(false);
@@ -24,7 +34,7 @@ export function CountUp({ end, suffix = "", duration = 2000, text }: { end: numb
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
     obs.observe(node);
     return () => obs.disconnect();

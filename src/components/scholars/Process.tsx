@@ -1,18 +1,27 @@
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import { PROCESS } from "@/lib/scholars-data";
+import { PROCESS as CMS_DEFAULT_PROCESS } from "@/lib/scholars-data";
 import { ScholarIcon } from "./ScholarIcon";
 
 export function Process() {
+  const PROCESS = useCmsValue("data.PROCESS", CMS_DEFAULT_PROCESS);
+
   return (
     <section className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">How It Works</span>
+          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+            <CmsText id="Process.c1879525c75c">How It Works</CmsText>
+          </span>
           <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
-            From conversation to acceptance.
+            <CmsText id="Process.0de600876bfd">From conversation to acceptance.</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
-            A six-step path designed to take the chaos out of admissions and replace it with structure, strategy, and momentum.
+            <CmsText id="Process.a5a96a06b61f">
+              A six-step path designed to take the chaos out of admissions and replace it with
+              structure, strategy, and momentum.
+            </CmsText>
           </p>
         </Reveal>
 
@@ -23,13 +32,20 @@ export function Process() {
           <RevealStagger className="space-y-10 md:space-y-16">
             {PROCESS.map((step, i) => (
               <StaggerItem key={step.n}>
-                <div className={`relative flex flex-col gap-6 md:grid md:grid-cols-2 md:items-center md:gap-12 ${i % 2 === 1 ? "md:[direction:rtl]" : ""}`}>
-                  <div className={`md:[direction:ltr] ${i % 2 === 1 ? "md:text-right" : "md:text-left"} pl-20 md:pl-0`}>
+                <div
+                  className={`relative flex flex-col gap-6 md:grid md:grid-cols-2 md:items-center md:gap-12 ${i % 2 === 1 ? "md:[direction:rtl]" : ""}`}
+                >
+                  <div
+                    className={`md:[direction:ltr] ${i % 2 === 1 ? "md:text-right" : "md:text-left"} pl-20 md:pl-0`}
+                  >
                     <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-sky-tint text-sky-deep">
                       <ScholarIcon name={step.icon} className="h-6 w-6" />
                     </div>
                     <h3 className="mt-3 font-display text-xl font-bold text-navy">
-                      Step {step.n}: {step.title}
+                      <CmsText id="Process.8e6a6cca7aae">Step </CmsText>
+                      {step.n}
+                      <CmsText id="Process.e7ac0786668e">: </CmsText>
+                      {step.title}
                     </h3>
                     <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{step.desc}</p>
                   </div>
@@ -48,3 +64,5 @@ export function Process() {
     </section>
   );
 }
+
+const PROCESS = CMS_DEFAULT_PROCESS;

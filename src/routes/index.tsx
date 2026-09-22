@@ -12,6 +12,7 @@ import { SuccessStories } from "@/components/scholars/SuccessStories";
 import { FAQ } from "@/components/scholars/FAQ";
 import { About } from "@/components/scholars/About";
 import { Resources } from "@/components/scholars/Resources";
+import { BlogPosts } from "@/components/scholars/BlogPosts";
 import { Newsletter } from "@/components/scholars/Newsletter";
 import { Contact } from "@/components/scholars/Contact";
 import { Footer } from "@/components/scholars/Footer";
@@ -37,6 +38,7 @@ function Index() {
         <FAQ />
         <About />
         <Resources />
+        <BlogPosts />
         <Newsletter />
         <Contact />
       </main>

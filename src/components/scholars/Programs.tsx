@@ -1,26 +1,40 @@
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import { PROGRAMS, WA_LINK } from "@/lib/scholars-data";
+import { PROGRAMS as DEFAULT_PROGRAMS, WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import { useCmsCollection } from "@/lib/cms";
 import { Check, ArrowRight, Star } from "lucide-react";
 import { ScholarIcon } from "./ScholarIcon";
 
 export function Programs() {
+  const PROGRAMS = useCmsCollection(
+    "courses",
+    DEFAULT_PROGRAMS,
+    (data, id) => ({ ...data, id, icon: "graduation-cap" }) as (typeof DEFAULT_PROGRAMS)[number],
+  );
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <section id="programs" className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">Our Tracks</span>
+          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+            <CmsText id="Programs.1d5c2e2d47ce">Our Tracks</CmsText>
+          </span>
           <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
-            Choose Your Path to the World
+            <CmsText id="Programs.e2cd5f83037c">Choose Your Path to the World</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
-            Whether you're chasing full scholarships or standard admission, we have a structured,
-            mentor-led program built around your goals.
+            <CmsText id="Programs.f664216f2985">
+              Whether you're chasing full scholarships or standard admission, we have a structured,
+              mentor-led program built around your goals.
+            </CmsText>
           </p>
         </Reveal>
 
-        <RevealStagger className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <RevealStagger className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
           {PROGRAMS.map((p) => (
-            <StaggerItem key={p.id} className="last:md:col-span-2 last:lg:col-span-1">
+            <StaggerItem key={p.id} className="min-w-0">
               <div
                 className={`relative flex h-full flex-col rounded-3xl p-9 transition-all duration-300 hover:-translate-y-2 ${
                   p.featured
@@ -92,3 +106,5 @@ export function Programs() {
     </section>
   );
 }
+
+const WA_LINK = CMS_DEFAULT_WA_LINK;

@@ -1,9 +1,12 @@
+import {useCmsLookup} from "@/lib/cms";
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { WA_LINK } from "@/lib/scholars-data";
+import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 
-const NAV = [
+const DEFAULT_NAV = [
   { label: "Home", href: "#top" },
   { label: "Programs", href: "#programs" },
   { label: "Destinations", href: "#destinations" },
@@ -14,6 +17,11 @@ const NAV = [
 ];
 
 export function Navbar() {
+ const cmsLabel = useCmsLookup();
+
+  const NAV = useCmsValue("local.NAV", DEFAULT_NAV);
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -39,7 +47,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={scrollToTop}
-            aria-label="Scholars Cafe home"
+            aria-label={cmsLabel("Navbar.label.7f7e5d138281","Scholars Cafe home")}
             className="flex items-center gap-2"
           >
             <span className="brand-mark" aria-hidden="true" />
@@ -67,11 +75,12 @@ export function Navbar() {
               rel="noopener noreferrer"
               className="hidden items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button md:inline-flex"
             >
-              <Phone className="h-4 w-4" /> Book a Free Call
+              <Phone className="h-4 w-4" />
+              <CmsText id="Navbar.33b0f3e06600"> Book a Free Call</CmsText>
             </a>
             <button
               onClick={() => setOpen(true)}
-              aria-label="Menu"
+              aria-label={cmsLabel("Navbar.label.99af6606ff9d","Menu")}
               className="mobile-menu-toggle lg:hidden"
             >
               <Menu className="h-6 w-6" />
@@ -90,9 +99,12 @@ export function Navbar() {
           >
             <div className="flex items-center justify-between">
               <button onClick={scrollToTop} className="font-display text-2xl text-white">
-                Scholars <span className="text-sky">Cafe</span>
+                <CmsText id="Navbar.05d3d9ddab08">Scholars </CmsText>
+                <span className="text-sky">
+                  <CmsText id="Navbar.0d5f2e74a9f6">Cafe</CmsText>
+                </span>
               </button>
-              <button onClick={() => setOpen(false)} aria-label="Close" className="text-white">
+              <button onClick={() => setOpen(false)} aria-label={cmsLabel("Navbar.label.7d9eb7acb13e","Close")} className="text-white">
                 <X className="h-7 w-7" />
               </button>
             </div>
@@ -118,7 +130,7 @@ export function Navbar() {
                 rel="noopener noreferrer"
                 className="flex-1 rounded-full bg-whatsapp py-3 text-center font-semibold text-white"
               >
-                WhatsApp
+                <CmsText id="Navbar.6a40edf1fc87">WhatsApp</CmsText>
               </a>
               <a
                 href={WA_LINK}
@@ -126,7 +138,7 @@ export function Navbar() {
                 rel="noopener noreferrer"
                 className="flex-1 rounded-full bg-sky py-3 text-center font-semibold text-white"
               >
-                Book Call
+                <CmsText id="Navbar.b2151df99763">Book Call</CmsText>
               </a>
             </div>
           </motion.div>
@@ -135,3 +147,5 @@ export function Navbar() {
     </>
   );
 }
+
+const WA_LINK = CMS_DEFAULT_WA_LINK;

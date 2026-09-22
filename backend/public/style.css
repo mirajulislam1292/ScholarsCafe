@@ -1,0 +1,278 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #263f5d;
+  background: #edf7fd;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button,
+a,
+input,
+textarea,
+select {
+  outline-offset: 4px;
+}
+button,
+.primary {
+  cursor: pointer;
+  border: 1px solid #c0e6fd;
+  border-radius: 9px;
+  padding: 11px 17px;
+  background: white;
+  color: #3f6593;
+  text-decoration: none;
+  font-weight: 600;
+}
+button:hover {
+  background: #e5f3fc;
+}
+.primary {
+  background: #3f6593;
+  color: white;
+  border-color: #3f6593;
+  display: inline-block;
+}
+h1,
+h2 {
+  letter-spacing: -0.04em;
+}
+h1 {
+  font-size: 36px;
+  margin: 5px 0 24px;
+}
+h2 {
+  font-size: 24px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+  color: #496b90;
+}
+.brand {
+  font-weight: 900;
+  font-size: 22px;
+  display: flex;
+  gap: 13px;
+  align-items: center;
+}
+.brand span {
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+.login {
+  max-width: 630px;
+  margin: 12vh auto;
+  padding: 40px;
+}
+.login h1 {
+  font-size: 60px;
+  line-height: 1.1;
+  margin-top: 30px;
+}
+.login p {
+  line-height: 1.7;
+}
+.login .primary {
+  margin: 24px 0;
+}
+.muted {
+  color: #496b90;
+  font-size: 13px;
+}
+aside {
+  width: 240px;
+  position: fixed;
+  height: 100vh;
+  padding: 32px 22px;
+  background: #fff;
+  border-right: 1px solid #c0e6fd;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+nav {
+  display: grid;
+  gap: 6px;
+}
+nav button {
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: #496b90;
+}
+nav button.active {
+  color: #3f6593;
+  background: #c0e6fd;
+}
+.site-link {
+  margin-top: auto;
+  color: #3f6593;
+  font-size: 13px;
+}
+main {
+  margin-left: 240px;
+  padding: 45px;
+  max-width: 1450px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+#identity {
+  font-size: 12px;
+  color: #496b90;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+.card {
+  background: white;
+  border: 1px solid #c0e6fd;
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 18px;
+}
+.card strong {
+  font-size: 32px;
+  display: block;
+  margin: 16px 0;
+}
+.toolbar,
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.toolbar {
+  justify-content: space-between;
+  margin: 18px 0;
+}
+.row {
+  justify-content: space-between;
+  border-bottom: 1px solid #e5f3fc;
+  padding: 16px 0;
+}
+.badge {
+  font-size: 11px;
+  background: #c0e6fd;
+  color: #3f6593;
+  padding: 5px 9px;
+  border-radius: 100px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 18px 0 8px;
+}
+input,
+textarea,
+select {
+  display: block;
+  width: 100%;
+  border: 1px solid #80aad3;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  color: #263f5d;
+}
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+input[type="checkbox"] {
+  width: auto;
+  display: inline-block;
+  margin-right: 8px;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.error {
+  color: #a12e27;
+}
+#notice {
+  min-height: 20px;
+}
+.body-field {
+  min-height: 320px;
+}
+.empty {
+  padding: 35px;
+  text-align: center;
+  color: #496b90;
+}
+details {
+  padding: 14px 0;
+  border-bottom: 1px solid #c0e6fd;
+}
+summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+td,
+th {
+  text-align: left;
+  padding: 13px;
+  border-bottom: 1px solid #c0e6fd;
+  word-break: break-word;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 800px) {
+  aside {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 20px;
+  }
+  nav {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  main {
+    margin: 0;
+    padding: 22px;
+  }
+  header {
+    display: block;
+  }
+  .login h1 {
+    font-size: 42px;
+  }
+  .login {
+    margin: 4vh auto;
+  }
+  table {
+    font-size: 11px;
+  }
+}

@@ -1,10 +1,13 @@
+import { useCmsValue } from "@/lib/cms";
 import { Reveal } from "./Reveal";
 import { CountUp } from "./CountUp";
-import { STATS } from "@/lib/scholars-data";
+import { STATS as CMS_DEFAULT_STATS } from "@/lib/scholars-data";
 
 export function Stats() {
+  const STATS = useCmsValue("data.STATS", CMS_DEFAULT_STATS);
+
   return (
-    <section className="light-panel bg-sky-soft py-20 md:py-28">
+    <section className="brand-stats light-panel bg-sky-soft py-20 md:py-28">
       <div className="mx-auto max-w-[1320px] px-5 md:px-10">
         <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4 md:gap-x-12">
           {STATS.map((s, i) => (
@@ -25,3 +28,5 @@ export function Stats() {
     </section>
   );
 }
+
+const STATS = CMS_DEFAULT_STATS;

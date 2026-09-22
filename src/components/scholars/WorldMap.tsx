@@ -1,3 +1,6 @@
+import {useCmsLookup} from "@/lib/cms";
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import { motion, AnimatePresence } from "motion/react";
@@ -11,8 +14,8 @@ import {
   Stamp,
   ArrowUpRight,
 } from "lucide-react";
-import { DESTINATIONS, ISO_TO_DESTINATION, type DestinationDetail } from "@/lib/destinations-data";
-import { WA_LINK } from "@/lib/scholars-data";
+import { DESTINATIONS as DEFAULT_DESTINATIONS, type DestinationDetail } from "@/lib/destinations-data";
+import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -33,6 +36,12 @@ const MARKERS: Record<string, [number, number]> = {
 };
 
 export function WorldMap() {
+ const cmsLabel = useCmsLookup();
+
+  const DESTINATIONS = useCmsValue("destinations", DEFAULT_DESTINATIONS);
+  const ISO_TO_DESTINATION = Object.fromEntries(DESTINATIONS.map(d => [d.iso, d]));
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   const [active, setActive] = useState<DestinationDetail | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -41,7 +50,7 @@ export function WorldMap() {
   return (
     <section
       id="world-map"
-      aria-label="Study destinations map"
+      aria-label={cmsLabel("WorldMap.label.10908df5c8b9","Study destinations map")}
       className="light-panel world-section relative overflow-hidden bg-sky-soft py-24 md:py-32"
     >
       {/* atmospheric grid */}
@@ -178,6 +187,10 @@ export function WorldMap() {
 }
 
 function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () => void }) {
+ const cmsLabel = useCmsLookup();
+
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -221,7 +234,7 @@ function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () 
             <button
               onClick={onClose}
               className="absolute right-5 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-muted"
-              aria-label="Close"
+              aria-label={cmsLabel("WorldMap.label.7d9eb7acb13e","Close")}
             >
               <X className="h-4 w-4" />
             </button>
@@ -230,20 +243,20 @@ function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () 
 
             {/* quick facts */}
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Fact icon={<Calendar className="h-4 w-4" />} label="Intake" value={dest.intake} />
-              <Fact icon={<Wallet className="h-4 w-4" />} label="Cost" value={dest.avgCost} />
+              <Fact icon={<Calendar className="h-4 w-4" />} label={cmsLabel("WorldMap.label.6b627d1cb766","Intake")} value={dest.intake} />
+              <Fact icon={<Wallet className="h-4 w-4" />} label={cmsLabel("WorldMap.label.204a5eb2cd28","Cost")} value={dest.avgCost} />
               <Fact
                 icon={<Languages className="h-4 w-4" />}
-                label="Language"
+                label={cmsLabel("WorldMap.label.a4fe65264ef7","Language")}
                 value={dest.language}
               />
-              <Fact icon={<Stamp className="h-4 w-4" />} label="Visa" value={dest.visaNote} />
+              <Fact icon={<Stamp className="h-4 w-4" />} label={cmsLabel("WorldMap.label.a725bda1f33e","Visa")} value={dest.visaNote} />
             </div>
 
             {/* what we cover */}
             <div className="mt-6">
               <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky">
-                What we handle
+                <CmsText id="WorldMap.fb3d81a82385">What we handle</CmsText>
               </div>
               <ul className="mt-3 grid grid-cols-1 gap-2">
                 {dest.highlights.map((h) => (
@@ -258,7 +271,7 @@ function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () 
             {/* universities */}
             <div className="mt-6">
               <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky">
-                Notable universities
+                <CmsText id="WorldMap.bbb77a237ffd">Notable universities</CmsText>
               </div>
               <ul className="mt-3 divide-y divide-border">
                 {dest.universities.map((u) => (
@@ -269,7 +282,9 @@ function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () 
                       <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3" />
                         {u.city}
-                        <span>·</span>
+                        <span>
+                          <CmsText id="WorldMap.a137f17a19a0">·</CmsText>
+                        </span>
                         <span>{u.highlight}</span>
                       </div>
                     </div>
@@ -284,7 +299,9 @@ function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () 
               rel="noopener noreferrer"
               className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky px-6 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
             >
-              Plan my {dest.name} application
+              <CmsText id="WorldMap.3ce3ad639329">Plan my </CmsText>
+              {dest.name}
+              <CmsText id="WorldMap.1fe289205936"> application</CmsText>
               <ArrowUpRight className="h-4 w-4" />
             </a>
           </div>
@@ -295,6 +312,8 @@ function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () 
 }
 
 function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <div className="rounded-xl border border-border bg-secondary/40 p-3">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -305,3 +324,5 @@ function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; va
     </div>
   );
 }
+
+const WA_LINK = CMS_DEFAULT_WA_LINK;

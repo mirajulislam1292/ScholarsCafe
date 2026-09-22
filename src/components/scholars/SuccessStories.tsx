@@ -1,29 +1,58 @@
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import { TESTIMONIALS, WA_LINK } from "@/lib/scholars-data";
+import {
+  TESTIMONIALS as DEFAULT_TESTIMONIALS,
+  WA_LINK as CMS_DEFAULT_WA_LINK,
+} from "@/lib/scholars-data";
+import { useCmsCollection } from "@/lib/cms";
 import { Star } from "lucide-react";
 import { motion } from "motion/react";
 
 const SLIDE_INTERVAL = 6000;
 
 export function SuccessStories() {
+  const TESTIMONIALS = useCmsCollection(
+    "feedback",
+    [],
+    (data) => ({ ...data, color: "from-sky to-navy" }) as (typeof DEFAULT_TESTIMONIALS)[number],
+  );
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % TESTIMONIALS.length);
+      setActiveIndex((current) => (current + 1) % Math.max(1, TESTIMONIALS.length));
     }, SLIDE_INTERVAL);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [TESTIMONIALS.length]);
 
   const total = TESTIMONIALS.length;
+  if (!total)
+    return (
+      <section id="success" className="bg-sky-soft px-5 py-20 text-center">
+        <h2 className="font-display text-3xl font-bold text-navy">
+          <CmsText id="SuccessStories.empty.title">Your story starts with a conversation.</CmsText>
+        </h2>
+        <a
+          href={WA_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-7 inline-flex rounded-full bg-sky px-7 py-4 font-semibold text-white"
+        >
+          <CmsText id="SuccessStories.empty.cta">Talk to a mentor</CmsText>
+        </a>
+      </section>
+    );
   const leftIndex = (activeIndex - 1 + total) % total;
   const rightIndex = (activeIndex + 1) % total;
 
   const visibleTestimonials = [
     { testimonial: TESTIMONIALS[leftIndex], position: "left" as const },
-    { testimonial: TESTIMONIALS[activeIndex], position: "center" as const },
+    { testimonial: TESTIMONIALS[activeIndex % total], position: "center" as const },
     { testimonial: TESTIMONIALS[rightIndex], position: "right" as const },
   ];
 
@@ -32,14 +61,16 @@ export function SuccessStories() {
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
-            Student Wins
+            <CmsText id="SuccessStories.2ef2f8126cf5">Student Wins</CmsText>
           </span>
           <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy dark:text-white">
-            Real Students. Real Results.
+            <CmsText id="SuccessStories.e96a6c77cf3b">Real Students. Real Results.</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600 dark:text-white/70">
-            Every success story started with a conversation. Here's what happens when preparation
-            meets opportunity and the right guidance.
+            <CmsText id="SuccessStories.325bb7362969">
+              Every success story started with a conversation. Here's what happens when preparation
+              meets opportunity and the right guidance.
+            </CmsText>
           </p>
         </Reveal>
 
@@ -61,7 +92,9 @@ export function SuccessStories() {
                 } ${isSide ? "lg:mt-8" : ""}`}
               >
                 <div className="px-9">
-                  <div className="font-display text-6xl leading-none text-sky/15">"</div>
+                  <div className="font-display text-6xl leading-none text-sky/15">
+                    <CmsText id="SuccessStories.8a331fdde703">"</CmsText>
+                  </div>
                   <p className="mt-2 text-[15px] italic leading-[1.85] text-slate-600 dark:text-white/75">
                     {testimonial.quote}
                   </p>
@@ -98,17 +131,21 @@ export function SuccessStories() {
         </div>
 
         <Reveal className="mt-12 text-center">
-          <p className="text-slate-600 dark:text-white/70">Your success story is next.</p>
+          <p className="text-slate-600 dark:text-white/70">
+            <CmsText id="SuccessStories.b9a500e1344f">Your success story is next.</CmsText>
+          </p>
           <a
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-7 py-3.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
           >
-            Book a Free Consultation →
+            <CmsText id="SuccessStories.fc4e64953206">Book a Free Consultation →</CmsText>
           </a>
         </Reveal>
       </div>
     </section>
   );
 }
+
+const WA_LINK = CMS_DEFAULT_WA_LINK;

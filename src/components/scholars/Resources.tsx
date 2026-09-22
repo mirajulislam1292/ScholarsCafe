@@ -1,12 +1,24 @@
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { useState } from "react";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import { RESOURCES, RESOURCE_CATEGORIES, type ResourceCategory } from "@/lib/scholars-data";
+import {
+  RESOURCES as CMS_DEFAULT_RESOURCES,
+  RESOURCE_CATEGORIES as CMS_DEFAULT_RESOURCE_CATEGORIES,
+  type ResourceCategory,
+} from "@/lib/scholars-data";
 import { ArrowUpRight, Clock } from "lucide-react";
 import { ScholarIcon } from "./ScholarIcon";
 
 type Filter = "All" | ResourceCategory;
 
 export function Resources() {
+  const RESOURCES = useCmsValue("data.RESOURCES", CMS_DEFAULT_RESOURCES);
+  const RESOURCE_CATEGORIES = useCmsValue(
+    "data.RESOURCE_CATEGORIES",
+    CMS_DEFAULT_RESOURCE_CATEGORIES,
+  );
+
   const [filter, setFilter] = useState<Filter>("All");
 
   const featured = RESOURCES.filter((r) => r.featured);
@@ -20,18 +32,22 @@ export function Resources() {
         <Reveal>
           <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
             <div>
-              <span className="kicker">Knowledge Hub · Always free</span>
+              <span className="kicker">
+                <CmsText id="Resources.4ee5e471de2b">Knowledge Hub · Always free</CmsText>
+              </span>
               <h2 className="mt-5 editorial-h2">
-                Every guide we wish we had
+                <CmsText id="Resources.bfa3e8d52c73">Every guide we wish we had</CmsText>
                 <br />
                 <span className="font-display italic font-light text-sky">
-                  when we were applying.
+                  <CmsText id="Resources.54ec7866ea80">when we were applying.</CmsText>
                 </span>
               </h2>
             </div>
             <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              Information shouldn't be locked behind a paywall. Every guide, checklist, and
-              breakdown below is free. No email required, no upsell.
+              <CmsText id="Resources.89cf27a56028">
+                Information shouldn't be locked behind a paywall. Every guide, checklist, and
+                breakdown below is free. No email required, no upsell.
+              </CmsText>
             </p>
           </div>
         </Reveal>
@@ -47,7 +63,8 @@ export function Resources() {
                 >
                   <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
                     <span className="h-px w-8 bg-gold" />
-                    Featured · {r.category}
+                    <CmsText id="Resources.2c8f9493f691">Featured · </CmsText>
+                    {r.category}
                   </div>
                   <h3 className="mt-8 font-display text-3xl font-extrabold leading-tight md:text-4xl">
                     {r.title}
@@ -61,7 +78,7 @@ export function Resources() {
                       {r.readTime}
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-light">
-                      Read guide
+                      <CmsText id="Resources.e103ed64a00f">Read guide</CmsText>
                       <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
                     </span>
                   </div>
@@ -75,7 +92,7 @@ export function Resources() {
         <Reveal>
           <div className="mt-16 flex flex-wrap items-center gap-2 border-y border-border py-5">
             <span className="mr-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Filter
+              <CmsText id="Resources.638e249f4a15">Filter</CmsText>
             </span>
             {(["All", ...RESOURCE_CATEGORIES.map((c) => c.id)] as Filter[]).map((c) => (
               <button
@@ -128,17 +145,20 @@ export function Resources() {
         </RevealStagger>
 
         <Reveal className="mt-16 text-center text-sm text-muted-foreground">
-          New guides every month ·{" "}
+          <CmsText id="Resources.5e5750c4e2c3">New guides every month ·</CmsText>{" "}
           <a
             className="font-semibold text-sky hover:underline"
             href="https://www.instagram.com/scholars_cafe_/"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Follow @scholars_cafe_ for weekly tips →
+            <CmsText id="Resources.9a06fcc0a8ce">Follow @scholars_cafe_ for weekly tips →</CmsText>
           </a>
         </Reveal>
       </div>
     </section>
   );
 }
+
+const RESOURCES = CMS_DEFAULT_RESOURCES;
+const RESOURCE_CATEGORIES = CMS_DEFAULT_RESOURCE_CATEGORIES;

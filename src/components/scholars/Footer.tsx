@@ -1,4 +1,7 @@
-import { EMAIL, WA_LINK } from "@/lib/scholars-data";
+import {useCmsLookup} from "@/lib/cms";
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
+import { EMAIL as CMS_DEFAULT_EMAIL, WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { Facebook, Instagram, Linkedin, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -10,6 +13,11 @@ type LinkRef = {
 };
 
 export function Footer() {
+ const cmsLabel = useCmsLookup();
+
+  const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <footer className="border-t border-white/8 bg-navy-deep text-white">
       <div className="mx-auto max-w-[1280px] px-5 py-16 md:px-8">
@@ -18,12 +26,15 @@ export function Footer() {
             <Link to="/" className="flex items-center gap-2">
               <span className="brand-mark" aria-hidden="true" />
               <span className="footer-brand font-display text-xl font-extrabold">
-                Scholars Cafe
+                <CmsText id="Footer.c9db85fc4db0">ScholarsCafe</CmsText>
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/55">
-              Your gateway to global education. Scholars Cafe is Bangladesh's dedicated study abroad
-              consultancy, helping ambitious students reach their dream universities worldwide.
+              <CmsText id="Footer.ecef8dd200d7">
+                Your gateway to global education. Scholars Cafe is Bangladesh's dedicated study
+                abroad consultancy, helping ambitious students reach their dream universities
+                worldwide.
+              </CmsText>
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <FootIcon href="https://www.facebook.com/profile.php?id=61571394902795">
@@ -50,14 +61,14 @@ export function Footer() {
           </div>
 
           <Col
-            title="Programs"
+            title={cmsLabel("Footer.label.b6747064b2a6","Programs")}
             links={[
               { label: "General Admission Track", href: "/#programs" },
               { label: "File Opening Service", href: "/#programs" },
             ]}
           />
           <Col
-            title="Destinations"
+            title={cmsLabel("Footer.label.72eb63f032e4","Destinations")}
             links={[
               { label: "🇺🇸 USA (Primary)", href: "/#destinations" },
               { label: "🇬🇧 United Kingdom", href: "/#world-map" },
@@ -72,7 +83,7 @@ export function Footer() {
 
         <div className="mt-12 grid grid-cols-2 gap-10 border-t border-white/7 pt-10 md:grid-cols-4">
           <Col
-            title="Company"
+            title={cmsLabel("Footer.label.de4743c87973","Company")}
             links={[
               { label: "About Us", href: "/#about" },
               { label: "Success Stories", href: "/#stories" },
@@ -81,7 +92,7 @@ export function Footer() {
             ]}
           />
           <Col
-            title="Resources"
+            title={cmsLabel("Footer.label.e89b30aa1dc3","Resources")}
             links={[
               { label: "Knowledge Hub", href: "/#resources" },
               { label: "FAQ", href: "/#faq" },
@@ -89,7 +100,7 @@ export function Footer() {
             ]}
           />
           <Col
-            title="Support"
+            title={cmsLabel("Footer.label.be91940b79f4","Support")}
             links={[
               { label: "WhatsApp Support", href: WA_LINK, external: true },
               { label: "Email Support", href: `mailto:${EMAIL}`, external: true },
@@ -97,7 +108,7 @@ export function Footer() {
             ]}
           />
           <Col
-            title="Legal"
+            title={cmsLabel("Footer.label.4787eaf7c938","Legal")}
             links={[
               { label: "Privacy Policy", href: "/privacy", route: "/privacy" },
               { label: "Terms of Service", href: "/terms", route: "/terms" },
@@ -110,17 +121,21 @@ export function Footer() {
       <div className="border-t border-white/7">
         <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-3 px-5 py-7 text-[13px] text-white/40 md:flex-row md:px-8">
           <div className="flex items-center gap-1.5 text-[13px] text-white/40">
-            <span>© {new Date().getFullYear()} Scholars Cafe. All rights reserved.</span>
+            <span>
+              <CmsText id="Footer.0a79b0ca699d">© </CmsText>
+              {new Date().getFullYear()}
+              <CmsText id="Footer.284e1c10b562"> Scholars Cafe. All rights reserved.</CmsText>
+            </span>
           </div>
           <div className="flex gap-5">
             <Link to="/privacy" className="transition-colors hover:text-white">
-              Privacy
+              <CmsText id="Footer.54a57c3147c4">Privacy</CmsText>
             </Link>
             <Link to="/terms" className="transition-colors hover:text-white">
-              Terms
+              <CmsText id="Footer.ede548996483">Terms</CmsText>
             </Link>
             <Link to="/cookies" className="transition-colors hover:text-white">
-              Cookies
+              <CmsText id="Footer.141395eb3556">Cookies</CmsText>
             </Link>
           </div>
         </div>
@@ -130,6 +145,9 @@ export function Footer() {
 }
 
 function Col({ title, links }: { title: string; links: LinkRef[] }) {
+  const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <div>
       <div className="font-display text-sm font-bold uppercase tracking-wider text-white">
@@ -160,6 +178,9 @@ function Col({ title, links }: { title: string; links: LinkRef[] }) {
 }
 
 function FootIcon({ href, children }: { href: string; children: React.ReactNode }) {
+  const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   return (
     <a
       href={href}
@@ -171,3 +192,6 @@ function FootIcon({ href, children }: { href: string; children: React.ReactNode 
     </a>
   );
 }
+
+const EMAIL = CMS_DEFAULT_EMAIL;
+const WA_LINK = CMS_DEFAULT_WA_LINK;

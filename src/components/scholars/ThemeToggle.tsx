@@ -12,8 +12,7 @@ export function useTheme() {
       | "dark"
       | null;
     const prefersDark =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
+      typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
     const initial = stored ?? (prefersDark ? "dark" : "light");
     setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");

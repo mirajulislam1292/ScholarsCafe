@@ -1,8 +1,16 @@
+import { useCmsValue } from "@/lib/cms";
+import { CmsText } from "@/lib/cms";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import { COUNTRIES, WA_LINK } from "@/lib/scholars-data";
+import {
+  COUNTRIES as CMS_DEFAULT_COUNTRIES,
+  WA_LINK as CMS_DEFAULT_WA_LINK,
+} from "@/lib/scholars-data";
 import { ArrowUpRight } from "lucide-react";
 
 export function Destinations() {
+  const COUNTRIES = useCmsValue("data.COUNTRIES", CMS_DEFAULT_COUNTRIES);
+  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
+
   const featured = COUNTRIES.find((c) => c.featured)!;
   const others = COUNTRIES.filter((c) => !c.featured);
 
@@ -13,17 +21,19 @@ export function Destinations() {
           <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
             <div>
               <h2 className="mt-5 editorial-h2">
-                Choose a country.
+                <CmsText id="Destinations.18fd83ffc2f5">Choose a country.</CmsText>
                 <br />
                 <span className="font-display italic font-light text-sky">
-                  We'll handle the rest.
+                  <CmsText id="Destinations.3322dce1f6ff">We'll handle the rest.</CmsText>
                 </span>
               </h2>
             </div>
             <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              Our deepest expertise is the USA, where Bangladeshi students consistently earn
-              need-based scholarships at top liberal arts colleges. We also support applications
-              across Europe, Asia, and beyond.
+              <CmsText id="Destinations.5b7373cdefcb">
+                Our deepest expertise is the USA, where Bangladeshi students consistently earn
+                need-based scholarships at top liberal arts colleges. We also support applications
+                across Europe, Asia, and beyond.
+              </CmsText>
             </p>
           </div>
         </Reveal>
@@ -47,12 +57,15 @@ export function Destinations() {
             <div className="flex flex-col justify-between gap-8 border-t border-white/15 pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
               <div>
                 <p className="mt-4 text-2xl font-light leading-snug text-white/85 md:text-3xl">
-                  {featured.note}. We've built our practice around helping Bangladeshi students
-                  unlock 50–100% need-based aid at top US universities.
+                  {featured.note}
+                  <CmsText id="Destinations.86139d839425">
+                    . We've built our practice around helping Bangladeshi students unlock 50–100%
+                    need-based aid at top US universities.
+                  </CmsText>
                 </p>
               </div>
               <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-sky-light">
-                Explore USA pathway
+                <CmsText id="Destinations.6855b9eac5c4">Explore USA pathway</CmsText>
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
               </div>
             </div>
@@ -81,3 +94,6 @@ export function Destinations() {
     </section>
   );
 }
+
+const COUNTRIES = CMS_DEFAULT_COUNTRIES;
+const WA_LINK = CMS_DEFAULT_WA_LINK;

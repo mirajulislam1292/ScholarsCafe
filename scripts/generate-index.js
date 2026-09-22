@@ -13,7 +13,12 @@ async function generateIndexHtml() {
     throw new Error(`SSR render failed with status ${response.status}`);
   }
 
-  const html = await response.text();
+  // Literal NUL characters in serialized route IDs are replaced by the HTML parser.
+  // Preserve the JavaScript string value with an escape, so hydration IDs still match.
+  const html = (await response.text()).replace(/\u0000/g, "\\u0000");
+  if (!html.includes('id="top"') || !html.includes('id="programs"')) {
+    throw new Error("SSR did not produce the home page; refusing to publish an error page");
+  }
   writeFileSync(join(clientDir, "index.html"), html);
 
   // Hostinger's native Git deploy serves the configured `dist` directory,
