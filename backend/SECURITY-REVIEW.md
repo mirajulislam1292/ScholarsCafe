@@ -1,5 +1,14 @@
 # Security and branding review — 20 September 2026
 
+## Update — 23 September 2026
+
+- Added owner/admin-only public-image uploads with the existing session, origin and CSRF checks. Images are decoded, resized and re-encoded as WebP; metadata is removed. SVG and other file types are rejected. Upload size, pixel count, rate and a transactionally locked 100 MB library quota are bounded.
+- Images persist in MySQL, not a deployment directory. Public image URLs intentionally allow cross-origin use; private dashboard APIs do not. The UI warns against uploading private documents.
+- 20 backend tests pass. A local mocked dashboard test covers upload/save/publish; live health, public-content CORS and unauthenticated media denial were verified. The 39 published records were compared before/after deployment and were unchanged.
+- Actual owner Google login, a real live image upload and SMTP delivery still require owner-session verification. These tests are not an independent penetration test or a guarantee of zero vulnerabilities.
+
+The following is the historical review from the previous release:
+
 ## Changes
 
 - Applied the supplied #c0e6fd, #80aad3, #5b86b6, #3f6593 palette, with darker text and lighter surface shades for legibility. Website layout remains intact; the site now uses light surfaces instead of the previous forced dark theme.

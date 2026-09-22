@@ -13,7 +13,8 @@ The homepage uses a campus photograph with a slow zoom and pause control, not vi
 
 ## Deployment
 
-Main website: existing Hostinger Git auto-deployment from `main`.
-Admin: deploy the contents of `backend/` as a source archive to **admin.scholarscafe.com**, Node 22, Express, build `npm run build`, entry `server.js`. Exclude `.env`, dependencies and test files. Preserve all existing environment variables and the MySQL database. Schema additions are non-destructive; existing content seed records use `INSERT IGNORE`.
+Both websites use Hostinger Git auto-deployment from `main`.
+Main website: repository root, Vite, output `dist`.
+Admin: **admin.scholarscafe.com**, repository root directory **backend**, Node 22, Express, build script **build**, entry **server.js**. Do not change the entry to `app.js`: that exports the application factory and does not start the server. For any manual archive deployment, explicitly set `server.js` rather than relying on auto-detection. Exclude `.env`, dependencies and test files. Preserve all existing environment variables and the MySQL database. Schema additions are non-destructive; existing content seed records use `INSERT IGNORE`.
 
 Run `npm test` in `backend/` before deployment. The tests mock storage and identity; a signed-in owner should also verify a real upload/save/publish in the live dashboard.
