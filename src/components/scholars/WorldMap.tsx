@@ -41,42 +41,15 @@ export function WorldMap() {
   return (
     <section
       id="world-map"
-      className="relative overflow-hidden bg-[var(--navy-deep)] py-24 md:py-32"
+      aria-label="Study destinations map"
+      className="light-panel world-section relative overflow-hidden bg-sky-soft py-24 md:py-32"
     >
       {/* atmospheric grid */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
 
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-10">
-        <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
-          <div>
-            <span className="kicker text-sky-light">Interactive · 12 countries</span>
-            <h2 className="mt-5 editorial-h2 text-white">
-              The world,
-              <br />
-              <span className="font-display italic font-light text-sky-light">
-                at your fingertips.
-              </span>
-            </h2>
-          </div>
-          <p className="max-w-md text-[15px] leading-relaxed text-white/65">
-            Hover the map. Click a glowing pin to open the country dossier. top universities,
-            scholarships, intake calendar, and visa notes.
-          </p>
-        </div>
-
-        <div className="mt-12 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] p-6 shadow-2xl md:hidden">
-          <div className="kicker text-sky-light">Mobile view</div>
-          <h3 className="mt-4 font-display text-3xl font-extrabold text-white">
-            Explore destinations without clipping.
-          </h3>
-          <p className="mt-3 text-sm leading-relaxed text-white/70">
-            The interactive world map is available on larger screens. On mobile, use the country
-            chips below to open each destination dossier.
-          </p>
-        </div>
-
         {/* the map */}
-        <div className="relative mt-12 hidden overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] shadow-2xl md:block">
+        <div className="relative mt-12 hidden overflow-hidden rounded-[28px] border border-white/10 bg-white shadow-2xl md:block">
           <div className="aspect-[16/9] w-full">
             {mounted && (
               <ComposableMap
@@ -108,9 +81,9 @@ export function WorldMap() {
                                 : isActive
                                   ? hover === iso
                                     ? "#0ea5e9"
-                                    : "#1e3a6b"
-                                  : "#13294b",
-                              stroke: "#07142a",
+                                    : "#80aad3"
+                                  : "#e2e8f0",
+                              stroke: "#ffffff",
                               strokeWidth: 0.5,
                               outline: "none",
                               cursor: isActive || isBangladesh ? "pointer" : "default",
@@ -178,12 +151,6 @@ export function WorldMap() {
               </ComposableMap>
             )}
           </div>
-
-          {/* legend */}
-          <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/70 backdrop-blur">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-sky" />
-            Click a glowing pin
-          </div>
         </div>
 
         {/* country chip rail */}
@@ -229,14 +196,14 @@ function DossierModal({ dest, onClose }: { dest: DestinationDetail; onClose: () 
       >
         <div className="grid max-h-[92vh] grid-cols-1 overflow-y-auto md:grid-cols-[1.1fr_1fr]">
           {/* photo side */}
-          <div className="relative h-72 overflow-hidden md:h-auto md:min-h-[560px]">
+          <div className="dossier-photo relative h-72 overflow-hidden md:h-auto md:min-h-[560px]">
             <img
               src={dest.image}
               alt={dest.name}
               className="absolute inset-0 h-full w-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-black/45" />
             <div className="absolute inset-x-0 bottom-0 p-7 text-white">
               <div className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-light">
                 {dest.tag}

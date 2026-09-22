@@ -330,82 +330,256 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-/* ============ Dark mode overrides ============ */
-.dark {
-  --background: #060f1e;
-  --foreground: #e2e8f0;
-  --card: #0c1d3a;
-  --card-foreground: #e2e8f0;
-  --popover: #0c1d3a;
-  --popover-foreground: #e2e8f0;
-  --primary: #0ea5e9;
+/* One light brand system: white, pale sky, muted blue and navy ink. */
+:root {
+  --navy: #1b3554;
+  --navy-deep: #1b3554;
+  --midnight: #1b3554;
+  --steel: #3f6593;
+  --sky: #3f6593;
+  --sky-deep: #3f6593;
+  --sky-light: #c0e6fd;
+  --sky-tint: #c0e6fd;
+  --sky-soft: #f3f8fc;
+  --gold: #3f6593;
+  --gold-deep: #3f6593;
+  --whatsapp: #3f6593;
+  --success: #3f6593;
+  --background: #ffffff;
+  --foreground: #1b3554;
+  --card: #ffffff;
+  --card-foreground: #1b3554;
+  --popover: #ffffff;
+  --popover-foreground: #1b3554;
+  --primary: #3f6593;
   --primary-foreground: #ffffff;
-  --secondary: #0f2547;
-  --secondary-foreground: #e2e8f0;
-  --muted: #0f2547;
-  --muted-foreground: #94a3b8;
-  --accent: #0ea5e9;
-  --accent-foreground: #ffffff;
-  --border: #1e3a5f;
-  --input: #1e3a5f;
+  --secondary: #edf5fc;
+  --secondary-foreground: #1b3554;
+  --muted: #f3f8fc;
+  --muted-foreground: #465e78;
+  --accent: #c0e6fd;
+  --accent-foreground: #1b3554;
+  --border: #dbe5ee;
+  --input: #80aad3;
+  --ring: #3f6593;
+  --gradient-hero: #f3f8fc;
+  --gradient-dark: #edf5fc;
+  --gradient-newsletter: #c0e6fd;
+  --gradient-card-hover: #edf5fc;
+  --gradient-gold: #3f6593;
+  --shadow-card: 0 4px 18px rgba(27, 53, 84, 0.05);
+  --shadow-card-hover: 0 12px 32px rgba(27, 53, 84, 0.1);
+  --shadow-button: 0 6px 18px rgba(63, 101, 147, 0.18);
 }
-
-.dark body {
-  background-color: var(--navy-deep);
-  color: #e2e8f0;
+html {
+  color-scheme: light;
+  background: white;
 }
-
-/* Override common hardcoded utility classes used across the site */
-.dark .bg-white {
-  background-color: #0c1d3a !important;
+body {
+  background: white;
+  color: var(--foreground);
 }
-.dark .bg-slate-50,
-.dark .bg-slate-100,
-.dark .bg-sky-soft,
-.dark .bg-sky-tint {
-  background-color: #0f2547 !important;
+section[id] {
+  scroll-margin-top: 80px;
 }
-.dark .bg-slate-900,
-.dark .bg-navy,
-.dark .bg-navy-deep {
-  background-color: #030813 !important;
+.brand-mark {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: #3f6593;
+  -webkit-mask: url("/brand-mark.png") center/contain no-repeat;
+  mask: url("/brand-mark.png") center/contain no-repeat;
 }
-
-.dark .text-navy,
-.dark .text-navy-deep,
-.dark .text-slate-900,
-.dark .text-slate-800,
-.dark .text-slate-700 {
-  color: #e2e8f0 !important;
+header,
+header.glass-nav {
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
 }
-.dark .text-slate-600,
-.dark .text-slate-500 {
-  color: #94a3b8 !important;
+header nav a,
+.mobile-menu-toggle {
+  color: var(--navy) !important;
 }
-.dark .text-slate-400 {
-  color: #64748b !important;
+header nav a:hover {
+  color: var(--sky) !important;
 }
-
-.dark .border-slate-100,
-.dark .border-slate-200,
-.dark .border-slate-300 {
-  border-color: #1e3a5f !important;
+.kicker {
+  display: none;
 }
-
-.dark .glass-nav {
-  background: rgba(6, 15, 30, 0.88) !important;
-  border-bottom-color: rgba(30, 58, 95, 0.5) !important;
+.country-grid {
+  background: var(--border);
 }
-
-.dark .shadow-card,
-.dark .shadow-card-hover,
-.dark .shadow-nav {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
+.country-feature,
+.light-panel,
+.bg-dark-gradient,
+.bg-newsletter-gradient {
+  color: var(--navy);
 }
-
+.country-feature {
+  background: #c0e6fd;
+}
+.light-panel span.bg-sky {
+  color: white;
+}
+:is(.country-feature, .light-panel, .bg-dark-gradient, .bg-newsletter-gradient)
+  [class*="text-white"] {
+  color: var(--navy);
+}
+:is(.country-feature, .light-panel, .bg-dark-gradient, .bg-newsletter-gradient)
+  [class*="text-sky-light"] {
+  color: var(--sky);
+}
+:is(.country-feature, .light-panel, .bg-dark-gradient, .bg-newsletter-gradient)
+  :is(a, button).bg-sky,
+:is(.country-feature, .light-panel, .bg-dark-gradient, .bg-newsletter-gradient) .bg-navy {
+  color: white;
+}
+:is(.light-panel, .bg-dark-gradient, .bg-newsletter-gradient) input {
+  color: var(--navy);
+}
+:is(.light-panel, .bg-dark-gradient, .bg-newsletter-gradient) input::placeholder {
+  color: #465e78;
+}
+:is(.light-panel, .bg-dark-gradient, .bg-newsletter-gradient) [class*="border-white"] {
+  border-color: #dbe5ee;
+}
+#resources a[class*="bg-gradient"] {
+  background: #c0e6fd;
+  color: var(--navy);
+}
+#resources a[class*="bg-gradient"] [class*="text-white"] {
+  color: var(--navy);
+}
+#about [class*="bg-gradient"],
+#success [class*="bg-gradient"] {
+  background: #3f6593;
+  color: white;
+}
+.world-section > .pointer-events-none {
+  display: none;
+}
+.world-section {
+  background-color: #f8fafc;
+  background-image:
+    linear-gradient(#d8dfe633 1px, transparent 1px),
+    linear-gradient(90deg, #d8dfe633 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.world-section .shadow-2xl {
+  box-shadow: var(--shadow-card);
+}
+.world-section .dossier-photo [class*="text-white"] {
+  color: white;
+}
+.world-section .dossier-photo [class*="text-sky-light"] {
+  color: #c0e6fd;
+}
+.world-section button[class*="bg-white"] {
+  background: white;
+  border-color: var(--border);
+}
+.hero-light {
+  background: #f3f8fc;
+}
+.mobile-panel [class*="text-white"] {
+  color: var(--navy);
+}
+.mobile-panel a.bg-sky,
+.mobile-panel a.bg-whatsapp {
+  color: white;
+}
+.hero-photo {
+  position: absolute;
+  top: 108px;
+  right: 24px;
+  width: 44%;
+  height: 640px;
+  border-radius: 24px;
+  overflow: hidden;
+}
+.hero-photo picture,
+.hero-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.hero-copy > div {
+  max-width: 620px;
+}
+.hero-light [class*="text-white"] {
+  color: var(--navy);
+  text-shadow: none;
+}
+.hero-light [class*="text-sky-light"] {
+  color: var(--sky);
+}
+.hero-light a.bg-sky {
+  color: white;
+}
+.hero-light h1 {
+  text-shadow: none;
+  font-size: clamp(3rem, 6.5vw, 6.5rem);
+}
+.hero-universities {
+  position: relative;
+  background: #f3f8fc;
+  padding-top: 24px;
+}
+.hero-universities button {
+  color: var(--sky);
+}
+footer {
+  background: #edf5fc;
+  color: var(--navy);
+  border-color: var(--border);
+}
+footer [class*="text-white"] {
+  color: var(--navy);
+}
+footer .footer-brand,
+footer .text-sky {
+  color: var(--sky);
+}
+footer [class*="border-white"] {
+  border-color: var(--border);
+}
+footer a:hover {
+  color: var(--sky);
+}
+@media (max-width: 767px) {
+  .country-grid > div {
+    flex-basis: calc(50% - 1px);
+  }
+  .country-grid > div:last-child:nth-child(odd) {
+    flex-basis: 100%;
+  }
+  .country-grid > div > div {
+    padding: 20px;
+  }
+  .hero-photo {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: 240px;
+    margin: 16px 20px;
+  }
+  .hero-copy {
+    margin-top: 24px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-photo {
+    width: 38%;
+    height: 560px;
+  }
+  .hero-copy > div {
+    max-width: 58%;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
-    opacity: 1 !important;
+  .animate-marquee {
+    animation: none !important;
     transform: none !important;
   }
   *,
@@ -414,169 +588,4 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* Use the image alpha as the logo shape, without a background tile. */
-.brand-mark {
-  display: inline-block;
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  background: linear-gradient(145deg, #e0f2fe 0%, #7dd3fc 45%, #0ea5e9 100%);
-  -webkit-mask: url("/brand-mark.png") center / contain no-repeat;
-  mask: url("/brand-mark.png") center / contain no-repeat;
-}
-
-/* Approved local preview palette, kept in source for reproducible deployments. */
-.mobile-menu-toggle {
-  color: #1b3554;
-}
-.dark header.glass-nav {
-  background: rgba(253, 253, 251, 0.9) !important;
-}
-section[id] {
-  scroll-margin-top: 80px;
-}
-:root {
-  --background: #fafaf7;
-  --foreground: #1b3554;
-  --navy: #1b3554;
-  --navy-deep: #1b3554;
-  --sky: #3f6593;
-  --sky-tint: #c0e6fd;
-  --sky-soft: #fdfdfb;
-  --primary: #3f6593;
-  --secondary: #5b86b6;
-  --border: #80aad3;
-}
-html {
-  background: #fafaf7;
-}
-body {
-  background: #fafaf7 !important;
-  color: #1b3554 !important;
-}
-.min-h-screen.bg-white {
-  background: #fafaf7 !important;
-}
-.brand-mark {
-  background: #3f6593 !important;
-  background-image: none !important;
-}
-header {
-  background: rgba(253, 253, 251, 0.9) !important;
-  border-bottom: 1px solid rgba(128, 170, 211, 0.45);
-  backdrop-filter: blur(18px);
-}
-header .brand-mark + span {
-  display: none;
-}
-header nav a {
-  color: #1b3554 !important;
-}
-header > a,
-header a[class*="bg-"] {
-  background: #3f6593 !important;
-  color: #ffffff !important;
-  border-radius: 14px;
-}
-main > div:not(:first-child) {
-  background: #fafaf7;
-  color: #1b3554;
-}
-main > div:not(:first-child) [class*="text-slate-"],
-main > div:not(:first-child) [class*="text-muted-foreground"],
-main > div:not(:first-child) [class*="text-white"] {
-  color: #1b3554 !important;
-}
-main > div:not(:first-child) h1,
-main > div:not(:first-child) h2,
-main > div:not(:first-child) h3 {
-  color: #1b3554 !important;
-}
-main > div:not(:first-child) [class*="bg-white"],
-main > div:not(:first-child) [class*="bg-card"],
-main > div:not(:first-child) [class*="bg-secondary"],
-main > div:not(:first-child) [class*="bg-muted"] {
-  background: rgba(253, 253, 251, 0.82) !important;
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(128, 170, 211, 0.55);
-  border-radius: 14px;
-  box-shadow: 0 14px 34px rgba(27, 53, 84, 0.1);
-}
-main > div:not(:first-child) [class*="bg-sky-tint"],
-main > div:not(:first-child) [class*="bg-sky-soft"] {
-  background: #c0e6fd !important;
-}
-main > div:not(:first-child) [class*="bg-navy"] {
-  background: #1b3554 !important;
-  color: #ffffff !important;
-}
-main > div:not(:first-child) [class*="bg-navy"] [class*="text-white"],
-main > div:not(:first-child) [class*="bg-navy"] h1,
-main > div:not(:first-child) [class*="bg-navy"] h2,
-main > div:not(:first-child) [class*="bg-navy"] h3 {
-  color: #ffffff !important;
-}
-main > div:not(:first-child) [class*="bg-sky"],
-[class*="bg-sky"] {
-  background: #3f6593 !important;
-  color: #ffffff !important;
-}
-main > div:not(:first-child) [class*="bg-sky"] [class*="text-white"],
-main > div:not(:first-child) [class*="bg-sky"] h1,
-main > div:not(:first-child) [class*="bg-sky"] h2,
-main > div:not(:first-child) [class*="bg-sky"] h3 {
-  color: #ffffff !important;
-}
-.bg-dark-gradient,
-.bg-newsletter-gradient {
-  background: #c0e6fd !important;
-  background-image: none !important;
-  color: #1b3554 !important;
-}
-.bg-dark-gradient [class*="text-white"],
-.bg-newsletter-gradient [class*="text-white"] {
-  color: #1b3554 !important;
-}
-main a[class*="bg-"],
-main button[class*="bg-"] {
-  border-radius: 14px;
-}
-main > div:not(:first-child) [class*="border-"],
-footer {
-  border-color: #80aad3 !important;
-}
-main > div:not(:first-child) [class*="text-gold"],
-main > div:not(:first-child) [class*="text-amber"],
-main > div:not(:first-child) [class*="text-yellow"],
-main > div:not(:first-child) [class*="text-emerald"],
-main > div:not(:first-child) [class*="text-rose"],
-main > div:not(:first-child) [class*="text-red"] {
-  color: #3f6593 !important;
-}
-main > div:not(:first-child) [class*="bg-gold"],
-main > div:not(:first-child) [class*="bg-amber"],
-main > div:not(:first-child) [class*="bg-yellow"],
-main > div:not(:first-child) [class*="bg-emerald"],
-main > div:not(:first-child) [class*="bg-rose"],
-main > div:not(:first-child) [class*="bg-red"] {
-  background: #c0e6fd !important;
-}
-footer,
-footer.bg-navy-deep {
-  background: #1b3554 !important;
-  color: #ffffff !important;
-  border-color: #80aad3 !important;
-}
-footer [class*="text-white"],
-footer p,
-footer a {
-  color: #ffffff !important;
-}
-footer .text-sky {
-  color: #c0e6fd !important;
-}
-footer a:hover {
-  color: #c0e6fd !important;
 }

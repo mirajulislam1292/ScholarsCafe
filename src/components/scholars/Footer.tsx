@@ -17,7 +17,9 @@ export function Footer() {
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2">
               <span className="brand-mark" aria-hidden="true" />
-              <span className="font-display text-xl font-extrabold">ScholarsCafe</span>
+              <span className="footer-brand font-display text-xl font-extrabold">
+                Scholars Cafe
+              </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/55">
               Your gateway to global education. Scholars Cafe is Bangladesh's dedicated study abroad

@@ -86,7 +86,7 @@ export function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[2000] bg-navy-deep p-6 lg:hidden"
+            className="mobile-panel fixed inset-0 z-[2000] bg-white p-6 lg:hidden"
           >
             <div className="flex items-center justify-between">
               <button onClick={scrollToTop} className="font-display text-2xl text-white">

@@ -31,12 +31,15 @@ export function SuccessStories() {
     <section id="success" className="bg-sky-soft py-24 md:py-32 dark:bg-navy-deep">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">Student Wins</span>
+          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+            Student Wins
+          </span>
           <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy dark:text-white">
             Real Students. Real Results.
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600 dark:text-white/70">
-            Every success story started with a conversation. Here's what happens when preparation meets opportunity and the right guidance.
+            Every success story started with a conversation. Here's what happens when preparation
+            meets opportunity and the right guidance.
           </p>
         </Reveal>
 
@@ -50,7 +53,7 @@ export function SuccessStories() {
                 key={`${testimonial.name}-${position}`}
                 initial={false}
                 animate={{
-                  opacity: isCenter ? 1 : 0.78,
+                  opacity: 1,
                 }}
                 transition={{ duration: 0.32, ease: "easeOut" }}
                 className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-white pt-9 shadow-card-hover transition-all dark:border-white/10 dark:bg-white/6 ${
@@ -59,18 +62,30 @@ export function SuccessStories() {
               >
                 <div className="px-9">
                   <div className="font-display text-6xl leading-none text-sky/15">"</div>
-                  <p className="mt-2 text-[15px] italic leading-[1.85] text-slate-600 dark:text-white/75">{testimonial.quote}</p>
+                  <p className="mt-2 text-[15px] italic leading-[1.85] text-slate-600 dark:text-white/75">
+                    {testimonial.quote}
+                  </p>
                   <div className="mt-7 flex items-center gap-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} font-display text-base font-extrabold text-white`}>
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} font-display text-base font-extrabold text-white`}
+                    >
                       {testimonial.initials}
                     </div>
                     <div>
-                      <div className="font-display text-base font-bold text-navy dark:text-white">{testimonial.name}</div>
-                      <div className="text-[13px] font-semibold text-sky-deep dark:text-sky-light">{testimonial.destination}</div>
-                      <div className="text-[12px] text-slate-500 dark:text-white/55">{testimonial.year}</div>
+                      <div className="font-display text-base font-bold text-navy dark:text-white">
+                        {testimonial.name}
+                      </div>
+                      <div className="text-[13px] font-semibold text-sky-deep dark:text-sky-light">
+                        {testimonial.destination}
+                      </div>
+                      <div className="text-[12px] text-slate-500 dark:text-white/55">
+                        {testimonial.year}
+                      </div>
                     </div>
                     <div className="ml-auto flex gap-0.5 text-gold">
-                      {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-current" />)}
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className="h-3.5 w-3.5 fill-current" />
+                      ))}
                     </div>
                   </div>
                 </div>

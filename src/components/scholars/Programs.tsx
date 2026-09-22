@@ -18,20 +18,20 @@ export function Programs() {
           </p>
         </Reveal>
 
-        <RevealStagger className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <RevealStagger className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {PROGRAMS.map((p) => (
-            <StaggerItem key={p.id} className={p.featured ? "lg:scale-[1.03]" : ""}>
+            <StaggerItem key={p.id} className="last:md:col-span-2 last:lg:col-span-1">
               <div
                 className={`relative flex h-full flex-col rounded-3xl p-9 transition-all duration-300 hover:-translate-y-2 ${
                   p.featured
-                    ? "border-2 border-gold bg-navy text-white shadow-2xl shadow-navy/20"
+                    ? "light-panel border-2 border-sky/30 bg-sky-tint text-navy shadow-card"
                     : "border border-border bg-white shadow-card hover:shadow-card-hover"
                 }`}
               >
                 <div
                   className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
                     p.featured
-                      ? "border-gold/40 bg-gold/15 text-gold"
+                      ? "border-sky/40 bg-sky/15 text-sky"
                       : "border-sky/30 bg-sky/10 text-sky-deep"
                   }`}
                 >
@@ -41,7 +41,7 @@ export function Programs() {
                 <div className="mt-6">
                   <ScholarIcon
                     name={p.icon}
-                    className={`h-14 w-14 ${p.featured ? "text-gold" : "text-sky-deep"}`}
+                    className={`h-14 w-14 ${p.featured ? "text-sky" : "text-sky-deep"}`}
                     strokeWidth={1.5}
                   />
                 </div>

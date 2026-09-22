@@ -12,7 +12,6 @@ export function Destinations() {
         <Reveal>
           <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
             <div>
-              <span className="kicker">Global reach · 11 countries</span>
               <h2 className="mt-5 editorial-h2">
                 Choose a country.
                 <br />
@@ -35,13 +34,10 @@ export function Destinations() {
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-14 grid overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-navy via-midnight to-[#0369a1] p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:grid-cols-[1fr_1.2fr] md:p-12"
+            className="group mt-14 grid overflow-hidden rounded-[28px] border border-border country-feature bg-sky-tint p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:grid-cols-[1fr_1.2fr] md:p-12"
           >
             <div className="flex flex-col justify-between gap-8">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
-                  ★ Primary focus
-                </div>
                 <div className="mt-6 text-8xl md:text-9xl">{featured.flag}</div>
               </div>
               <div className="font-display text-5xl font-extrabold md:text-6xl">
@@ -50,9 +46,6 @@ export function Destinations() {
             </div>
             <div className="flex flex-col justify-between gap-8 border-t border-white/15 pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-light">
-                  {featured.tag}
-                </div>
                 <p className="mt-4 text-2xl font-light leading-snug text-white/85 md:text-3xl">
                   {featured.note}. We've built our practice around helping Bangladeshi students
                   unlock 50–100% need-based aid at top US universities.
@@ -67,9 +60,9 @@ export function Destinations() {
         </Reveal>
 
         {/* Other countries, minimal editorial grid */}
-        <RevealStagger className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[28px] border border-border bg-border md:grid-cols-3 lg:grid-cols-4">
+        <RevealStagger className="mt-6 country-grid flex flex-wrap gap-px overflow-hidden rounded-[28px] border border-border bg-border">
           {others.map((c) => (
-            <StaggerItem key={c.name}>
+            <StaggerItem key={c.name} className="min-w-0 flex-[1_1_220px]">
               <div className="group relative h-full bg-card p-7 transition-colors hover:bg-secondary">
                 <div className="flex items-start justify-between">
                   <span className="text-4xl">{c.flag}</span>
