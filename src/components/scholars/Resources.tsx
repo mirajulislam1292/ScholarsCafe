@@ -45,6 +45,10 @@ export function Resources() {
                   href="#newsletter"
                   className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-navy to-midnight p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:p-10"
                 >
+                  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
+                    <span className="h-px w-8 bg-gold" />
+                    Featured · {r.category}
+                  </div>
                   <h3 className="mt-8 font-display text-3xl font-extrabold leading-tight md:text-4xl">
                     {r.title}
                   </h3>
@@ -123,7 +127,7 @@ export function Resources() {
           ))}
         </RevealStagger>
 
-        <Reveal className="mt-10 text-center text-sm text-muted-foreground">
+        <Reveal className="mt-16 text-center text-sm text-muted-foreground">
           New guides every month ·{" "}
           <a
             className="font-semibold text-sky hover:underline"

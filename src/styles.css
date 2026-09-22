@@ -58,55 +58,55 @@
   --radius: 0.75rem;
 
   /* Brand palette, exact hex from spec */
-  --navy: #0066cc;
-  --navy-deep: #0b1b2b;
-  --midnight: #0b1b2b;
-  --steel: #0066cc;
-  --sky: #0a84ff;
-  --sky-deep: #0066cc;
-  --sky-light: #5ac8fa;
-  --sky-tint: #e9f3fe;
-  --sky-soft: #f5f8fc;
-  --gold: #0a84ff;
-  --gold-deep: #0066cc;
+  --navy: #0c2d5e;
+  --navy-deep: #060f1e;
+  --midnight: #0f3a7a;
+  --steel: #1e4080;
+  --sky: #0ea5e9;
+  --sky-deep: #0284c7;
+  --sky-light: #7dd3fc;
+  --sky-tint: #e0f2fe;
+  --sky-soft: #f0f9ff;
+  --gold: #fbbf24;
+  --gold-deep: #f59e0b;
   --whatsapp: #25d366;
   --success: #22c55e;
 
   /* Shadcn semantic tokens mapped to brand */
-  --background: #f5f8fc;
-  --foreground: #1d1d1f;
+  --background: #ffffff;
+  --foreground: #0c2d5e;
   --card: #ffffff;
   --card-foreground: #0c2d5e;
   --popover: #ffffff;
   --popover-foreground: #0c2d5e;
-  --primary: #0a84ff;
+  --primary: #0c2d5e;
   --primary-foreground: #ffffff;
-  --secondary: #e9f3fe;
-  --secondary-foreground: #0066cc;
-  --muted: #f5f8fc;
-  --muted-foreground: #6e6e73;
-  --accent: #0a84ff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0c2d5e;
+  --muted: #f8fafc;
+  --muted-foreground: #475569;
+  --accent: #0ea5e9;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
-  --input: rgba(0, 0, 0, 0.12);
-  --ring: #0a84ff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0ea5e9;
 
   /* Gradients */
-  --gradient-hero: linear-gradient(135deg, #ffffff 0%, #e9f3fe 100%);
-  --gradient-dark: #0b1b2b;
-  --gradient-card-hover: linear-gradient(135deg, #0a84ff 0%, #5ac8fa 100%);
-  --gradient-gold: #0a84ff;
-  --gradient-newsletter: linear-gradient(135deg, #ffffff 0%, #e9f3fe 100%);
+  --gradient-hero: linear-gradient(135deg, #0c2d5e 0%, #0f3a7a 45%, #0369a1 100%);
+  --gradient-dark: linear-gradient(180deg, #060f1e 0%, #0c2d5e 100%);
+  --gradient-card-hover: linear-gradient(135deg, #0ea5e9 0%, #0c2d5e 100%);
+  --gradient-gold: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+  --gradient-newsletter: linear-gradient(135deg, #0c2d5e 0%, #1a4a9e 100%);
 
   /* Shadows */
-  --shadow-card: 0 8px 30px rgba(0, 40, 90, 0.06);
-  --shadow-card-hover: 0 14px 36px rgba(0, 40, 90, 0.1);
-  --shadow-glow: 0 0 28px rgba(10, 132, 255, 0.16);
-  --shadow-nav: 0 4px 24px rgba(0, 40, 90, 0.08);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 16px 48px rgba(14, 165, 233, 0.2);
+  --shadow-glow: 0 0 24px rgba(14, 165, 233, 0.5);
+  --shadow-nav: 0 2px 24px rgba(0, 0, 0, 0.08);
   --shadow-modal: 0 32px 80px rgba(0, 0, 0, 0.3);
-  --shadow-button: 0 8px 20px rgba(10, 132, 255, 0.2);
+  --shadow-button: 0 12px 32px rgba(14, 165, 233, 0.55);
 }
 
 @layer base {
@@ -404,6 +404,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
   *,
   *::before,
   *::after {
@@ -412,78 +416,167 @@
   }
 }
 
-/* Final light frontend surface overrides. */
-html {
-  color-scheme: light;
+/* Use the image alpha as the logo shape, without a background tile. */
+.brand-mark {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #e0f2fe 0%, #7dd3fc 45%, #0ea5e9 100%);
+  -webkit-mask: url("/brand-mark.png") center / contain no-repeat;
+  mask: url("/brand-mark.png") center / contain no-repeat;
 }
-body {
-  background: var(--background);
-  color: var(--foreground);
+
+/* Approved local preview palette, kept in source for reproducible deployments. */
+.mobile-menu-toggle {
+  color: #1b3554;
+}
+.dark header.glass-nav {
+  background: rgba(253, 253, 251, 0.9) !important;
 }
 section[id] {
   scroll-margin-top: 80px;
 }
-header.fixed {
-  background: rgba(255, 255, 255, 0.82);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: var(--shadow-nav);
-  backdrop-filter: blur(24px) saturate(165%);
-  -webkit-backdrop-filter: blur(24px) saturate(165%);
+:root {
+  --background: #fafaf7;
+  --foreground: #1b3554;
+  --navy: #1b3554;
+  --navy-deep: #1b3554;
+  --sky: #3f6593;
+  --sky-tint: #c0e6fd;
+  --sky-soft: #fdfdfb;
+  --primary: #3f6593;
+  --secondary: #5b86b6;
+  --border: #80aad3;
 }
-header.fixed .text-white {
-  color: var(--foreground) !important;
+html {
+  background: #fafaf7;
 }
-header.fixed .font-display {
+body {
+  background: #fafaf7 !important;
+  color: #1b3554 !important;
+}
+.min-h-screen.bg-white {
+  background: #fafaf7 !important;
+}
+.brand-mark {
+  background: #3f6593 !important;
+  background-image: none !important;
+}
+header {
+  background: rgba(253, 253, 251, 0.9) !important;
+  border-bottom: 1px solid rgba(128, 170, 211, 0.45);
+  backdrop-filter: blur(18px);
+}
+header .brand-mark + span {
   display: none;
 }
-main > section[class*="py-24"],
-main > section[class*="py-32"],
-main > section[class*="py-20"] {
-  padding-top: 5rem !important;
-  padding-bottom: 5rem !important;
+header nav a {
+  color: #1b3554 !important;
 }
-.kicker {
-  display: none !important;
+header > a,
+header a[class*="bg-"] {
+  background: #3f6593 !important;
+  color: #ffffff !important;
+  border-radius: 14px;
 }
-.text-gold,
-.text-gold-deep,
-.bg-gold,
-[class*="border-gold"] {
-  color: var(--sky) !important;
-  border-color: var(--sky) !important;
-  background-color: transparent !important;
+main > div:not(:first-child) {
+  background: #fafaf7;
+  color: #1b3554;
 }
-[class*="mt-6 h-px"],
-[class*="h-px w-10"],
-[class*="border-t border-sky"],
-[class*="bg-gradient-to-r from-sky"] {
-  background: var(--border) !important;
-  border-top-color: var(--border) !important;
+main > div:not(:first-child) [class*="text-slate-"],
+main > div:not(:first-child) [class*="text-muted-foreground"],
+main > div:not(:first-child) [class*="text-white"] {
+  color: #1b3554 !important;
 }
-button[class*="rounded-full"],
-a[class*="rounded-full"] {
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease,
-    background-color 180ms ease;
+main > div:not(:first-child) h1,
+main > div:not(:first-child) h2,
+main > div:not(:first-child) h3 {
+  color: #1b3554 !important;
 }
-button[class*="rounded-full"]:hover,
-a[class*="rounded-full"]:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-button);
+main > div:not(:first-child) [class*="bg-white"],
+main > div:not(:first-child) [class*="bg-card"],
+main > div:not(:first-child) [class*="bg-secondary"],
+main > div:not(:first-child) [class*="bg-muted"] {
+  background: rgba(253, 253, 251, 0.82) !important;
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(128, 170, 211, 0.55);
+  border-radius: 14px;
+  box-shadow: 0 14px 34px rgba(27, 53, 84, 0.1);
 }
-main > section:not(#top) {
-  content-visibility: auto;
-  contain-intrinsic-size: 720px;
+main > div:not(:first-child) [class*="bg-sky-tint"],
+main > div:not(:first-child) [class*="bg-sky-soft"] {
+  background: #c0e6fd !important;
 }
+main > div:not(:first-child) [class*="bg-navy"] {
+  background: #1b3554 !important;
+  color: #ffffff !important;
+}
+main > div:not(:first-child) [class*="bg-navy"] [class*="text-white"],
+main > div:not(:first-child) [class*="bg-navy"] h1,
+main > div:not(:first-child) [class*="bg-navy"] h2,
+main > div:not(:first-child) [class*="bg-navy"] h3 {
+  color: #ffffff !important;
+}
+main > div:not(:first-child) [class*="bg-sky"],
+[class*="bg-sky"] {
+  background: #3f6593 !important;
+  color: #ffffff !important;
+}
+main > div:not(:first-child) [class*="bg-sky"] [class*="text-white"],
+main > div:not(:first-child) [class*="bg-sky"] h1,
+main > div:not(:first-child) [class*="bg-sky"] h2,
+main > div:not(:first-child) [class*="bg-sky"] h3 {
+  color: #ffffff !important;
+}
+.bg-dark-gradient,
+.bg-newsletter-gradient {
+  background: #c0e6fd !important;
+  background-image: none !important;
+  color: #1b3554 !important;
+}
+.bg-dark-gradient [class*="text-white"],
+.bg-newsletter-gradient [class*="text-white"] {
+  color: #1b3554 !important;
+}
+main a[class*="bg-"],
+main button[class*="bg-"] {
+  border-radius: 14px;
+}
+main > div:not(:first-child) [class*="border-"],
 footer {
-  background: var(--sky-soft) !important;
-  color: var(--foreground) !important;
-  border-top: 1px solid var(--border) !important;
+  border-color: #80aad3 !important;
 }
-footer [class*="text-white"] {
-  color: var(--foreground) !important;
+main > div:not(:first-child) [class*="text-gold"],
+main > div:not(:first-child) [class*="text-amber"],
+main > div:not(:first-child) [class*="text-yellow"],
+main > div:not(:first-child) [class*="text-emerald"],
+main > div:not(:first-child) [class*="text-rose"],
+main > div:not(:first-child) [class*="text-red"] {
+  color: #3f6593 !important;
 }
-footer [class*="text-white/"] {
-  color: var(--muted-foreground) !important;
+main > div:not(:first-child) [class*="bg-gold"],
+main > div:not(:first-child) [class*="bg-amber"],
+main > div:not(:first-child) [class*="bg-yellow"],
+main > div:not(:first-child) [class*="bg-emerald"],
+main > div:not(:first-child) [class*="bg-rose"],
+main > div:not(:first-child) [class*="bg-red"] {
+  background: #c0e6fd !important;
+}
+footer,
+footer.bg-navy-deep {
+  background: #1b3554 !important;
+  color: #ffffff !important;
+  border-color: #80aad3 !important;
+}
+footer [class*="text-white"],
+footer p,
+footer a {
+  color: #ffffff !important;
+}
+footer .text-sky {
+  color: #c0e6fd !important;
+}
+footer a:hover {
+  color: #c0e6fd !important;
 }

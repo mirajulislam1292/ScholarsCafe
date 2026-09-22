@@ -36,24 +36,13 @@ export function Navbar() {
         }`}
       >
         <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-5 md:px-8">
-          <button type="button" onClick={scrollToTop} className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy text-white">
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                <path
-                  d="M12 2L3 7v6c0 5 4 8 9 9 5-1 9-4 9-9V7l-9-5z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M8 11l3 3 5-6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+          <button
+            type="button"
+            onClick={scrollToTop}
+            aria-label="Scholars Cafe home"
+            className="flex items-center gap-2"
+          >
+            <span className="brand-mark" aria-hidden="true" />
           </button>
 
           <nav className="hidden items-center gap-7 lg:flex">
@@ -83,7 +72,7 @@ export function Navbar() {
             <button
               onClick={() => setOpen(true)}
               aria-label="Menu"
-              className={`lg:hidden ${scrolled ? "text-navy" : "text-white"}`}
+              className="mobile-menu-toggle lg:hidden"
             >
               <Menu className="h-6 w-6" />
             </button>

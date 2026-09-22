@@ -49,6 +49,7 @@ export function WorldMap() {
       <div className="relative mx-auto max-w-[1320px] px-5 md:px-10">
         <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
           <div>
+            <span className="kicker text-sky-light">Interactive · 12 countries</span>
             <h2 className="mt-5 editorial-h2 text-white">
               The world,
               <br />
@@ -57,6 +58,10 @@ export function WorldMap() {
               </span>
             </h2>
           </div>
+          <p className="max-w-md text-[15px] leading-relaxed text-white/65">
+            Hover the map. Click a glowing pin to open the country dossier. top universities,
+            scholarships, intake calendar, and visa notes.
+          </p>
         </div>
 
         <div className="mt-12 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#0b1f44] to-[#07142a] p-6 shadow-2xl md:hidden">

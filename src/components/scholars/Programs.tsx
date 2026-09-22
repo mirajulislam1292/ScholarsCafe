@@ -41,7 +41,7 @@ export function Programs() {
                 <div className="mt-6">
                   <ScholarIcon
                     name={p.icon}
-                    className={`h-14 w-14 ${p.featured ? "text-white" : "text-sky-deep"}`}
+                    className={`h-14 w-14 ${p.featured ? "text-gold" : "text-sky-deep"}`}
                     strokeWidth={1.5}
                   />
                 </div>
