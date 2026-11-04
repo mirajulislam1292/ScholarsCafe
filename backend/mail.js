@@ -41,3 +41,13 @@ export async function deliverMail(store, transport) {
     }
   });
 }
+
+// Sign-in code + magic link, sent straight to the account's own address (not via the outbox).
+export async function sendLoginEmail(transport, to, code, url, minutes) {
+  await transport.sendMail({
+    from: "Scholars Cafe <contact@scholarscafe.com>",
+    to,
+    subject: "Your Scholars Cafe sign-in code",
+    text: `Your sign-in code is ${code}\n\nOr open this link to sign in:\n${url}\n\nThe code and link expire in ${minutes} minutes and work once. If you did not ask for this, ignore this email; nobody can sign in without the code.`,
+  });
+}

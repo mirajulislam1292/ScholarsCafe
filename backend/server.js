@@ -39,7 +39,7 @@ async function start() {
     finally { delivering = false; }
   }, 15000);
   mailTimer.unref();
-  const server = createApp(store, process.env).listen(Number(process.env.PORT || 3000), "0.0.0.0");
+  const server = createApp(store, process.env, undefined, mailer).listen(Number(process.env.PORT || 3000), "0.0.0.0");
   process.on("SIGTERM", () => server.close(() => store.pool.end().then(() => process.exit(0))));
 }
 start().catch((error) => {

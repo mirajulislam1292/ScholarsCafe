@@ -265,6 +265,10 @@ function render() {
     renderLeads().catch(report);
     return;
   }
+  if (section === "Account") {
+    renderAccount();
+    return;
+  }
   if (section === "Private feedback" || section === "Newsletter") {
     renderSubmissions().catch(report);
     return;
@@ -827,6 +831,106 @@ async function renderMail() {
     $("screen").append(card);
   }
 }
+// Sign-in screen: password, or a one-time email code (the email also holds a magic link).
+async function authPost(path, body) {
+  const r = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Error(j.error || "Sign-in failed. Try again.");
+  return j;
+}
+function loginMessage(text) {
+  $("login-message").textContent = text;
+}
+$("password-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const email = $("login-email").value.trim();
+  const password = $("login-password").value;
+  if (!email || !password) return loginMessage("Enter your email and password, or ask for a code.");
+  try {
+    await authPost("/auth/password", { email, password });
+    location.reload();
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+$("send-code").onclick = async () => {
+  const email = $("login-email").value.trim();
+  if (!email) return loginMessage("Enter your email first.");
+  try {
+    const j = await authPost("/auth/email/start", { email });
+    $("password-form").hidden = true;
+    $("code-form").hidden = false;
+    $("login-code").focus();
+    loginMessage(j.message);
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+$("code-back").onclick = () => {
+  $("code-form").hidden = true;
+  $("password-form").hidden = false;
+  loginMessage("");
+};
+$("code-form").onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await authPost("/auth/email/verify", {
+      email: $("login-email").value.trim(),
+      code: $("login-code").value.trim(),
+    });
+    location.reload();
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+function renderAccount() {
+  const card = node("form", undefined, "card");
+  card.append(
+    node("h2", me.has_password ? "Change password" : "Set a password"),
+    node(
+      "p",
+      "Optional. Lets you sign in with your email and password as well as Google or an email code. At least 12 characters. Other devices are signed out.",
+      "muted",
+    ),
+  );
+  const field = (label, id, auto) => {
+    const l = node("label", label);
+    const input = document.createElement("input");
+    input.type = "password";
+    input.id = id;
+    input.autocomplete = auto;
+    input.maxLength = 128;
+    l.append(input);
+    card.append(l);
+    return input;
+  };
+  const current = me.has_password ? field("Current password", "pw-current", "current-password") : null;
+  const next = field("New password", "pw-new", "new-password");
+  const again = field("Repeat new password", "pw-again", "new-password");
+  const save = node("button", "Save password", "primary");
+  save.type = "submit";
+  card.append(save);
+  card.onsubmit = async (e) => {
+    e.preventDefault();
+    if (next.value !== again.value) return report(Error("The two new passwords don't match."));
+    try {
+      await api("password", {
+        password: next.value,
+        ...(current ? { current: current.value } : {}),
+      });
+      me.has_password = true;
+      notice("Password saved.");
+      render();
+    } catch (err) {
+      report(err);
+    }
+  };
+  $("screen").append(card);
+}
 try {
   me = await api("me");
   const catalogResponse = await fetch("/cms-copy-catalog.json");
@@ -837,7 +941,7 @@ try {
   $("identity").textContent = me.email + " · " + me.role;
   const navFor =
     me.role === "mentor"
-      ? ["Leads"]
+      ? ["Leads", "Account"]
       : [
           "Overview",
           "Media",
@@ -845,6 +949,7 @@ try {
           ...(me.role === "editor"
             ? []
             : ["Leads", "Access", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
+          "Account",
         ];
   if (me.role === "mentor") section = "Leads";
   for (const key of navFor) {

@@ -6,6 +6,7 @@ import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { installMedia, serveMedia } from "./media.js";
+import { installAuthRoutes, installAccountRoutes } from "./auth.js";
 import {
   token,
   hash,
@@ -42,8 +43,24 @@ export function createApp(
     config.GOOGLE_CLIENT_SECRET,
     config.ADMIN_ORIGIN + "/auth/callback",
   ),
+  mailer = null,
 ) {
   const app = express();
+  // Every sign-in method ends here: replace any previous session, create a new one, audit it.
+  const startSession = async (c, user, req, method) => {
+    const session = token();
+    const previous = cookie(req, sessionCookie);
+    if (previous) await store.query("DELETE FROM sessions WHERE token_hash=?", [hash(previous)], c);
+    await store.query(
+      "INSERT INTO sessions (token_hash,user_id,csrf,expires_at) VALUES (?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 4 HOUR))",
+      [hash(session), user.id, token()],
+      c,
+    );
+    await store.audit(user.id, method === "google" ? "sign_in" : "sign_in_" + method, user.email, c);
+    return session;
+  };
+  const setSession = (res, session) =>
+    res.cookie(sessionCookie, session, { ...cookieOptions, maxAge: 4 * 60 * 60 * 1000 });
   // No generic trust-proxy setting: only an explicitly verified Hostinger proxy range may be trusted.
   if (config.TRUST_PROXY) app.set("trust proxy", config.TRUST_PROXY.split(","));
   app.disable("x-powered-by");
@@ -276,10 +293,9 @@ export function createApp(
     const identity = ticket.getPayload();
     if (!trustedGoogleIdentity(identity, attempt.nonce))
       throw fail(403, "Google account could not be verified.");
-    const session = token(),
-      csrf = token();
+    let session;
     try {
-      await store.transaction(async (c) => {
+      session = await store.transaction(async (c) => {
         const rows = await store.query(
           "SELECT * FROM users WHERE email=? FOR UPDATE",
           [identity.email.toLowerCase()],
@@ -289,15 +305,7 @@ export function createApp(
         if (!user?.active || (user.google_sub && user.google_sub !== identity.sub))
           throw fail(403, "This account has not been granted access.");
         await store.query("UPDATE users SET google_sub=? WHERE id=?", [identity.sub, user.id], c);
-        const previous = cookie(req, sessionCookie);
-        if (previous)
-          await store.query("DELETE FROM sessions WHERE token_hash=?", [hash(previous)], c);
-        await store.query(
-          "INSERT INTO sessions (token_hash,user_id,csrf,expires_at) VALUES (?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 4 HOUR))",
-          [hash(session), user.id, csrf],
-          c,
-        );
-        await store.audit(user.id, "sign_in", user.email, c);
+        return startSession(c, user, req, "google");
       });
     } catch (error) {
       // Record refused sign-ins (the transaction above rolled back). The user sees a generic message.
@@ -307,12 +315,13 @@ export function createApp(
           .catch(() => {});
       throw error;
     }
-    res.cookie(sessionCookie, session, { ...cookieOptions, maxAge: 4 * 60 * 60 * 1000 });
+    setSession(res, session);
     res.redirect("/");
   });
+  installAuthRoutes(app, { store, config, mailer, fail, startSession, setSession });
   app.use("/api", async (req, res, next) => {
     const raw = cookie(req, sessionCookie);
-    if (!raw || raw.length !== 64) throw fail(401, "Please sign in with Google.");
+    if (!raw || raw.length !== 64) throw fail(401, "Please sign in.");
     req.actor = await store.session(hash(raw));
     if (!req.actor) throw fail(401, "Your session has expired or access was removed.");
     if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
@@ -330,9 +339,10 @@ export function createApp(
   // Mentors only reach their own leads; every other admin API is closed to them.
   app.use("/api", (req, _res, next) => {
     if (req.actor.role !== "mentor") return next();
-    if (["/me", "/logout"].includes(req.path) || req.path.startsWith("/leads")) return next();
+    if (["/me", "/logout", "/password"].includes(req.path) || req.path.startsWith("/leads")) return next();
     throw fail(403, "Mentors can only open their assigned leads.");
   });
+  installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
     if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");

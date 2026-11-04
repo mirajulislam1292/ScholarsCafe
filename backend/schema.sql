@@ -90,3 +90,11 @@ CREATE TABLE IF NOT EXISTS media_quota (
   used_bytes BIGINT UNSIGNED NOT NULL DEFAULT 0
 );
 INSERT IGNORE INTO media_quota (id,used_bytes) VALUES (1,0);
+CREATE TABLE IF NOT EXISTS email_codes (
+  user_id CHAR(36) PRIMARY KEY,
+  code_hash CHAR(64) NOT NULL,
+  link_hash CHAR(64) NOT NULL UNIQUE,
+  attempts INT NOT NULL DEFAULT 0,
+  expires_at DATETIME NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

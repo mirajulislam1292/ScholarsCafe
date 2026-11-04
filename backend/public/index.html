@@ -17,6 +17,19 @@
       <h1>Good guidance.<br />Beautifully shared.</h1>
       <p>Manage the people, stories and programs behind Scholars Cafe.</p>
       <a class="primary" href="/auth/google">Continue with Google →</a>
+      <p class="or">or with your email</p>
+      <form id="password-form" class="login-form" novalidate>
+        <label>Email<input id="login-email" type="email" autocomplete="username" maxlength="254" required /></label>
+        <label>Password<input id="login-password" type="password" autocomplete="current-password" maxlength="128" /></label>
+        <button class="primary" type="submit">Sign in with password</button>
+        <button id="send-code" type="button">Email me a one-time code</button>
+      </form>
+      <form id="code-form" class="login-form" hidden>
+        <label>6-digit code from your email<input id="login-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required /></label>
+        <button class="primary" type="submit">Sign in</button>
+        <button id="code-back" type="button">Use a different email</button>
+      </form>
+      <p id="login-message" role="status" aria-live="polite"></p>
       <p class="muted">Access is limited to approved accounts.</p>
     </div>
     <div id="workspace" hidden>

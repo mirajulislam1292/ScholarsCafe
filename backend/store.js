@@ -4,6 +4,7 @@ import { randomUUID, createHash } from "node:crypto";
 
 export class Store {
   constructor(config) {
+    this.config = config;
     this.pool = mysql.createPool({
       host: config.DB_HOST,
       user: config.DB_USER,
@@ -45,7 +46,7 @@ export class Store {
     // Bootstrap only an empty account list. Never re-enable a revoked owner at restart.
     await this.query(
       "INSERT INTO users (id,email,role) SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM users existing)",
-      [randomUUID(), "contact.scholarscafe@gmail.com", "owner"],
+      [randomUUID(), (this.config?.OWNER_EMAIL || "contact.scholarscafe@gmail.com").toLowerCase(), "owner"],
     );
     const seed = JSON.parse(await readFile(new URL("./seed.json", import.meta.url), "utf8"));
     for (const item of seed)
@@ -84,6 +85,9 @@ export class Store {
     await add("inquiries", "notes", "notes TEXT NULL");
     await add("inquiries", "assigned_to", "assigned_to CHAR(36) NULL");
     await add("inquiries", "updated_at", "updated_at TIMESTAMP NULL");
+    await add("users", "password_hash", "password_hash VARCHAR(255) NULL");
+    await add("users", "failed_logins", "failed_logins INT NOT NULL DEFAULT 0");
+    await add("users", "locked_until", "locked_until DATETIME NULL");
     await add("media", "mime", "mime VARCHAR(40) NOT NULL DEFAULT 'image/webp'");
   }
   async audit(actor, action, target, c = this.pool) {
@@ -95,7 +99,7 @@ export class Store {
   }
   async session(hash) {
     const rows = await this.query(
-      "SELECT u.id,u.email,u.role,s.csrf FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP() AND u.active=1",
+      "SELECT u.id,u.email,u.role,s.csrf,(u.password_hash IS NOT NULL) AS has_password FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP() AND u.active=1",
       [hash],
     );
     return rows[0];
@@ -103,6 +107,7 @@ export class Store {
   async clean() {
     await this.query("DELETE FROM sessions WHERE expires_at<UTC_TIMESTAMP()");
     await this.query("DELETE FROM oauth_attempts WHERE expires_at<UTC_TIMESTAMP()");
+    await this.query("DELETE FROM email_codes WHERE expires_at<UTC_TIMESTAMP()");
     await this.query("DELETE FROM rate_limits WHERE expires_at<UTC_TIMESTAMP()");
   }
   async checkRateLimit(scope, identity, limit, seconds) {

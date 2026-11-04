@@ -288,3 +288,11 @@ details.card summary { cursor: pointer; font-weight: 500; }
 details.card .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid rgb(0 0 0 / 0.06); }
 .card.row button[aria-label^="Move"] { min-width: 36px; }
 article.card textarea { width: 100%; min-height: 80px; }
+
+/* Sign-in forms */
+.login .or { margin: 1.25rem 0 0.5rem; font-size: 0.85rem; color: #6b7785; }
+.login-form { display: grid; gap: 0.75rem; max-width: 360px; }
+.login-form label { display: grid; gap: 0.3rem; font-size: 0.9rem; }
+.login-form input { padding: 0.65rem 0.75rem; border: 1px solid #c9d3dd; border-radius: 8px; font: inherit; }
+.login-form button { justify-self: start; }
+#login-message { min-height: 1.4em; max-width: 360px; }

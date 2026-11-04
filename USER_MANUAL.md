@@ -9,10 +9,11 @@ A plain-language guide to running the website. No coding needed for everyday cha
 
 ## 1. Log in to the admin (Super Admin)
 1. Go to **https://admin.scholarscafe.com**.
-2. Click **Sign in with Google** and choose your approved Google account (`contact.scholarscafe@gmail.com` is the owner).
+2. Click **Continue with Google**, or type your email and either your password or **Email me a one-time code** (the code expires in 10 minutes). `contact.scholarscafe@gmail.com` is the owner.
+   To set or change a password: **Account** → enter it twice → **Save password**. Forgot it? Sign in with an email code.
 3. You land on **Overview**. Mentors land on **Leads**.
 
-Only Google accounts you have approved can sign in. Sessions end automatically after 4 hours.
+Only accounts you have approved can sign in. Sessions end automatically after 4 hours.
 **Security tip:** turn on Google 2-Step Verification for every account with admin access.
 
 ### Roles

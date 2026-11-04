@@ -49,3 +49,10 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - **Video uploads:** MP4/WebM only, file-signature checked, ≤12 MB, 250 MB quota, served with Range support. Hostinger MySQL `max_allowed_packet` must allow 12 MB.
 - **Delete/restore:** soft delete (`deleted_at`), version-checked restore, all audited. Seeds never revive deleted entries.
 - Known limits: SEO overrides apply client-side (crawlers see build-time titles); Student role arrives in Phase 4/5.
+
+## Phase 4 additions (sign-in)
+- Methods: Google, email + password (optional), email code/magic link. No self sign-up, no SMS, no Microsoft. All require an active approved account.
+- Passwords: scrypt (N=32768, r=8, p=1, unique salt), 12–128 chars; 5 misses → 15-minute lock; unknown emails cost the same time. Setting a password needs the current one and signs out other devices.
+- Email codes: 6 random digits + 256-bit link token, only hashes stored, 10-minute expiry, single use, destroyed after 5 wrong tries, 3 sends per address per 15 min, same reply for unknown emails, sent without awaiting (no timing leak).
+- Magic link: GET only shows a button (mail scanners can't consume it); POST requires the admin Origin. All sign-in POSTs check Origin (no login CSRF). Session cookie unchanged (`__Host-`, HttpOnly, Secure, SameSite=Lax, 4 h).
+- Risk: an email code is only as safe as the mailbox. Keep 2-Step Verification on mailboxes of admin accounts.

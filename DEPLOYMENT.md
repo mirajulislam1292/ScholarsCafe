@@ -38,10 +38,11 @@ hPanel → **Websites** → `admin.scholarscafe.com` → **Node.js**:
 |---|---|
 | `DB_HOST` | `127.0.0.1` |
 | `DB_NAME`, `DB_USER`, `DB_PASSWORD` | from hPanel → Databases → MySQL (the existing CMS database) |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google Cloud → APIs & Services → Credentials (OAuth web client). Redirect URI must be `https://admin.scholarscafe.com/auth/callback` |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google Cloud → APIs & Services → Credentials (OAuth web client). Redirect URI must be `https://admin.scholarscafe.com/auth/callback` (step by step: `BACKEND_SETUP.md`) |
 | `ADMIN_ORIGIN` | `https://admin.scholarscafe.com` |
 | `PUBLIC_ORIGIN` | `https://scholarscafe.com` |
-| `SMTP_PASSWORD` | password of the `contact@scholarscafe.com` mailbox (optional; enables email notifications) |
+| `SMTP_PASSWORD` | password of the `contact@scholarscafe.com` mailbox (enables email sign-in codes and notifications) |
+| `OWNER_EMAIL` | first Super Admin, only for a new empty database (see `BACKEND_SETUP.md`) |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile **secret key** (optional; must match the site key above) |
 | `TRUST_PROXY` | leave empty until verified (see SECURITY.md, "Rate limits") |
 
