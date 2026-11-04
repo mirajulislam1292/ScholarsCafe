@@ -88,10 +88,10 @@ export function Contact() {
     <section id="contact" className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
             <CmsText id="Contact.3ee6cddb8ee0">Get In Touch</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
+          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy">
             <CmsText id="Contact.231ff83a4896">Let's Plan Your Future Together</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
@@ -136,7 +136,7 @@ export function Contact() {
             />
 
             <div>
-              <div className="font-display text-lg font-bold text-navy">
+              <div className="font-display text-lg font-medium text-navy">
                 <CmsText id="Contact.bb8bb7523e6d">Follow Our Journey</CmsText>
               </div>
               <p className="text-sm text-slate-500">
@@ -183,7 +183,7 @@ export function Contact() {
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-tint text-sky-deep">
                 <Phone className="h-6 w-6" strokeWidth={2} aria-hidden />
               </div>
-              <div className="mt-3 font-display text-lg font-bold text-navy">
+              <div className="mt-3 font-display text-lg font-medium text-navy">
                 <CmsText id="Contact.46454eeca3ea">Book a Free 30-Minute Consultation</CmsText>
               </div>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
@@ -196,7 +196,7 @@ export function Contact() {
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-sky px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
+                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-sky px-6 py-3 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
               >
                 <MessageCircle className="h-4 w-4" aria-hidden />
                 <CmsText id="Contact.6262cd58b9d5">WhatsApp us now →</CmsText>
@@ -207,7 +207,7 @@ export function Contact() {
           {/* Right: form */}
           <Reveal>
             <div className="rounded-3xl border border-border bg-white p-8 shadow-card md:p-10">
-              <h3 className="font-display text-xl font-extrabold text-navy">
+              <h3 className="font-display text-xl font-medium text-navy">
                 <CmsText id="Contact.19ecf8fecb75">Send Us a Message</CmsText>
               </h3>
               {done ? (
@@ -219,7 +219,7 @@ export function Contact() {
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-sky text-white">
                     <Check className="h-6 w-6" strokeWidth={3} />
                   </div>
-                  <div className="mt-4 font-display text-lg font-bold text-navy">
+                  <div className="mt-4 font-display text-lg font-medium text-navy">
                     <CmsText id="Contact.89602ec37891">Message received!</CmsText>
                   </div>
                   <p className="mt-2 text-sm text-slate-600">
@@ -232,7 +232,7 @@ export function Contact() {
                     href={WA_LINK}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-block text-sm font-bold text-sky-deep hover:underline"
+                    className="mt-4 inline-block text-sm font-medium text-sky-deep hover:underline"
                   >
                     <CmsText id="Contact.a75653166353">Open WhatsApp →</CmsText>
                   </a>
@@ -290,7 +290,7 @@ export function Contact() {
                   <button
                     type="submit"
                     disabled={sending}
-                    className="w-full rounded-full bg-navy py-4 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-sky hover:shadow-button"
+                    className="w-full rounded-full bg-navy py-4 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-sky hover:shadow-button"
                   >
                     <CmsText id="Contact.42d2a8b329f6">Send Message →</CmsText>
                   </button>
@@ -332,8 +332,8 @@ function ContactItem({
         {icon}
       </div>
       <div>
-        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{title}</div>
-        <div className="mt-0.5 font-display text-base font-bold text-navy">{value}</div>
+        <div className="text-xs font-medium uppercase tracking-wider text-slate-500">{title}</div>
+        <div className="mt-0.5 font-display text-base font-medium text-navy">{value}</div>
         <div className="mt-1 text-sm text-slate-500">{sub}</div>
       </div>
     </div>

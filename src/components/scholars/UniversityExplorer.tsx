@@ -69,10 +69,10 @@ export function UniversityExplorer() {
     <section id="universities" className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
             <CmsText id="UniversityExplorer.0d7a9a83ef6d">University Explorer</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
+          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy">
             <CmsText id="UniversityExplorer.3bbe267caa26">Find Your Perfect Fit</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
@@ -114,7 +114,7 @@ export function UniversityExplorer() {
                 options={TUITIONS}
               />
               <div className="relative">
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-500">
                   <CmsText id="UniversityExplorer.49c266baaaa7">Search</CmsText>
                 </label>
                 <Search className="pointer-events-none absolute bottom-3 left-3 h-4 w-4 text-slate-400" />
@@ -165,11 +165,11 @@ export function UniversityExplorer() {
             >
               <div className="flex items-start justify-between">
                 <div className="text-3xl">{u.flag}</div>
-                <span className="rounded-full bg-sky-tint px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-deep">
+                <span className="rounded-full bg-sky-tint px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-sky-deep">
                   {u.country}
                 </span>
               </div>
-              <h3 className="mt-4 font-display text-base font-bold leading-tight text-navy">
+              <h3 className="mt-4 font-display text-base font-medium leading-tight text-navy">
                 {u.name}
               </h3>
               <div className="mt-3 space-y-1 text-[12px] text-slate-600">
@@ -188,7 +188,7 @@ export function UniversityExplorer() {
           <div className="mt-10 text-center">
             <button
               onClick={() => setVisible((v) => v + 8)}
-              className="rounded-full border-2 border-navy px-6 py-3 text-sm font-bold text-navy transition-all hover:bg-navy hover:text-white"
+              className="rounded-full border-2 border-navy px-6 py-3 text-sm font-medium text-navy transition-all hover:bg-navy hover:text-white"
             >
               <CmsText id="UniversityExplorer.8f9849c015cd">Load More Universities →</CmsText>
             </button>
@@ -214,7 +214,7 @@ export function UniversityExplorer() {
               <X className="h-5 w-5" />
             </button>
             <div className="text-4xl">{selected.flag}</div>
-            <h3 className="mt-3 font-display text-2xl font-extrabold text-navy">{selected.name}</h3>
+            <h3 className="mt-3 font-display text-2xl font-medium text-navy">{selected.name}</h3>
             <div className="mt-1 text-sm text-slate-500">
               {selected.country}
               <CmsText id="UniversityExplorer.a137f17a19a0"> · </CmsText>
@@ -250,7 +250,7 @@ export function UniversityExplorer() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-sky"
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-6 py-3.5 text-sm font-medium text-white transition-all hover:bg-sky"
             >
               <CmsText id="UniversityExplorer.cdb1b2633afe">Apply with Scholars Cafe </CmsText>
               <ArrowRight className="h-4 w-4" />
@@ -278,7 +278,7 @@ function Select({
 
   return (
     <div>
-      <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-500">
         {label}
       </label>
       <select
@@ -302,7 +302,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 
   return (
     <div className="rounded-xl bg-sky-soft p-3">
-      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="text-[11px] font-medium uppercase tracking-wider text-slate-500">{label}</div>
       <div className="mt-1 font-semibold text-navy">{value}</div>
     </div>
   );

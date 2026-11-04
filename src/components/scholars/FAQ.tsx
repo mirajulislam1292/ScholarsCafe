@@ -20,10 +20,10 @@ export function FAQ() {
     <section id="faq" className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
             <CmsText id="FAQ.4e9f48728271">Got Questions?</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
+          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy">
             <CmsText id="FAQ.a3d458e1bd1e">Frequently Asked Questions</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
@@ -41,7 +41,7 @@ export function FAQ() {
                     onClick={() => setOpen(isOpen ? null : i)}
                     className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
                   >
-                    <span className="font-display text-[16px] font-bold text-navy">{f.q}</span>
+                    <span className="font-display text-[16px] font-medium text-navy">{f.q}</span>
                     <span
                       className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-sky/10 text-sky transition-transform ${isOpen ? "rotate-45" : ""}`}
                     >

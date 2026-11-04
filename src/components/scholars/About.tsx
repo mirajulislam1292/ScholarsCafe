@@ -19,10 +19,10 @@ export function About() {
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <div className="grid grid-cols-1 gap-14 lg:grid-cols-[5fr_6fr]">
           <Reveal>
-            <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky-light">
+            <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky-light">
               <CmsText id="About.10a516acef81">Who We Are</CmsText>
             </span>
-            <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold leading-[1.1]">
+            <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light leading-[1.1]">
               <CmsText id="About.8bdc46e618ce">Built by Students,</CmsText>
               <br />
               <CmsText id="About.6aa9f10fe080"> For Students.</CmsText>
@@ -60,7 +60,7 @@ export function About() {
                   aria-hidden
                 />
                 <div>
-                  <span className="font-bold">
+                  <span className="font-medium">
                     <CmsText id="About.b3bb760b6a9d">Our mission:</CmsText>
                   </span>
                   <CmsText id="About.ca4646eca668">
@@ -79,7 +79,7 @@ export function About() {
               <StaggerItem key={v.title}>
                 <div className="h-full rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-sky/50 hover:bg-white/10">
                   <ScholarIcon name={v.icon} className="h-8 w-8 text-sky-light" strokeWidth={1.5} />
-                  <h3 className="mt-4 font-display text-lg font-bold">{v.title}</h3>
+                  <h3 className="mt-4 font-display text-lg font-medium">{v.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/70">{v.desc}</p>
                 </div>
               </StaggerItem>
@@ -90,7 +90,7 @@ export function About() {
         {/* Team */}
         <div className="mt-24">
           <Reveal className="text-center">
-            <h3 className="font-display text-3xl font-extrabold">
+            <h3 className="font-display text-3xl font-light">
               <CmsText id="About.72271dec619e">Meet the Team</CmsText>
             </h3>
             <p className="mt-2 text-sky-light">
@@ -103,7 +103,7 @@ export function About() {
             {TEAM.map((m) => (
               <StaggerItem key={m.name}>
                 <div className="h-full rounded-2xl border border-white/12 bg-white/5 p-6 text-center backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-sky/40">
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-sky to-midnight font-display text-xl font-extrabold">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-sky to-midnight font-display text-xl font-medium">
                     {m.photo ? (
                       <img
                         src={m.photo}
@@ -115,7 +115,7 @@ export function About() {
                       m.initials
                     )}
                   </div>
-                  <div className="mt-4 font-display text-lg font-bold">{m.name}</div>
+                  <div className="mt-4 font-display text-lg font-medium">{m.name}</div>
                   <div className="text-[13px] font-semibold text-sky-light">{m.role}</div>
                   <p className="mt-3 text-[13px] leading-relaxed text-white/65">{m.bio}</p>
                 </div>
@@ -124,7 +124,7 @@ export function About() {
             <StaggerItem className="sm:col-span-2 lg:col-span-4">
               <div className="flex flex-col items-center rounded-2xl border-2 border-dashed border-white/20 p-8 text-center md:flex-row md:justify-between md:text-left">
                 <div>
-                  <div className="font-display text-lg font-bold">
+                  <div className="font-display text-lg font-medium">
                     <CmsText id="About.9d698add0344">Join Our Team</CmsText>
                   </div>
                   <p className="mt-1 text-sm text-white/60">
@@ -135,7 +135,7 @@ export function About() {
                   </p>
                 </div>
                 <a
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-bold text-white hover:bg-[#0284c7] md:mt-0"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-5 py-2.5 text-sm font-medium text-white hover:bg-[#0284c7] md:mt-0"
                   href="#contact"
                 >
                   <CmsText id="About.31e392d1c037">Apply </CmsText>

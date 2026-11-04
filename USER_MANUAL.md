@@ -41,11 +41,10 @@ To hide a course, open it and click **Unpublish**.
 ## 4. Mentors (team section)
 Admin → **Mentors** → **+ Add entry** → name, role, short bio, photo (upload or `https://` link), initials (shown if there's no photo) → **Save draft** → **Publish**.
 
-## 5. Universities and logos (the scrolling logo strip)
-1. Admin → **Website text & images** → **Universities**.
-2. Each university has a **name** and a **logo**. Upload a new logo or change the name, then **Publish**.
-3. Logos look best as **dark logos on a transparent background** (PNG or WebP, about 300 px wide). The site shows them in gray and brings them to full strength on hover.
-4. If a logo is missing or fails to load, the university's name appears instead.
+## 5. Universities (the moving name strip under the video)
+1. Admin → **Website text & images** → **universities**.
+2. Each entry is one university **name**. Edit a name, add the next number for a new one, or clear a name to hide it, then **Publish**.
+3. Names scroll slowly from right to left and pause when you hover over them. No logos are needed.
 
 ## 6. Students and student dashboard
 The student dashboard (courses, lessons, messages, reviews) is **not built yet**; it is the next project phase. When it's ready, this manual will cover adding students, assigning courses and moderating messages. For now:
@@ -78,7 +77,6 @@ In `src/content/site.json` → `countries` → set `"enabled": true` for a count
 | "Another editor changed this entry" | Someone saved it meanwhile. Reload the page and make your edit again. |
 | Contact form says it can't send | Check that the admin site is up. If you enabled Turnstile, both keys must be set (see `DEPLOYMENT.md`). |
 | Hero video doesn't play | On phones with data saver, slow connections or "reduce motion" turned on, a still image is shown on purpose. Otherwise check the file exists in `public/media/hero/`. |
-| A logo shows as text | Its image is missing or broken. Upload it again (section 5). |
 | Site is down after an update | hPanel → Websites → Node.js → Deployments: open the failed build's log, or redeploy the last good build. |
 
 For anything else, contact your developer with a screenshot and the time it happened.

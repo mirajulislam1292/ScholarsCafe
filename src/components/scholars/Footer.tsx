@@ -26,7 +26,7 @@ export function Footer() {
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2">
               <span className="brand-mark" aria-hidden="true" />
-              <span className="footer-brand font-display text-xl font-extrabold">
+              <span className="footer-brand font-display text-xl font-medium">
                 <CmsText id="Footer.c9db85fc4db0">ScholarsCafe</CmsText>
               </span>
             </Link>
@@ -143,7 +143,7 @@ function Col({ title, links }: { title: string; links: LinkRef[] }) {
 
   return (
     <div>
-      <div className="font-display text-sm font-bold uppercase tracking-wider text-white">
+      <div className="font-display text-sm font-medium uppercase tracking-wider text-white">
         {title}
       </div>
       <ul className="mt-4 space-y-2.5 text-sm text-white/55">

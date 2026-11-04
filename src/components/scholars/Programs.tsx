@@ -18,10 +18,10 @@ export function Programs() {
     <section id="programs" className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
             <CmsText id="Programs.1d5c2e2d47ce">Our Tracks</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
+          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy">
             <CmsText id="Programs.e2cd5f83037c">Choose Your Path to the World</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
@@ -43,7 +43,7 @@ export function Programs() {
                 }`}
               >
                 <div
-                  className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                  className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-wider ${
                     p.featured
                       ? "border-sky/40 bg-sky/15 text-sky"
                       : "border-sky/30 bg-sky/10 text-sky-deep"
@@ -60,7 +60,7 @@ export function Programs() {
                   />
                 </div>
                 <h3
-                  className={`mt-4 font-display text-2xl font-extrabold ${p.featured ? "text-white" : "text-navy"}`}
+                  className={`mt-4 font-display text-2xl font-medium ${p.featured ? "text-white" : "text-navy"}`}
                 >
                   {p.title}
                 </h3>
@@ -90,7 +90,7 @@ export function Programs() {
                   href={WA_LINK}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`mt-8 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold transition-all hover:-translate-y-0.5 ${
+                  className={`mt-8 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-medium transition-all hover:-translate-y-0.5 ${
                     p.featured
                       ? "bg-sky text-white hover:bg-sky-light hover:text-navy"
                       : "bg-navy text-white hover:bg-sky"

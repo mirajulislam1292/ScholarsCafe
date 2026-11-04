@@ -57,10 +57,10 @@ export function Newsletter() {
           >
             <Mail className="h-8 w-8 text-sky-light" />
           </motion.div>
-          <span className="mt-6 inline-block text-xs font-bold uppercase tracking-[0.15em] text-sky-light">
+          <span className="mt-6 inline-block text-xs font-medium uppercase tracking-[0.15em] text-sky-light">
             <CmsText id="Newsletter.ac7654d7cf2c">Stay Updated</CmsText>
           </span>
-          <h2 className="mt-3 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold">
+          <h2 className="mt-3 font-display text-[clamp(2rem,3.5vw,3rem)] font-light">
             <CmsText id="Newsletter.8d2bdd3b4ffc">Get Free Scholarship Alerts & Study Tips</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-white/80">
@@ -88,7 +88,7 @@ export function Newsletter() {
                 <button
                   type="submit"
                   disabled={sending}
-                  className="bg-sky px-7 py-4 text-[15px] font-bold text-white transition-colors hover:bg-[#0284c7]"
+                  className="bg-sky px-7 py-4 text-[15px] font-medium text-white transition-colors hover:bg-[#0284c7]"
                 >
                   <CmsText id="Newsletter.d0f736aa267d">Subscribe →</CmsText>
                 </button>
@@ -126,7 +126,7 @@ export function Newsletter() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400 text-navy">
                 <Check className="h-6 w-6" strokeWidth={3} />
               </div>
-              <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 font-display text-lg font-bold">
+              <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 font-display text-lg font-medium">
                 <span>
                   <CmsText id="Newsletter.66023af1bfb0">
                     You're in! Welcome to the Scholars Cafe community.

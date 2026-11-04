@@ -61,12 +61,12 @@ export function Resources() {
                   href="#newsletter"
                   className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-border bg-gradient-to-br from-navy to-midnight p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:p-10"
                 >
-                  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-gold">
+                  <div className="flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.22em] text-gold">
                     <span className="h-px w-8 bg-gold" />
                     <CmsText id="Resources.2c8f9493f691">Featured · </CmsText>
                     {r.category}
                   </div>
-                  <h3 className="mt-8 font-display text-3xl font-extrabold leading-tight md:text-4xl">
+                  <h3 className="mt-8 font-display text-3xl font-light leading-tight md:text-4xl">
                     {r.title}
                   </h3>
                   <p className="mt-5 flex-1 text-[15px] leading-relaxed text-white/75">
@@ -122,11 +122,11 @@ export function Resources() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-foreground">
                     <ScholarIcon name={r.icon} className="h-6 w-6" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-sky">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-sky">
                     {r.category}
                   </span>
                 </div>
-                <h3 className="mt-7 font-display text-xl font-bold leading-snug text-foreground">
+                <h3 className="mt-7 font-display text-xl font-medium leading-snug text-foreground">
                   {r.title}
                 </h3>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">

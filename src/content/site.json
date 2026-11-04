@@ -1,24 +1,58 @@
 {
   "_readme": "Editable site content. Change text here, save, rebuild. Fields ending in _TODO describe what to add; an empty value is simply hidden on the site. Most other text can also be edited live in the admin (Content > Text).",
-
   "countries": {
     "_readme": "Set enabled to true to show a country again across the site (USA section, university explorer, contact form, footer). The country data itself lives in src/lib/scholars-data.ts.",
     "list": [
-      { "name": "USA", "enabled": true },
-      { "name": "UK", "enabled": false },
-      { "name": "Canada", "enabled": false },
-      { "name": "Germany", "enabled": false },
-      { "name": "Sweden", "enabled": false },
-      { "name": "Netherlands", "enabled": false },
-      { "name": "Finland", "enabled": false },
-      { "name": "New Zealand", "enabled": false },
-      { "name": "Hungary", "enabled": false },
-      { "name": "South Korea", "enabled": false },
-      { "name": "Turkey", "enabled": false },
-      { "name": "Spain", "enabled": false }
+      {
+        "name": "USA",
+        "enabled": true
+      },
+      {
+        "name": "UK",
+        "enabled": false
+      },
+      {
+        "name": "Canada",
+        "enabled": false
+      },
+      {
+        "name": "Germany",
+        "enabled": false
+      },
+      {
+        "name": "Sweden",
+        "enabled": false
+      },
+      {
+        "name": "Netherlands",
+        "enabled": false
+      },
+      {
+        "name": "Finland",
+        "enabled": false
+      },
+      {
+        "name": "New Zealand",
+        "enabled": false
+      },
+      {
+        "name": "Hungary",
+        "enabled": false
+      },
+      {
+        "name": "South Korea",
+        "enabled": false
+      },
+      {
+        "name": "Turkey",
+        "enabled": false
+      },
+      {
+        "name": "Spain",
+        "enabled": false
+      }
     ]
   },
-
   "usa": {
     "heading": "Study in the United States.",
     "lead": "",
@@ -26,10 +60,12 @@
     "regions": [
       {
         "name": "New England",
-        "place": "New Haven, Connecticut",
-        "image": "/media/hero/d1-new-haven.webp",
+        "place": "",
+        "image": "",
         "note": "",
-        "note_TODO": "Optional: one short line, e.g. which universities your students target here."
+        "note_TODO": "Optional: one short line, e.g. which universities your students target here.",
+        "image_TODO": "Add a licensed New England campus photo (e.g. public/media/usa/new-england.webp) and put its path here. Without an image the card shows a brand gradient.",
+        "place_TODO": "Optional: city or university shown under the name."
       },
       {
         "name": "New York",
@@ -48,7 +84,6 @@
     ],
     "cta": "Plan my US applications"
   },
-
   "contact": {
     "defaultCountry": "USA"
   }

@@ -17,7 +17,7 @@ export function BlogPosts() {
   if (!posts.length) return null;
   return (
     <section id="blog" className="mx-auto max-w-[1280px] px-5 py-20">
-      <h2 className="font-display text-3xl font-bold">From our journal</h2>
+      <h2 className="font-display text-3xl font-light">From our journal</h2>
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         {posts.map((post) => (
           <article key={post.id} className="rounded-2xl border border-border bg-white p-7">
@@ -29,7 +29,7 @@ export function BlogPosts() {
                 loading="lazy"
               />
             )}
-            <h3 className="text-xl font-bold">{post.title}</h3>
+            <h3 className="text-xl font-medium">{post.title}</h3>
             <p className="my-3 text-sm text-slate-500">{post.author}</p>
             <p className="whitespace-pre-wrap text-slate-600">
               {selected === post.id ? post.body : post.excerpt}

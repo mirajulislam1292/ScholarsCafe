@@ -34,7 +34,7 @@ export function Hero() {
       />
 
       <div className="relative mx-auto w-full max-w-[1200px] px-6 pb-[clamp(64px,10vh,120px)] pt-40 md:px-12">
-        <h1 className="max-w-[15ch] font-heading text-[clamp(2.75rem,6.6vw,6.25rem)] font-light leading-[0.98] tracking-[-0.03em] text-white">
+        <h1 className="max-w-[15ch] type-display text-white">
           {headline.map((word, i) => (
             <span
               key={word}
@@ -49,10 +49,7 @@ export function Hero() {
           </span>
         </h1>
 
-        <p
-          style={delay(560)}
-          className={`${RISE} mt-8 max-w-[34ch] font-heading text-[clamp(1.125rem,1.6vw,1.375rem)] font-light leading-[1.5] tracking-[-0.01em] text-ice-200/85`}
-        >
+        <p style={delay(560)} className={`${RISE} mt-8 max-w-[34ch] type-lead text-ice-200/85`}>
           <CmsText id="Hero.lead.v2">
             One-to-one mentorship for Bangladeshi students aiming at the world's best universities.
           </CmsText>
@@ -64,7 +61,7 @@ export function Hero() {
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex h-12 items-center gap-2 rounded-full bg-ice-100 px-6 font-text text-[15px] font-medium text-blue-950 transition-[background-color,box-shadow] duration-500 ease-premium hover:bg-white hover:shadow-[0_16px_40px_rgb(0_0_0/0.35)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ice-300"
+            className="group inline-flex h-12 items-center gap-2 rounded-full bg-ice-100 px-6 type-button text-blue-950 transition-[background-color,box-shadow] duration-500 ease-premium hover:bg-white hover:shadow-[0_16px_40px_rgb(0_0_0/0.35)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ice-300"
           >
             <CmsText id="Hero.009fe0d39178">Book a free strategy call</CmsText>
             <ArrowUpRight
@@ -74,7 +71,7 @@ export function Hero() {
           </a>
           <a
             href="#programs"
-            className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 font-text text-[15px] font-medium text-white transition-colors duration-500 ease-premium hover:border-white/50 hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ice-300"
+            className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 type-button text-white transition-colors duration-500 ease-premium hover:border-white/50 hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ice-300"
           >
             <CmsText id="Hero.f4685c1f868b">Explore programs</CmsText>
           </a>

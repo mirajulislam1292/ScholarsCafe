@@ -34,7 +34,7 @@ export function SuccessStories() {
   if (!total)
     return (
       <section id="success" className="bg-sky-soft px-5 py-20 text-center">
-        <h2 className="font-display text-3xl font-bold text-navy">
+        <h2 className="font-display text-3xl font-light text-navy">
           <CmsText id="SuccessStories.empty.title">Your story starts with a conversation.</CmsText>
         </h2>
         <a
@@ -60,10 +60,10 @@ export function SuccessStories() {
     <section id="success" className="bg-sky-soft py-24 md:py-32 dark:bg-navy-deep">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
             <CmsText id="SuccessStories.2ef2f8126cf5">Student Wins</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy dark:text-white">
+          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy dark:text-white">
             <CmsText id="SuccessStories.e96a6c77cf3b">Real Students. Real Results.</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600 dark:text-white/70">
@@ -100,12 +100,12 @@ export function SuccessStories() {
                   </p>
                   <div className="mt-7 flex items-center gap-4">
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} font-display text-base font-extrabold text-white`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} font-display text-base font-medium text-white`}
                     >
                       {testimonial.initials}
                     </div>
                     <div>
-                      <div className="font-display text-base font-bold text-navy dark:text-white">
+                      <div className="font-display text-base font-medium text-navy dark:text-white">
                         {testimonial.name}
                       </div>
                       <div className="text-[13px] font-semibold text-sky-deep dark:text-sky-light">
@@ -122,7 +122,7 @@ export function SuccessStories() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-7 bg-gradient-to-r from-sky to-navy px-9 py-4 text-center text-sm font-bold text-white">
+                <div className="mt-7 bg-gradient-to-r from-sky to-navy px-9 py-4 text-center text-sm font-medium text-white">
                   {testimonial.outcome}
                 </div>
               </motion.article>
@@ -138,7 +138,7 @@ export function SuccessStories() {
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-7 py-3.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-7 py-3.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
           >
             <CmsText id="SuccessStories.fc4e64953206">Book a Free Consultation →</CmsText>
           </a>

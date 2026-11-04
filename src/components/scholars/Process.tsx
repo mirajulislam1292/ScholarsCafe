@@ -11,10 +11,10 @@ export function Process() {
     <section className="bg-white py-24 md:py-32">
       <div className="mx-auto max-w-[1280px] px-5 md:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
+          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
             <CmsText id="Process.c1879525c75c">How It Works</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
+          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy">
             <CmsText id="Process.0de600876bfd">From conversation to acceptance.</CmsText>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
@@ -41,7 +41,7 @@ export function Process() {
                     <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-sky-tint text-sky-deep">
                       <ScholarIcon name={step.icon} className="h-6 w-6" />
                     </div>
-                    <h3 className="mt-3 font-display text-xl font-bold text-navy">
+                    <h3 className="mt-3 font-display text-xl font-medium text-navy">
                       <CmsText id="Process.8e6a6cca7aae">Step </CmsText>
                       {step.n}
                       <CmsText id="Process.e7ac0786668e">: </CmsText>
@@ -52,7 +52,7 @@ export function Process() {
                   <div className="hidden md:block" />
 
                   {/* Number circle on timeline */}
-                  <div className="absolute left-0 top-0 flex h-12 w-12 items-center justify-center rounded-full bg-sky font-display text-lg font-extrabold text-white shadow-[0_0_0_6px_rgba(14,165,233,0.15)] md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
+                  <div className="absolute left-0 top-0 flex h-12 w-12 items-center justify-center rounded-full bg-sky font-display text-lg font-medium text-white shadow-[0_0_0_6px_rgba(14,165,233,0.15)] md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
                     {step.n}
                   </div>
                 </div>

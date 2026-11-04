@@ -15,8 +15,8 @@ function writeSecurityPolicy(clientDir, html) {
     "default-src 'self'",
     `script-src 'self' ${hashes.join(" ")}${turnstile}`,
     // React/motion set inline style attributes; styles cannot run code.
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self'",
     "img-src 'self' data: https:",
     "media-src 'self'",
     "connect-src 'self' https://admin.scholarscafe.com",

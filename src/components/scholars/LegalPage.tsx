@@ -30,7 +30,7 @@ export function LegalPage({
           <div className="mt-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-sky">
             {kicker}
           </div>
-          <h1 className="mt-4 font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-6xl">
+          <h1 className="mt-4 font-display text-5xl font-light leading-[1.05] tracking-tight text-foreground md:text-6xl">
             {title}
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
@@ -45,7 +45,7 @@ export function LegalPage({
       <article className="mx-auto max-w-[760px] px-5 py-16 md:px-8 md:py-24">
         <div
           className="prose prose-slate max-w-none
-            prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-foreground
+            prose-headings:font-display prose-headings:font-light prose-headings:tracking-tight prose-headings:text-foreground
             prose-h2:mt-12 prose-h2:text-2xl prose-h2:md:text-3xl
             prose-h3:mt-8 prose-h3:text-lg
             prose-p:text-[16px] prose-p:leading-[1.75] prose-p:text-muted-foreground

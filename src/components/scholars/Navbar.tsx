@@ -68,7 +68,7 @@ export function Navbar() {
               <a
                 key={item.href}
                 href={item.href}
-                className={`font-text text-[14px] font-medium tracking-[-0.005em] transition-colors duration-500 ease-premium ${
+                className={`type-nav transition-colors duration-500 ease-premium ${
                   solid
                     ? "text-neutral-600 hover:text-neutral-900"
                     : "text-white/70 hover:text-white"
@@ -84,7 +84,7 @@ export function Navbar() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className={`hidden h-10 items-center rounded-full px-5 font-text text-[14px] font-medium transition-colors duration-500 ease-premium md:inline-flex ${
+              className={`hidden h-10 items-center rounded-full px-5 type-button transition-colors duration-500 ease-premium md:inline-flex ${
                 solid
                   ? "bg-blue-700 text-white hover:bg-blue-800"
                   : "bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md hover:bg-white/20"
@@ -152,7 +152,7 @@ export function Navbar() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-auto inline-flex h-12 items-center justify-center rounded-full bg-ice-100 font-text text-[15px] font-medium text-blue-950"
+              className="mt-auto inline-flex h-12 items-center justify-center rounded-full bg-ice-100 type-button text-blue-950"
             >
               <CmsText id="Navbar.b2151df99763">Book Call</CmsText>
             </a>
