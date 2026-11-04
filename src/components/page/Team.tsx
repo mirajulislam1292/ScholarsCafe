@@ -78,7 +78,7 @@ export function Team() {
   const team = SITE.team;
   const members = useCmsList<Member>("team", DEFAULT_TEAM);
   return (
-    <section id="team" className="bg-white py-[clamp(96px,13vw,200px)]">
+    <section id="team" className="bg-white py-[clamp(72px,13vw,200px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal>
           <h2 className="type-h2 text-neutral-900">{team.heading}</h2>

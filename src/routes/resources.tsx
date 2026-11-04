@@ -109,7 +109,7 @@ function ResourcesPage() {
                   <div
                     role="tablist"
                     aria-label="Guide topics"
-                    className="-mx-1 flex flex-wrap gap-2"
+                    className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden"
                   >
                     {["All", ...CATEGORIES.map((c) => c.id)].map((c) => {
                       const label =
@@ -122,7 +122,7 @@ function ResourcesPage() {
                           role="tab"
                           aria-selected={active}
                           onClick={() => setFilter(c)}
-                          className={`type-nav h-10 rounded-full px-4 transition-colors duration-500 ease-premium ${
+                          className={`type-nav h-10 shrink-0 whitespace-nowrap rounded-full px-4 transition-colors duration-500 ease-premium ${
                             active
                               ? "bg-blue-950 text-white"
                               : "text-neutral-600 ring-1 ring-neutral-900/10 hover:text-neutral-900 hover:ring-neutral-900/25"

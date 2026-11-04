@@ -58,7 +58,7 @@ export function SuccessStories() {
   ];
 
   return (
-    <section id="success" className="bg-ice-50 py-[clamp(96px,13vw,200px)] ">
+    <section id="success" className="bg-ice-50 py-[clamp(72px,13vw,200px)] ">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="hidden">

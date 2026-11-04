@@ -26,6 +26,10 @@ for (const key of [
   if (url.protocol !== "https:" || url.origin !== process.env[key])
     throw new Error("An exact HTTPS origin is required: " + key);
 }
+// Google IDs and secrets never contain whitespace; strip any that sneaks in when pasting into hPanel
+// (a stray space makes Google reject every sign-in with "invalid_client").
+for (const key of ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"])
+  process.env[key] = process.env[key].replace(/\s+/g, "");
 // LiteSpeed loads the entry point with require(), so avoid top-level await.
 async function start() {
   const store = new Store(process.env);

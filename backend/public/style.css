@@ -475,3 +475,119 @@ progress {
 .message p {
   margin: 0.2rem 0;
 }
+
+/* ---------- Phones and small tablets: compact top bar with a swipeable menu ---------- */
+@media (max-width: 800px) {
+  aside {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    width: auto;
+    height: auto;
+    padding: 12px 16px 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    border-right: 0;
+    border-bottom: 1px solid var(--ice-200);
+    box-shadow: 0 6px 18px rgb(4 28 49 / 0.06);
+  }
+  aside .brand span {
+    font-size: 14px;
+  }
+  aside .brand img {
+    width: 32px;
+    height: 32px;
+  }
+  aside .eyebrow,
+  aside .site-link {
+    display: none;
+  }
+  #logout {
+    margin-left: auto;
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+  nav {
+    order: 3;
+    flex: 1 0 100%;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 0 16px 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+  nav button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 14px;
+    font-size: 14px;
+    background: var(--ice-100);
+  }
+  main {
+    margin: 0;
+    padding: 20px 16px 48px;
+  }
+  header {
+    display: block;
+  }
+  header h1 {
+    font-size: 30px;
+    margin: 4px 0 6px;
+  }
+  #identity {
+    display: block;
+    margin-bottom: 14px;
+    overflow-wrap: anywhere;
+  }
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .card {
+    padding: 16px;
+  }
+  /* Wide tables scroll sideways inside their card instead of stretching the page. */
+  table {
+    display: block;
+    overflow-x: auto;
+    font-size: 12px;
+  }
+  /* 16px text stops iPhones zooming in when a field is tapped. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    max-width: 100%;
+  }
+  .toolbar > * {
+    flex: 1 1 100%;
+  }
+  .message {
+    max-width: 92%;
+  }
+  .lesson-view video {
+    max-height: 56vh;
+  }
+  .login {
+    margin: 0 auto;
+    padding: 36px 20px 48px;
+  }
+  .login h1 {
+    font-size: 40px;
+    line-height: 1.05;
+  }
+  .login .primary,
+  .login-form,
+  .login-form button {
+    width: 100%;
+    max-width: none;
+    text-align: center;
+  }
+}
