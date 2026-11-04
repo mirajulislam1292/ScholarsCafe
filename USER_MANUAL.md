@@ -86,7 +86,9 @@ Admin → **Leads**. Every contact-form message becomes a lead.
 3. **Staff notes** are never shown to the student. To block a student completely: **Access** → untick **Active**.
 
 **Mentors** see **Students**: only students enrolled with them, and they can add notes. They cannot change courses or enrollments.
-**What students see:** they sign in at **https://admin.scholarscafe.com** and land on **My courses**: each course with a progress bar, then lessons in order with the video, the text and **Mark as done**. Under **Account** they can edit their name, phone and target intake, and set a password. Messages and reviews arrive in the next step.
+**What students see:** they sign in at **https://admin.scholarscafe.com** and land on **My courses**: each course with a progress bar, then lessons in order with the video, the text and **Mark as done**. Under **Account** they can edit their name, phone and target intake, and set a password.
+**Messages:** each student has one conversation with their mentor(s) and the Scholars Cafe team. Students use **Messages**; mentors and admins open **Messages** to see every conversation they're allowed to (unread counts shown). Mentors only see their own students. Up to 30 messages per person per hour. There are no email alerts yet, so check **Messages** daily.
+**Reviews:** students can review a course they're enrolled in (1–5 stars + text) at the bottom of the course page. Admins approve or reject them under **Reviews**. Editing a review sends it back for approval. Approved reviews are not shown on the public website yet; copy the good ones into **Testimonials** if you want them there.
 **Video protection:** videos play only for students actively enrolled in that course (and their mentor and admins). Pausing an enrollment, unpublishing a lesson or deactivating an account stops playback straight away. Download buttons are hidden, but no website can stop someone recording their screen, so don't put anything in a video you couldn't accept being shared.
 **Newsletter** shows email signups.
 

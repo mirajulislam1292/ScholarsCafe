@@ -14,6 +14,9 @@ export class Store {
       timezone: "Z",
       charset: "utf8mb4",
     });
+    // The driver reads dates as UTC, so every session must store and return UTC too
+    // (otherwise TIMESTAMP columns shift by the server's local offset).
+    this.pool.pool.on("connection", (c) => c.query("SET time_zone='+00:00'"));
   }
   async query(sql, args = [], connection = this.pool) {
     const rows = (await connection.execute(sql, args))[0];

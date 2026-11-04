@@ -75,3 +75,9 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - Lesson video `/api/lms/lessons/:id/video`: session required, access re-checked on every request including each byte range (pause/unpublish/deactivate takes effect immediately), private files only, `Cache-Control: private, no-store`, `Cross-Origin-Resource-Policy: same-origin`. Chose per-request checks over signed URLs: nothing to leak or share.
 - Limits: hidden download button is a deterrent, not DRM; screen recording can't be prevented. Videos are read whole from MySQL per range request (fine for ≤12 MB files and modest traffic; move to object storage if usage grows).
 - Verified on MySQL 8: enrolled student 206 range; not-enrolled student, paused enrollment and unpublished lesson 404; no session 401; editor 403.
+
+## Phase 5.4 additions (messages and reviews)
+- Messages: one thread per student; access via `canReachStudent` inside the transaction (student: own; mentor: own students; staff: all); others get 404 with nothing written. Bodies are plain text (rendered with `textContent`), 1–5000 chars, 30 messages per user per hour. Students never see staff email addresses.
+- Reviews: only for courses in the student's `courseScope` (enrolled, not paused, published); one per course; any edit returns it to `pending`; only owners/admins moderate (audited). Not published anywhere yet.
+- Fixed: MySQL sessions now run in UTC (`SET time_zone='+00:00'` per connection). Before, a server not on UTC stored local time that the driver read as UTC, shifting lead and message times.
+- Verified on MySQL 8: other mentor and other student 404 on read and post, rate limit at 31st message, review moderation roles.

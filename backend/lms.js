@@ -341,3 +341,122 @@ export function installStudentRoutes(app, { store, fail, sendBytes }) {
     sendBytes(req, res, file.bytes);
   });
 }
+
+// ---------- Messages (one thread per student) and course reviews ----------
+const messageInput = z.object({ body: z.string().trim().min(1).max(5000) }).strict();
+const reviewInput = z
+  .object({ course_id: uuid, rating: z.number().int().min(1).max(5), body: z.string().trim().min(10).max(2000) })
+  .strict();
+const moderation = z.object({ status: z.enum(["approved", "rejected", "pending"]) }).strict();
+
+export function installMessageRoutes(app, { store, fail }) {
+  const q = (sql, args, c) => store.query(sql, args, c);
+  const reach = async (req, studentId, c) => {
+    const [student] = await q("SELECT id FROM users WHERE id=? AND role='student'", [studentId], c);
+    if (!student || !(await canReachStudent(req.actor, studentId, store.query.bind(store), c))) throw fail(404, "Conversation not found.");
+  };
+
+  // Staff and mentors: list of student conversations in their scope, newest first, with unread counts.
+  app.get("/api/lms/threads", async (req, res) => {
+    if (req.actor.role === "student") throw fail(403, "Staff only.");
+    const s = studentScope(req.actor, "u.id");
+    const items = await q(
+      `SELECT u.id,u.email,p.full_name,
+        (SELECT MAX(m.created_at) FROM messages m WHERE m.student_id=u.id) AS last_at,
+        (SELECT COUNT(*) FROM messages m WHERE m.student_id=u.id AND m.sender_id=u.id AND m.read_at IS NULL) AS unread
+       FROM users u LEFT JOIN student_profiles p ON p.user_id=u.id
+       WHERE u.role='student' AND u.active=1 AND ${s.sql}
+       ORDER BY last_at IS NULL, last_at DESC, p.full_name LIMIT 1000`,
+      s.params,
+    );
+    res.json({ items });
+  });
+  // One conversation. Opening it marks the other side's messages as read.
+  app.get("/api/lms/threads/:id", async (req, res) => {
+    const studentId = uuid.parse(req.params.id);
+    const messages = await store.transaction(async (c) => {
+      await reach(req, studentId, c);
+      const fromStudent = req.actor.id === studentId;
+      await q(
+        `UPDATE messages SET read_at=UTC_TIMESTAMP() WHERE student_id=? AND read_at IS NULL AND ${fromStudent ? "sender_id<>?" : "sender_id=?"}`,
+        [studentId, studentId],
+        c,
+      );
+      return q(
+        `SELECT m.id,m.body,m.created_at,m.read_at,m.sender_id,s.role AS sender_role,
+          ${fromStudent ? "NULL" : "s.email"} AS sender_email
+         FROM messages m LEFT JOIN users s ON s.id=m.sender_id
+         WHERE m.student_id=? ORDER BY m.created_at,m.id LIMIT 500`,
+        [studentId],
+        c,
+      );
+    });
+    res.json({ items: messages.map((m) => ({ ...m, mine: m.sender_id === req.actor.id })) });
+  });
+  app.post("/api/lms/threads/:id", async (req, res) => {
+    requireCan(req.actor, "message.send");
+    const studentId = uuid.parse(req.params.id);
+    const { body } = messageInput.parse(req.body);
+    if (store.checkRateLimit && !(await store.checkRateLimit("message", req.actor.id, 30, 3600)))
+      throw fail(429, "You've sent a lot of messages. Please wait a little.");
+    const messageId = randomUUID();
+    await store.transaction(async (c) => {
+      await reach(req, studentId, c);
+      await q("INSERT INTO messages (id,student_id,sender_id,body) VALUES (?,?,?,?)", [messageId, studentId, req.actor.id, body], c);
+    });
+    res.status(201).json({ id: messageId });
+  });
+  // Students: unread count for the menu badge.
+  app.get("/api/lms/my/unread", async (req, res) => {
+    if (req.actor.role !== "student") throw fail(403, "This page is for students.");
+    const [row] = await q("SELECT COUNT(*) AS n FROM messages WHERE student_id=? AND sender_id<>? AND read_at IS NULL", [req.actor.id, req.actor.id]);
+    res.json({ unread: Number(row?.n || 0) });
+  });
+
+  // ---------- Reviews ----------
+  app.get("/api/lms/my/reviews", async (req, res) => {
+    if (req.actor.role !== "student") throw fail(403, "This page is for students.");
+    const s = studentScope(req.actor, "r.user_id");
+    res.json({ items: await q(`SELECT r.course_id,r.rating,r.body,r.status FROM reviews r WHERE ${s.sql}`, s.params) });
+  });
+  // One review per course; editing sends it back for approval.
+  app.post("/api/lms/my/reviews", async (req, res) => {
+    requireCan(req.actor, "review.write");
+    const d = reviewInput.parse(req.body);
+    await store.transaction(async (c) => {
+      const cs = courseScope(req.actor);
+      const [course] = await q(`SELECT c.id FROM lms_courses c WHERE c.id=? AND ${cs.sql}`, [d.course_id, ...cs.params], c);
+      if (!course) throw fail(404, "Course not found.");
+      await q(
+        `INSERT INTO reviews (id,user_id,course_id,rating,body,status) VALUES (?,?,?,?,?,'pending')
+         ON DUPLICATE KEY UPDATE rating=VALUES(rating),body=VALUES(body),status='pending',created_at=CURRENT_TIMESTAMP`,
+        [randomUUID(), req.actor.id, d.course_id, d.rating, d.body],
+        c,
+      );
+    });
+    res.json({ ok: true, status: "pending" });
+  });
+  app.get("/api/lms/reviews", async (req, res) => {
+    requireCan(req.actor, "review.moderate");
+    const status = moderation.shape.status.safeParse(req.query.status).data;
+    const items = await q(
+      `SELECT r.id,r.rating,r.body,r.status,r.created_at,c.title AS course,u.email,p.full_name
+       FROM reviews r JOIN lms_courses c ON c.id=r.course_id JOIN users u ON u.id=r.user_id
+       LEFT JOIN student_profiles p ON p.user_id=r.user_id
+       ${status ? "WHERE r.status=?" : ""} ORDER BY r.created_at DESC LIMIT 500`,
+      status ? [status] : [],
+    );
+    res.json({ items });
+  });
+  app.post("/api/lms/reviews/:id", async (req, res) => {
+    requireCan(req.actor, "review.moderate");
+    const reviewId = uuid.parse(req.params.id);
+    const { status } = moderation.parse(req.body);
+    await store.transaction(async (c) => {
+      const r = await q("UPDATE reviews SET status=? WHERE id=?", [status, reviewId], c);
+      if (!r.affectedRows) throw fail(404, "Review not found.");
+      await store.audit(req.actor.id, "review_" + status, reviewId, c);
+    });
+    res.json({ ok: true });
+  });
+}

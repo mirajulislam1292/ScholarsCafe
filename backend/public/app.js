@@ -274,6 +274,14 @@ function render() {
     renderMyCourses().catch(report);
     return;
   }
+  if (section === "Messages") {
+    (me.role === "student" ? renderThread(me.id) : renderThreads()).catch(report);
+    return;
+  }
+  if (section === "Reviews") {
+    renderReviews().catch(report);
+    return;
+  }
   if (section === "Student courses") {
     renderLmsCourses().catch(report);
     return;
@@ -857,7 +865,7 @@ async function renderMyCourse(courseId, lessonId) {
     view.append(toggle);
   }
   layout.append(list, view);
-  screen.append(layout);
+  screen.append(layout, await reviewForm(courseId));
 }
 async function renderMyDetails() {
   const p = await api("lms/my/profile");
@@ -878,6 +886,117 @@ async function renderMyDetails() {
     }
   };
   $("screen").prepend(card);
+}
+// ---------- Messages and reviews ----------
+const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+function senderLabel(m) {
+  if (m.mine) return "You";
+  if (m.sender_role === "student") return "Student";
+  if (me.role === "student") return m.sender_role === "mentor" ? "Your mentor" : "Scholars Cafe team";
+  return m.sender_email || m.sender_role || "Staff";
+}
+async function renderThread(studentId, title, back) {
+  const screen = $("screen");
+  const messages = (await api("lms/threads/" + studentId)).items;
+  screen.replaceChildren();
+  if (back) screen.append(button("← All conversations", back));
+  if (title) $("heading").textContent = title;
+  const list = node("div", undefined, "thread");
+  if (!messages.length)
+    list.append(node("p", me.role === "student" ? "Ask your mentor anything here. They'll reply as soon as they can." : "No messages yet.", "empty"));
+  for (const m of messages) {
+    const bubble = node("article", undefined, "message" + (m.mine ? " mine" : ""));
+    bubble.append(node("p", `${senderLabel(m)} · ${when(m.created_at)}`, "muted"), node("p", m.body, "lesson-body"));
+    list.append(bubble);
+  }
+  const form = node("form", undefined, "card");
+  const [l, text] = input("Message", "", "textarea", 5000);
+  const send = node("button", "Send", "primary");
+  send.type = "submit";
+  form.append(l, send);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (!text.value.trim()) return;
+    try {
+      send.disabled = true;
+      await api("lms/threads/" + studentId, { body: text.value });
+      await renderThread(studentId, title, back);
+    } catch (err) {
+      send.disabled = false;
+      report(err);
+    }
+  };
+  screen.append(list, form);
+  list.lastElementChild?.scrollIntoView({ block: "nearest" });
+}
+async function renderThreads() {
+  const screen = $("screen");
+  const items = (await api("lms/threads")).items;
+  screen.append(node("p", me.role === "mentor" ? "Conversations with your students." : "Conversations with every student.", "muted"));
+  if (!items.length) screen.append(node("p", "No students yet.", "empty"));
+  for (const t of items) {
+    const card = node("article", undefined, "card");
+    const name = t.full_name || t.email;
+    card.append(
+      node("h3", name),
+      node("p", (t.last_at ? "Last message " + when(t.last_at) : "No messages yet") + (t.unread ? ` · ${t.unread} unread` : ""), t.unread ? "badge" : "muted"),
+      button("Open →", () => renderThread(t.id, name, () => navigate("Messages"))),
+    );
+    screen.append(card);
+  }
+}
+async function reviewForm(courseId) {
+  const mine = (await api("lms/my/reviews")).items.find((r) => r.course_id === courseId);
+  const form = node("form", undefined, "card");
+  const [rl, rating] = select("Rating", [["5", "★★★★★ Excellent"], ["4", "★★★★ Good"], ["3", "★★★ OK"], ["2", "★★ Poor"], ["1", "★ Bad"]], String(mine?.rating || 5));
+  const [bl, body] = input("Your review (at least 10 characters)", mine?.body, "textarea", 2000);
+  const save = node("button", mine ? "Update review" : "Send review", "primary");
+  save.type = "submit";
+  const state = { pending: "Waiting for approval.", approved: "Approved. Thank you!", rejected: "Not approved. You can edit and send it again." };
+  form.append(node("h2", "Review this course"), ...(mine ? [node("p", state[mine.status], "muted")] : []), rl, bl, save);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api("lms/my/reviews", { course_id: courseId, rating: Number(rating.value), body: body.value });
+      notice("Thanks! Your review will appear after the team approves it.");
+      form.replaceWith(await reviewForm(courseId));
+    } catch (err) {
+      report(err);
+    }
+  };
+  return form;
+}
+async function renderReviews() {
+  const screen = $("screen");
+  const [fl, filter] = select("Show", [["pending", "Waiting for approval"], ["approved", "Approved"], ["rejected", "Rejected"], ["", "All"]], "pending");
+  const list = node("div");
+  screen.append(node("p", "Students review courses they're enrolled in. Approve before anyone else can see them.", "muted"), fl, list);
+  const load = async () => {
+    const items = (await api("lms/reviews" + (filter.value ? "?status=" + filter.value : ""))).items;
+    list.replaceChildren();
+    if (!items.length) list.append(node("p", "Nothing here.", "empty"));
+    for (const r of items) {
+      const card = node("article", undefined, "card");
+      card.append(
+        node("h3", `${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)} · ${r.course}`),
+        node("p", `${r.full_name || r.email} · ${when(r.created_at)}`, "muted"),
+        node("p", r.body, "lesson-body"),
+        node("span", r.status, "badge"),
+      );
+      for (const [label, status] of [["Approve", "approved"], ["Reject", "rejected"]])
+        if (r.status !== status)
+          card.append(
+            button(label, async () => {
+              await api("lms/reviews/" + r.id, { status });
+              notice("Review " + status + ".");
+              await load();
+            }, status === "approved" ? "primary" : "danger"),
+          );
+      list.append(card);
+    }
+  };
+  filter.onchange = () => load().catch(report);
+  await load();
 }
 async function renderMedia() {
   const screen = $("screen");
@@ -1312,16 +1431,16 @@ try {
   $("identity").textContent = me.email + " · " + me.role;
   const navFor =
     me.role === "student"
-      ? ["My courses", "Account"]
+      ? ["My courses", "Messages", "Account"]
       : me.role === "mentor"
-      ? ["Leads", "Students", "Account"]
+      ? ["Leads", "Students", "Messages", "Account"]
       : [
           "Overview",
           "Media",
           ...Object.keys(names),
           ...(me.role === "editor"
             ? []
-            : ["Leads", "Students", "Student courses", "Access", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
+            : ["Leads", "Students", "Student courses", "Messages", "Reviews", "Access", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
           "Account",
         ];
   if (me.role === "mentor") section = "Leads";
@@ -1335,6 +1454,13 @@ try {
     b.dataset.section = key;
     $("nav").append(b);
   }
+  if (me.role === "student")
+    api("lms/my/unread")
+      .then(({ unread }) => {
+        const b = $("nav").querySelector('[data-section="Messages"]');
+        if (unread && b) b.textContent = `Messages (${unread})`;
+      })
+      .catch(() => {});
   $("logout").onclick = async () => {
     try {
       await api("logout", {});

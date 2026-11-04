@@ -122,3 +122,26 @@ test("Lesson video: login required, editors refused, query scoped to the student
   assert.match(seen.sql, /l\.published=1/);
   assert.deepEqual(seen.args, [OTHER, ME]);
 });
+
+test("Messages: a student cannot read or post in another student's thread; mentors can't moderate reviews", async () => {
+  const config = { ADMIN_ORIGIN: "https://admin.scholarscafe.com", PUBLIC_ORIGIN: "https://scholarscafe.com", GOOGLE_CLIENT_ID: "t" };
+  const writes = [];
+  const store = (role) => ({
+    session: async () => ({ id: ME, role, csrf: "abc" }),
+    transaction: (fn) => fn({}),
+    checkRateLimit: async () => true,
+    audit: async () => {},
+    query: async (sql) => {
+      if (!sql.startsWith("SELECT")) writes.push(sql);
+      return sql.startsWith("SELECT id FROM users WHERE id=? AND role='student'") ? [{ id: OTHER }] : [];
+    },
+  });
+  const cookie = "__Host-sc_session=" + "a".repeat(64);
+  const app = createApp(store("student"), config);
+  await request(app).get("/api/lms/threads/" + OTHER).set("Cookie", cookie).expect(404);
+  await request(app).post("/api/lms/threads/" + OTHER).set("Cookie", cookie).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send({ body: "hi" }).expect(404);
+  assert.deepEqual(writes, []);
+  const mentor = createApp(store("mentor"), config);
+  await request(mentor).get("/api/lms/reviews").set("Cookie", cookie).expect(403);
+  await request(mentor).post("/api/lms/reviews/" + OTHER).set("Cookie", cookie).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send({ status: "approved" }).expect(403);
+});
