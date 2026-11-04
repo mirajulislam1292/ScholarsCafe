@@ -9,4 +9,6 @@
 - Tests: `cd backend && npm test` (node --test, injected store). Type check: `npx tsc --noEmit`.
 - Local: `npm run dev -- --port 8080`; backend local runner `backend/local-dev.js` + `backend/.env` (both git-ignored).
 - Secrets live only in Hostinger env vars; never commit `.env`.
-- Branches: `redesign/premium-brand` = parked serif WIP; `security/hardening` = Phase 1; `design/system` = Phase 2 style tile (`/design-system`, `src/design-system.css`, fonts in `public/fonts`).
+- USA-only: editable content + country switches in `src/content/site.json` (helper `src/lib/site-content.ts`); hero clips in `src/lib/hero-media.ts`, timing constants in `HeroVideo.tsx`.
+- Logos: `public/university-logos/gray/*.webp` from `assets-src/University_Logos_Grayscale_v3.pdf`; strip = `LogoMarquee.tsx`. Docs: USER_MANUAL(_BN).md, DEPLOYMENT.md, SECURITY.md, CREDITS.md.
+- Branch `landing/hero` contains security + design system + hero + fix pass (pushed for PR into `main`).
