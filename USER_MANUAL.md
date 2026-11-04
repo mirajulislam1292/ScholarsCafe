@@ -3,6 +3,8 @@
 A plain-language guide to running the website. No coding needed for everyday changes.
 (Bangla version: `USER_MANUAL_BN.md`.)
 
+**Site pages:** Home, Programs, Services, About (with Our Team), Resources (guides, university explorer, FAQ, newsletter) and Contact, plus Privacy, Terms and Cookies.
+
 ---
 
 ## 1. Log in to the admin (Super Admin)
@@ -39,6 +41,9 @@ Admin → **Courses & pricing** → **Edit** (or **+ Add entry**) → fill in th
 To hide a course, open it and click **Unpublish**.
 
 ## 4. Mentors (team section)
+**Our Team (About page):** founders and mentors are set in `src/content/site.json` → `team` (name, role, title, one line, photo). Empty names stay hidden. They move into the admin in the next phase.
+The older **Mentors** list in the admin is no longer shown on the site.
+
 Admin → **Mentors** → **+ Add entry** → name, role, short bio, photo (upload or `https://` link), initials (shown if there's no photo) → **Save draft** → **Publish**.
 
 ## 5. Universities (the moving name strip under the video)

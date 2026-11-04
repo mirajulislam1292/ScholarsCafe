@@ -79,17 +79,17 @@ export function Footer() {
             title={cmsLabel("Footer.label.de4743c87973", "Company")}
             links={[
               { label: "About Us", href: "/about" },
-              { label: "Success Stories", href: "/#stories" },
-              { label: "Free Resources", href: "/#resources" },
-              { label: "Contact Us", href: "/#contact" },
+              { label: "Success Stories", href: "/#success" },
+              { label: "Free Resources", href: "/resources" },
+              { label: "Contact Us", href: "/contact" },
             ]}
           />
           <Col
             title={cmsLabel("Footer.label.e89b30aa1dc3", "Resources")}
             links={[
-              { label: "Knowledge Hub", href: "/#resources" },
-              { label: "FAQ", href: "/#faq" },
-              { label: "Newsletter", href: "/#newsletter" },
+              { label: "Knowledge Hub", href: "/resources" },
+              { label: "FAQ", href: "/resources#faq" },
+              { label: "Newsletter", href: "/resources#newsletter" },
             ]}
           />
           <Col
@@ -97,7 +97,7 @@ export function Footer() {
             links={[
               { label: "WhatsApp Support", href: WA_LINK, external: true },
               { label: "Email Support", href: `mailto:${EMAIL}`, external: true },
-              { label: "Contact Form", href: "/#contact" },
+              { label: "Contact Form", href: "/contact" },
             ]}
           />
           <Col

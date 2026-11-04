@@ -8,10 +8,10 @@ const DEFAULT_NAV = [
   { label: "Home", href: "/" },
   { label: "Programs", href: "/programs" },
   { label: "Destinations", href: "/#destinations" },
-  { label: "Services", href: "/#services" },
-  { label: "Resources", href: "/#resources" },
+  { label: "Services", href: "/services" },
+  { label: "Resources", href: "/resources" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Contact", href: "/contact" },
 ];
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -23,7 +23,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > window.innerHeight * 0.6);
+    const onScroll = () => setSolid(window.scrollY > 120);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);

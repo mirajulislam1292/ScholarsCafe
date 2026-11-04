@@ -66,16 +66,16 @@ export function UniversityExplorer() {
   if (tuition !== "All") activeTags.push({ label: tuition, onRemove: () => setTuition("All") });
 
   return (
-    <section id="universities" className="bg-white py-24 md:py-32">
-      <div className="mx-auto max-w-[1280px] px-5 md:px-8">
+    <section id="universities" className="bg-white py-[clamp(96px,13vw,200px)]">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
+          <span className="hidden">
             <CmsText id="UniversityExplorer.0d7a9a83ef6d">University Explorer</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy">
+          <h2 className="type-h2 text-neutral-900">
             <CmsText id="UniversityExplorer.3bbe267caa26">Find Your Perfect Fit</CmsText>
           </h2>
-          <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
+          <p className="mt-5 type-lead text-neutral-600">
             <CmsText id="UniversityExplorer.87c9a85ac63f">
               Browse our curated list of US universities by scholarship availability and type. A
               starting point for your personalized college list.
@@ -85,7 +85,7 @@ export function UniversityExplorer() {
 
         {/* Filter bar */}
         <Reveal>
-          <div className="mt-12 rounded-3xl border border-border bg-white p-6 shadow-card md:p-8">
+          <div className="mt-12 rounded-3xl border border-neutral-900/[0.08] bg-white p-6 shadow-[0_4px_16px_rgb(4_28_49/0.04)] md:p-8">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {COUNTRIES.length > 2 && (
                 <Select
@@ -114,10 +114,10 @@ export function UniversityExplorer() {
                 options={TUITIONS}
               />
               <div className="relative">
-                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-500">
+                <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-neutral-500">
                   <CmsText id="UniversityExplorer.49c266baaaa7">Search</CmsText>
                 </label>
-                <Search className="pointer-events-none absolute bottom-3 left-3 h-4 w-4 text-slate-400" />
+                <Search className="pointer-events-none absolute bottom-3 left-3 h-4 w-4 text-neutral-400" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -125,7 +125,7 @@ export function UniversityExplorer() {
                     "UniversityExplorer.label.d02ef87a95f7",
                     "University name…",
                   )}
-                  className="w-full rounded-xl border border-border bg-white py-2.5 pl-9 pr-3 text-sm focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/15"
+                  className="w-full rounded-xl border border-neutral-900/[0.08] bg-white py-2.5 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
                 />
               </div>
             </div>
@@ -135,20 +135,20 @@ export function UniversityExplorer() {
                   <button
                     key={t.label}
                     onClick={t.onRemove}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-sky-tint px-3 py-1 text-xs font-semibold text-sky-deep hover:bg-sky/20"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-ice-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-ice-200"
                   >
                     {t.label} <X className="h-3 w-3" />
                   </button>
                 ))}
                 <button
                   onClick={clear}
-                  className="text-xs font-medium text-slate-500 underline-offset-2 hover:text-navy hover:underline"
+                  className="text-xs font-medium text-neutral-500 underline-offset-2 hover:text-neutral-900 hover:underline"
                 >
                   <CmsText id="UniversityExplorer.29a390f9237e">Clear all</CmsText>
                 </button>
               </div>
             )}
-            <div className="mt-4 text-sm text-slate-500">
+            <div className="mt-4 text-sm text-neutral-500">
               {filtered.length}
               <CmsText id="UniversityExplorer.ebca61909226"> universities found</CmsText>
             </div>
@@ -161,20 +161,20 @@ export function UniversityExplorer() {
             <button
               key={u.name}
               onClick={() => setSelected(u)}
-              className="group rounded-2xl border border-border bg-white p-5 text-left transition-all hover:-translate-y-1 hover:border-sky hover:shadow-card-hover"
+              className="group rounded-2xl border border-neutral-900/[0.08] bg-white p-5 text-left transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_24px_48px_rgb(4_28_49/0.08)]"
             >
               <div className="flex items-start justify-between">
                 <div className="text-3xl">{u.flag}</div>
-                <span className="rounded-full bg-sky-tint px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-sky-deep">
+                <span className="rounded-full bg-ice-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-700">
                   {u.country}
                 </span>
               </div>
-              <h3 className="mt-4 font-display text-base font-medium leading-tight text-navy">
+              <h3 className="mt-4 type-h3 text-[1.0625rem] leading-tight text-neutral-900">
                 {u.name}
               </h3>
-              <div className="mt-3 space-y-1 text-[12px] text-slate-600">
+              <div className="mt-3 space-y-1 text-[12px] text-neutral-600">
                 <div>{u.type}</div>
-                <div className="text-sky-deep">{u.scholarship}</div>
+                <div className="text-blue-700">{u.scholarship}</div>
                 <div>
                   <CmsText id="UniversityExplorer.172b6f9f21d3">Acceptance: </CmsText>
                   {u.acceptance}
@@ -188,7 +188,7 @@ export function UniversityExplorer() {
           <div className="mt-10 text-center">
             <button
               onClick={() => setVisible((v) => v + 8)}
-              className="rounded-full border-2 border-navy px-6 py-3 text-sm font-medium text-navy transition-all hover:bg-navy hover:text-white"
+              className="rounded-full border-2 border-neutral-900/20 px-6 py-3 text-sm font-medium text-neutral-900 transition-all hover:bg-blue-700 hover:text-white"
             >
               <CmsText id="UniversityExplorer.8f9849c015cd">Load More Universities →</CmsText>
             </button>
@@ -204,18 +204,18 @@ export function UniversityExplorer() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-xl rounded-3xl bg-white p-8 shadow-modal"
+            className="relative w-full max-w-xl rounded-3xl bg-white p-8 shadow-[0_40px_80px_rgb(4_28_49/0.25)]"
           >
             <button
               onClick={() => setSelected(null)}
-              className="absolute right-5 top-5 text-slate-400 hover:text-navy"
+              className="absolute right-5 top-5 text-neutral-400 hover:text-neutral-900"
               aria-label={cmsLabel("UniversityExplorer.label.7d9eb7acb13e", "Close")}
             >
               <X className="h-5 w-5" />
             </button>
             <div className="text-4xl">{selected.flag}</div>
-            <h3 className="mt-3 font-display text-2xl font-medium text-navy">{selected.name}</h3>
-            <div className="mt-1 text-sm text-slate-500">
+            <h3 className="mt-3 type-h3 text-neutral-900">{selected.name}</h3>
+            <div className="mt-1 text-sm text-neutral-500">
               {selected.country}
               <CmsText id="UniversityExplorer.a137f17a19a0"> · </CmsText>
               {selected.type}
@@ -238,7 +238,7 @@ export function UniversityExplorer() {
                 value={selected.type}
               />
             </div>
-            <p className="mt-6 text-[14px] leading-relaxed text-slate-600">
+            <p className="mt-6 text-[14px] leading-relaxed text-neutral-600">
               {selected.name}
               <CmsText id="UniversityExplorer.192eae1272bb">
                 {" "}
@@ -250,7 +250,7 @@ export function UniversityExplorer() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-6 py-3.5 text-sm font-medium text-white transition-all hover:bg-sky"
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-700 px-6 py-3.5 text-sm font-medium text-white transition-all hover:bg-blue-800"
             >
               <CmsText id="UniversityExplorer.cdb1b2633afe">Apply with Scholars Cafe </CmsText>
               <ArrowRight className="h-4 w-4" />
@@ -278,13 +278,13 @@ function Select({
 
   return (
     <div>
-      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-500">
+      <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-neutral-500">
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-border bg-white px-3 py-2.5 text-sm focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/15"
+        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
       >
         {options.map((o) => (
           <option key={o} value={o}>
@@ -301,9 +301,11 @@ function Fact({ label, value }: { label: string; value: string }) {
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
-    <div className="rounded-xl bg-sky-soft p-3">
-      <div className="text-[11px] font-medium uppercase tracking-wider text-slate-500">{label}</div>
-      <div className="mt-1 font-semibold text-navy">{value}</div>
+    <div className="rounded-xl bg-ice-50 p-3">
+      <div className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+        {label}
+      </div>
+      <div className="mt-1 font-medium text-neutral-900">{value}</div>
     </div>
   );
 }

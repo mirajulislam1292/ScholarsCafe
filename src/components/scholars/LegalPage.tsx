@@ -1,62 +1,48 @@
 import { CmsText } from "@/lib/cms";
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { CtaBand, PageHero } from "@/components/page/PageParts";
 
+/** Shared layout for Privacy, Terms and Cookies: page hero, readable article, closing CTA. */
 export function LegalPage({
-  kicker,
   title,
   updated,
   intro,
   children,
 }: {
-  kicker: string;
+  kicker?: string;
   title: string;
   updated: string;
   intro: string;
   children: React.ReactNode;
 }) {
   return (
-    <main className="bg-background pt-32 md:pt-40">
-      {/* hero */}
-      <section className="border-b border-border bg-gradient-to-b from-secondary/40 to-background">
-        <div className="mx-auto max-w-[820px] px-5 py-16 md:px-8 md:py-24">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <CmsText id="LegalPage.76c5505ff2e2">Back to home</CmsText>
-          </Link>
-          <div className="mt-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-sky">
-            {kicker}
-          </div>
-          <h1 className="mt-4 font-display text-5xl font-light leading-[1.05] tracking-tight text-foreground md:text-6xl">
-            {title}
-          </h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            <CmsText id="LegalPage.ba34a96f2969">Last updated: </CmsText>
-            {updated}
-          </p>
-          <p className="mt-8 text-lg leading-relaxed text-muted-foreground">{intro}</p>
-        </div>
-      </section>
-
-      {/* body */}
-      <article className="mx-auto max-w-[760px] px-5 py-16 md:px-8 md:py-24">
-        <div
-          className="prose prose-slate max-w-none
-            prose-headings:font-display prose-headings:font-light prose-headings:tracking-tight prose-headings:text-foreground
-            prose-h2:mt-12 prose-h2:text-2xl prose-h2:md:text-3xl
-            prose-h3:mt-8 prose-h3:text-lg
-            prose-p:text-[16px] prose-p:leading-[1.75] prose-p:text-muted-foreground
-            prose-ul:text-muted-foreground prose-li:my-1
-            prose-a:text-sky prose-a:no-underline hover:prose-a:underline
-            prose-strong:text-foreground
-            dark:prose-invert"
+    <main>
+      <PageHero
+        title={title}
+        lead={
+          <>
+            {intro}
+            <span className="type-caption mt-5 block text-ice-400">
+              <CmsText id="LegalPage.ba34a96f2969">Last updated: </CmsText>
+              {updated}
+            </span>
+          </>
+        }
+      />
+      <section className="bg-white py-[clamp(96px,12vw,160px)]">
+        <article
+          className="prose mx-auto max-w-[720px] px-6 md:px-0
+            prose-headings:font-heading prose-headings:font-light prose-headings:tracking-[-0.02em] prose-headings:text-neutral-900
+            prose-h2:mt-16 prose-h2:text-[clamp(1.5rem,2.4vw,2rem)]
+            prose-h3:mt-10 prose-h3:text-[1.25rem] prose-h3:font-medium
+            prose-p:font-heading prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:text-neutral-700
+            prose-li:font-heading prose-li:text-neutral-700 prose-li:marker:text-blue-400
+            prose-a:font-medium prose-a:text-blue-700 prose-a:underline-offset-4
+            prose-strong:font-semibold prose-strong:text-neutral-900"
         >
           {children}
-        </div>
-      </article>
+        </article>
+      </section>
+      <CtaBand title="Questions about your data? Just ask." action="Contact us" />
     </main>
   );
 }

@@ -1,5 +1,5 @@
 import { useCmsValue, CmsText } from "@/lib/cms";
-import { useState, type CSSProperties } from "react";
+import { Fragment, useState, type CSSProperties } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { HeroVideo } from "./HeroVideo";
@@ -36,13 +36,11 @@ export function Hero() {
       <div className="relative mx-auto w-full max-w-[1200px] px-6 pb-[clamp(64px,10vh,120px)] pt-40 md:px-12">
         <h1 className="max-w-[15ch] type-display text-white">
           {headline.map((word, i) => (
-            <span
-              key={word}
-              style={delay(120 + i * 90)}
-              className={`${RISE} inline-block pr-[0.22em]`}
-            >
-              {word}
-            </span>
+            <Fragment key={word}>
+              <span style={delay(120 + i * 90)} className={`${RISE} inline-block`}>
+                {word}
+              </span>{" "}
+            </Fragment>
           ))}
           <span style={delay(390)} className={`${RISE} inline-block text-ice-300`}>
             <CmsText id="Hero.5fcef7e1a94c">acceptance.</CmsText>

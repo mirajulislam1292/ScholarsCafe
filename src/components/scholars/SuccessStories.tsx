@@ -16,7 +16,8 @@ export function SuccessStories() {
   const TESTIMONIALS = useCmsCollection(
     "feedback",
     [],
-    (data) => ({ ...data, color: "from-sky to-navy" }) as (typeof DEFAULT_TESTIMONIALS)[number],
+    (data) =>
+      ({ ...data, color: "from-blue-600 to-blue-900" }) as (typeof DEFAULT_TESTIMONIALS)[number],
   );
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
@@ -33,15 +34,15 @@ export function SuccessStories() {
   const total = TESTIMONIALS.length;
   if (!total)
     return (
-      <section id="success" className="bg-sky-soft px-5 py-20 text-center">
-        <h2 className="font-display text-3xl font-light text-navy">
+      <section id="success" className="bg-ice-50 px-5 py-20 text-center">
+        <h2 className="font-heading text-3xl font-light text-neutral-900">
           <CmsText id="SuccessStories.empty.title">Your story starts with a conversation.</CmsText>
         </h2>
         <a
           href={WA_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-7 inline-flex rounded-full bg-sky px-7 py-4 font-semibold text-white"
+          className="mt-7 inline-flex rounded-full bg-blue-700 px-7 py-4 font-medium text-white"
         >
           <CmsText id="SuccessStories.empty.cta">Talk to a mentor</CmsText>
         </a>
@@ -57,16 +58,16 @@ export function SuccessStories() {
   ];
 
   return (
-    <section id="success" className="bg-sky-soft py-24 md:py-32 dark:bg-navy-deep">
-      <div className="mx-auto max-w-[1280px] px-5 md:px-8">
+    <section id="success" className="bg-ice-50 py-[clamp(96px,13vw,200px)] ">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-medium uppercase tracking-[0.15em] text-sky">
+          <span className="hidden">
             <CmsText id="SuccessStories.2ef2f8126cf5">Student Wins</CmsText>
           </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-light text-navy dark:text-white">
+          <h2 className="type-h2 text-neutral-900 ">
             <CmsText id="SuccessStories.e96a6c77cf3b">Real Students. Real Results.</CmsText>
           </h2>
-          <p className="mt-5 text-[17px] leading-relaxed text-slate-600 dark:text-white/70">
+          <p className="mt-5 type-lead text-neutral-600 ">
             <CmsText id="SuccessStories.325bb7362969">
               Every success story started with a conversation. Here's what happens when preparation
               meets opportunity and the right guidance.
@@ -87,42 +88,40 @@ export function SuccessStories() {
                   opacity: 1,
                 }}
                 transition={{ duration: 0.32, ease: "easeOut" }}
-                className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-white pt-9 shadow-card-hover transition-all dark:border-white/10 dark:bg-white/6 ${
+                className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border border-neutral-900/[0.08] bg-white pt-9 shadow-[0_24px_48px_rgb(4_28_49/0.08)] transition-all   ${
                   isCenter ? "z-20" : "z-10"
                 } ${isSide ? "lg:mt-8" : ""}`}
               >
                 <div className="px-9">
-                  <div className="font-display text-6xl leading-none text-sky/15">
+                  <div className="font-heading text-6xl leading-none text-blue-700/15">
                     <CmsText id="SuccessStories.8a331fdde703">"</CmsText>
                   </div>
-                  <p className="mt-2 text-[15px] italic leading-[1.85] text-slate-600 dark:text-white/75">
+                  <p className="mt-2 text-[15px] italic leading-[1.85] text-neutral-600 ">
                     {testimonial.quote}
                   </p>
                   <div className="mt-7 flex items-center gap-4">
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} font-display text-base font-medium text-white`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} type-h3 text-[1.0625rem] text-white`}
                     >
                       {testimonial.initials}
                     </div>
                     <div>
-                      <div className="font-display text-base font-medium text-navy dark:text-white">
+                      <div className="type-h3 text-[1.0625rem] text-neutral-900 ">
                         {testimonial.name}
                       </div>
-                      <div className="text-[13px] font-semibold text-sky-deep dark:text-sky-light">
+                      <div className="text-[13px] font-medium text-blue-700 ">
                         {testimonial.destination}
                       </div>
-                      <div className="text-[12px] text-slate-500 dark:text-white/55">
-                        {testimonial.year}
-                      </div>
+                      <div className="text-[12px] text-neutral-500 ">{testimonial.year}</div>
                     </div>
-                    <div className="ml-auto flex gap-0.5 text-gold">
+                    <div className="ml-auto flex gap-0.5 text-blue-600">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star key={i} className="h-3.5 w-3.5 fill-current" />
                       ))}
                     </div>
                   </div>
                 </div>
-                <div className="mt-7 bg-gradient-to-r from-sky to-navy px-9 py-4 text-center text-sm font-medium text-white">
+                <div className="mt-7 bg-gradient-to-r from-blue-600 to-blue-900 px-9 py-4 text-center text-sm font-medium text-white">
                   {testimonial.outcome}
                 </div>
               </motion.article>
@@ -131,14 +130,14 @@ export function SuccessStories() {
         </div>
 
         <Reveal className="mt-12 text-center">
-          <p className="text-slate-600 dark:text-white/70">
+          <p className="text-neutral-600 ">
             <CmsText id="SuccessStories.b9a500e1344f">Your success story is next.</CmsText>
           </p>
           <a
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-sky px-7 py-3.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-700 px-7 py-3.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800 "
           >
             <CmsText id="SuccessStories.fc4e64953206">Book a Free Consultation →</CmsText>
           </a>

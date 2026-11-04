@@ -43,7 +43,7 @@ async function generateIndexHtml() {
   const serverEntry = await import(pathToFileURL(serverEntryPath).href);
   // Pre-render every page so each URL ships its own HTML (fast first paint, correct SEO).
   // Paths must match routes in src/routes. Each page goes to <path>/index.html.
-  const pages = ["/", "/about", "/programs", "/privacy", "/terms", "/cookies"];
+  const pages = ["/", "/about", "/programs", "/services", "/resources", "/contact", "/privacy", "/terms", "/cookies"];
   const rendered = [];
   for (const path of pages) {
     const response = await serverEntry.default.fetch(new Request("https://example.com" + path));
