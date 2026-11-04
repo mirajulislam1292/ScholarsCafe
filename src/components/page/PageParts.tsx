@@ -131,13 +131,13 @@ export function Block({
     </Reveal>
   );
   return (
-    <section id={id} className={`${toneClass[tone]} py-[clamp(96px,13vw,200px)]`}>
+    <section id={id} className={`${toneClass[tone]} py-[clamp(72px,13vw,200px)]`}>
       {dark && <div aria-hidden className={GRAIN} />}
       <div className="relative mx-auto max-w-[1200px] px-6 md:px-12">
         {sticky ? (
-          <div className="grid gap-14 lg:grid-cols-[5fr_7fr] lg:gap-24">
+          <div className="grid grid-cols-1 gap-14 lg:grid-cols-[5fr_7fr] lg:gap-24">
             {heading}
-            <div>{children}</div>
+            <div className="min-w-0">{children}</div>
           </div>
         ) : (
           <>
@@ -160,7 +160,7 @@ export function CtaBand({
 }) {
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   return (
-    <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(96px,12vw,176px)] text-white">
+    <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(72px,12vw,176px)] text-white">
       <div
         aria-hidden
         className="absolute inset-0 -z-10 bg-[radial-gradient(70%_90%_at_10%_100%,rgb(43_109_166/0.4)_0%,transparent_60%)]"

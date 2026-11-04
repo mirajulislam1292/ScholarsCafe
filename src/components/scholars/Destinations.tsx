@@ -10,7 +10,7 @@ export function Destinations() {
   const usa = SITE.usa;
 
   return (
-    <section id="destinations" className="bg-white py-[clamp(96px,12vw,160px)]">
+    <section id="destinations" className="bg-white py-[clamp(72px,12vw,160px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>

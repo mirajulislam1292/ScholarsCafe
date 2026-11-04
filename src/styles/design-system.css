@@ -155,7 +155,7 @@
   --space-16: 128px;
   --space-20: 160px;
   --space-25: 200px;
-  --section-y: clamp(96px, 12vw, 160px);
+  --section-y: clamp(72px, 12vw, 160px);
 
   --radius-sm: 8px;
   --radius-md: 16px;

@@ -22,7 +22,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-white/8 bg-navy-deep text-white">
-      <div className="mx-auto max-w-[1280px] px-5 py-16 md:px-8">
+      <div className="mx-auto max-w-[1280px] px-6 py-16 md:px-8">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-white/7">
-        <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-3 px-5 py-7 text-[13px] text-white/40 md:flex-row md:px-8">
+        <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-3 px-6 py-7 text-[13px] text-white/40 md:flex-row md:px-8">
           <div className="flex items-center gap-1.5 text-[13px] text-white/40">
             <span>
               <CmsText id="Footer.0a79b0ca699d">© </CmsText>

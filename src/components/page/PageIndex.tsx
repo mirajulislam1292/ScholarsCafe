@@ -39,7 +39,7 @@ const ENTRIES: Entry[] = [
 /** Home page index: large rows linking to each inner page, with an image that follows hover. */
 export function PageIndex() {
   return (
-    <section className="bg-neutral-50 py-[clamp(96px,13vw,200px)]">
+    <section className="bg-neutral-50 py-[clamp(72px,13vw,200px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <ul className="border-t border-neutral-900/[0.08]">
           {ENTRIES.map((e, i) => (
@@ -52,13 +52,13 @@ export function PageIndex() {
                   <span className="type-caption hidden text-neutral-400 md:block">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="type-h2 text-neutral-900 transition-transform duration-700 ease-premium group-hover:translate-x-2">
+                  <span className="type-h2 col-start-1 row-start-1 text-neutral-900 transition-transform duration-700 ease-premium group-hover:translate-x-2 md:col-auto md:row-auto">
                     {e.name}
                   </span>
                   <span className="type-body col-span-2 -mt-3 max-w-[38ch] text-neutral-600 md:col-span-1 md:mt-0">
                     {e.line}
                   </span>
-                  <span className="relative row-start-1 flex items-center justify-end md:row-auto md:col-start-4">
+                  <span className="relative col-start-2 row-start-1 flex items-center justify-end md:row-auto md:col-start-4">
                     <img
                       src={e.image}
                       alt=""

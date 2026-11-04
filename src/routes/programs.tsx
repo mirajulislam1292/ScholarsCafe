@@ -78,7 +78,7 @@ function ProgramsPage() {
             ),
             process: (
               <>
-                <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(96px,13vw,200px)] text-white">
+                <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(72px,13vw,200px)] text-white">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"

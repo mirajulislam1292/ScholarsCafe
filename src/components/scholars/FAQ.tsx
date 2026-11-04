@@ -18,9 +18,9 @@ export function FAQ() {
 
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section id="faq" className="bg-white py-[clamp(96px,13vw,200px)]">
+    <section id="faq" className="bg-white py-[clamp(72px,13vw,200px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
-        <Reveal className="mx-auto max-w-2xl text-center">
+        <Reveal className="max-w-2xl md:mx-auto md:text-center">
           <span className="hidden">
             <CmsText id="FAQ.4e9f48728271">Got Questions?</CmsText>
           </span>
