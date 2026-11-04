@@ -9,4 +9,4 @@
 - Tests: `cd backend && npm test` (node --test, injected store). Type check: `npx tsc --noEmit`.
 - Local: `npm run dev -- --port 8080`; backend local runner `backend/local-dev.js` + `backend/.env` (both git-ignored).
 - Secrets live only in Hostinger env vars; never commit `.env`.
-- Branches: `redesign/premium-brand` = parked WIP serif restyle; `security/hardening` = Phase 1.
+- Branches: `redesign/premium-brand` = parked serif WIP; `security/hardening` = Phase 1; `design/system` = Phase 2 style tile (`/design-system`, `src/design-system.css`, fonts in `public/fonts`).
