@@ -39,9 +39,12 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   }, []);
   return <Content.Provider value={items}><BrandSettings />{children}</Content.Provider>;
 }
+const DEFAULT_BRAND_MARK = "/brand/mark-blue.png";
 function BrandSettings() {
-  const brand = useCmsValue("brand", { image: "/brand-mark.png" });
+  const brand = useCmsValue("brand", { image: DEFAULT_BRAND_MARK });
   useEffect(() => {
+    // Only override the built-in logo files when the admin has uploaded a custom mark.
+    if (brand.image === DEFAULT_BRAND_MARK) return;
     document.documentElement.style.setProperty("--brand-mark-url", `url(${JSON.stringify(brand.image)})`);
     document.querySelectorAll<HTMLLinkElement>('link[rel="icon"],link[rel="apple-touch-icon"]').forEach(link => { link.href = brand.image; });
   }, [brand.image]);

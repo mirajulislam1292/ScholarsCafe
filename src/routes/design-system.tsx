@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import dsCss from "../design-system.css?url";
+import dsCss from "../styles/design-system.css?url";
 
 export const Route = createFileRoute("/design-system")({
   head: () => ({
