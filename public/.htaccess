@@ -1,4 +1,5 @@
 DirectoryIndex index.html
+DirectorySlash Off
 Options -Indexes
 
 # Correct media types (with nosniff, browsers rely on these)
@@ -43,10 +44,11 @@ AddType font/woff2 .woff2
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
 
-  # Allow direct access to real directories with index.html
+  # Pre-rendered pages: /about -> /about/index.html without a trailing-slash redirect
+  RewriteCond %{REQUEST_URI} !^/$
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteCond %{REQUEST_FILENAME}/index.html -f
-  RewriteRule ^ - [L]
+  RewriteRule ^(.*?)/?$ /$1/index.html [L]
 
   # Fallback all SPA routes to /index.html
   RewriteRule ^ /index.html [L]

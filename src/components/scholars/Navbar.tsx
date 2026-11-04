@@ -5,13 +5,13 @@ import { AnimatePresence, motion } from "motion/react";
 import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 
 const DEFAULT_NAV = [
-  { label: "Home", href: "#top" },
-  { label: "Programs", href: "#programs" },
-  { label: "Destinations", href: "#destinations" },
-  { label: "Services", href: "#services" },
-  { label: "Resources", href: "#resources" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "Programs", href: "/programs" },
+  { label: "Destinations", href: "/#destinations" },
+  { label: "Services", href: "/#services" },
+  { label: "Resources", href: "/#resources" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/#contact" },
 ];
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -51,7 +51,7 @@ export function Navbar() {
       >
         <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-6 md:px-12">
           <a
-            href="#top"
+            href="/"
             aria-label={cmsLabel("Navbar.label.7f7e5d138281", "Scholars Cafe home")}
             className="relative -m-2 grid h-12 w-12 place-items-center rounded-full"
           >
@@ -64,7 +64,7 @@ export function Navbar() {
           </a>
 
           <nav aria-label="Main" className="hidden items-center gap-9 lg:flex">
-            {NAV.filter((i) => i.href !== "#top").map((item) => (
+            {NAV.filter((i) => i.href !== "/" && i.href !== "#top").map((item) => (
               <a
                 key={item.href}
                 href={item.href}

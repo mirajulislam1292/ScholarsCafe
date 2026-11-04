@@ -10,14 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DesignSystemRouteImport } from './routes/design-system'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as TermsRouteImport } from './routes/terms'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -35,6 +42,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProgramsRoute = ProgramsRouteImport.update({
+  id: '/programs',
+  path: '/programs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -43,39 +55,69 @@ const TermsRoute = TermsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cookies': typeof CookiesRoute
   '/design-system': typeof DesignSystemRoute
   '/privacy': typeof PrivacyRoute
+  '/programs': typeof ProgramsRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cookies': typeof CookiesRoute
   '/design-system': typeof DesignSystemRoute
   '/privacy': typeof PrivacyRoute
+  '/programs': typeof ProgramsRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cookies': typeof CookiesRoute
   '/design-system': typeof DesignSystemRoute
   '/privacy': typeof PrivacyRoute
+  '/programs': typeof ProgramsRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cookies' | '/design-system' | '/privacy' | '/terms'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/cookies'
+    | '/design-system'
+    | '/privacy'
+    | '/programs'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cookies' | '/design-system' | '/privacy' | '/terms'
-  id: '__root__' | '/' | '/cookies' | '/design-system' | '/privacy' | '/terms'
+  to:
+    | '/'
+    | '/about'
+    | '/cookies'
+    | '/design-system'
+    | '/privacy'
+    | '/programs'
+    | '/terms'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/cookies'
+    | '/design-system'
+    | '/privacy'
+    | '/programs'
+    | '/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   CookiesRoute: typeof CookiesRoute
   DesignSystemRoute: typeof DesignSystemRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProgramsRoute: typeof ProgramsRoute
   TermsRoute: typeof TermsRoute
 }
 
@@ -86,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -109,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/programs': {
+      id: '/programs'
+      path: '/programs'
+      fullPath: '/programs'
+      preLoaderRoute: typeof ProgramsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -121,9 +177,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   CookiesRoute: CookiesRoute,
   DesignSystemRoute: DesignSystemRoute,
   PrivacyRoute: PrivacyRoute,
+  ProgramsRoute: ProgramsRoute,
   TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport

@@ -13,6 +13,16 @@ Removed: Cambridge, Oxford and Stanford clips (outside the USA focus or too shor
 Not found as free, commercially licensed 1080p+ drone footage (November 2026): Harvard, MIT, Princeton, Stanford (long enough), Yale campus close-ups.
 The USA section reuses the desktop posters as its images.
 
+## Page photography (`public/media/pages/`)
+Downloaded at 2400 px, saved as WebP at 1920 px (and 960/720 px `-sm` versions). All under the Pexels License (free commercial use, no attribution required).
+
+| Files | Subject | Source | Photographer | Used on |
+|---|---|---|---|---|
+| `students-walking*.webp` | College students walking on a lawn | [Pexels #7683629](https://www.pexels.com/photo/three-college-students-walking-on-the-ground-7683629/) | RDNE Stock project | /about hero |
+| `library*.webp` | Students in a university library | [Pexels #8199659](https://www.pexels.com/photo/students-studying-inside-the-library-8199659/) | Yan Krukau | /about image band |
+| `oklahoma-autumn*.webp` | The University of Oklahoma in autumn | [Pexels #19554793](https://www.pexels.com/photo/the-university-of-oklahoma-in-autumn-19554793/) | An Vuong | /programs hero |
+| `campus-early-fall*.webp` | College campus in early fall | [Pexels #34623256](https://www.pexels.com/photo/peaceful-college-campus-in-early-fall-34623256/) | Garrison Gao | /programs image band |
+
 ## Fonts (`public/fonts/`)
 - Funnel Display (variable): SIL Open Font License 1.1 (`LICENSE-FunnelDisplay.txt`). Replace with the designer's files when supplied.
 - Inter (variable): SIL Open Font License 1.1 (`LICENSE-Inter.txt`).

@@ -70,7 +70,7 @@ export function Hero() {
             />
           </a>
           <a
-            href="#programs"
+            href="/programs"
             className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 type-button text-white transition-colors duration-500 ease-premium hover:border-white/50 hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ice-300"
           >
             <CmsText id="Hero.f4685c1f868b">Explore programs</CmsText>

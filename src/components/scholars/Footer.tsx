@@ -64,8 +64,8 @@ export function Footer() {
           <Col
             title={cmsLabel("Footer.label.b6747064b2a6", "Programs")}
             links={[
-              { label: "General Admission Track", href: "/#programs" },
-              { label: "File Opening Service", href: "/#programs" },
+              { label: "General Admission Track", href: "/programs" },
+              { label: "File Opening Service", href: "/programs" },
             ]}
           />
           <Col
@@ -78,7 +78,7 @@ export function Footer() {
           <Col
             title={cmsLabel("Footer.label.de4743c87973", "Company")}
             links={[
-              { label: "About Us", href: "/#about" },
+              { label: "About Us", href: "/about" },
               { label: "Success Stories", href: "/#stories" },
               { label: "Free Resources", href: "/#resources" },
               { label: "Contact Us", href: "/#contact" },

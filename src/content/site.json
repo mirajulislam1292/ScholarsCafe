@@ -86,5 +86,63 @@
   },
   "contact": {
     "defaultCountry": "USA"
+  },
+  "team": {
+    "_readme": "Our Team. Entries with an empty name are hidden. photo: path or https link (portrait, at least 800px tall); without one, initials on a brand gradient are shown. Will become editable in the admin (Phase 3).",
+    "heading": "Our Team",
+    "founders": [
+      {
+        "name": "Mridul",
+        "role": "Co-founder",
+        "title": "",
+        "title_TODO": "CEO or CFO: to be confirmed by the owner",
+        "line": "",
+        "line_TODO": "One short line about Mridul",
+        "photo": "",
+        "photo_TODO": "Portrait photo"
+      },
+      {
+        "name": "Nishat Tasnim Niha",
+        "role": "Co-founder",
+        "title": "",
+        "title_TODO": "CEO or CFO: to be confirmed by the owner",
+        "line": "Caldwell University",
+        "photo": "",
+        "photo_TODO": "Portrait photo"
+      },
+      {
+        "name": "",
+        "name_TODO": "Optional third founder",
+        "role": "Co-founder",
+        "title": "",
+        "line": "",
+        "photo": ""
+      },
+      {
+        "name": "",
+        "name_TODO": "Optional fourth founder",
+        "role": "Co-founder",
+        "title": "",
+        "line": "",
+        "photo": ""
+      }
+    ],
+    "mentors": [
+      {
+        "name": "Hasan Nawaz Shahzer",
+        "role": "Mentor",
+        "line": "",
+        "line_TODO": "One short line about Hasan",
+        "photo": "",
+        "photo_TODO": "Portrait photo"
+      },
+      {
+        "name": "",
+        "name_TODO": "Second mentor: name to be provided by the owner",
+        "role": "Mentor",
+        "line": "",
+        "photo": ""
+      }
+    ]
   }
 }

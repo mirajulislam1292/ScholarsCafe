@@ -11,4 +11,4 @@
 - Secrets live only in Hostinger env vars; never commit `.env`.
 - USA-only: editable content + country switches in `src/content/site.json` (helper `src/lib/site-content.ts`); hero clips in `src/lib/hero-media.ts`, timing constants in `HeroVideo.tsx`.
 - Universities: text-only `NameMarquee.tsx` (data `university-acceptances.ts`, admin key `universities`). Type styles `type-display|h1|h2|h3|lead|body|caption|button|nav` in `styles.css`; Funnel Display site-wide, Hind Siliguri for Bangla. Docs: USER_MANUAL(_BN).md, DEPLOYMENT.md, SECURITY.md, CREDITS.md.
-- Branch `landing/hero` contains security + design system + hero + fix pass (pushed for PR into `main`).
+- Pages: shared parts in `src/components/page/PageParts.tsx` (PageHero, Block, ParallaxImage, CtaBand) + `Team.tsx` (data: site.json > team). Routes /about, /programs; all pages pre-rendered by `scripts/generate-index.js` (add new routes to its `pages` list).
