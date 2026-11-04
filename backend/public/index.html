@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex,nofollow" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'"
+    />
     <link rel="icon" type="image/png" href="/brand-mark.png" />
     <link rel="apple-touch-icon" href="/brand-mark.png" />
     <title>Scholars Cafe · Studio</title>
@@ -12,29 +15,58 @@
   </head>
   <body>
     <div id="login" class="login">
-      <div class="brand"><img src="/brand-mark.png" alt="" width="48" height="48" /><span>Scholars Cafe</span></div>
-      <p class="eyebrow">SCHOLARS CAFE ACCOUNT</p>
-      <h1>Good guidance.<br />Beautifully shared.</h1>
-      <p>Sign in to your student dashboard or the Scholars Cafe team workspace.</p>
+      <div class="brand">
+        <img src="/brand-mark.png" alt="" width="48" height="48" /><span>Scholars Cafe</span>
+      </div>
+      <p class="eyebrow" id="login-eyebrow">SCHOLARS CAFE TEAM</p>
+      <h1 id="login-title">Good guidance.<br />Beautifully shared.</h1>
+      <p id="login-lead">
+        Team workspace. Sign in with the Google account an admin approved for you.
+      </p>
       <a class="primary" href="/auth/google">Continue with Google →</a>
-      <p class="or">or with your email</p>
-      <form id="password-form" class="login-form" novalidate>
-        <label>Email<input id="login-email" type="email" autocomplete="username" maxlength="254" required /></label>
-        <label>Password<input id="login-password" type="password" autocomplete="current-password" maxlength="128" /></label>
-        <button class="primary" type="submit">Sign in with password</button>
-        <button id="send-code" type="button">Email me a one-time code</button>
-      </form>
-      <form id="code-form" class="login-form" hidden>
-        <label>6-digit code from your email<input id="login-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required /></label>
-        <button class="primary" type="submit">Sign in</button>
-        <button id="code-back" type="button">Use a different email</button>
-      </form>
+      <div id="email-signin" hidden>
+        <p class="or">or with your email</p>
+        <form id="password-form" class="login-form" novalidate>
+          <label
+            >Email<input
+              id="login-email"
+              type="email"
+              autocomplete="username"
+              maxlength="254"
+              required
+          /></label>
+          <label
+            >Password<input
+              id="login-password"
+              type="password"
+              autocomplete="current-password"
+              maxlength="128"
+          /></label>
+          <button class="primary" type="submit">Sign in with password</button>
+          <button id="send-code" type="button">Email me a one-time code</button>
+        </form>
+        <form id="code-form" class="login-form" hidden>
+          <label
+            >6-digit code from your email<input
+              id="login-code"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              required
+          /></label>
+          <button class="primary" type="submit">Sign in</button>
+          <button id="code-back" type="button">Use a different email</button>
+        </form>
+      </div>
       <p id="login-message" role="status" aria-live="polite"></p>
       <p class="muted">Access is limited to approved accounts.</p>
     </div>
     <div id="workspace" hidden>
       <aside>
-        <div class="brand"><img src="/brand-mark.png" alt="" width="48" height="48" /><span>Scholars Cafe</span></div>
+        <div class="brand">
+          <img src="/brand-mark.png" alt="" width="48" height="48" /><span>Scholars Cafe</span>
+        </div>
         <p class="eyebrow">CONTENT STUDIO</p>
         <nav id="nav"></nav>
         <a href="https://scholarscafe.com" target="_blank" rel="noopener" class="site-link"

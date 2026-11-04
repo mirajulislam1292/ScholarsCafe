@@ -220,7 +220,8 @@ test("A genuine Google account still cannot enter without approval", async () =>
   const response = await request(createApp(store, config, google))
     .get("/auth/callback?state=valid&code=code")
     .set("Cookie", "__Host-sc_oauth=valid")
-    .expect(403);
+    .expect(303);
+  assert.equal(response.headers.location, "/?signin=denied");
   assert.ok(
     !(response.headers["set-cookie"] || []).some((c) => c.startsWith("__Host-sc_session=")),
   );

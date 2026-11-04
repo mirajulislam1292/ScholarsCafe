@@ -7,14 +7,15 @@ A plain-language guide to running the website. No coding needed for everyday cha
 
 ---
 
-## 1. Log in to the admin (Super Admin)
-1. Go to **https://admin.scholarscafe.com**.
-2. Click **Continue with Google**, or type your email and either your password or **Email me a one-time code** (the code expires in 10 minutes). `contact.scholarscafe@gmail.com` is the owner.
-   To set or change a password: **Account** → enter it twice → **Save password**. Forgot it? Sign in with an email code.
-3. You land on **Overview**. Mentors land on **Leads**.
+## 1. Sign-in pages
+| Page | For | How |
+|---|---|---|
+| **https://admin.scholarscafe.com** | You (master admin) and your team | **Continue with Google**, with a Gmail you approved under **Access** |
+| **https://student.scholarscafe.com** | Students | Google, **Email me a one-time code** (expires in 10 minutes), or a password they set under **Account** |
 
-Only accounts you have approved can sign in. Sessions end automatically after 4 hours.
-**Security tip:** turn on Google 2-Step Verification for every account with admin access.
+Each page turns away the other's accounts. Sessions end automatically after 4 hours.
+**Students who forget their password:** sign in with an email code, then set a new password under **Account**.
+**Security tip:** turn on Google 2-Step Verification for every team account.
 
 ### Roles
 | Role | Can do |
@@ -25,7 +26,7 @@ Only accounts you have approved can sign in. Sessions end automatically after 4 
 | **Mentor** | Their **Leads**, **Students** and **Messages** only; can add notes |
 | **Student** | Their own courses, lessons, messages, reviews and details |
 
-**Give someone access:** Admin → **Access** → enter their Gmail address → choose a role → Save. To remove access, untick **Active** and save. Their session ends immediately.
+**Give a team member access:** Admin → **Access** → enter their Gmail address → choose a role (*admin*, *editor* or *mentor*) → Save. When they sign in with that Gmail they get exactly that role. Students are added under **Students** instead. To remove access, untick **Active** and save. Their session ends immediately.
 
 ---
 
@@ -82,12 +83,12 @@ Admin → **Leads**. Every contact-form message becomes a lead.
 3. Set the course to **Published** when it's ready. Draft courses and unpublished lessons are never shown to students.
 
 **Students** (Admin/Owner):
-1. **Add a student**: email, full name, phone, target intake → **Add student**. They sign in at the admin address with Google (if that email is a Google account), an email code, or a password they set. Nobody can sign up on their own.
+1. **Add a student**: email, full name, phone, target intake → **Add student**. They sign in at **https://student.scholarscafe.com** with Google (if that email is a Google account), an email code, or a password they set. Nobody can sign up on their own.
 2. Open a student → **Enroll** them in a course and pick their **mentor**. Change the status any time: *Active*, *Paused* (locks the course, e.g. unpaid) or *Completed*. **Remove** takes them out of the course.
 3. **Staff notes** are never shown to the student. To block a student completely: **Access** → untick **Active**.
 
 **Mentors** see **Students**: only students enrolled with them, and they can add notes. They cannot change courses or enrollments.
-**What students see:** they sign in at **https://admin.scholarscafe.com** and land on **My courses**: each course with a progress bar, then lessons in order with the video, the text and **Mark as done**. Under **Account** they can edit their name, phone and target intake, and set a password.
+**What students see:** they sign in at **https://student.scholarscafe.com** and land on **My courses**: each course with a progress bar, then lessons in order with the video, the text and **Mark as done**. Under **Account** they can edit their name, phone and target intake, and set a password.
 **Messages:** each student has one conversation with their mentor(s) and the Scholars Cafe team. Students use **Messages**; mentors and admins open **Messages** to see every conversation they're allowed to (unread counts shown). Mentors only see their own students. Up to 30 messages per person per hour. There are no email alerts yet, so check **Messages** daily.
 **Reviews:** students can review a course they're enrolled in (1–5 stars + text) at the bottom of the course page. Admins approve or reject them under **Reviews**. Editing a review sends it back for approval. Approved reviews are not shown on the public website yet; copy the good ones into **Testimonials** if you want them there.
 **Video protection:** videos play only for students actively enrolled in that course (and their mentor and admins). Pausing an enrollment, unpublishing a lesson or deactivating an account stops playback straight away. Download buttons are hidden, but no website can stop someone recording their screen, so don't put anything in a video you couldn't accept being shared.

@@ -1,5 +1,5 @@
 import { Store } from "./store.js";
-import { createApp } from "./app.js";
+import { createApp, portalConfig } from "./app.js";
 import { createMailer, deliverMail } from "./mail.js";
 
 for (const key of [
@@ -14,7 +14,14 @@ for (const key of [
 ]) {
   if (!process.env[key]) throw new Error("Required configuration missing: " + key);
 }
-for (const key of ["ADMIN_ORIGIN", "PUBLIC_ORIGIN"]) {
+// PORTAL=student runs the student portal (student.scholarscafe.com) from this same code and database.
+if (process.env.PORTAL === "student" && !process.env.STUDENT_ORIGIN)
+  throw new Error("Required configuration missing: STUDENT_ORIGIN");
+for (const key of [
+  "ADMIN_ORIGIN",
+  "PUBLIC_ORIGIN",
+  ...(process.env.PORTAL === "student" ? ["STUDENT_ORIGIN"] : []),
+]) {
   const url = new URL(process.env[key]);
   if (url.protocol !== "https:" || url.origin !== process.env[key])
     throw new Error("An exact HTTPS origin is required: " + key);
@@ -32,7 +39,8 @@ async function start() {
   const mailer = createMailer(process.env);
   let delivering = false;
   const mailTimer = setInterval(async () => {
-    if (delivering || !mailer) return;
+    // Team notifications are delivered by the admin deployment only.
+    if (delivering || !mailer || process.env.PORTAL === "student") return;
     delivering = true;
     try {
       await deliverMail(store, mailer);
@@ -43,7 +51,7 @@ async function start() {
     }
   }, 15000);
   mailTimer.unref();
-  const server = createApp(store, process.env, undefined, mailer).listen(
+  const server = createApp(store, portalConfig(process.env), undefined, mailer).listen(
     Number(process.env.PORT || 3000),
     "0.0.0.0",
   );

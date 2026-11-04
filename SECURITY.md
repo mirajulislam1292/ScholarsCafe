@@ -85,3 +85,9 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - Reviews: only for courses in the student's `courseScope` (enrolled, not paused, published); one per course; any edit returns it to `pending`; only owners/admins moderate (audited). Not published anywhere yet.
 - Fixed: MySQL sessions now run in UTC (`SET time_zone='+00:00'` per connection). Before, a server not on UTC stored local time that the driver read as UTC, shifting lead and message times.
 - Verified on MySQL 8: other mentor and other student 404 on read and post, rate limit at 31st message, review moderation roles.
+
+## Separate admin and student portals
+- Same code, two deployments: `admin.scholarscafe.com` (default) and `student.scholarscafe.com` (`PORTAL=student`). Each has its own host-only `__Host-` cookie, CSRF origin and Google redirect URL.
+- Admin portal: Google only; email-code and password routes don't exist there (404). Student sessions get 401.
+- Student portal: Google, email code, password; every lookup is limited to `role='student'`, so team emails never get codes and can't use passwords there. Team sessions get 401. The website's content and form endpoints are disabled (404).
+- Refused Google sign-ins redirect to a friendly message and are audited; no session is created.

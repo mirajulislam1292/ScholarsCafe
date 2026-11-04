@@ -5,15 +5,17 @@ import { createApp } from "./app.js";
 import { hashPassword, verifyPassword, newCode, CODE_MINUTES, CODE_ATTEMPTS } from "./auth.js";
 import { hash } from "./security.js";
 
+// Email code and password sign-in live on the student portal (its origin is passed as ADMIN_ORIGIN).
 const config = {
-  ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+  PORTAL: "student",
+  ADMIN_ORIGIN: "https://student.scholarscafe.com",
   PUBLIC_ORIGIN: "https://scholarscafe.com",
   GOOGLE_CLIENT_ID: "test",
 };
 const USER = {
   id: "11111111-1111-4111-8111-111111111111",
   email: "mentor@example.com",
-  role: "mentor",
+  role: "student",
   active: 1,
 };
 const post = (app, path, body, origin = config.ADMIN_ORIGIN) =>
