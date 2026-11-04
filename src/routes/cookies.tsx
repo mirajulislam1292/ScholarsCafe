@@ -1,4 +1,4 @@
-import {useCmsLookup} from "@/lib/cms";
+import { useCmsLookup } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/scholars/Navbar";
@@ -27,16 +27,19 @@ export const Route = createFileRoute("/cookies")({
 });
 
 function CookiesPage() {
- const cmsLabel = useCmsLookup();
+  const cmsLabel = useCmsLookup();
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <LegalPage
         kicker="Legal"
-        title={cmsLabel("cookies.label.eb095f90a1f1","Cookie Notice")}
+        title={cmsLabel("cookies.label.eb095f90a1f1", "Cookie Notice")}
         updated="May 2026"
-        intro={cmsLabel("cookies.label.a5932ebdfe39","This notice explains how scholarscafe.com uses cookies and similar technologies to make the site work, remember your preferences, and help us improve.")}
+        intro={cmsLabel(
+          "cookies.label.a5932ebdfe39",
+          "This notice explains how scholarscafe.com uses cookies and similar technologies to make the site work, remember your preferences, and help us improve.",
+        )}
       >
         <h2>
           <CmsText id="cookies.c1f30d809e15">1. What is a cookie?</CmsText>

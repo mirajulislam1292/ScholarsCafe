@@ -37,7 +37,12 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       window.clearInterval(interval);
     };
   }, []);
-  return <Content.Provider value={items}><BrandSettings />{children}</Content.Provider>;
+  return (
+    <Content.Provider value={items}>
+      <BrandSettings />
+      {children}
+    </Content.Provider>
+  );
 }
 const DEFAULT_BRAND_MARK = "/brand/mark-blue.png";
 function BrandSettings() {
@@ -45,8 +50,15 @@ function BrandSettings() {
   useEffect(() => {
     // Only override the built-in logo files when the admin has uploaded a custom mark.
     if (brand.image === DEFAULT_BRAND_MARK) return;
-    document.documentElement.style.setProperty("--brand-mark-url", `url(${JSON.stringify(brand.image)})`);
-    document.querySelectorAll<HTMLLinkElement>('link[rel="icon"],link[rel="apple-touch-icon"]').forEach(link => { link.href = brand.image; });
+    document.documentElement.style.setProperty(
+      "--brand-mark-url",
+      `url(${JSON.stringify(brand.image)})`,
+    );
+    document
+      .querySelectorAll<HTMLLinkElement>('link[rel="icon"],link[rel="apple-touch-icon"]')
+      .forEach((link) => {
+        link.href = brand.image;
+      });
   }, [brand.image]);
   return null;
 }
@@ -84,7 +96,12 @@ export function useCmsValue<T>(key: string, fallback: T): T {
   function visit(value: unknown, path: string): unknown {
     if (typeof value === "number") {
       const next = copy[path];
-      return typeof next === "string" && next.trim() && Number.isFinite(Number(next)) && Math.abs(Number(next)) <= 1000000 ? Number(next) : value;
+      return typeof next === "string" &&
+        next.trim() &&
+        Number.isFinite(Number(next)) &&
+        Math.abs(Number(next)) <= 1000000
+        ? Number(next)
+        : value;
     }
     if (typeof value === "string") {
       const next = copy[path];
@@ -92,6 +109,7 @@ export function useCmsValue<T>(key: string, fallback: T): T {
       if (
         (/^(https?:|mailto:|tel:|#|\/)/.test(value) ||
           /(?:url|link|href|src|image|photo)$/i.test(path)) &&
+        // eslint-disable-next-line no-control-regex -- rejects control characters in CMS URLs on purpose
         (!/^(https:\/\/|mailto:|tel:|#|\/(?!\/))/.test(next) || /[\u0000-\u0020\\]/.test(next))
       )
         return value;
