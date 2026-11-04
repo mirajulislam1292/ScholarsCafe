@@ -13,7 +13,7 @@ export function Stats() {
           {STATS.map((s, i) => (
             <Reveal key={i} delay={i * 0.08}>
               <div className="relative">
-                <div className="font-display text-[clamp(3.5rem,7vw,6rem)] font-extrabold leading-none text-white">
+                <div className="whitespace-nowrap font-display text-[clamp(3rem,6vw,5.5rem)] font-light leading-none text-white">
                   <CountUp end={s.value} suffix={s.suffix} />
                 </div>
                 <div className="mt-4 max-w-[180px] text-[13px] uppercase tracking-[0.16em] text-white/55">

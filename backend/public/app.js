@@ -4,16 +4,40 @@ let me,
 let catalog = {};
 const $ = (id) => document.getElementById(id);
 const names = {
-  mentors: "Mentors",
-  blogs: "Blogs",
-  feedback: "Feedback",
-  courses: "Courses & pricing",
   copy: "Website text & images",
+  sections: "Page sections",
+  seo: "SEO titles",
+  hero: "Hero videos",
+  universities: "Universities",
+  team: "Our Team",
+  feedback: "Testimonials",
+  faqs: "FAQs",
+  countries: "Countries",
+  courses: "Courses & pricing",
+  blogs: "Blog",
+};
+const canPublishRole = (role) => role === "owner" || role === "admin";
+const ENUMS = { group: ["founder", "mentor"], device: ["desktop", "mobile"] };
+const HELP = {
+  order: "Section ids in display order, separated by commas.",
+  hidden: "Section ids to hide, separated by commas (leave empty to show all).",
+  position: "Lower numbers appear first. Use the ↑ ↓ buttons in the list to reorder.",
+  rate: "Playback speed, 0.5–1.5 (0.85 is calm).",
+  page: "Page path, for example / or /about.",
+  title: "",
 };
 const defaults = {
   mentors: { name: "", role: "", bio: "", photo: "", initials: "" },
   blogs: { title: "", slug: "", excerpt: "", body: "", author: "", image: "" },
-  feedback: { name: "", quote: "", destination: "", outcome: "", year: "", initials: "" },
+  feedback: {
+    name: "",
+    quote: "",
+    destination: "",
+    outcome: "",
+    year: "",
+    initials: "",
+    position: 0,
+  },
   courses: {
     title: "",
     description: "",
@@ -22,8 +46,34 @@ const defaults = {
     features: [],
     cta: "Learn more",
     featured: false,
+    position: 0,
   },
   copy: {},
+  universities: { name: "", position: 0 },
+  team: {
+    name: "",
+    group: "founder",
+    role: "Co-founder",
+    title: "",
+    line: "",
+    photo: "",
+    position: 0,
+  },
+  faqs: { q: "", a: "", position: 0 },
+  countries: { name: "", enabled: false, position: 0 },
+  hero: {
+    place: "",
+    device: "desktop",
+    mp4: "",
+    webm: "",
+    poster: "",
+    credit: "",
+    rate: 0.85,
+    enabled: true,
+    position: 0,
+  },
+  seo: { page: "/", title: "", description: "" },
+  sections: { page: "/", order: "", hidden: "" },
 };
 function node(tag, text, cls) {
   const n = document.createElement(tag);
@@ -73,6 +123,30 @@ function field(form, key, value) {
     Array.isArray(value) ||
     ["body", "bio", "description", "excerpt", "quote"].includes(key) ||
     String(value).length > 100;
+  if (ENUMS[key]) {
+    const select = node("select");
+    for (const opt of ENUMS[key]) {
+      const o = node("option", opt);
+      o.value = opt;
+      select.append(o);
+    }
+    select.value = value;
+    select.id = "field-" + key;
+    label.htmlFor = select.id;
+    form.append(label, select);
+    return () => select.value;
+  }
+  if (typeof value === "number") {
+    const num = node("input");
+    num.type = "number";
+    num.step = key === "rate" ? "0.05" : "1";
+    num.value = String(value);
+    num.id = "field-" + key;
+    label.htmlFor = num.id;
+    form.append(label, num);
+    if (HELP[key]) form.append(node("small", HELP[key], "muted"));
+    return () => Number(num.value);
+  }
   const input = node(typeof value === "boolean" ? "input" : multi ? "textarea" : "input");
   if (typeof value === "boolean") {
     input.type = "checkbox";
@@ -84,16 +158,60 @@ function field(form, key, value) {
   input.id = "field-" + key;
   label.htmlFor = input.id;
   form.append(label, input);
-  if (/(?:photo|image|mobileImage|logo)$/i.test(key) && me.role !== "editor") {
-    const file = node("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp";
+  if (HELP[key]) form.append(node("small", HELP[key], "muted"));
+  if (/^(mp4|webm)$/.test(key) && canPublishRole(me.role)) {
+    const file = node("input");
+    file.type = "file";
+    file.accept = key === "mp4" ? "video/mp4" : "video/webm";
+    file.setAttribute("aria-label", "Upload video for " + key);
+    file.onchange = async () => {
+      if (!file.files[0]) return;
+      file.disabled = true;
+      try {
+        input.value = (await upload(file.files[0])).url;
+        notice("Video uploaded. Save the draft and publish to use it.");
+      } catch (e) {
+        report(e);
+      } finally {
+        file.disabled = false;
+      }
+    };
+    form.append(
+      file,
+      node(
+        "small",
+        "Licensed footage only · " +
+          key.toUpperCase() +
+          " · maximum 12 MB · 1080p, 10–14 s, no audio",
+        "muted",
+      ),
+    );
+  }
+  if (/(?:photo|image|mobileImage|logo|poster)$/i.test(key) && me.role !== "editor") {
+    const file = node("input");
+    file.type = "file";
+    file.accept = "image/png,image/jpeg,image/webp";
     file.setAttribute("aria-label", "Upload image for " + key);
     file.onchange = async () => {
       if (!file.files[0]) return;
       file.disabled = true;
-      try { input.value = (await upload(file.files[0])).url; notice("Image uploaded. Save the draft and publish to use it."); }
-      catch (e) { report(e); } finally { file.disabled = false; }
+      try {
+        input.value = (await upload(file.files[0])).url;
+        notice("Image uploaded. Save the draft and publish to use it.");
+      } catch (e) {
+        report(e);
+      } finally {
+        file.disabled = false;
+      }
     };
-    form.append(file, node("small", "Public images only · PNG, JPEG or WebP · maximum 5 MB / 16 megapixels", "muted"));
+    form.append(
+      file,
+      node(
+        "small",
+        "Public images only · PNG, JPEG or WebP · maximum 5 MB / 16 megapixels",
+        "muted",
+      ),
+    );
   }
   return () =>
     typeof value === "boolean"
@@ -110,7 +228,10 @@ function render() {
   const screen = $("screen");
   screen.replaceChildren();
   for (const b of $("nav").children) b.classList.toggle("active", b.dataset.section === section);
-  if (section === "Media") { renderMedia().catch(report); return; }
+  if (section === "Media") {
+    renderMedia().catch(report);
+    return;
+  }
   if (section === "Overview") {
     const grid = node("div", undefined, "grid");
     for (const [kind, label] of Object.entries(names)) {
@@ -140,8 +261,33 @@ function render() {
     renderAudit().catch(report);
     return;
   }
+  if (section === "Leads") {
+    renderLeads().catch(report);
+    return;
+  }
+  if (section === "Account") {
+    renderAccount();
+    if (me.role === "student") renderMyDetails().catch(report);
+    return;
+  }
+  if (section === "My courses") {
+    renderMyCourses().catch(report);
+    return;
+  }
   if (section === "Messages") {
-    renderMessages().catch(report);
+    (me.role === "student" ? renderThread(me.id) : renderThreads()).catch(report);
+    return;
+  }
+  if (section === "Reviews") {
+    renderReviews().catch(report);
+    return;
+  }
+  if (section === "Student courses") {
+    renderLmsCourses().catch(report);
+    return;
+  }
+  if (section === "Students") {
+    renderStudents().catch(report);
     return;
   }
   if (section === "Private feedback" || section === "Newsletter") {
@@ -171,16 +317,37 @@ function render() {
     );
   screen.append(bar);
   if (section === "copy") {
-    const existingKeys = new Set(items.filter(i => i.kind === 'copy').flatMap(i => Object.keys(i.data)));
+    const existingKeys = new Set(
+      items.filter((i) => i.kind === "copy").flatMap((i) => Object.keys(i.data)),
+    );
     const missing = Object.entries(catalog).filter(([key]) => !existingKeys.has(key));
-    const groups = [...new Set(missing.map(([key]) => key.split('.')[0]))];
-    for (const group of groups) screen.append(button("Set up " + group + " fields", () => edit({
-      id: crypto.randomUUID(), kind: 'copy', title: group + ' additional fields', version: 0,
-      data: Object.fromEntries(missing.filter(([key]) => key.split('.')[0] === group)),
-    })));
-    screen.append(node('p', 'Existing published edits are preserved. New fields use the website defaults until you save and publish them. Images can be uploaded in image fields or from Media.', 'muted'));
+    const groups = [...new Set(missing.map(([key]) => key.split(".")[0]))];
+    for (const group of groups)
+      screen.append(
+        button("Set up " + group + " fields", () =>
+          edit({
+            id: crypto.randomUUID(),
+            kind: "copy",
+            title: group + " additional fields",
+            version: 0,
+            data: Object.fromEntries(missing.filter(([key]) => key.split(".")[0] === group)),
+          }),
+        ),
+      );
+    screen.append(
+      node(
+        "p",
+        "Existing published edits are preserved. New fields use the website defaults until you save and publish them. Images can be uploaded in image fields or from Media.",
+        "muted",
+      ),
+    );
   }
-  const list = items.filter((i) => i.kind === section);
+  const pos = (i) => (typeof i.data.position === "number" ? i.data.position : 1e9);
+  const list = items
+    .filter((i) => i.kind === section)
+    .sort((a, b) => pos(a) - pos(b) || a.title.localeCompare(b.title));
+  const orderable =
+    list.length > 1 && "position" in (defaults[section] || {}) && canPublishRole(me.role);
   if (!list.length)
     screen.append(
       node(
@@ -191,15 +358,47 @@ function render() {
         "empty",
       ),
     );
-  for (const item of list) {
+  list.forEach((item, index) => {
     const row = node("div", undefined, "card row");
     row.append(
       node("span", item.title),
       node("span", item.published ? "Published · may have a newer draft" : "Draft", "badge"),
-      button("Edit", () => edit(item)),
     );
+    if (orderable) {
+      const up = button("↑", () => move(list, index, -1));
+      const down = button("↓", () => move(list, index, 1));
+      up.setAttribute("aria-label", "Move " + item.title + " up");
+      down.setAttribute("aria-label", "Move " + item.title + " down");
+      up.disabled = index === 0;
+      down.disabled = index === list.length - 1;
+      row.append(up, down);
+    }
+    row.append(button("Edit", () => edit(item)));
     screen.append(row);
+  });
+}
+/** Reorder: renumber the list (10, 20, 30…), save each changed entry and publish it. */
+async function move(list, index, dir) {
+  const order = [...list];
+  const [item] = order.splice(index, 1);
+  order.splice(index + dir, 0, item);
+  for (const [i, entry] of order.entries()) {
+    const position = (i + 1) * 10;
+    if (entry.data.position === position) continue;
+    await api("content", {
+      id: entry.id,
+      kind: entry.kind,
+      title: entry.title,
+      data: { ...entry.data, position },
+      version: entry.version,
+    });
+    const saved = (await api("content")).items.find((x) => x.id === entry.id);
+    if (entry.published)
+      await api("content/" + encodeURIComponent(entry.id) + "/publish", { version: saved.version });
   }
+  await refresh();
+  render();
+  notice("Order saved and published.");
 }
 function navigate(next) {
   section = next;
@@ -240,6 +439,56 @@ function edit(item) {
       );
   actions.append(node("span", "Save your changes before publishing.", "muted"));
   form.append(actions);
+  if (item.version && item.kind !== "copy" && canPublishRole(me.role))
+    form.append(
+      button(
+        "Delete entry",
+        async () => {
+          if (
+            !confirm(
+              'Delete "' +
+                item.title +
+                '"? It disappears from the website. An owner can restore it from Activity.',
+            )
+          )
+            return;
+          await api("content/" + encodeURIComponent(item.id) + "/delete", {
+            version: item.version,
+          });
+          await refresh();
+          render();
+          notice("Deleted.");
+        },
+        "danger",
+      ),
+    );
+  if (item.version) {
+    const history = node("details", undefined, "card");
+    history.append(node("summary", "Version history"));
+    history.ontoggle = async () => {
+      if (!history.open || history.dataset.loaded) return;
+      history.dataset.loaded = "1";
+      const rows = (await api("content/" + encodeURIComponent(item.id) + "/revisions")).items;
+      if (!rows.length) history.append(node("p", "No earlier versions yet.", "muted"));
+      for (const r of rows) {
+        const line = node("div", undefined, "row");
+        line.append(
+          node("span", new Date(r.created_at).toLocaleString() + " · " + (r.email || "unknown")),
+          button("Restore as draft", async () => {
+            await api("content/" + encodeURIComponent(item.id) + "/restore", {
+              revision: r.id,
+              version: item.version,
+            });
+            await refresh();
+            edit(items.find((i) => i.id === item.id));
+            notice("Earlier version restored as a draft. Review it, then publish.");
+          }),
+        );
+        history.append(line);
+      }
+    };
+    form.append(history);
+  }
   form.onsubmit = async (e) => {
     e.preventDefault();
     save.disabled = true;
@@ -261,38 +510,723 @@ function edit(item) {
     }
   };
 }
-async function upload(file) {
-  if (file.size > 5 * 1024 * 1024) throw Error('Choose an image smaller than 5 MB.');
-  const response = await fetch('/api/media', { method: 'POST', headers: {
-    'Content-Type': file.type, 'X-CSRF-Token': me.csrf,
-    'X-File-Name': file.name.replace(/[^a-zA-Z0-9._ -]/g, '_'),
-  }, body: file });
+async function upload(file, visibility = "public") {
+  const video = file.type.startsWith("video/");
+  if (file.size > (video ? 12 : 5) * 1024 * 1024)
+    throw Error(
+      video ? "Choose a video smaller than 12 MB." : "Choose an image smaller than 5 MB.",
+    );
+  const response = await fetch("/api/media", {
+    method: "POST",
+    headers: {
+      "Content-Type": file.type,
+      "X-CSRF-Token": me.csrf,
+      "X-File-Name": file.name.replace(/[^a-zA-Z0-9._ -]/g, "_"),
+      "X-Visibility": visibility,
+    },
+    body: file,
+  });
   const result = await response.json();
-  if (!response.ok) throw Error(result.error || 'Upload failed.');
+  if (!response.ok) throw Error(result.error || "Upload failed.");
   return result;
 }
+// ---------- Student dashboard: staff screens ----------
+function input(label, value = "", type = "text", max = 200) {
+  const l = node("label", label);
+  const el = type === "textarea" ? node("textarea") : node("input");
+  if (type !== "textarea") el.type = type;
+  el.value = value ?? "";
+  el.maxLength = max;
+  l.append(el);
+  return [l, el];
+}
+function select(label, options, value) {
+  const l = node("label", label);
+  const el = node("select");
+  for (const [v, t] of options) {
+    const o = node("option", t);
+    o.value = v;
+    el.append(o);
+  }
+  el.value = value ?? "";
+  l.append(el);
+  return [l, el];
+}
+async function renderLmsCourses(openId) {
+  const screen = $("screen");
+  const courses = (await api("lms/courses")).items;
+  if (openId) return renderLmsCourse(courses.find((c) => c.id === openId));
+  screen.append(
+    node(
+      "p",
+      "Courses students take in their dashboard (separate from the public pricing list).",
+      "muted",
+    ),
+    button("+ New course", () => renderLmsCourse(null), "primary"),
+  );
+  if (!courses.length) screen.append(node("p", "No courses yet.", "empty"));
+  for (const c of courses) {
+    const card = node("article", undefined, "card");
+    card.append(
+      node("h3", c.title),
+      node("span", c.status, "badge"),
+      node("p", `${c.lessons} lessons · ${c.students} students`, "muted"),
+      button("Edit →", () => renderLmsCourse(c)),
+    );
+    screen.append(card);
+  }
+}
+async function renderLmsCourse(course) {
+  const screen = $("screen");
+  screen.replaceChildren(button("← All courses", () => render()));
+  const form = node("form", undefined, "card");
+  const [tl, title] = input("Title", course?.title);
+  const [sl, summary] = input("Summary", course?.summary, "textarea", 5000);
+  const [stl, status] = select(
+    "Status",
+    [
+      ["draft", "Draft (hidden from students)"],
+      ["published", "Published"],
+    ],
+    course?.status || "draft",
+  );
+  const save = node("button", course ? "Save course" : "Create course", "primary");
+  save.type = "submit";
+  form.append(node("h2", course ? "Edit course" : "New course"), tl, sl, stl, save);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const body = { title: title.value, summary: summary.value, status: status.value };
+      const id = course
+        ? (await api("lms/courses/" + course.id, body), course.id)
+        : (await api("lms/courses", body)).id;
+      notice("Course saved.");
+      screen.replaceChildren();
+      await renderLmsCourses(id);
+    } catch (err) {
+      report(err);
+    }
+  };
+  screen.append(form);
+  if (!course) return;
+  form.append(
+    button(
+      "Delete course",
+      async () => {
+        if (!confirm("Delete this course? Students lose access at once.")) return;
+        await api("lms/courses/" + course.id + "/delete", {});
+        notice("Course deleted.");
+        render();
+      },
+      "danger",
+    ),
+  );
+  const lessons = (await api("lms/courses/" + course.id + "/lessons")).items;
+  screen.append(
+    node("h2", "Lessons"),
+    node("p", "Videos are private: only students enrolled in this course can watch them.", "muted"),
+  );
+  for (const lesson of [...lessons, null])
+    screen.append(lessonCard(course, lesson, lessons.length));
+}
+function lessonCard(course, lesson, count) {
+  const card = node("form", undefined, lesson ? "card" : "card new");
+  const [tl, title] = input("Lesson title", lesson?.title);
+  const [bl, body] = input("Text / notes", lesson?.body, "textarea", 200000);
+  const [pl, position] = input("Order", lesson?.position ?? (count + 1) * 10, "number");
+  const pub = node("label", "Published");
+  const published = node("input");
+  published.type = "checkbox";
+  published.checked = Boolean(lesson?.published);
+  pub.prepend(published);
+  let videoId = lesson?.video_media_id || null;
+  const videoState = node("p", videoId ? "Video attached." : "No video.", "muted");
+  const file = node("input");
+  file.type = "file";
+  file.accept = "video/mp4,video/webm";
+  file.onchange = async () => {
+    if (!file.files[0]) return;
+    try {
+      videoState.textContent = "Uploading…";
+      videoId = (await upload(file.files[0], "private")).id;
+      videoState.textContent = "Video uploaded. Save the lesson to attach it.";
+    } catch (err) {
+      videoState.textContent = videoId ? "Video attached." : "No video.";
+      report(err);
+    }
+  };
+  const remove = button("Remove video", () => {
+    videoId = null;
+    videoState.textContent = "Video removed. Save the lesson to apply.";
+  });
+  const save = node("button", lesson ? "Save lesson" : "+ Add lesson", "primary");
+  save.type = "submit";
+  card.append(
+    node("h3", lesson ? lesson.title : "New lesson"),
+    tl,
+    bl,
+    pl,
+    pub,
+    videoState,
+    file,
+    remove,
+    save,
+  );
+  if (lesson)
+    card.append(
+      button(
+        "Delete lesson",
+        async () => {
+          if (!confirm("Delete this lesson and its progress records?")) return;
+          await api("lms/lessons/" + lesson.id + "/delete", {});
+          notice("Lesson deleted.");
+          $("screen").replaceChildren();
+          await renderLmsCourses(course.id);
+        },
+        "danger",
+      ),
+    );
+  card.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api("lms/lessons" + (lesson ? "/" + lesson.id : ""), {
+        course_id: course.id,
+        title: title.value,
+        body: body.value,
+        position: Number(position.value) || 0,
+        published: published.checked,
+        video_media_id: videoId,
+      });
+      notice("Lesson saved.");
+      $("screen").replaceChildren();
+      await renderLmsCourses(course.id);
+    } catch (err) {
+      report(err);
+    }
+  };
+  return card;
+}
+async function renderStudents() {
+  const screen = $("screen");
+  const staff = canPublishRole(me.role);
+  const [students, courses, mentors] = await Promise.all([
+    api("lms/students").then((r) => r.items),
+    api("lms/courses").then((r) => r.items),
+    staff ? api("mentors").then((r) => r.items) : [],
+  ]);
+  const mentorOptions = [["", "No mentor"], ...mentors.map((m) => [m.id, m.email])];
+  const mentorName = (id) =>
+    mentors.find((m) => m.id === id)?.email || (id ? "assigned mentor" : "no mentor");
+  screen.append(
+    node(
+      "p",
+      staff
+        ? "Student accounts, their courses and mentors. Students sign in with Google, an email code or a password."
+        : "Students assigned to you. You can keep notes.",
+      "muted",
+    ),
+  );
+  if (staff) {
+    const add = node("form", undefined, "card");
+    const [el, email] = input("Email", "", "email", 254);
+    const [nl, name] = input("Full name", "", "text", 160);
+    const [pl, phone] = input("Phone", "", "tel", 80);
+    const [il, intake] = input("Target intake (e.g. Fall 2027)", "", "text", 40);
+    const go = node("button", "Add student", "primary");
+    go.type = "submit";
+    add.append(node("h2", "Add a student"), el, nl, pl, il, go);
+    add.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api("lms/students", {
+          email: email.value,
+          full_name: name.value,
+          phone: phone.value,
+          target_intake: intake.value,
+        });
+        notice("Student added. They can now sign in with that email.");
+        render();
+      } catch (err) {
+        report(err);
+      }
+    };
+    screen.append(add);
+  }
+  const search = node("input");
+  search.type = "search";
+  search.placeholder = "Search students";
+  search.setAttribute("aria-label", "Search students");
+  const list = node("div");
+  screen.append(search, list);
+  const draw = () => {
+    const term = search.value.trim().toLowerCase();
+    list.replaceChildren();
+    const shown = students.filter(
+      (s) => !term || `${s.full_name} ${s.email}`.toLowerCase().includes(term),
+    );
+    if (!shown.length) list.append(node("p", "No students yet.", "empty"));
+    for (const s of shown) list.append(studentCard(s));
+  };
+  const studentCard = (s) => {
+    const card = node("details", undefined, "card");
+    card.append(
+      node("summary", `${s.full_name || "(no name)"} · ${s.email}${s.active ? "" : " · inactive"}`),
+    );
+    const form = node("form");
+    const fields = {};
+    if (staff)
+      for (const [key, label, max] of [
+        ["full_name", "Full name", 160],
+        ["phone", "Phone", 80],
+        ["target_intake", "Target intake", 40],
+      ]) {
+        const [l, el] = input(label, s[key], "text", max);
+        fields[key] = el;
+        form.append(l);
+      }
+    const [nl, notes] = input(
+      "Staff notes (never shown to the student)",
+      s.staff_notes,
+      "textarea",
+      10000,
+    );
+    fields.staff_notes = notes;
+    const save = node("button", "Save", "primary");
+    save.type = "submit";
+    form.append(nl, save);
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api(
+          "lms/students/" + s.id,
+          Object.fromEntries(Object.entries(fields).map(([k, el]) => [k, el.value])),
+        );
+        notice("Saved.");
+      } catch (err) {
+        report(err);
+      }
+    };
+    card.append(form, node("h3", "Courses"));
+    for (const en of s.enrollments) {
+      const row = node("div", undefined, "toolbar");
+      row.append(node("strong", en.title));
+      if (staff) {
+        const [, mentor] = select("Mentor", mentorOptions, en.mentor_id);
+        const [, status] = select(
+          "Status",
+          [
+            ["active", "Active"],
+            ["paused", "Paused (locked)"],
+            ["completed", "Completed"],
+          ],
+          en.status,
+        );
+        row.append(
+          mentor,
+          status,
+          button("Save", async () => {
+            await api("lms/enrollments", {
+              user_id: s.id,
+              course_id: en.course_id,
+              mentor_id: mentor.value || null,
+              status: status.value,
+            });
+            notice("Enrollment saved.");
+          }),
+          button(
+            "Remove",
+            async () => {
+              if (!confirm("Remove this student from the course?")) return;
+              await api("lms/enrollments/delete", { user_id: s.id, course_id: en.course_id });
+              notice("Removed.");
+              render();
+            },
+            "danger",
+          ),
+        );
+      } else row.append(node("span", `${en.status} · ${mentorName(en.mentor_id)}`, "muted"));
+      card.append(row);
+    }
+    if (!s.enrollments.length) card.append(node("p", "Not enrolled in any course.", "muted"));
+    const open = courses.filter((c) => !s.enrollments.some((en) => en.course_id === c.id));
+    if (staff && open.length) {
+      const row = node("div", undefined, "toolbar");
+      const [, course] = select(
+        "Course",
+        open.map((c) => [c.id, c.title + (c.status === "draft" ? " (draft)" : "")]),
+      );
+      const [, mentor] = select("Mentor", mentorOptions, "");
+      row.append(
+        course,
+        mentor,
+        button(
+          "Enroll",
+          async () => {
+            await api("lms/enrollments", {
+              user_id: s.id,
+              course_id: course.value,
+              mentor_id: mentor.value || null,
+              status: "active",
+            });
+            notice("Enrolled.");
+            render();
+          },
+          "primary",
+        ),
+      );
+      card.append(row);
+    }
+    return card;
+  };
+  search.oninput = draw;
+  draw();
+}
+// ---------- Student dashboard: student screens ----------
+async function renderMyCourses() {
+  const screen = $("screen");
+  const courses = (await api("lms/my/courses")).items;
+  screen.append(node("p", "Your courses. Pick up where you left off.", "muted"));
+  if (!courses.length)
+    screen.append(
+      node("p", "You're not enrolled in a course yet. Your mentor will add you.", "empty"),
+    );
+  for (const c of courses) {
+    const card = node("article", undefined, "card");
+    const pct = c.lessons ? Math.round((c.done / c.lessons) * 100) : 0;
+    const bar = node("progress");
+    bar.max = 100;
+    bar.value = pct;
+    bar.setAttribute("aria-label", `${pct}% complete`);
+    card.append(
+      node("h3", c.title),
+      node("p", c.summary || "", "muted"),
+      bar,
+      node("p", `${c.done} of ${c.lessons} lessons done`, "muted"),
+      button("Open course →", () => renderMyCourse(c.id), "primary"),
+    );
+    screen.append(card);
+  }
+}
+async function renderMyCourse(courseId, lessonId) {
+  const screen = $("screen");
+  const { course, lessons } = await api("lms/my/courses/" + courseId);
+  screen.replaceChildren(button("← My courses", () => render()));
+  $("heading").textContent = course.title;
+  const layout = node("div", undefined, "course-layout");
+  const list = node("ol", undefined, "lesson-list");
+  const current =
+    lessons.find((l) => l.id === lessonId) || lessons.find((l) => !l.done) || lessons[0];
+  for (const l of lessons) {
+    const item = node("li");
+    const b = button((l.done ? "✓ " : "") + l.title, () => renderMyCourse(courseId, l.id));
+    if (l === current) b.setAttribute("aria-current", "true");
+    item.append(b);
+    list.append(item);
+  }
+  const view = node("section", undefined, "card lesson-view");
+  if (!current) view.append(node("p", "Lessons will appear here soon.", "empty"));
+  else {
+    view.append(node("h2", current.title));
+    if (current.has_video) {
+      const video = node("video");
+      video.controls = true;
+      video.preload = "metadata";
+      video.playsInline = true;
+      video.disablePictureInPicture = true;
+      video.setAttribute("controlsList", "nodownload noplaybackrate");
+      video.oncontextmenu = (e) => e.preventDefault();
+      video.src = "/api/lms/lessons/" + current.id + "/video";
+      video.onerror = () =>
+        report(
+          Error("This video can't play right now. Your access may have changed; reload the page."),
+        );
+      view.append(video);
+    }
+    if (current.body) view.append(node("p", current.body, "lesson-body"));
+    const toggle = button(
+      current.done ? "Mark as not done" : "Mark as done ✓",
+      async () => {
+        await api("lms/my/progress", { lesson_id: current.id, done: !current.done });
+        const next = lessons[lessons.indexOf(current) + 1];
+        await renderMyCourse(courseId, !current.done && next ? next.id : current.id);
+      },
+      current.done ? "" : "primary",
+    );
+    view.append(toggle);
+  }
+  layout.append(list, view);
+  screen.append(layout, await reviewForm(courseId));
+}
+async function renderMyDetails() {
+  const p = await api("lms/my/profile");
+  const card = node("form", undefined, "card");
+  const [nl, name] = input("Full name", p.full_name, "text", 160);
+  const [pl, phone] = input("Phone", p.phone, "tel", 80);
+  const [il, intake] = input("Target intake (e.g. Fall 2027)", p.target_intake, "text", 40);
+  const save = node("button", "Save details", "primary");
+  save.type = "submit";
+  card.append(node("h2", "My details"), nl, pl, il, save);
+  card.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api("lms/my/profile", {
+        full_name: name.value,
+        phone: phone.value,
+        target_intake: intake.value,
+      });
+      notice("Details saved.");
+    } catch (err) {
+      report(err);
+    }
+  };
+  $("screen").prepend(card);
+}
+// ---------- Messages and reviews ----------
+const when = (t) =>
+  new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+function senderLabel(m) {
+  if (m.mine) return "You";
+  if (m.sender_role === "student") return "Student";
+  if (me.role === "student")
+    return m.sender_role === "mentor" ? "Your mentor" : "Scholars Cafe team";
+  return m.sender_email || m.sender_role || "Staff";
+}
+async function renderThread(studentId, title, back) {
+  const screen = $("screen");
+  const messages = (await api("lms/threads/" + studentId)).items;
+  screen.replaceChildren();
+  if (back) screen.append(button("← All conversations", back));
+  if (title) $("heading").textContent = title;
+  const list = node("div", undefined, "thread");
+  if (!messages.length)
+    list.append(
+      node(
+        "p",
+        me.role === "student"
+          ? "Ask your mentor anything here. They'll reply as soon as they can."
+          : "No messages yet.",
+        "empty",
+      ),
+    );
+  for (const m of messages) {
+    const bubble = node("article", undefined, "message" + (m.mine ? " mine" : ""));
+    bubble.append(
+      node("p", `${senderLabel(m)} · ${when(m.created_at)}`, "muted"),
+      node("p", m.body, "lesson-body"),
+    );
+    list.append(bubble);
+  }
+  const form = node("form", undefined, "card");
+  const [l, text] = input("Message", "", "textarea", 5000);
+  const send = node("button", "Send", "primary");
+  send.type = "submit";
+  form.append(l, send);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (!text.value.trim()) return;
+    try {
+      send.disabled = true;
+      await api("lms/threads/" + studentId, { body: text.value });
+      await renderThread(studentId, title, back);
+    } catch (err) {
+      send.disabled = false;
+      report(err);
+    }
+  };
+  screen.append(list, form);
+  list.lastElementChild?.scrollIntoView({ block: "nearest" });
+}
+async function renderThreads() {
+  const screen = $("screen");
+  const items = (await api("lms/threads")).items;
+  screen.append(
+    node(
+      "p",
+      me.role === "mentor"
+        ? "Conversations with your students."
+        : "Conversations with every student.",
+      "muted",
+    ),
+  );
+  if (!items.length) screen.append(node("p", "No students yet.", "empty"));
+  for (const t of items) {
+    const card = node("article", undefined, "card");
+    const name = t.full_name || t.email;
+    card.append(
+      node("h3", name),
+      node(
+        "p",
+        (t.last_at ? "Last message " + when(t.last_at) : "No messages yet") +
+          (t.unread ? ` · ${t.unread} unread` : ""),
+        t.unread ? "badge" : "muted",
+      ),
+      button("Open →", () => renderThread(t.id, name, () => navigate("Messages"))),
+    );
+    screen.append(card);
+  }
+}
+async function reviewForm(courseId) {
+  const mine = (await api("lms/my/reviews")).items.find((r) => r.course_id === courseId);
+  const form = node("form", undefined, "card");
+  const [rl, rating] = select(
+    "Rating",
+    [
+      ["5", "★★★★★ Excellent"],
+      ["4", "★★★★ Good"],
+      ["3", "★★★ OK"],
+      ["2", "★★ Poor"],
+      ["1", "★ Bad"],
+    ],
+    String(mine?.rating || 5),
+  );
+  const [bl, body] = input("Your review (at least 10 characters)", mine?.body, "textarea", 2000);
+  const save = node("button", mine ? "Update review" : "Send review", "primary");
+  save.type = "submit";
+  const state = {
+    pending: "Waiting for approval.",
+    approved: "Approved. Thank you!",
+    rejected: "Not approved. You can edit and send it again.",
+  };
+  form.append(
+    node("h2", "Review this course"),
+    ...(mine ? [node("p", state[mine.status], "muted")] : []),
+    rl,
+    bl,
+    save,
+  );
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api("lms/my/reviews", {
+        course_id: courseId,
+        rating: Number(rating.value),
+        body: body.value,
+      });
+      notice("Thanks! Your review will appear after the team approves it.");
+      form.replaceWith(await reviewForm(courseId));
+    } catch (err) {
+      report(err);
+    }
+  };
+  return form;
+}
+async function renderReviews() {
+  const screen = $("screen");
+  const [fl, filter] = select(
+    "Show",
+    [
+      ["pending", "Waiting for approval"],
+      ["approved", "Approved"],
+      ["rejected", "Rejected"],
+      ["", "All"],
+    ],
+    "pending",
+  );
+  const list = node("div");
+  screen.append(
+    node(
+      "p",
+      "Students review courses they're enrolled in. Approve before anyone else can see them.",
+      "muted",
+    ),
+    fl,
+    list,
+  );
+  const load = async () => {
+    const items = (await api("lms/reviews" + (filter.value ? "?status=" + filter.value : "")))
+      .items;
+    list.replaceChildren();
+    if (!items.length) list.append(node("p", "Nothing here.", "empty"));
+    for (const r of items) {
+      const card = node("article", undefined, "card");
+      card.append(
+        node("h3", `${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)} · ${r.course}`),
+        node("p", `${r.full_name || r.email} · ${when(r.created_at)}`, "muted"),
+        node("p", r.body, "lesson-body"),
+        node("span", r.status, "badge"),
+      );
+      for (const [label, status] of [
+        ["Approve", "approved"],
+        ["Reject", "rejected"],
+      ])
+        if (r.status !== status)
+          card.append(
+            button(
+              label,
+              async () => {
+                await api("lms/reviews/" + r.id, { status });
+                notice("Review " + status + ".");
+                await load();
+              },
+              status === "approved" ? "primary" : "danger",
+            ),
+          );
+      list.append(card);
+    }
+  };
+  filter.onchange = () => load().catch(report);
+  await load();
+}
 async function renderMedia() {
-  const screen = $('screen');
-  screen.append(node('p', 'Only upload images you own or have permission to use. Uploaded images are public immediately; never upload private documents.', 'muted'));
-  if (me.role !== 'editor') {
-    const file = node('input'); file.type = 'file'; file.accept = 'image/png,image/jpeg,image/webp';
-    file.setAttribute('aria-label', 'Upload public image');
+  const screen = $("screen");
+  screen.append(
+    node(
+      "p",
+      "Only upload images you own or have permission to use. Uploaded images are public immediately; never upload private documents.",
+      "muted",
+    ),
+  );
+  if (me.role !== "editor") {
+    const file = node("input");
+    file.type = "file";
+    file.accept = "image/png,image/jpeg,image/webp,video/mp4,video/webm";
+    file.setAttribute("aria-label", "Upload public image or video");
     file.onchange = async () => {
       if (!file.files[0]) return;
       file.disabled = true;
-      try { await upload(file.files[0]); render(); notice('Image uploaded. Copy its URL into any image field.'); }
-      catch(e) { report(e); } finally { file.disabled = false; }
-    }; screen.append(file);
+      try {
+        await upload(file.files[0]);
+        render();
+        notice("Image uploaded. Copy its URL into any image field.");
+      } catch (e) {
+        report(e);
+      } finally {
+        file.disabled = false;
+      }
+    };
+    screen.append(file);
   }
-  const result = await api('media');
+  const result = await api("media");
   for (const item of result.items) {
-    const card = node('div', undefined, 'card');
-    const image = node('img'); image.src = item.url; image.alt = item.name; image.width = 160; image.loading = 'lazy';
-    const url = node('input'); url.readOnly = true; url.value = item.url; url.setAttribute('aria-label', 'Image URL');
-    card.append(image,node('p', item.name),url,button('Copy URL', async () => { await navigator.clipboard.writeText(item.url); notice('Image URL copied.'); }));
+    const card = node("div", undefined, "card");
+    const isVideo = String(item.mime || "").startsWith("video/");
+    const image = node(isVideo ? "video" : "img");
+    image.src = item.url;
+    image.width = 160;
+    if (isVideo) {
+      image.muted = true;
+      image.preload = "metadata";
+      image.controls = true;
+    } else {
+      image.alt = item.name;
+      image.loading = "lazy";
+    }
+    const url = node("input");
+    url.readOnly = true;
+    url.value = item.url;
+    url.setAttribute("aria-label", "Image URL");
+    card.append(
+      image,
+      node("p", item.name),
+      url,
+      button("Copy URL", async () => {
+        await navigator.clipboard.writeText(item.url);
+        notice("Image URL copied.");
+      }),
+    );
     screen.append(card);
   }
-  if (!result.items.length) screen.append(node('p', 'No uploaded images yet.', 'empty'));
+  if (!result.items.length) screen.append(node("p", "No uploaded images yet.", "empty"));
 }
 async function renderAccess() {
   const users = (await api("users")).items;
@@ -302,7 +1236,9 @@ async function renderAccess() {
   const email = field(card, "email", "");
   const label = node("label", "Role");
   const select = node("select");
-  for (const role of me.role === "owner" ? ["editor", "admin", "owner"] : ["editor"]) {
+  for (const role of me.role === "owner"
+    ? ["student", "editor", "mentor", "admin", "owner"]
+    : ["student", "editor", "mentor"]) {
     const option = node("option", role);
     option.value = role;
     select.append(option);
@@ -338,7 +1274,10 @@ async function renderAccess() {
       node("span", user.email),
       node("span", user.role + (user.active ? "" : " · revoked"), "badge"),
     );
-    if (user.id !== me.id && (me.role === "owner" || user.role === "editor"))
+    if (
+      user.id !== me.id &&
+      (me.role === "owner" || ["editor", "mentor", "student"].includes(user.role))
+    )
       row.append(
         button(user.active ? "Revoke access" : "Restore access", async () => {
           if (!confirm("Change access for " + user.email + "?")) return;
@@ -368,6 +1307,117 @@ async function renderAudit() {
   }
   $("screen").append(table);
 }
+async function renderLeads() {
+  const screen = $("screen");
+  const admin = canPublishRole(me.role);
+  const mentors = admin ? (await api("mentors")).items : [];
+  const filters = node("form", undefined, "card toolbar");
+  const q = node("input");
+  q.type = "search";
+  q.placeholder = "Search name, email, phone or message";
+  q.setAttribute("aria-label", "Search leads");
+  const status = node("select");
+  status.setAttribute("aria-label", "Filter by status");
+  for (const v of ["", "new", "contacted", "enrolled", "closed"]) {
+    const o = node("option", v || "All statuses");
+    o.value = v;
+    status.append(o);
+  }
+  const assigned = node("select");
+  assigned.setAttribute("aria-label", "Filter by mentor");
+  if (admin) {
+    for (const [v, t] of [
+      ["", "All mentors"],
+      ["none", "Unassigned"],
+      ...mentors.map((m) => [m.id, m.email]),
+    ]) {
+      const o = node("option", t);
+      o.value = v;
+      assigned.append(o);
+    }
+  }
+  const go = node("button", "Filter", "primary");
+  go.type = "submit";
+  const csv = node("a", "Export CSV");
+  csv.className = "button";
+  filters.append(q, status, ...(admin ? [assigned] : []), go, csv);
+  const list = node("div");
+  screen.append(
+    node(
+      "p",
+      admin
+        ? "Every website enquiry. Assign a mentor, track status and keep notes."
+        : "Leads assigned to you.",
+      "muted",
+    ),
+    filters,
+    list,
+  );
+  const query = () => {
+    const p = new URLSearchParams();
+    if (q.value.trim()) p.set("q", q.value.trim());
+    if (status.value) p.set("status", status.value);
+    if (admin && assigned.value) p.set("assigned", assigned.value);
+    return p.toString();
+  };
+  const load = async () => {
+    csv.href = "/api/leads.csv" + (query() ? "?" + query() : "");
+    const rows = (await api("leads" + (query() ? "?" + query() : ""))).items;
+    list.replaceChildren();
+    if (!rows.length) list.append(node("p", "No leads match.", "empty"));
+    for (const row of rows) {
+      const card = node("article", undefined, "card");
+      card.append(
+        node("h2", row.name),
+        node("p", row.email + " · " + row.phone, "muted"),
+        node("p", row.message),
+        node("p", "Received " + new Date(row.created_at).toLocaleString(), "muted"),
+      );
+      const st = node("select");
+      st.setAttribute("aria-label", "Status for " + row.name);
+      for (const v of ["new", "contacted", "enrolled", "closed"]) {
+        const o = node("option", v);
+        o.value = v;
+        st.append(o);
+      }
+      st.value = row.status || "new";
+      const notes = node("textarea");
+      notes.value = row.notes || "";
+      notes.maxLength = 5000;
+      notes.setAttribute("aria-label", "Notes for " + row.name);
+      const who = node("select");
+      who.setAttribute("aria-label", "Assigned mentor for " + row.name);
+      if (admin) {
+        for (const [v, t] of [["", "Unassigned"], ...mentors.map((m) => [m.id, m.email])]) {
+          const o = node("option", t);
+          o.value = v;
+          who.append(o);
+        }
+        who.value = row.assigned_to || "";
+      }
+      const save = button(
+        "Save",
+        async () => {
+          const body = { status: st.value, notes: notes.value };
+          if (admin) body.assigned_to = who.value || null;
+          await api("leads/" + row.id, body);
+          notice("Lead updated.");
+        },
+        "primary",
+      );
+      card.append(node("label", "Status"), st, node("label", "Notes"), notes);
+      if (admin) card.append(node("label", "Assigned mentor"), who);
+      else if (row.assigned_email) card.append(node("p", "Assigned to you", "badge"));
+      card.append(save);
+      list.append(card);
+    }
+  };
+  filters.onsubmit = (e) => {
+    e.preventDefault();
+    load().catch(report);
+  };
+  await load();
+}
 async function renderMessages() {
   const rows = (await api("inquiries")).items;
   for (const row of rows) {
@@ -385,42 +1435,217 @@ async function renderMessages() {
 async function renderSubmissions() {
   const kind = section === "Newsletter" ? "newsletter" : "feedback";
   const rows = (await api("submissions")).items.filter((row) => row.kind === kind);
-  $("screen").append(node("p", kind === "newsletter" ? "Signups are recorded with consent. This dashboard does not send newsletter campaigns. Honor unsubscribe requests before contacting subscribers." : "Private feedback is never published automatically.", "muted"));
+  $("screen").append(
+    node(
+      "p",
+      kind === "newsletter"
+        ? "Signups are recorded with consent. This dashboard does not send newsletter campaigns. Honor unsubscribe requests before contacting subscribers."
+        : "Private feedback is never published automatically.",
+      "muted",
+    ),
+  );
   for (const row of rows) {
     const card = node("article", undefined, "card");
-    card.append(node("h2", row.name || row.email), node("p", row.email), node("p", row.message), node("p", new Date(row.created_at).toLocaleString(), "muted"));
-    if (kind === "newsletter") card.append(row.unsubscribed_at ? node("p", "Unsubscribed", "badge") : button("Mark unsubscribed", async () => { await api("submissions/" + row.id + "/unsubscribe", {}); render(); }));
+    card.append(
+      node("h2", row.name || row.email),
+      node("p", row.email),
+      node("p", row.message),
+      node("p", new Date(row.created_at).toLocaleString(), "muted"),
+    );
+    if (kind === "newsletter")
+      card.append(
+        row.unsubscribed_at
+          ? node("p", "Unsubscribed", "badge")
+          : button("Mark unsubscribed", async () => {
+              await api("submissions/" + row.id + "/unsubscribe", {});
+              render();
+            }),
+      );
     $("screen").append(card);
   }
   if (!rows.length) $("screen").append(node("p", "No entries yet.", "empty"));
 }
 async function renderMail() {
   const result = await api("mail-status");
-  $("screen").append(node("p", result.configured ? "Notifications go to contact@scholarscafe.com. Your original messages remain in the dashboard." : "Mailbox delivery is not connected yet. Entries are saved here and notifications are queued until the mailbox password is configured.", "card"));
+  $("screen").append(
+    node(
+      "p",
+      result.configured
+        ? "Notifications go to contact@scholarscafe.com. Your original messages remain in the dashboard."
+        : "Mailbox delivery is not connected yet. Entries are saved here and notifications are queued until the mailbox password is configured.",
+      "card",
+    ),
+  );
   for (const row of result.items) {
     const card = node("div", undefined, "card row");
-    card.append(node("span", row.subject), node("span", row.sent_at ? "Sent" : row.attempts >= 5 ? "Delivery failed — check mailbox settings" : "Queued", "badge"));
+    card.append(
+      node("span", row.subject),
+      node(
+        "span",
+        row.sent_at
+          ? "Sent"
+          : row.attempts >= 5
+            ? "Delivery failed — check mailbox settings"
+            : "Queued",
+        "badge",
+      ),
+    );
     $("screen").append(card);
   }
 }
+// Sign-in screen: password, or a one-time email code (the email also holds a magic link).
+async function authPost(path, body) {
+  const r = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Error(j.error || "Sign-in failed. Try again.");
+  return j;
+}
+function loginMessage(text) {
+  $("login-message").textContent = text;
+}
+$("password-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const email = $("login-email").value.trim();
+  const password = $("login-password").value;
+  if (!email || !password) return loginMessage("Enter your email and password, or ask for a code.");
+  try {
+    await authPost("/auth/password", { email, password });
+    location.reload();
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+$("send-code").onclick = async () => {
+  const email = $("login-email").value.trim();
+  if (!email) return loginMessage("Enter your email first.");
+  try {
+    const j = await authPost("/auth/email/start", { email });
+    $("password-form").hidden = true;
+    $("code-form").hidden = false;
+    $("login-code").focus();
+    loginMessage(j.message);
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+$("code-back").onclick = () => {
+  $("code-form").hidden = true;
+  $("password-form").hidden = false;
+  loginMessage("");
+};
+$("code-form").onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await authPost("/auth/email/verify", {
+      email: $("login-email").value.trim(),
+      code: $("login-code").value.trim(),
+    });
+    location.reload();
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+function renderAccount() {
+  const card = node("form", undefined, "card");
+  card.append(
+    node("h2", me.has_password ? "Change password" : "Set a password"),
+    node(
+      "p",
+      "Optional. Lets you sign in with your email and password as well as Google or an email code. At least 12 characters. Other devices are signed out.",
+      "muted",
+    ),
+  );
+  const field = (label, id, auto) => {
+    const l = node("label", label);
+    const input = document.createElement("input");
+    input.type = "password";
+    input.id = id;
+    input.autocomplete = auto;
+    input.maxLength = 128;
+    l.append(input);
+    card.append(l);
+    return input;
+  };
+  const current = me.has_password
+    ? field("Current password", "pw-current", "current-password")
+    : null;
+  const next = field("New password", "pw-new", "new-password");
+  const again = field("Repeat new password", "pw-again", "new-password");
+  const save = node("button", "Save password", "primary");
+  save.type = "submit";
+  card.append(save);
+  card.onsubmit = async (e) => {
+    e.preventDefault();
+    if (next.value !== again.value) return report(Error("The two new passwords don't match."));
+    try {
+      await api("password", {
+        password: next.value,
+        ...(current ? { current: current.value } : {}),
+      });
+      me.has_password = true;
+      notice("Password saved.");
+      render();
+    } catch (err) {
+      report(err);
+    }
+  };
+  $("screen").append(card);
+}
 try {
   me = await api("me");
-  const catalogResponse = await fetch('/cms-copy-catalog.json');
+  const catalogResponse = await fetch("/cms-copy-catalog.json");
   if (catalogResponse.ok) catalog = await catalogResponse.json();
-  await refresh();
+  if (!["mentor", "student"].includes(me.role)) await refresh();
   $("login").hidden = true;
   $("workspace").hidden = false;
   $("identity").textContent = me.email + " · " + me.role;
-  for (const key of [
-    "Overview",
-    "Media",
-    ...Object.keys(names),
-    ...(me.role === "editor" ? [] : ["Access", "Messages", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
-  ]) {
+  const navFor =
+    me.role === "student"
+      ? ["My courses", "Messages", "Account"]
+      : me.role === "mentor"
+        ? ["Leads", "Students", "Messages", "Account"]
+        : [
+            "Overview",
+            "Media",
+            ...Object.keys(names),
+            ...(me.role === "editor"
+              ? []
+              : [
+                  "Leads",
+                  "Students",
+                  "Student courses",
+                  "Messages",
+                  "Reviews",
+                  "Access",
+                  "Private feedback",
+                  "Newsletter",
+                  "Email delivery",
+                  "Activity",
+                ]),
+            "Account",
+          ];
+  if (me.role === "mentor") section = "Leads";
+  if (me.role === "student") section = "My courses";
+  if (me.role === "student") {
+    document.querySelector("aside .eyebrow").textContent = "STUDENT DASHBOARD";
+    document.querySelector("main header .eyebrow").textContent = "SCHOLARS CAFE / STUDENT";
+  }
+  for (const key of navFor) {
     const b = button(names[key] || key, () => navigate(key));
     b.dataset.section = key;
     $("nav").append(b);
   }
+  if (me.role === "student")
+    api("lms/my/unread")
+      .then(({ unread }) => {
+        const b = $("nav").querySelector('[data-section="Messages"]');
+        if (unread && b) b.textContent = `Messages (${unread})`;
+      })
+      .catch(() => {});
   $("logout").onclick = async () => {
     try {
       await api("logout", {});

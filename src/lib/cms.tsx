@@ -124,3 +124,54 @@ export function useCmsValue<T>(key: string, fallback: T): T {
   }
   return visit(fallback, key) as T;
 }
+
+/**
+ * A published collection from the admin, sorted by `position`. Falls back to the built-in
+ * defaults until content loads, or when the admin has no published entries of that kind.
+ */
+export function useCmsList<T>(
+  kind: string,
+  fallback: T[],
+  map?: (data: Record<string, unknown>) => T,
+): T[] {
+  const items = useContext(Content);
+  const rows = (items || []).filter((i) => i.kind === kind);
+  if (!rows.length) return fallback;
+  const pos = (d: Record<string, unknown>) => (typeof d.position === "number" ? d.position : 1e9);
+  return [...rows]
+    .sort((a, b) => pos(a.data) - pos(b.data))
+    .map((i) => (map ? map(i.data) : (i.data as T)));
+}
+
+/** Section order and visibility for a page, from the admin's "Page sections" (ids not listed keep their default place). */
+export function usePageSections(page: string, defaults: string[]): string[] {
+  const items = useContext(Content);
+  const entry = (items || []).find((i) => i.kind === "sections" && i.data.page === page);
+  if (!entry) return defaults;
+  const split = (v: unknown) =>
+    typeof v === "string"
+      ? v
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+  const order = split(entry.data.order).filter((id) => defaults.includes(id));
+  const hidden = new Set(split(entry.data.hidden));
+  return [...order, ...defaults.filter((id) => !order.includes(id))].filter(
+    (id) => !hidden.has(id),
+  );
+}
+
+/** Applies the admin's SEO title/description for the current page (client side, no redeploy). */
+export function SeoOverride({ path }: { path: string }) {
+  const items = useContext(Content);
+  const entry = (items || []).find((i) => i.kind === "seo" && i.data.page === path);
+  useEffect(() => {
+    if (!entry) return;
+    const { title, description } = entry.data as { title?: string; description?: string };
+    if (title) document.title = title;
+    if (description)
+      document.querySelector('meta[name="description"]')?.setAttribute("content", description);
+  }, [entry]);
+  return null;
+}

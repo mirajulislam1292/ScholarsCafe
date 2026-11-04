@@ -20,24 +20,44 @@ export async function deliverMail(store, transport) {
   if (!transport) return;
   await store.transaction(async (c) => {
     const rows = await store.query(
-      "SELECT * FROM mail_outbox WHERE sent_at IS NULL AND attempts<5 AND next_attempt_at<=UTC_TIMESTAMP() ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED", [], c,
+      "SELECT * FROM mail_outbox WHERE sent_at IS NULL AND attempts<5 AND next_attempt_at<=UTC_TIMESTAMP() ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED",
+      [],
+      c,
     );
     if (!rows.length) return;
     const row = rows[0];
     try {
       await transport.sendMail({
-        from: 'Scholars Cafe Website <contact@scholarscafe.com>',
+        from: "Scholars Cafe Website <contact@scholarscafe.com>",
         to: "contact@scholarscafe.com",
         replyTo: row.reply_to || undefined,
         subject: row.subject,
         text: row.body,
         messageId: `<${row.id}@scholarscafe.com>`,
       });
-      await store.query("UPDATE mail_outbox SET sent_at=UTC_TIMESTAMP(),attempts=attempts+1 WHERE id=?", [row.id], c);
+      await store.query(
+        "UPDATE mail_outbox SET sent_at=UTC_TIMESTAMP(),attempts=attempts+1 WHERE id=?",
+        [row.id],
+        c,
+      );
     } catch {
       // Never log SMTP credentials or private message bodies.
-      await store.query("UPDATE mail_outbox SET attempts=attempts+1,next_attempt_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL 1 HOUR) WHERE id=?", [row.id], c);
+      await store.query(
+        "UPDATE mail_outbox SET attempts=attempts+1,next_attempt_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL 1 HOUR) WHERE id=?",
+        [row.id],
+        c,
+      );
       console.error("Mailbox delivery failed; message remains in dashboard and delivery queue.");
     }
+  });
+}
+
+// Sign-in code + magic link, sent straight to the account's own address (not via the outbox).
+export async function sendLoginEmail(transport, to, code, url, minutes) {
+  await transport.sendMail({
+    from: "Scholars Cafe <contact@scholarscafe.com>",
+    to,
+    subject: "Your Scholars Cafe sign-in code",
+    text: `Your sign-in code is ${code}\n\nOr open this link to sign in:\n${url}\n\nThe code and link expire in ${minutes} minutes and work once. If you did not ask for this, ignore this email; nobody can sign in without the code.`,
   });
 }

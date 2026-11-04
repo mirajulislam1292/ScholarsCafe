@@ -20,17 +20,12 @@ const clip = (name: string, place: string, extra: Partial<HeroClip> = {}): HeroC
 
 /** 1920×1080 landscape clips for tablets and desktops. */
 export const HERO_DESKTOP: HeroClip[] = [
-  clip("d1-new-haven", "New Haven, Connecticut", {
-    credit: "Footage: Gabriel M. M. Mendes, CC BY 3.0",
-  }),
   clip("d2-columbia", "Columbia University, New York", { rate: 0.9 }),
   clip("d3-philadelphia-university", "Philadelphia, Pennsylvania"),
-  clip("d4-philadelphia-campus", "Philadelphia, Pennsylvania"),
 ];
 
 /** 720×1280 portrait clips for phones. */
 export const HERO_MOBILE: HeroClip[] = [
   clip("m1-columbia", "Columbia University, New York", { rate: 0.9 }),
   clip("m2-philadelphia-university", "Philadelphia, Pennsylvania"),
-  clip("m3-philadelphia-campus", "Philadelphia, Pennsylvania"),
 ];

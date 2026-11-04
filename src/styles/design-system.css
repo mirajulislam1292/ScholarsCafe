@@ -31,6 +31,48 @@
   font-display: swap;
 }
 
+/* Bangla: only downloaded when Bengali characters appear on a page. */
+@font-face {
+  font-family: "Hind Siliguri";
+  src: url("/fonts/hind-siliguri-bengali-300-normal.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA,
+    U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+}
+@font-face {
+  font-family: "Hind Siliguri";
+  src: url("/fonts/hind-siliguri-bengali-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA,
+    U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+}
+@font-face {
+  font-family: "Hind Siliguri";
+  src: url("/fonts/hind-siliguri-bengali-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA,
+    U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+}
+@font-face {
+  font-family: "Hind Siliguri";
+  src: url("/fonts/hind-siliguri-bengali-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA,
+    U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+}
+
 :root {
   /* Blue (logo mark) */
   --color-blue-50: #f1f8ff;
@@ -70,7 +112,7 @@
   --color-neutral-950: #060f18;
 
   /* Semantic roles: ~90% neutral, ~10% accent */
-  --surface: #ffffff;
+  --surface: #fbfcfd;
   --surface-muted: var(--color-neutral-50);
   --surface-ice: var(--color-ice-100);
   --surface-dark: var(--color-blue-950);
@@ -78,7 +120,7 @@
   --text-body: var(--color-neutral-700);
   --text-muted: var(--color-neutral-600);
   --text-subtle: var(--color-neutral-500);
-  --text-on-dark: #ffffff;
+  --text-on-dark: #f6fbfe;
   --text-on-dark-muted: var(--color-ice-500);
   --accent: var(--color-blue-700);
   --accent-hover: var(--color-blue-800);
@@ -90,7 +132,7 @@
   --danger: #b3261e;
 
   /* Type */
-  --font-display: "Funnel Display", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Funnel Display", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
   --font-text: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --text-display: clamp(3.5rem, 8vw, 7.5rem);
   --text-h1: clamp(2.75rem, 5.5vw, 5rem);

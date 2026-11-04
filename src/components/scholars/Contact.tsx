@@ -4,7 +4,7 @@ import { CmsText } from "@/lib/cms";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Reveal } from "./Reveal";
-import { ENABLED_COUNTRIES, SITE } from "@/lib/site-content";
+import { useEnabledCountries, SITE } from "@/lib/site-content";
 import { Turnstile, turnstileEnabled, resetTurnstile } from "./Turnstile";
 import {
   EMAIL as CMS_DEFAULT_EMAIL,
@@ -32,10 +32,11 @@ const INTERESTS = [
   "CSS Profile / ISFAA",
   "Just Exploring",
 ];
-const COUNTRIES = [...ENABLED_COUNTRIES, "Other / Not Sure"];
 const GRADES = ["Grade 9", "Grade 10", "Grade 11", "Grade 12", "Gap Year", "Other"];
 
-export function Contact() {
+export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
+  const enabledCountries = useEnabledCountries();
+  const COUNTRIES = [...enabledCountries, "Other / Not Sure"];
   const cmsLabel = useCmsLookup();
 
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
@@ -85,24 +86,28 @@ export function Contact() {
     }
   }
   return (
-    <section id="contact" className="bg-white py-24 md:py-32">
-      <div className="mx-auto max-w-[1280px] px-5 md:px-8">
-        <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-sky">
-            <CmsText id="Contact.3ee6cddb8ee0">Get In Touch</CmsText>
-          </span>
-          <h2 className="mt-4 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold text-navy">
-            <CmsText id="Contact.231ff83a4896">Let's Plan Your Future Together</CmsText>
-          </h2>
-          <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
-            <CmsText id="Contact.d939b4bf1168">
-              Have a question? Ready to start? Just reach out. We respond within 24 hours and always
-              give honest, personalized advice.
-            </CmsText>
-          </p>
-        </Reveal>
+    <section id="contact" className="bg-white py-[clamp(96px,13vw,200px)]">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-12">
+        {showHeader && (
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <span className="hidden">
+              <CmsText id="Contact.3ee6cddb8ee0">Get In Touch</CmsText>
+            </span>
+            <h2 className="type-h2 text-neutral-900">
+              <CmsText id="Contact.231ff83a4896">Let's Plan Your Future Together</CmsText>
+            </h2>
+            <p className="mt-5 type-lead text-neutral-600">
+              <CmsText id="Contact.d939b4bf1168">
+                Have a question? Ready to start? Just reach out. We respond within 24 hours and
+                always give honest, personalized advice.
+              </CmsText>
+            </p>
+          </Reveal>
+        )}
 
-        <div className="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-2">
+        <div
+          className={`${showHeader ? "mt-16" : ""} grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16`}
+        >
           {/* Left: contact info */}
           <Reveal className="space-y-6">
             <ContactItem
@@ -136,10 +141,10 @@ export function Contact() {
             />
 
             <div>
-              <div className="font-display text-lg font-bold text-navy">
+              <div className="type-h3 text-neutral-900">
                 <CmsText id="Contact.bb8bb7523e6d">Follow Our Journey</CmsText>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-neutral-500">
                 <CmsText id="Contact.66567e0fc9b3">
                   Weekly tips, scholarships, and student wins on social.
                 </CmsText>
@@ -179,14 +184,14 @@ export function Contact() {
               </div>
             </div>
 
-            <div className="rounded-3xl border-[1.5px] border-sky-tint bg-sky-soft p-7">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-tint text-sky-deep">
+            <div className="rounded-3xl border border-ice-200 bg-ice-50 p-7">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ice-100 text-blue-700">
                 <Phone className="h-6 w-6" strokeWidth={2} aria-hidden />
               </div>
-              <div className="mt-3 font-display text-lg font-bold text-navy">
+              <div className="mt-3 type-h3 text-neutral-900">
                 <CmsText id="Contact.46454eeca3ea">Book a Free 30-Minute Consultation</CmsText>
               </div>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+              <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">
                 <CmsText id="Contact.253203ee4e24">
                   No pressure. No commitment. Just honest guidance on your study abroad options from
                   a real person who knows the process.
@@ -196,7 +201,7 @@ export function Contact() {
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-sky px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#0284c7] hover:shadow-button"
+                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-6 py-3 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800 "
               >
                 <MessageCircle className="h-4 w-4" aria-hidden />
                 <CmsText id="Contact.6262cd58b9d5">WhatsApp us now →</CmsText>
@@ -206,23 +211,23 @@ export function Contact() {
 
           {/* Right: form */}
           <Reveal>
-            <div className="rounded-3xl border border-border bg-white p-8 shadow-card md:p-10">
-              <h3 className="font-display text-xl font-extrabold text-navy">
+            <div className="rounded-3xl border border-neutral-900/[0.08] bg-white p-8 shadow-[0_4px_16px_rgb(4_28_49/0.04)] md:p-10">
+              <h3 className="type-h3 text-neutral-900">
                 <CmsText id="Contact.19ecf8fecb75">Send Us a Message</CmsText>
               </h3>
               {done ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mt-8 rounded-2xl bg-sky-soft p-7 text-center"
+                  className="mt-8 rounded-2xl bg-ice-50 p-7 text-center"
                 >
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-sky text-white">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-700 text-white">
                     <Check className="h-6 w-6" strokeWidth={3} />
                   </div>
-                  <div className="mt-4 font-display text-lg font-bold text-navy">
+                  <div className="mt-4 type-h3 text-neutral-900">
                     <CmsText id="Contact.89602ec37891">Message received!</CmsText>
                   </div>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-neutral-600">
                     <CmsText id="Contact.056ee3330478">
                       We'll be in touch within 24 hours. In the meantime, feel free to WhatsApp us
                       for faster response.
@@ -232,7 +237,7 @@ export function Contact() {
                     href={WA_LINK}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-block text-sm font-bold text-sky-deep hover:underline"
+                    className="mt-4 inline-block text-sm font-medium text-blue-700 hover:underline"
                   >
                     <CmsText id="Contact.a75653166353">Open WhatsApp →</CmsText>
                   </a>
@@ -261,7 +266,7 @@ export function Contact() {
                     label={cmsLabel("Contact.label.d07f5ef208e1", "I'm Interested In")}
                     options={INTERESTS}
                   />
-                  {ENABLED_COUNTRIES.length > 1 && (
+                  {enabledCountries.length > 1 && (
                     <SelectField
                       label={cmsLabel("Contact.label.8270cf12a2cb", "Target Country")}
                       options={COUNTRIES}
@@ -272,7 +277,7 @@ export function Contact() {
                     options={GRADES}
                   />
                   <div>
-                    <label className="mb-1.5 block text-sm font-semibold text-navy">
+                    <label className="mb-1.5 block text-sm font-medium text-neutral-900">
                       <CmsText id="Contact.b5be5d4eaaf4">Your Message</CmsText>
                     </label>
                     <textarea
@@ -283,14 +288,14 @@ export function Contact() {
                         "Contact.label.2acc8f94e428",
                         "Tell us about your background, goals, target universities, timeline, and any questions you have.",
                       )}
-                      className="w-full resize-none rounded-xl border border-border bg-white px-4 py-3 text-sm focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/15"
+                      className="w-full resize-none rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
                     />
                   </div>
                   <Turnstile />
                   <button
                     type="submit"
                     disabled={sending}
-                    className="w-full rounded-full bg-navy py-4 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-sky hover:shadow-button"
+                    className="w-full rounded-full bg-blue-700 py-4 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800 "
                   >
                     <CmsText id="Contact.42d2a8b329f6">Send Message →</CmsText>
                   </button>
@@ -327,14 +332,14 @@ function ContactItem({
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   const Inner = (
-    <div className="flex items-start gap-4 rounded-2xl border border-border p-5 transition-all hover:border-sky hover:bg-sky-soft">
-      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-sky-tint text-sky-deep">
+    <div className="flex items-start gap-4 rounded-2xl border border-neutral-900/[0.08] p-5 transition-all hover:border-blue-300 hover:bg-ice-50">
+      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-ice-100 text-blue-700">
         {icon}
       </div>
       <div>
-        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{title}</div>
-        <div className="mt-0.5 font-display text-base font-bold text-navy">{value}</div>
-        <div className="mt-1 text-sm text-slate-500">{sub}</div>
+        <div className="text-xs font-medium uppercase tracking-wider text-neutral-500">{title}</div>
+        <div className="mt-0.5 type-h3 text-[1.0625rem] text-neutral-900">{value}</div>
+        <div className="mt-1 text-sm text-neutral-500">{sub}</div>
       </div>
     </div>
   );
@@ -370,7 +375,7 @@ function Social({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-border bg-white text-slate-600 transition-all hover:scale-110 hover:border-sky hover:bg-sky hover:text-white"
+      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-neutral-900/[0.08] bg-white text-neutral-600 transition-all hover:scale-110 hover:border-blue-300 hover:bg-blue-800 hover:text-white"
     >
       {children}
     </a>
@@ -394,12 +399,12 @@ function Field({
 
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-semibold text-navy">{label}</label>
+      <label className="mb-1.5 block text-sm font-medium text-neutral-900">{label}</label>
       <input
         name={name}
         type={type}
         required={required}
-        className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/15"
+        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
       />
     </div>
   );
@@ -412,10 +417,10 @@ function SelectField({ label, options }: { label: string; options: string[] }) {
 
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-semibold text-navy">{label}</label>
+      <label className="mb-1.5 block text-sm font-medium text-neutral-900">{label}</label>
       <select
         name={label}
-        className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/15"
+        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
       >
         <option value="">
           <CmsText id="Contact.8e8522783c86">Select an option…</CmsText>

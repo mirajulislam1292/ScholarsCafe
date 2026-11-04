@@ -17,10 +17,13 @@ export function BlogPosts() {
   if (!posts.length) return null;
   return (
     <section id="blog" className="mx-auto max-w-[1280px] px-5 py-20">
-      <h2 className="font-display text-3xl font-bold">From our journal</h2>
+      <h2 className="font-heading text-3xl font-light">From our journal</h2>
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         {posts.map((post) => (
-          <article key={post.id} className="rounded-2xl border border-border bg-white p-7">
+          <article
+            key={post.id}
+            className="rounded-2xl border border-neutral-900/[0.08] bg-white p-7"
+          >
             {post.image && (
               <img
                 src={post.image}
@@ -29,15 +32,15 @@ export function BlogPosts() {
                 loading="lazy"
               />
             )}
-            <h3 className="text-xl font-bold">{post.title}</h3>
-            <p className="my-3 text-sm text-slate-500">{post.author}</p>
-            <p className="whitespace-pre-wrap text-slate-600">
+            <h3 className="text-xl font-medium">{post.title}</h3>
+            <p className="my-3 text-sm text-neutral-500">{post.author}</p>
+            <p className="whitespace-pre-wrap text-neutral-600">
               {selected === post.id ? post.body : post.excerpt}
             </p>
             <button
               type="button"
               aria-expanded={selected === post.id}
-              className="mt-5 font-semibold text-sky-700"
+              className="mt-5 font-medium text-blue-700"
               onClick={() => setSelected(selected === post.id ? null : post.id)}
             >
               {selected === post.id ? "Close article" : "Read article →"}

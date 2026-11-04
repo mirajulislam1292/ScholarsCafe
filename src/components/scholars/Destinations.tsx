@@ -14,20 +14,14 @@ export function Destinations() {
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <h2 className="max-w-[16ch] font-heading text-[clamp(2.25rem,4vw,3.5rem)] font-normal leading-[1.05] tracking-[-0.025em] text-neutral-900">
-              {usa.heading}
-            </h2>
-            {usa.lead && (
-              <p className="mt-5 max-w-md font-text text-[16px] leading-relaxed text-neutral-600">
-                {usa.lead}
-              </p>
-            )}
+            <h2 className="max-w-[16ch] type-h2 text-neutral-900">{usa.heading}</h2>
+            {usa.lead && <p className="mt-5 max-w-md type-body text-neutral-600">{usa.lead}</p>}
           </div>
           <a
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-1.5 self-start font-text text-[15px] font-medium text-blue-700 md:self-auto"
+            className="group inline-flex items-center gap-1.5 self-start type-button text-blue-700 md:self-auto"
           >
             {usa.cta}
             <ArrowUpRight
@@ -41,15 +35,22 @@ export function Destinations() {
           {usa.regions.map((r, i) => (
             <Reveal key={r.name} delay={i * 0.08} className="w-[82%] shrink-0 snap-start md:w-auto">
               <figure className="group relative aspect-[4/5] overflow-hidden rounded-3xl bg-blue-950">
-                <img
-                  src={r.image}
-                  alt={r.place}
-                  loading="lazy"
-                  decoding="async"
-                  width={1920}
-                  height={1080}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-premium group-hover:scale-[1.04]"
-                />
+                {r.image ? (
+                  <img
+                    src={r.image}
+                    alt={r.place || r.name}
+                    loading="lazy"
+                    decoding="async"
+                    width={1920}
+                    height={1080}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-premium group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-[radial-gradient(120%_80%_at_80%_0%,rgb(43_109_166/0.55)_0%,transparent_60%),linear-gradient(180deg,var(--color-blue-900),var(--color-blue-950))]"
+                  />
+                )}
                 <div
                   aria-hidden
                   className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgb(4_28_49/0.85)_100%)]"
@@ -58,7 +59,7 @@ export function Destinations() {
                   <div className="font-heading text-[1.75rem] font-light tracking-[-0.02em] text-white">
                     {r.name}
                   </div>
-                  <div className="mt-1 font-text text-[13px] text-ice-300/90">{r.place}</div>
+                  {r.place && <div className="mt-1 type-caption text-ice-300/90">{r.place}</div>}
                   {r.note && (
                     <p className="mt-3 font-text text-[14px] leading-snug text-white/80">
                       {r.note}

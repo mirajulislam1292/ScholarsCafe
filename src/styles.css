@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -42,8 +41,11 @@
   --color-neutral-800: #242c35;
   --color-neutral-900: #101922;
   --color-neutral-950: #060f18;
-  --font-heading: "Funnel Display", ui-sans-serif, system-ui, sans-serif;
-  --font-text: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: "Funnel Display", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  --font-text: "Funnel Display", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  /* Never pure white or black: brand-tinted near-white / near-black */
+  --color-white: #fbfcfd;
+  --color-black: #0a1520;
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --animate-rise: rise 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-marquee: marquee 120s linear infinite;
@@ -68,8 +70,8 @@
 }
 
 @theme inline {
-  --font-display: "Plus Jakarta Sans", sans-serif;
-  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-display: "Funnel Display", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Funnel Display", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -134,22 +136,22 @@
   --success: #22c55e;
 
   /* Shadcn semantic tokens mapped to brand */
-  --background: #ffffff;
+  --background: #fbfcfd;
   --foreground: #0c2d5e;
-  --card: #ffffff;
+  --card: #fbfcfd;
   --card-foreground: #0c2d5e;
-  --popover: #ffffff;
+  --popover: #fbfcfd;
   --popover-foreground: #0c2d5e;
   --primary: #0c2d5e;
-  --primary-foreground: #ffffff;
+  --primary-foreground: #fbfcfd;
   --secondary: #f1f5f9;
   --secondary-foreground: #0c2d5e;
   --muted: #f8fafc;
   --muted-foreground: #475569;
   --accent: #0ea5e9;
-  --accent-foreground: #ffffff;
+  --accent-foreground: #fbfcfd;
   --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #fbfcfd;
   --border: #e2e8f0;
   --input: #e2e8f0;
   --ring: #0ea5e9;
@@ -187,7 +189,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: "Plus Jakarta Sans", sans-serif;
+    font-family: var(--font-heading);
     -webkit-font-smoothing: antialiased;
     line-height: 1.75;
   }
@@ -197,16 +199,21 @@
   h4,
   h5,
   h6 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-weight: 800;
+    font-family: var(--font-heading);
+    font-weight: 500;
     line-height: 1.1;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+  }
+  h1,
+  h2 {
+    font-weight: 300;
+    letter-spacing: -0.025em;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: "Plus Jakarta Sans", sans-serif !important;
+    font-family: var(--font-heading) !important;
   }
   .bg-hero-gradient {
     background: var(--gradient-hero);
@@ -356,7 +363,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--sky);
@@ -370,7 +377,7 @@
 }
 .editorial-h2 {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 300;
   font-size: clamp(2.25rem, 4.5vw, 3.75rem);
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -379,7 +386,7 @@
 }
 .editorial-display {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 300;
   font-size: clamp(3rem, 7vw, 6.5rem);
   line-height: 0.95;
   letter-spacing: -0.035em;
@@ -406,14 +413,14 @@
   --gold-deep: #3f6593;
   --whatsapp: #3f6593;
   --success: #3f6593;
-  --background: #ffffff;
+  --background: #fbfcfd;
   --foreground: #1b3554;
-  --card: #ffffff;
+  --card: #fbfcfd;
   --card-foreground: #1b3554;
-  --popover: #ffffff;
+  --popover: #fbfcfd;
   --popover-foreground: #1b3554;
   --primary: #3f6593;
-  --primary-foreground: #ffffff;
+  --primary-foreground: #fbfcfd;
   --secondary: #edf5fc;
   --secondary-foreground: #1b3554;
   --muted: #f3f8fc;
@@ -434,10 +441,10 @@
 }
 html {
   color-scheme: light;
-  background: white;
+  background: var(--color-white);
 }
 body {
-  background: white;
+  background: var(--color-white);
   color: var(--foreground);
 }
 section[id] {
@@ -468,7 +475,7 @@ section[id] {
   background: #c0e6fd;
 }
 .light-panel span.bg-sky {
-  color: white;
+  color: var(--color-white);
 }
 :is(.country-feature, .light-panel, .bg-dark-gradient, .bg-newsletter-gradient)
   [class*="text-white"] {
@@ -481,7 +488,7 @@ section[id] {
 :is(.country-feature, .light-panel, .bg-dark-gradient, .bg-newsletter-gradient)
   :is(a, button).bg-sky,
 :is(.country-feature, .light-panel, .bg-dark-gradient, .bg-newsletter-gradient) .bg-navy {
-  color: white;
+  color: var(--color-white);
 }
 :is(.light-panel, .bg-dark-gradient, .bg-newsletter-gradient) input {
   color: var(--navy);
@@ -502,7 +509,7 @@ section[id] {
 #about [class*="bg-gradient"],
 #success [class*="bg-gradient"] {
   background: #3f6593;
-  color: white;
+  color: var(--color-white);
 }
 .world-section > .pointer-events-none {
   display: none;
@@ -518,13 +525,13 @@ section[id] {
   box-shadow: var(--shadow-card);
 }
 .world-section .dossier-photo [class*="text-white"] {
-  color: white;
+  color: var(--color-white);
 }
 .world-section .dossier-photo [class*="text-sky-light"] {
   color: #c0e6fd;
 }
 .world-section button[class*="bg-white"] {
-  background: white;
+  background: var(--color-white);
   border-color: var(--border);
 }
 .hero-light {
@@ -535,7 +542,7 @@ section[id] {
 }
 .mobile-panel a.bg-sky,
 .mobile-panel a.bg-whatsapp {
-  color: white;
+  color: var(--color-white);
 }
 .hero-photo {
   position: absolute;
@@ -563,7 +570,7 @@ section[id] {
   color: var(--sky);
 }
 .hero-light a.bg-sky {
-  color: white;
+  color: var(--color-white);
 }
 .hero-light h1 {
   text-shadow: none;
@@ -713,7 +720,7 @@ main > section.bg-white {
   content: " ";
 }
 .hero-cinematic .hero-copy [class*="text-white"] {
-  color: white;
+  color: var(--color-white);
   text-shadow: none;
 }
 .hero-cinematic .hero-copy [class*="text-sky-light"] {
@@ -731,9 +738,9 @@ main > section.bg-white {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid #ffffff66;
+  border: 1px solid #fbfcfd66;
   border-radius: 50%;
-  color: white;
+  color: var(--color-white);
   background: #163e5b66;
 }
 .hero-cinematic .hero-universities {
@@ -762,7 +769,7 @@ main > section.bg-white {
 .hero-universities button {
   padding: 12px 18px;
   gap: 14px;
-  background: white;
+  background: var(--color-white);
   border: 1px solid #dae5ed;
   border-radius: 12px;
   min-height: 84px;
@@ -800,13 +807,13 @@ main > section.bg-white {
 }
 .brand-stats [class*="text-white"],
 .brand-stats .text-sky {
-  color: white;
+  color: var(--color-white);
 }
 .brand-stats [class*="text-white/55"] {
   color: #d9eaf6;
 }
 .brand-stats::before {
-  color: white;
+  color: var(--color-white);
 }
 #newsletter {
   position: relative;
@@ -874,5 +881,84 @@ footer .footer-brand {
   .hero-cinematic .hero-photo img {
     animation: none;
     transform: none;
+  }
+}
+
+/* ---------- Type styles (Funnel Display). Light for display, Medium for subheads/UI, SemiBold only for small emphasis. ---------- */
+@utility type-display {
+  font-family: var(--font-heading);
+  font-size: clamp(2.75rem, 6.6vw, 6.25rem);
+  font-weight: 300;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+@utility type-h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 5.2vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+@utility type-h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 3.8vw, 3.25rem);
+  font-weight: 300;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+@utility type-h3 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+@utility type-lead {
+  font-family: var(--font-heading);
+  font-size: clamp(1.125rem, 1.5vw, 1.3125rem);
+  font-weight: 300;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+@utility type-body {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0;
+}
+@utility type-caption {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+@utility type-button {
+  font-family: var(--font-heading);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.005em;
+}
+@utility type-nav {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+}
+@utility type-marquee {
+  font-family: var(--font-heading);
+  font-size: clamp(1.0625rem, 1.6vw, 1.375rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--color-neutral-500);
+}
+@layer base {
+  strong,
+  b {
+    font-weight: 600;
   }
 }

@@ -5,13 +5,13 @@ import { AnimatePresence, motion } from "motion/react";
 import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 
 const DEFAULT_NAV = [
-  { label: "Home", href: "#top" },
-  { label: "Programs", href: "#programs" },
-  { label: "Destinations", href: "#destinations" },
-  { label: "Services", href: "#services" },
-  { label: "Resources", href: "#resources" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "Programs", href: "/programs" },
+  { label: "Destinations", href: "/#destinations" },
+  { label: "Services", href: "/services" },
+  { label: "Resources", href: "/resources" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -23,7 +23,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > window.innerHeight * 0.6);
+    const onScroll = () => setSolid(window.scrollY > 120);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -51,7 +51,7 @@ export function Navbar() {
       >
         <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-6 md:px-12">
           <a
-            href="#top"
+            href="/"
             aria-label={cmsLabel("Navbar.label.7f7e5d138281", "Scholars Cafe home")}
             className="relative -m-2 grid h-12 w-12 place-items-center rounded-full"
           >
@@ -64,11 +64,11 @@ export function Navbar() {
           </a>
 
           <nav aria-label="Main" className="hidden items-center gap-9 lg:flex">
-            {NAV.filter((i) => i.href !== "#top").map((item) => (
+            {NAV.filter((i) => i.href !== "/" && i.href !== "#top").map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className={`font-text text-[14px] font-medium tracking-[-0.005em] transition-colors duration-500 ease-premium ${
+                className={`type-nav transition-colors duration-500 ease-premium ${
                   solid
                     ? "text-neutral-600 hover:text-neutral-900"
                     : "text-white/70 hover:text-white"
@@ -84,7 +84,7 @@ export function Navbar() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className={`hidden h-10 items-center rounded-full px-5 font-text text-[14px] font-medium transition-colors duration-500 ease-premium md:inline-flex ${
+              className={`hidden h-10 items-center rounded-full px-5 type-button transition-colors duration-500 ease-premium md:inline-flex ${
                 solid
                   ? "bg-blue-700 text-white hover:bg-blue-800"
                   : "bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md hover:bg-white/20"
@@ -152,7 +152,7 @@ export function Navbar() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-auto inline-flex h-12 items-center justify-center rounded-full bg-ice-100 font-text text-[15px] font-medium text-blue-950"
+              className="mt-auto inline-flex h-12 items-center justify-center rounded-full bg-ice-100 type-button text-blue-950"
             >
               <CmsText id="Navbar.b2151df99763">Book Call</CmsText>
             </a>

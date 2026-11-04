@@ -1,14 +1,15 @@
 # Project notes (keep under 15 lines)
 - Public site: React 19 + TanStack Start/Router + Vite 7 + Tailwind 4, prerendered to static `dist/` (`npm run build` → `scripts/generate-index.js`). Deployed to Hostinger (scholarscafe.com) on push to `main`.
 - Admin/CMS: `backend/` Express 5 + MySQL (mysql2), entry `server.js`, deployed separately to admin.scholarscafe.com (Hostinger Node, root `backend`).
-- Admin UI is plain JS in `backend/public/` (app.js, style.css). Auth: Google OAuth only, roles owner > admin > editor in `users` table.
+- Admin UI is plain JS in `backend/public/` (app.js, style.css). Auth: Google OAuth + email/password + email code/magic link (`backend/auth.js`, setup in BACKEND_SETUP.md), roles owner > admin > editor | mentor (leads only) in `users` table. Collections: universities, team, faqs, countries, hero, seo, sections (`backend/seed.json`, read via `useCmsList`); page order via `<Sections>`. Leads CRM: `/api/leads*`.
 - Sessions: random token, SHA-256 hash stored in `sessions`, `__Host-` cookie, 4h expiry, CSRF token per session, `audit` table.
 - Public site reads published CMS content from `GET /public/content`; forms POST to `/public/inquiries|feedback|newsletter`.
 - CMS text: `<CmsText id>` / `useCmsValue(key)`; keep ids stable (admin catalog in `public/cms-copy-catalog.json`).
-- Data defaults: `src/lib/scholars-data.ts`, `university-acceptances.ts`, `destinations-data.ts`; logos in `public/university-logos/`.
+- Data defaults: `src/lib/scholars-data.ts`, `university-acceptances.ts`, `src/content/site.json`.
 - Tests: `cd backend && npm test` (node --test, injected store). Type check: `npx tsc --noEmit`.
 - Local: `npm run dev -- --port 8080`; backend local runner `backend/local-dev.js` + `backend/.env` (both git-ignored).
 - Secrets live only in Hostinger env vars; never commit `.env`.
 - USA-only: editable content + country switches in `src/content/site.json` (helper `src/lib/site-content.ts`); hero clips in `src/lib/hero-media.ts`, timing constants in `HeroVideo.tsx`.
-- Logos: `public/university-logos/gray/*.webp` from `assets-src/University_Logos_Grayscale_v3.pdf`; strip = `LogoMarquee.tsx`. Docs: USER_MANUAL(_BN).md, DEPLOYMENT.md, SECURITY.md, CREDITS.md.
-- Branch `landing/hero` contains security + design system + hero + fix pass (pushed for PR into `main`).
+- Universities: text-only `NameMarquee.tsx` (data `university-acceptances.ts`, admin key `universities`). Type styles `type-display|h1|h2|h3|lead|body|caption|button|nav` in `styles.css`; Funnel Display site-wide, Hind Siliguri for Bangla. Docs: USER_MANUAL(_BN).md, DEPLOYMENT.md, SECURITY.md, CREDITS.md.
+- Student dashboard: tables in `backend/schema.sql` (lms_*, enrollments, messages, reviews…); EVERY student-data query must use `backend/access.js` scopes. Student API prefix `/api/lms/`.
+- Pages: shared parts in `src/components/page/PageParts.tsx` (PageHero, Block, ParallaxImage, CtaBand) + `Team.tsx` (data: site.json > team). Routes /about, /programs; all pages pre-rendered by `scripts/generate-index.js` (add new routes to its `pages` list).

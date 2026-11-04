@@ -4,7 +4,7 @@ import { CmsText } from "@/lib/cms";
 import { EMAIL as CMS_DEFAULT_EMAIL, WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { Facebook, Instagram, Linkedin, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { ENABLED_COUNTRIES } from "@/lib/site-content";
+import { useEnabledCountries } from "@/lib/site-content";
 
 type LinkRef = {
   label: string;
@@ -14,6 +14,7 @@ type LinkRef = {
 };
 
 export function Footer() {
+  const countries = useEnabledCountries();
   const cmsLabel = useCmsLookup();
 
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
@@ -26,7 +27,7 @@ export function Footer() {
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2">
               <span className="brand-mark" aria-hidden="true" />
-              <span className="footer-brand font-display text-xl font-extrabold">
+              <span className="footer-brand font-display text-xl font-medium">
                 <CmsText id="Footer.c9db85fc4db0">ScholarsCafe</CmsText>
               </span>
             </Link>
@@ -64,13 +65,13 @@ export function Footer() {
           <Col
             title={cmsLabel("Footer.label.b6747064b2a6", "Programs")}
             links={[
-              { label: "General Admission Track", href: "/#programs" },
-              { label: "File Opening Service", href: "/#programs" },
+              { label: "General Admission Track", href: "/programs" },
+              { label: "File Opening Service", href: "/programs" },
             ]}
           />
           <Col
             title={cmsLabel("Footer.label.72eb63f032e4", "Destinations")}
-            links={ENABLED_COUNTRIES.map((c) => ({ label: c, href: "/#destinations" }))}
+            links={countries.map((c) => ({ label: c, href: "/#destinations" }))}
           />
         </div>
 
@@ -78,18 +79,18 @@ export function Footer() {
           <Col
             title={cmsLabel("Footer.label.de4743c87973", "Company")}
             links={[
-              { label: "About Us", href: "/#about" },
-              { label: "Success Stories", href: "/#stories" },
-              { label: "Free Resources", href: "/#resources" },
-              { label: "Contact Us", href: "/#contact" },
+              { label: "About Us", href: "/about" },
+              { label: "Success Stories", href: "/#success" },
+              { label: "Free Resources", href: "/resources" },
+              { label: "Contact Us", href: "/contact" },
             ]}
           />
           <Col
             title={cmsLabel("Footer.label.e89b30aa1dc3", "Resources")}
             links={[
-              { label: "Knowledge Hub", href: "/#resources" },
-              { label: "FAQ", href: "/#faq" },
-              { label: "Newsletter", href: "/#newsletter" },
+              { label: "Knowledge Hub", href: "/resources" },
+              { label: "FAQ", href: "/resources#faq" },
+              { label: "Newsletter", href: "/resources#newsletter" },
             ]}
           />
           <Col
@@ -97,7 +98,7 @@ export function Footer() {
             links={[
               { label: "WhatsApp Support", href: WA_LINK, external: true },
               { label: "Email Support", href: `mailto:${EMAIL}`, external: true },
-              { label: "Contact Form", href: "/#contact" },
+              { label: "Contact Form", href: "/contact" },
             ]}
           />
           <Col
@@ -143,7 +144,7 @@ function Col({ title, links }: { title: string; links: LinkRef[] }) {
 
   return (
     <div>
-      <div className="font-display text-sm font-bold uppercase tracking-wider text-white">
+      <div className="font-display text-sm font-medium uppercase tracking-wider text-white">
         {title}
       </div>
       <ul className="mt-4 space-y-2.5 text-sm text-white/55">

@@ -1,46 +1,66 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Sections } from "@/components/page/Sections";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Hero } from "@/components/scholars/Hero";
-import { LogoMarquee } from "@/components/scholars/LogoMarquee";
-import { Stats } from "@/components/scholars/Stats";
+import { NameMarquee } from "@/components/scholars/NameMarquee";
 import { Destinations } from "@/components/scholars/Destinations";
-import { Programs } from "@/components/scholars/Programs";
-import { Services } from "@/components/scholars/Services";
-import { Process } from "@/components/scholars/Process";
-import { UniversityExplorer } from "@/components/scholars/UniversityExplorer";
 import { SuccessStories } from "@/components/scholars/SuccessStories";
-import { FAQ } from "@/components/scholars/FAQ";
-import { About } from "@/components/scholars/About";
-import { Resources } from "@/components/scholars/Resources";
 import { BlogPosts } from "@/components/scholars/BlogPosts";
-import { Newsletter } from "@/components/scholars/Newsletter";
-import { Contact } from "@/components/scholars/Contact";
 import { Footer } from "@/components/scholars/Footer";
+import { PageIndex } from "@/components/page/PageIndex";
+import { CtaBand } from "@/components/page/PageParts";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
+// Home: hero → names → USA → page index → proof → CTA. Detailed content lives on the inner pages.
+// The stats band (src/components/scholars/Stats.tsx) is hidden until the numbers are verified.
 function Index() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <Hero />
-        <LogoMarquee />
-        <Stats />
-        <Destinations />
-        <Programs />
-        <Services />
-        <Process />
-        <UniversityExplorer />
-        <SuccessStories />
-        <FAQ />
-        <About />
-        <Resources />
-        <BlogPosts />
-        <Newsletter />
-        <Contact />
+        <Sections
+          page="/"
+          blocks={{
+            hero: (
+              <>
+                <Hero />
+              </>
+            ),
+            names: (
+              <>
+                <NameMarquee />
+              </>
+            ),
+            usa: (
+              <>
+                <Destinations />
+              </>
+            ),
+            pages: (
+              <>
+                <PageIndex />
+              </>
+            ),
+            stories: (
+              <>
+                <SuccessStories />
+              </>
+            ),
+            journal: (
+              <>
+                <BlogPosts />
+              </>
+            ),
+            cta: (
+              <>
+                <CtaBand />
+              </>
+            ),
+          }}
+        />
       </main>
       <Footer />
     </div>

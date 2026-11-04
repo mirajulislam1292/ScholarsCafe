@@ -1,30 +1,30 @@
-import { Client } from 'basic-ftp';
-import { readdirSync, statSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
-import dotenv from 'dotenv';
+import { Client } from "basic-ftp";
+import { readdirSync, statSync, writeFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath, pathToFileURL } from "url";
+import dotenv from "dotenv";
 
 // Load .env file
-dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), '..', '.env') });
+dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), "..", ".env") });
 
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
-const FTP_PORT = parseInt(process.env.FTP_PORT || '21', 10);
+const FTP_PORT = parseInt(process.env.FTP_PORT || "21", 10);
 const FTP_PASS = process.env.FTP_PASS || process.env.FTP_PASSWORD;
 const RAW_REMOTE_DIR = process.env.FTP_DIR;
-const LOCAL_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'client');
+const LOCAL_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "dist", "client");
 
 function normalizeRemoteDir(remoteDir) {
   if (!remoteDir) return remoteDir;
-  if (remoteDir === '/' || remoteDir === '.') return remoteDir;
-  return remoteDir.replace(/\/+$/, '');
+  if (remoteDir === "/" || remoteDir === ".") return remoteDir;
+  return remoteDir.replace(/\/+$/, "");
 }
 
 function resolveRemoteDir(remoteDir) {
   const normalized = normalizeRemoteDir(remoteDir);
 
-  if (!normalized || normalized === '.') {
-    return '.';
+  if (!normalized || normalized === ".") {
+    return ".";
   }
 
   return normalized;
@@ -33,14 +33,9 @@ function resolveRemoteDir(remoteDir) {
 const REMOTE_DIR = resolveRemoteDir(RAW_REMOTE_DIR);
 
 function buildTargetDirs(primaryDir) {
-  const candidates = [
-    primaryDir,
-    'domains/scholarscafe.com/public_html',
-    'public_html',
-    '.',
-  ]
+  const candidates = [primaryDir, "domains/scholarscafe.com/public_html", "public_html", "."]
     .map(normalizeRemoteDir)
-    .filter(dir => dir !== undefined && dir !== null);
+    .filter((dir) => dir !== undefined && dir !== null);
 
   return [...new Set(candidates)];
 }
@@ -48,22 +43,22 @@ function buildTargetDirs(primaryDir) {
 const DEPLOY_TARGET_DIRS = buildTargetDirs(REMOTE_DIR);
 
 if (!FTP_HOST) {
-  console.error('[ERROR] FTP_HOST environment variable not set');
+  console.error("[ERROR] FTP_HOST environment variable not set");
   process.exit(1);
 }
 
 if (!FTP_USER) {
-  console.error('[ERROR] FTP_USER environment variable not set');
+  console.error("[ERROR] FTP_USER environment variable not set");
   process.exit(1);
 }
 
 if (!FTP_PASS) {
-  console.error('[ERROR] FTP_PASS environment variable not set');
+  console.error("[ERROR] FTP_PASS environment variable not set");
   process.exit(1);
 }
 
 if (!REMOTE_DIR) {
-  console.error('[ERROR] FTP_DIR environment variable not set');
+  console.error("[ERROR] FTP_DIR environment variable not set");
   process.exit(1);
 }
 
@@ -75,13 +70,19 @@ const FTP_CONFIG = {
 };
 
 async function generateIndexHtml(clientDir) {
-  const serverEntryPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'server', 'index.js');
+  const serverEntryPath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "dist",
+    "server",
+    "index.js",
+  );
   const serverEntry = await import(pathToFileURL(serverEntryPath).href);
-  const response = await serverEntry.default.fetch(new Request('https://example.com/'));
+  const response = await serverEntry.default.fetch(new Request("https://example.com/"));
   if (!response.ok) throw new Error(`SSR render failed with status ${response.status}`);
   const html = await response.text();
-  writeFileSync(join(clientDir, 'index.html'), html);
-  console.log('[OK] Generated SSR index.html');
+  writeFileSync(join(clientDir, "index.html"), html);
+  console.log("[OK] Generated SSR index.html");
 }
 
 function createClient() {
@@ -99,18 +100,20 @@ async function connect(client) {
 
 // Delete a remote file silently (used to clean up orphaned .in. temp files)
 async function tryDelete(client, remotePath) {
-  try { await client.remove(remotePath); } catch (_) {}
+  try {
+    await client.remove(remotePath);
+  } catch (_) {}
 }
 
 function sortDeployFiles(files) {
   return [...files].sort((a, b) => {
-    const aName = a.remotePath.split('/').pop();
-    const bName = b.remotePath.split('/').pop();
+    const aName = a.remotePath.split("/").pop();
+    const bName = b.remotePath.split("/").pop();
 
-    if (aName === '.htaccess') return -1;
-    if (bName === '.htaccess') return 1;
-    if (aName === 'index.html') return 1;
-    if (bName === 'index.html') return -1;
+    if (aName === ".htaccess") return -1;
+    if (bName === ".htaccess") return 1;
+    if (aName === "index.html") return 1;
+    if (bName === "index.html") return -1;
     return a.remotePath.localeCompare(b.remotePath);
   });
 }
@@ -124,15 +127,19 @@ async function uploadFile(localFile, remoteFile, retries = 3) {
       await client.uploadFrom(localFile, remoteFile);
       return; // success
     } catch (e) {
-      const msg = e.message || '';
-      const isTempFileConflict = msg.includes('.in.');
+      const msg = e.message || "";
+      const isTempFileConflict = msg.includes(".in.");
 
       if (isTempFileConflict) {
         console.log(`  [CLEANUP] Temp file conflict on ${remoteFile}`);
         // Try to clean up guessed temp path
-        const dir = remoteFile.includes('/') ? remoteFile.substring(0, remoteFile.lastIndexOf('/')) : '';
-        const base = remoteFile.includes('/') ? remoteFile.substring(remoteFile.lastIndexOf('/') + 1) : remoteFile;
-        const tempPath = (dir ? dir + '/' : '') + '.in.' + base + '.';
+        const dir = remoteFile.includes("/")
+          ? remoteFile.substring(0, remoteFile.lastIndexOf("/"))
+          : "";
+        const base = remoteFile.includes("/")
+          ? remoteFile.substring(remoteFile.lastIndexOf("/") + 1)
+          : remoteFile;
+        const tempPath = (dir ? dir + "/" : "") + ".in." + base + ".";
         const cleanClient = createClient();
         try {
           await connect(cleanClient);
@@ -155,20 +162,20 @@ async function uploadFile(localFile, remoteFile, retries = 3) {
 
 async function ensureDir(client, remotePath) {
   try {
-    await client.send('MKD ' + remotePath);
+    await client.send("MKD " + remotePath);
   } catch (_) {
     // Ignore — directory likely already exists (550)
   }
 }
 
 async function ensureRemotePath(client, remotePath) {
-  if (!remotePath || remotePath === '.') return;
+  if (!remotePath || remotePath === ".") return;
 
-  const segments = remotePath.split('/').filter(Boolean);
-  let currentPath = remotePath.startsWith('/') ? '/' : '';
+  const segments = remotePath.split("/").filter(Boolean);
+  let currentPath = remotePath.startsWith("/") ? "/" : "";
 
   for (const segment of segments) {
-    currentPath = currentPath ? `${currentPath.replace(/\/$/, '')}/${segment}` : segment;
+    currentPath = currentPath ? `${currentPath.replace(/\/$/, "")}/${segment}` : segment;
     await ensureDir(client, currentPath);
   }
 }
@@ -177,19 +184,19 @@ async function collectFiles(localPath, remotePath, list = []) {
   const entries = readdirSync(localPath);
 
   // Collect directories
-  const dirs = entries.filter(f => statSync(join(localPath, f)).isDirectory());
+  const dirs = entries.filter((f) => statSync(join(localPath, f)).isDirectory());
   for (const dir of dirs) {
-    const rf = remotePath && remotePath !== '.' ? `${remotePath}/${dir}` : dir;
-    list.push({ type: 'dir', remotePath: rf });
+    const rf = remotePath && remotePath !== "." ? `${remotePath}/${dir}` : dir;
+    list.push({ type: "dir", remotePath: rf });
     await collectFiles(join(localPath, dir), rf, list);
   }
 
   // Collect files
   for (const file of entries) {
     const lf = join(localPath, file);
-    const rf = remotePath && remotePath !== '.' ? `${remotePath}/${file}` : file;
+    const rf = remotePath && remotePath !== "." ? `${remotePath}/${file}` : file;
     if (!statSync(lf).isDirectory()) {
-      list.push({ type: 'file', localPath: lf, remotePath: rf });
+      list.push({ type: "file", localPath: lf, remotePath: rf });
     }
   }
 
@@ -204,10 +211,14 @@ async function remoteFileExists(client, remotePath) {
     // FTP 'SIZE' command often fails on hidden files like .htaccess on Hostinger.
     // Fallback to directory listing check.
     try {
-      const dir = remotePath.includes('/') ? remotePath.substring(0, remotePath.lastIndexOf('/')) : '.';
-      const base = remotePath.includes('/') ? remotePath.substring(remotePath.lastIndexOf('/') + 1) : remotePath;
-      const list = await client.list(dir || '.');
-      return list.some(item => item.name === base);
+      const dir = remotePath.includes("/")
+        ? remotePath.substring(0, remotePath.lastIndexOf("/"))
+        : ".";
+      const base = remotePath.includes("/")
+        ? remotePath.substring(remotePath.lastIndexOf("/") + 1)
+        : remotePath;
+      const list = await client.list(dir || ".");
+      return list.some((item) => item.name === base);
     } catch (_) {
       return false;
     }
@@ -219,7 +230,7 @@ async function deploy() {
   try {
     await generateIndexHtml(LOCAL_DIR);
 
-    console.log('[...] Connecting to Hostinger FTP...');
+    console.log("[...] Connecting to Hostinger FTP...");
 
     for (const targetDir of DEPLOY_TARGET_DIRS) {
       try {
@@ -229,7 +240,7 @@ async function deploy() {
         console.log(`[...] Creating remote directories at ${targetDir}...`);
         await ensureRemotePath(client, targetDir);
         const allItems = await collectFiles(LOCAL_DIR, targetDir);
-        const dirs = allItems.filter(i => i.type === 'dir');
+        const dirs = allItems.filter((i) => i.type === "dir");
         for (const d of dirs) {
           console.log(`  [DIR] ${d.remotePath}`);
           await ensureDir(client, d.remotePath);
@@ -238,7 +249,7 @@ async function deploy() {
 
         // Second pass: upload each file directly into the target folder.
         // Upload .htaccess early and index.html last so Hostinger never serves a partial site.
-        const files = sortDeployFiles(allItems.filter(i => i.type === 'file'));
+        const files = sortDeployFiles(allItems.filter((i) => i.type === "file"));
         console.log(`[...] Uploading ${files.length} files to ${targetDir}...`);
         for (const f of files) {
           console.log(`  [UP] ${f.remotePath}`);
@@ -247,7 +258,7 @@ async function deploy() {
 
         // Ensure common web permissions so Hostinger serves files (prevents 403 due to restrictive perms)
         try {
-          console.log('[...] Fixing remote permissions (this may be slow)...');
+          console.log("[...] Fixing remote permissions (this may be slow)...");
           const permClient = createClient();
           await connect(permClient);
           for (const d of dirs) {
@@ -261,9 +272,9 @@ async function deploy() {
             } catch (_) {}
           }
           permClient.close();
-          console.log('[OK] Remote permissions updated (best-effort)');
+          console.log("[OK] Remote permissions updated (best-effort)");
         } catch (e) {
-          console.log('[WARN] Could not update remote permissions:', e.message || e);
+          console.log("[WARN] Could not update remote permissions:", e.message || e);
         }
 
         console.log(`[OK] Deploy complete for target ${targetDir}`);
@@ -271,21 +282,27 @@ async function deploy() {
         try {
           const verifyClient = createClient();
           await connect(verifyClient);
-          const indexRemote = (targetDir && targetDir !== '.') ? `${targetDir}/index.html` : 'index.html';
-          const htaccessRemote = (targetDir && targetDir !== '.') ? `${targetDir}/.htaccess` : '.htaccess';
+          const indexRemote =
+            targetDir && targetDir !== "." ? `${targetDir}/index.html` : "index.html";
+          const htaccessRemote =
+            targetDir && targetDir !== "." ? `${targetDir}/.htaccess` : ".htaccess";
 
           const indexExists = await remoteFileExists(verifyClient, indexRemote);
           const htExists = await remoteFileExists(verifyClient, htaccessRemote);
           verifyClient.close();
 
           if (!indexExists) {
-            console.log(`[WARN] Verification failed: ${indexRemote} missing or empty on target ${targetDir}`);
+            console.log(
+              `[WARN] Verification failed: ${indexRemote} missing or empty on target ${targetDir}`,
+            );
             // Try next deploy target
             continue;
           }
 
           if (!htExists) {
-            console.log(`[WARN] Verification failed: ${htaccessRemote} missing on target ${targetDir}`);
+            console.log(
+              `[WARN] Verification failed: ${htaccessRemote} missing on target ${targetDir}`,
+            );
             // Try next deploy target
             continue;
           }
@@ -302,9 +319,9 @@ async function deploy() {
       }
     }
 
-    throw new Error('All deploy targets failed');
+    throw new Error("All deploy targets failed");
   } catch (err) {
-    console.error('[ERROR] Deploy failed:', err.message);
+    console.error("[ERROR] Deploy failed:", err.message);
     process.exit(1);
   }
 }

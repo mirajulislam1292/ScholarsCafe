@@ -47,23 +47,23 @@ export function Newsletter() {
   }
 
   return (
-    <section id="newsletter" className="bg-newsletter-gradient py-24 md:py-32">
-      <div className="mx-auto max-w-[1280px] px-5 md:px-8">
+    <section id="newsletter" className="bg-blue-950 py-[clamp(96px,13vw,200px)]">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center text-white">
           <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
             className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm"
           >
-            <Mail className="h-8 w-8 text-sky-light" />
+            <Mail className="h-8 w-8 text-ice-300" />
           </motion.div>
-          <span className="mt-6 inline-block text-xs font-bold uppercase tracking-[0.15em] text-sky-light">
+          <span className="hidden">
             <CmsText id="Newsletter.ac7654d7cf2c">Stay Updated</CmsText>
           </span>
-          <h2 className="mt-3 font-display text-[clamp(2rem,3.5vw,3rem)] font-extrabold">
+          <h2 className="type-h2">
             <CmsText id="Newsletter.8d2bdd3b4ffc">Get Free Scholarship Alerts & Study Tips</CmsText>
           </h2>
-          <p className="mt-5 text-[17px] leading-relaxed text-white/80">
+          <p className="mt-5 type-lead text-white/80">
             <CmsText id="Newsletter.0c183d00d7df">
               Join 500+ Bangladeshi students who get weekly scholarship deadlines, application tips,
               and US university news, completely free.
@@ -88,7 +88,7 @@ export function Newsletter() {
                 <button
                   type="submit"
                   disabled={sending}
-                  className="bg-sky px-7 py-4 text-[15px] font-bold text-white transition-colors hover:bg-[#0284c7]"
+                  className="type-button bg-ice-100 px-7 py-4 text-blue-950 transition-colors hover:bg-white"
                 >
                   <CmsText id="Newsletter.d0f736aa267d">Subscribe →</CmsText>
                 </button>
@@ -123,16 +123,16 @@ export function Newsletter() {
               animate={{ opacity: 1, scale: 1 }}
               className="mx-auto mt-10 max-w-md rounded-2xl bg-white/15 p-7 backdrop-blur-sm"
             >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400 text-navy">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400 text-neutral-900">
                 <Check className="h-6 w-6" strokeWidth={3} />
               </div>
-              <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 font-display text-lg font-bold">
+              <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 type-h3">
                 <span>
                   <CmsText id="Newsletter.66023af1bfb0">
                     You're in! Welcome to the Scholars Cafe community.
                   </CmsText>
                 </span>
-                <PartyPopper className="h-6 w-6 text-sky-light" strokeWidth={1.75} aria-hidden />
+                <PartyPopper className="h-6 w-6 text-ice-300" strokeWidth={1.75} aria-hidden />
               </div>
               <div className="mt-1 text-sm text-white/90">
                 Your signup is saved. Thank you for joining our mailing list.
