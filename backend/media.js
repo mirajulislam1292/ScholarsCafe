@@ -108,19 +108,25 @@ export function serveMedia(app, store) {
       "X-Content-Type-Options": "nosniff",
       "Accept-Ranges": "bytes",
     });
-    // Byte ranges: required by Safari to play video, also lets browsers seek.
-    const range = /^bytes=(\d*)-(\d*)$/.exec(req.get("Range") || "");
-    if (range && (range[1] || range[2])) {
-      let start = range[1] ? Number(range[1]) : bytes.length - Number(range[2]);
-      let end = range[1] && range[2] ? Number(range[2]) : bytes.length - 1;
-      start = Math.max(0, start);
-      end = Math.min(end, bytes.length - 1);
-      if (start > end) return res.status(416).set("Content-Range", `bytes */${bytes.length}`).end();
-      return res
-        .status(206)
-        .set("Content-Range", `bytes ${start}-${end}/${bytes.length}`)
-        .send(bytes.subarray(start, end + 1));
-    }
-    res.send(bytes);
+    sendBytes(req, res, bytes);
   });
+}
+
+
+/** Sends a stored file, answering HTTP Range requests (Safari needs them for video; seeking uses them). */
+export function sendBytes(req, res, bytes) {
+  // Byte ranges: required by Safari to play video, also lets browsers seek.
+  const range = /^bytes=(\d*)-(\d*)$/.exec(req.get("Range") || "");
+  if (range && (range[1] || range[2])) {
+    let start = range[1] ? Number(range[1]) : bytes.length - Number(range[2]);
+    let end = range[1] && range[2] ? Number(range[2]) : bytes.length - 1;
+    start = Math.max(0, start);
+    end = Math.min(end, bytes.length - 1);
+    if (start > end) return res.status(416).set("Content-Range", `bytes */${bytes.length}`).end();
+    return res
+      .status(206)
+      .set("Content-Range", `bytes ${start}-${end}/${bytes.length}`)
+      .send(bytes.subarray(start, end + 1));
+  }
+  res.send(bytes);
 }

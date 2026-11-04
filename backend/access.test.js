@@ -105,3 +105,20 @@ test("Course and student writes are refused for students and mentors before touc
     assert.deepEqual(writes, []);
   }
 });
+
+test("Lesson video: login required, editors refused, query scoped to the student and private files", async () => {
+  const config = { ADMIN_ORIGIN: "https://admin.scholarscafe.com", PUBLIC_ORIGIN: "https://scholarscafe.com", GOOGLE_CLIENT_ID: "t" };
+  const path = "/api/lms/lessons/" + OTHER + "/video";
+  await request(createApp({ session: async () => null }, config)).get(path).expect(401);
+  const cookie = "__Host-sc_session=" + "a".repeat(64);
+  const appFor = (role, query) => createApp({ session: async () => ({ id: ME, role, csrf: "abc" }), query }, config);
+  await request(appFor("editor", async () => [])).get(path).set("Cookie", cookie).expect(403);
+  let seen;
+  const app = appFor("student", async (sql, args) => ((seen = { sql, args }), [{ bytes: Buffer.from("0123456789"), mime: "video/mp4" }]));
+  const res = await request(app).get(path).set("Cookie", cookie).set("Range", "bytes=2-5").expect(206);
+  assert.equal(res.headers["content-range"], "bytes 2-5/10");
+  assert.equal(res.headers["cache-control"], "private, no-store");
+  assert.match(seen.sql, /m\.visibility='private'/);
+  assert.match(seen.sql, /l\.published=1/);
+  assert.deepEqual(seen.args, [OTHER, ME]);
+});

@@ -5,9 +5,9 @@ import { OAuth2Client } from "google-auth-library";
 import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { installMedia, serveMedia } from "./media.js";
+import { installMedia, serveMedia, sendBytes } from "./media.js";
 import { installAuthRoutes, installAccountRoutes } from "./auth.js";
-import { installLmsRoutes } from "./lms.js";
+import { installLmsRoutes, installStudentRoutes } from "./lms.js";
 import {
   token,
   hash,
@@ -349,6 +349,7 @@ export function createApp(
     next();
   });
   installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
+  installStudentRoutes(app, { store, fail, sendBytes });
   installLmsRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {

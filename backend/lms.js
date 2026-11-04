@@ -242,3 +242,102 @@ export function installLmsRoutes(app, { store, fail }) {
     res.json({ ok: true });
   });
 }
+
+// ---------- Student side: my courses, progress, profile, protected video ----------
+const progressInput = z.object({ lesson_id: uuid, done: z.boolean() }).strict();
+const myProfileInput = z
+  .object({
+    full_name: z.string().trim().min(1).max(160),
+    phone: z.string().trim().max(80).default(""),
+    target_intake: z.string().trim().max(40).default(""),
+  })
+  .strict();
+
+export function installStudentRoutes(app, { store, fail, sendBytes }) {
+  const q = (sql, args, c) => store.query(sql, args, c);
+  const onlyStudents = (req) => {
+    if (req.actor.role !== "student") throw fail(403, "This page is for students.");
+  };
+
+  app.get("/api/lms/my/courses", async (req, res) => {
+    onlyStudents(req);
+    const s = courseScope(req.actor);
+    const items = await q(
+      `SELECT c.id,c.title,c.summary,
+        (SELECT COUNT(*) FROM lms_lessons l WHERE l.course_id=c.id AND l.published=1) AS lessons,
+        (SELECT COUNT(*) FROM lesson_progress g JOIN lms_lessons l ON l.id=g.lesson_id
+           WHERE g.user_id=? AND l.course_id=c.id AND l.published=1) AS done
+       FROM lms_courses c WHERE ${s.sql} ORDER BY c.title`,
+      [req.actor.id, ...s.params],
+    );
+    res.json({ items });
+  });
+  app.get("/api/lms/my/courses/:id", async (req, res) => {
+    onlyStudents(req);
+    const courseId = uuid.parse(req.params.id);
+    const c = courseScope(req.actor);
+    const [course] = await q(`SELECT c.id,c.title,c.summary FROM lms_courses c WHERE c.id=? AND ${c.sql}`, [courseId, ...c.params]);
+    if (!course) throw fail(404, "Course not found.");
+    const l = lessonScope(req.actor);
+    const lessons = await q(
+      `SELECT l.id,l.title,l.body,l.position,(l.video_media_id IS NOT NULL) AS has_video,
+        EXISTS(SELECT 1 FROM lesson_progress g WHERE g.user_id=? AND g.lesson_id=l.id) AS done
+       FROM lms_lessons l WHERE l.course_id=? AND ${l.sql} ORDER BY l.position,l.title`,
+      [req.actor.id, courseId, ...l.params],
+    );
+    res.json({ course, lessons });
+  });
+  app.post("/api/lms/my/progress", async (req, res) => {
+    requireCan(req.actor, "progress.write");
+    const d = progressInput.parse(req.body);
+    await store.transaction(async (c) => {
+      const l = lessonScope(req.actor);
+      const [lesson] = await q(`SELECT l.id FROM lms_lessons l WHERE l.id=? AND ${l.sql}`, [d.lesson_id, ...l.params], c);
+      if (!lesson) throw fail(404, "Lesson not found.");
+      if (d.done) await q("INSERT IGNORE INTO lesson_progress (user_id,lesson_id) VALUES (?,?)", [req.actor.id, d.lesson_id], c);
+      else await q("DELETE FROM lesson_progress WHERE user_id=? AND lesson_id=?", [req.actor.id, d.lesson_id], c);
+    });
+    res.json({ ok: true });
+  });
+  app.get("/api/lms/my/profile", async (req, res) => {
+    onlyStudents(req);
+    const s = studentScope(req.actor, "p.user_id");
+    const [profile] = await q(`SELECT ${profileColumns(req.actor)} FROM student_profiles p WHERE ${s.sql}`, s.params);
+    res.json(profile || { full_name: "", phone: "", target_intake: "" });
+  });
+  app.post("/api/lms/my/profile", async (req, res) => {
+    onlyStudents(req);
+    requireCan(req.actor, "profile.write");
+    const d = myProfileInput.parse(req.body);
+    // Own row only, and never staff_notes.
+    await q(
+      `INSERT INTO student_profiles (user_id,full_name,phone,target_intake,updated_at) VALUES (?,?,?,?,UTC_TIMESTAMP())
+       ON DUPLICATE KEY UPDATE full_name=VALUES(full_name),phone=VALUES(phone),target_intake=VALUES(target_intake),updated_at=UTC_TIMESTAMP()`,
+      [req.actor.id, d.full_name, d.phone, d.target_intake],
+    );
+    res.json({ ok: true });
+  });
+
+  // Protected lesson video. Checked on EVERY request (including each byte-range request), so pausing an
+  // enrollment, unpublishing a lesson or deactivating an account stops playback immediately.
+  // Same-origin only, never cached, never on the public media route.
+  app.get("/api/lms/lessons/:id/video", async (req, res) => {
+    const lessonId = uuid.parse(req.params.id);
+    const l = lessonScope(req.actor); // throws 403 for editors
+    const [file] = await q(
+      `SELECT m.bytes,m.mime FROM lms_lessons l JOIN media m ON m.id=l.video_media_id
+       WHERE l.id=? AND m.visibility='private' AND ${l.sql}`,
+      [lessonId, ...l.params],
+    );
+    if (!file || !String(file.mime).startsWith("video/")) throw fail(404, "Video not found.");
+    res.set({
+      "Content-Type": file.mime,
+      "Cache-Control": "private, no-store",
+      "Content-Disposition": "inline",
+      "Cross-Origin-Resource-Policy": "same-origin",
+      "X-Content-Type-Options": "nosniff",
+      "Accept-Ranges": "bytes",
+    });
+    sendBytes(req, res, file.bytes);
+  });
+}

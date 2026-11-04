@@ -296,3 +296,13 @@ article.card textarea { width: 100%; min-height: 80px; }
 .login-form input { padding: 0.65rem 0.75rem; border: 1px solid #c9d3dd; border-radius: 8px; font: inherit; }
 .login-form button { justify-self: start; }
 #login-message { min-height: 1.4em; max-width: 360px; }
+
+/* Student dashboard */
+.course-layout { display: grid; grid-template-columns: minmax(200px, 280px) 1fr; gap: 1.25rem; align-items: start; }
+.lesson-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.lesson-list button { width: 100%; text-align: left; }
+.lesson-list button[aria-current="true"] { font-weight: 600; outline: 2px solid currentColor; }
+.lesson-view video { width: 100%; max-height: 70vh; background: #0a1520; border-radius: 8px; margin: 0.5rem 0 1rem; }
+.lesson-body { white-space: pre-wrap; line-height: 1.6; }
+progress { width: 100%; height: 8px; }
+@media (max-width: 760px) { .course-layout { grid-template-columns: 1fr; } }

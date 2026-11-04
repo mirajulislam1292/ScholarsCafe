@@ -69,3 +69,9 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - Students are created only by owners/admins (409 on duplicate email). Mentors may only write `staff_notes` for their own students. Enrollment requires an active student, a live course and an active mentor.
 - Lesson videos must be private uploads (`X-Visibility: private`); public files are refused for lessons. Private files return 404 on the public route.
 - Verified on MySQL 8: owner/mentor/student flows, paused enrollment hides the course, draft course and unpublished lesson hidden from the student.
+
+## Phase 5.3 additions (student side and protected video)
+- Student API `/api/lms/my/*` (students only): courses via `courseScope`, lessons via `lessonScope`, progress only on lessons the student can open, profile writes limited to own name/phone/intake (unknown fields such as `staff_notes` rejected).
+- Lesson video `/api/lms/lessons/:id/video`: session required, access re-checked on every request including each byte range (pause/unpublish/deactivate takes effect immediately), private files only, `Cache-Control: private, no-store`, `Cross-Origin-Resource-Policy: same-origin`. Chose per-request checks over signed URLs: nothing to leak or share.
+- Limits: hidden download button is a deterrent, not DRM; screen recording can't be prevented. Videos are read whole from MySQL per range request (fine for ≤12 MB files and modest traffic; move to object storage if usage grows).
+- Verified on MySQL 8: enrolled student 206 range; not-enrolled student, paused enrollment and unpublished lesson 404; no session 401; editor 403.

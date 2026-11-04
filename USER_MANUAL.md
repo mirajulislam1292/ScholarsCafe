@@ -86,7 +86,9 @@ Admin → **Leads**. Every contact-form message becomes a lead.
 3. **Staff notes** are never shown to the student. To block a student completely: **Access** → untick **Active**.
 
 **Mentors** see **Students**: only students enrolled with them, and they can add notes. They cannot change courses or enrollments.
-The students' own dashboard (watching lessons, messages, reviews) arrives in the next steps. **Newsletter** shows email signups.
+**What students see:** they sign in at **https://admin.scholarscafe.com** and land on **My courses**: each course with a progress bar, then lessons in order with the video, the text and **Mark as done**. Under **Account** they can edit their name, phone and target intake, and set a password. Messages and reviews arrive in the next step.
+**Video protection:** videos play only for students actively enrolled in that course (and their mentor and admins). Pausing an enrollment, unpublishing a lesson or deactivating an account stops playback straight away. Download buttons are hidden, but no website can stop someone recording their screen, so don't put anything in a video you couldn't accept being shared.
+**Newsletter** shows email signups.
 
 ## 9. Change colors and fonts
 - Colors and fonts are defined once in `src/styles/design-system.css` (and mirrored in the `@theme` block of `src/styles.css`). The full palette and type are on the private page **https://scholarscafe.com/design-system**.

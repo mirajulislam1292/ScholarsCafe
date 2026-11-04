@@ -267,6 +267,11 @@ function render() {
   }
   if (section === "Account") {
     renderAccount();
+    if (me.role === "student") renderMyDetails().catch(report);
+    return;
+  }
+  if (section === "My courses") {
+    renderMyCourses().catch(report);
     return;
   }
   if (section === "Student courses") {
@@ -788,6 +793,92 @@ async function renderStudents() {
   search.oninput = draw;
   draw();
 }
+// ---------- Student dashboard: student screens ----------
+async function renderMyCourses() {
+  const screen = $("screen");
+  const courses = (await api("lms/my/courses")).items;
+  screen.append(node("p", "Your courses. Pick up where you left off.", "muted"));
+  if (!courses.length)
+    screen.append(node("p", "You're not enrolled in a course yet. Your mentor will add you.", "empty"));
+  for (const c of courses) {
+    const card = node("article", undefined, "card");
+    const pct = c.lessons ? Math.round((c.done / c.lessons) * 100) : 0;
+    const bar = node("progress");
+    bar.max = 100;
+    bar.value = pct;
+    bar.setAttribute("aria-label", `${pct}% complete`);
+    card.append(
+      node("h3", c.title),
+      node("p", c.summary || "", "muted"),
+      bar,
+      node("p", `${c.done} of ${c.lessons} lessons done`, "muted"),
+      button("Open course →", () => renderMyCourse(c.id), "primary"),
+    );
+    screen.append(card);
+  }
+}
+async function renderMyCourse(courseId, lessonId) {
+  const screen = $("screen");
+  const { course, lessons } = await api("lms/my/courses/" + courseId);
+  screen.replaceChildren(button("← My courses", () => render()));
+  $("heading").textContent = course.title;
+  const layout = node("div", undefined, "course-layout");
+  const list = node("ol", undefined, "lesson-list");
+  const current = lessons.find((l) => l.id === lessonId) || lessons.find((l) => !l.done) || lessons[0];
+  for (const l of lessons) {
+    const item = node("li");
+    const b = button((l.done ? "✓ " : "") + l.title, () => renderMyCourse(courseId, l.id));
+    if (l === current) b.setAttribute("aria-current", "true");
+    item.append(b);
+    list.append(item);
+  }
+  const view = node("section", undefined, "card lesson-view");
+  if (!current) view.append(node("p", "Lessons will appear here soon.", "empty"));
+  else {
+    view.append(node("h2", current.title));
+    if (current.has_video) {
+      const video = node("video");
+      video.controls = true;
+      video.preload = "metadata";
+      video.playsInline = true;
+      video.disablePictureInPicture = true;
+      video.setAttribute("controlsList", "nodownload noplaybackrate");
+      video.oncontextmenu = (e) => e.preventDefault();
+      video.src = "/api/lms/lessons/" + current.id + "/video";
+      video.onerror = () => report(Error("This video can't play right now. Your access may have changed; reload the page."));
+      view.append(video);
+    }
+    if (current.body) view.append(node("p", current.body, "lesson-body"));
+    const toggle = button(current.done ? "Mark as not done" : "Mark as done ✓", async () => {
+      await api("lms/my/progress", { lesson_id: current.id, done: !current.done });
+      const next = lessons[lessons.indexOf(current) + 1];
+      await renderMyCourse(courseId, !current.done && next ? next.id : current.id);
+    }, current.done ? "" : "primary");
+    view.append(toggle);
+  }
+  layout.append(list, view);
+  screen.append(layout);
+}
+async function renderMyDetails() {
+  const p = await api("lms/my/profile");
+  const card = node("form", undefined, "card");
+  const [nl, name] = input("Full name", p.full_name, "text", 160);
+  const [pl, phone] = input("Phone", p.phone, "tel", 80);
+  const [il, intake] = input("Target intake (e.g. Fall 2027)", p.target_intake, "text", 40);
+  const save = node("button", "Save details", "primary");
+  save.type = "submit";
+  card.append(node("h2", "My details"), nl, pl, il, save);
+  card.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api("lms/my/profile", { full_name: name.value, phone: phone.value, target_intake: intake.value });
+      notice("Details saved.");
+    } catch (err) {
+      report(err);
+    }
+  };
+  $("screen").prepend(card);
+}
 async function renderMedia() {
   const screen = $("screen");
   screen.append(
@@ -1221,7 +1312,7 @@ try {
   $("identity").textContent = me.email + " · " + me.role;
   const navFor =
     me.role === "student"
-      ? ["Account"]
+      ? ["My courses", "Account"]
       : me.role === "mentor"
       ? ["Leads", "Students", "Account"]
       : [
@@ -1234,7 +1325,11 @@ try {
           "Account",
         ];
   if (me.role === "mentor") section = "Leads";
-  if (me.role === "student") section = "Account";
+  if (me.role === "student") section = "My courses";
+  if (me.role === "student") {
+    document.querySelector("aside .eyebrow").textContent = "STUDENT DASHBOARD";
+    document.querySelector("main header .eyebrow").textContent = "SCHOLARS CAFE / STUDENT";
+  }
   for (const key of navFor) {
     const b = button(names[key] || key, () => navigate(key));
     b.dataset.section = key;
