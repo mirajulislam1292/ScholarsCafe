@@ -34,3 +34,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Raw/unencoded media sources (keep out of Git; only encoded files in public/media are committed)
+media-src/
+raw-video/
+*.mov
+*.mkv
+*.prproj

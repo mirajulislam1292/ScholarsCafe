@@ -1,4 +1,4 @@
-import {useCmsLookup} from "@/lib/cms";
+import { useCmsLookup } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/scholars/Navbar";
@@ -27,16 +27,19 @@ export const Route = createFileRoute("/privacy")({
 });
 
 function PrivacyPage() {
- const cmsLabel = useCmsLookup();
+  const cmsLabel = useCmsLookup();
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <LegalPage
         kicker="Legal"
-        title={cmsLabel("privacy.label.506ff3946215","Privacy Policy")}
+        title={cmsLabel("privacy.label.506ff3946215", "Privacy Policy")}
         updated="May 2026"
-        intro={cmsLabel("privacy.label.f452be0c5041","Scholars Cafe (we, us, our) is committed to protecting the privacy of every student and family that trusts us with their study abroad journey. This policy explains what we collect, why we collect it, and the choices you have.")}
+        intro={cmsLabel(
+          "privacy.label.f452be0c5041",
+          "Scholars Cafe (we, us, our) is committed to protecting the privacy of every student and family that trusts us with their study abroad journey. This policy explains what we collect, why we collect it, and the choices you have.",
+        )}
       >
         <h2>
           <CmsText id="privacy.331e44fd15c9">1. Information we collect</CmsText>

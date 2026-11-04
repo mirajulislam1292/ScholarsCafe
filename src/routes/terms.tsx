@@ -1,4 +1,4 @@
-import {useCmsLookup} from "@/lib/cms";
+import { useCmsLookup } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/scholars/Navbar";
@@ -27,16 +27,19 @@ export const Route = createFileRoute("/terms")({
 });
 
 function TermsPage() {
- const cmsLabel = useCmsLookup();
+  const cmsLabel = useCmsLookup();
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <LegalPage
         kicker="Legal"
-        title={cmsLabel("terms.label.4afa55bf7aec","Terms of Service")}
+        title={cmsLabel("terms.label.4afa55bf7aec", "Terms of Service")}
         updated="May 2026"
-        intro={cmsLabel("terms.label.e4aaf89bded9","By engaging Scholars Cafe, for a consultation, test prep, or any of our admissions programs, you agree to the following terms. They are written in plain language so you know exactly what to expect from us, and what we expect from you.")}
+        intro={cmsLabel(
+          "terms.label.e4aaf89bded9",
+          "By engaging Scholars Cafe, for a consultation, test prep, or any of our admissions programs, you agree to the following terms. They are written in plain language so you know exactly what to expect from us, and what we expect from you.",
+        )}
       >
         <h2>
           <CmsText id="terms.dec38f4494e4">1. The services we provide</CmsText>

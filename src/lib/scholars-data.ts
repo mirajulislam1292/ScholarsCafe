@@ -5,28 +5,58 @@ export const EMAIL = "contact@scholarscafe.com";
 export const PHONE = "+880 1560-001325";
 
 export const COUNTRIES = [
-  { flag: "🇺🇸", name: "USA", tag: "Primary focus", featured: true, note: "Need-based aid · Top-50 admissions" },
-  { flag: "🇬🇧", name: "United Kingdom", tag: "UCAS Support", note: "Russell Group · Merit scholarships" },
+  {
+    flag: "🇺🇸",
+    name: "USA",
+    tag: "Primary focus",
+    featured: true,
+    note: "Need-based aid · Top-50 admissions",
+  },
+  {
+    flag: "🇬🇧",
+    name: "United Kingdom",
+    tag: "UCAS Support",
+    note: "Russell Group · Merit scholarships",
+  },
   { flag: "🇨🇦", name: "Canada", tag: "SDS Visa", note: "U of T · UBC · McGill" },
   { flag: "🇩🇪", name: "Germany", tag: "Free Tuition", note: "TU Munich · RWTH · Heidelberg" },
   { flag: "🇸🇪", name: "Sweden", tag: "SI Scholarship", note: "Uppsala · Lund · KTH" },
-  { flag: "🇳🇱", name: "Netherlands", tag: "English-Taught", note: "TU Delft · Amsterdam · Utrecht" },
+  {
+    flag: "🇳🇱",
+    name: "Netherlands",
+    tag: "English-Taught",
+    note: "TU Delft · Amsterdam · Utrecht",
+  },
   { flag: "🇫🇮", name: "Finland", tag: "Nordic Quality", note: "Aalto · Helsinki · Tampere" },
   { flag: "🇳🇿", name: "New Zealand", tag: "Student-Friendly", note: "Auckland · Otago · Victoria" },
-  { flag: "🇭🇺", name: "Hungary", tag: "Stipendium Hungaricum", note: "Affordable · Government-funded" },
+  {
+    flag: "🇭🇺",
+    name: "Hungary",
+    tag: "Stipendium Hungaricum",
+    note: "Affordable · Government-funded",
+  },
   { flag: "🇰🇷", name: "South Korea", tag: "GKS Full Scholarship", note: "Yonsei · KAIST · SNU" },
   { flag: "🇹🇷", name: "Turkey", tag: "Türkiye Burs", note: "Tuition + stipend covered" },
   { flag: "🇪🇸", name: "Spain", tag: "Cultural & Affordable", note: "Madrid · Barcelona · IE" },
 ];
 
 export const STATS = [
-  { value: 12, suffix: "+", label: "Study Destinations" },
   { value: 100, suffix: "%", label: "Dedicated Support" },
   { value: 30, suffix: " min", label: "Free Consultation" },
   { value: 500, suffix: "+", label: "Students Learning" },
 ];
 
-export const PROGRAMS: { id: string; icon: ScholarIconName; badge: string; title: string; price: string; description: string; features: string[]; cta: string; featured: boolean }[] = [
+export const PROGRAMS: {
+  id: string;
+  icon: ScholarIconName;
+  badge: string;
+  title: string;
+  price: string;
+  description: string;
+  features: string[];
+  cta: string;
+  featured: boolean;
+}[] = [
   {
     id: "scholarship",
     icon: "trophy" satisfies ScholarIconName,
@@ -87,23 +117,85 @@ export const PROGRAMS: { id: string; icon: ScholarIconName; badge: string; title
 ];
 
 export const SERVICES: { icon: ScholarIconName; title: string; desc: string }[] = [
-  { icon: "target" satisfies ScholarIconName, title: "Personalized Pathway Planning", desc: "Tailored country, university and timeline strategy from day one." },
-  { icon: "pen-line" satisfies ScholarIconName, title: "Essay & SOP Coaching", desc: "Multiple drafts, real feedback, voice that admissions remembers." },
-  { icon: "banknote" satisfies ScholarIconName, title: "CSS Profile & ISFAA", desc: "Every field explained. Every document gathered. Done right." },
-  { icon: "library" satisfies ScholarIconName, title: "College List Building", desc: "Reach, target, safety, calibrated to your profile and finances." },
-  { icon: "school" satisfies ScholarIconName, title: "Teacher Portal Support", desc: "We walk your teachers through recommendation submissions." },
-  { icon: "compass" satisfies ScholarIconName, title: "Counselor Portal Support", desc: "School counselor section coordination so nothing slips." },
-  { icon: "stamp" satisfies ScholarIconName, title: "F-1 Visa Preparation", desc: "DS-160, SEVIS, financial docs, and full mock interviews." },
-  { icon: "luggage" satisfies ScholarIconName, title: "Pre-Departure & Beyond", desc: "Housing, banking, packing, and your first weeks abroad." },
+  {
+    icon: "target" satisfies ScholarIconName,
+    title: "Personalized Pathway Planning",
+    desc: "Tailored university and timeline strategy from day one.",
+  },
+  {
+    icon: "pen-line" satisfies ScholarIconName,
+    title: "Essay & SOP Coaching",
+    desc: "Multiple drafts, real feedback, voice that admissions remembers.",
+  },
+  {
+    icon: "banknote" satisfies ScholarIconName,
+    title: "CSS Profile & ISFAA",
+    desc: "Every field explained. Every document gathered. Done right.",
+  },
+  {
+    icon: "library" satisfies ScholarIconName,
+    title: "College List Building",
+    desc: "Reach, target, safety, calibrated to your profile and finances.",
+  },
+  {
+    icon: "school" satisfies ScholarIconName,
+    title: "Teacher Portal Support",
+    desc: "We walk your teachers through recommendation submissions.",
+  },
+  {
+    icon: "compass" satisfies ScholarIconName,
+    title: "Counselor Portal Support",
+    desc: "School counselor section coordination so nothing slips.",
+  },
+  {
+    icon: "stamp" satisfies ScholarIconName,
+    title: "F-1 Visa Preparation",
+    desc: "DS-160, SEVIS, financial docs, and full mock interviews.",
+  },
+  {
+    icon: "luggage" satisfies ScholarIconName,
+    title: "Pre-Departure & Beyond",
+    desc: "Housing, banking, packing, and your first weeks abroad.",
+  },
 ];
 
 export const PROCESS: { n: number; icon: ScholarIconName; title: string; desc: string }[] = [
-  { n: 1, icon: "message-circle" satisfies ScholarIconName, title: "Discovery Call", desc: "A free, honest conversation about your goals, profile, and realistic options." },
-  { n: 2, icon: "compass" satisfies ScholarIconName, title: "Strategy & Roadmap", desc: "Country mix, college list, timeline, and a personalized prep plan." },
-  { n: 3, icon: "trending-up" satisfies ScholarIconName, title: "Profile Building", desc: "Test prep, extracurricular shaping, and academic positioning." },
-  { n: 4, icon: "file-text" satisfies ScholarIconName, title: "Application Preparation", desc: "Essays, forms, portals, financial aid, every part together step by step." },
-  { n: 5, icon: "send" satisfies ScholarIconName, title: "Submit & Follow Up", desc: "On-time submissions, response tracking, and quick follow-ups." },
-  { n: 6, icon: "party-popper" satisfies ScholarIconName, title: "Acceptance & Next Steps", desc: "Offer evaluation, aid negotiation, visa, departure." },
+  {
+    n: 1,
+    icon: "message-circle" satisfies ScholarIconName,
+    title: "Discovery Call",
+    desc: "A free, honest conversation about your goals, profile, and realistic options.",
+  },
+  {
+    n: 2,
+    icon: "compass" satisfies ScholarIconName,
+    title: "Strategy & Roadmap",
+    desc: "College list, timeline, and a personalized prep plan.",
+  },
+  {
+    n: 3,
+    icon: "trending-up" satisfies ScholarIconName,
+    title: "Profile Building",
+    desc: "Test prep, extracurricular shaping, and academic positioning.",
+  },
+  {
+    n: 4,
+    icon: "file-text" satisfies ScholarIconName,
+    title: "Application Preparation",
+    desc: "Essays, forms, portals, financial aid, every part together step by step.",
+  },
+  {
+    n: 5,
+    icon: "send" satisfies ScholarIconName,
+    title: "Submit & Follow Up",
+    desc: "On-time submissions, response tracking, and quick follow-ups.",
+  },
+  {
+    n: 6,
+    icon: "party-popper" satisfies ScholarIconName,
+    title: "Acceptance & Next Steps",
+    desc: "Offer evaluation, aid negotiation, visa, departure.",
+  },
 ];
 
 export const TESTS = [
@@ -179,50 +271,312 @@ export type University = {
   country: string;
   flag: string;
   type: "Liberal Arts" | "Research" | "Technical/STEM" | "Arts & Design";
-  scholarship: "Need-Based 100%" | "Need-Based" | "Merit-Based" | "Full Scholarship" | "Limited Aid" | "State University";
+  scholarship:
+    | "Need-Based 100%"
+    | "Need-Based"
+    | "Merit-Based"
+    | "Full Scholarship"
+    | "Limited Aid"
+    | "State University";
   tuition: "Free" | "$0-10k" | "$10-30k" | "$30k+";
   acceptance: string;
 };
 
 export const UNIVERSITIES: University[] = [
   // USA
-  { name: "Harvard University", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "Need-Based 100%", tuition: "$30k+", acceptance: "3%" },
-  { name: "MIT", country: "USA", flag: "🇺🇸", type: "Technical/STEM", scholarship: "Need-Based 100%", tuition: "$30k+", acceptance: "4%" },
-  { name: "Amherst College", country: "USA", flag: "🇺🇸", type: "Liberal Arts", scholarship: "Need-Based 100%", tuition: "$30k+", acceptance: "11%" },
-  { name: "Grinnell College", country: "USA", flag: "🇺🇸", type: "Liberal Arts", scholarship: "Need-Based", tuition: "$30k+", acceptance: "16%" },
-  { name: "Williams College", country: "USA", flag: "🇺🇸", type: "Liberal Arts", scholarship: "Need-Based 100%", tuition: "$30k+", acceptance: "9%" },
-  { name: "Vassar College", country: "USA", flag: "🇺🇸", type: "Liberal Arts", scholarship: "Need-Based", tuition: "$30k+", acceptance: "25%" },
-  { name: "Hamilton College", country: "USA", flag: "🇺🇸", type: "Liberal Arts", scholarship: "Need-Based", tuition: "$30k+", acceptance: "18%" },
-  { name: "Macalester College", country: "USA", flag: "🇺🇸", type: "Liberal Arts", scholarship: "Need-Based", tuition: "$30k+", acceptance: "28%" },
-  { name: "Bates College", country: "USA", flag: "🇺🇸", type: "Liberal Arts", scholarship: "Need-Based", tuition: "$30k+", acceptance: "14%" },
-  { name: "NYU", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "Limited Aid", tuition: "$30k+", acceptance: "13%" },
-  { name: "UCLA", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "State University", tuition: "$30k+", acceptance: "9%" },
-  { name: "UC Berkeley", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "State University", tuition: "$30k+", acceptance: "11%" },
-  { name: "Johns Hopkins", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "Need-Based", tuition: "$30k+", acceptance: "8%" },
-  { name: "Northwestern University", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "Need-Based", tuition: "$30k+", acceptance: "7%" },
-  { name: "Tufts University", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "Need-Based", tuition: "$30k+", acceptance: "11%" },
-  { name: "Rice University", country: "USA", flag: "🇺🇸", type: "Research", scholarship: "Need-Based", tuition: "$30k+", acceptance: "9%" },
+  {
+    name: "Harvard University",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "Need-Based 100%",
+    tuition: "$30k+",
+    acceptance: "3%",
+  },
+  {
+    name: "MIT",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Technical/STEM",
+    scholarship: "Need-Based 100%",
+    tuition: "$30k+",
+    acceptance: "4%",
+  },
+  {
+    name: "Amherst College",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Liberal Arts",
+    scholarship: "Need-Based 100%",
+    tuition: "$30k+",
+    acceptance: "11%",
+  },
+  {
+    name: "Grinnell College",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Liberal Arts",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "16%",
+  },
+  {
+    name: "Williams College",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Liberal Arts",
+    scholarship: "Need-Based 100%",
+    tuition: "$30k+",
+    acceptance: "9%",
+  },
+  {
+    name: "Vassar College",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Liberal Arts",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "25%",
+  },
+  {
+    name: "Hamilton College",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Liberal Arts",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "18%",
+  },
+  {
+    name: "Macalester College",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Liberal Arts",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "28%",
+  },
+  {
+    name: "Bates College",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Liberal Arts",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "14%",
+  },
+  {
+    name: "NYU",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "Limited Aid",
+    tuition: "$30k+",
+    acceptance: "13%",
+  },
+  {
+    name: "UCLA",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "State University",
+    tuition: "$30k+",
+    acceptance: "9%",
+  },
+  {
+    name: "UC Berkeley",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "State University",
+    tuition: "$30k+",
+    acceptance: "11%",
+  },
+  {
+    name: "Johns Hopkins",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "8%",
+  },
+  {
+    name: "Northwestern University",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "7%",
+  },
+  {
+    name: "Tufts University",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "11%",
+  },
+  {
+    name: "Rice University",
+    country: "USA",
+    flag: "🇺🇸",
+    type: "Research",
+    scholarship: "Need-Based",
+    tuition: "$30k+",
+    acceptance: "9%",
+  },
   // UK
-  { name: "UCL", country: "UK", flag: "🇬🇧", type: "Research", scholarship: "Merit-Based", tuition: "$30k+", acceptance: "63%" },
-  { name: "University of Edinburgh", country: "UK", flag: "🇬🇧", type: "Research", scholarship: "Merit-Based", tuition: "$30k+", acceptance: "40%" },
-  { name: "Imperial College London", country: "UK", flag: "🇬🇧", type: "Technical/STEM", scholarship: "Merit-Based", tuition: "$30k+", acceptance: "14%" },
-  { name: "University of Manchester", country: "UK", flag: "🇬🇧", type: "Research", scholarship: "Merit-Based", tuition: "$10-30k", acceptance: "57%" },
+  {
+    name: "UCL",
+    country: "UK",
+    flag: "🇬🇧",
+    type: "Research",
+    scholarship: "Merit-Based",
+    tuition: "$30k+",
+    acceptance: "63%",
+  },
+  {
+    name: "University of Edinburgh",
+    country: "UK",
+    flag: "🇬🇧",
+    type: "Research",
+    scholarship: "Merit-Based",
+    tuition: "$30k+",
+    acceptance: "40%",
+  },
+  {
+    name: "Imperial College London",
+    country: "UK",
+    flag: "🇬🇧",
+    type: "Technical/STEM",
+    scholarship: "Merit-Based",
+    tuition: "$30k+",
+    acceptance: "14%",
+  },
+  {
+    name: "University of Manchester",
+    country: "UK",
+    flag: "🇬🇧",
+    type: "Research",
+    scholarship: "Merit-Based",
+    tuition: "$10-30k",
+    acceptance: "57%",
+  },
   // Canada
-  { name: "University of Toronto", country: "Canada", flag: "🇨🇦", type: "Research", scholarship: "Limited Aid", tuition: "$30k+", acceptance: "43%" },
-  { name: "UBC", country: "Canada", flag: "🇨🇦", type: "Research", scholarship: "Limited Aid", tuition: "$30k+", acceptance: "52%" },
-  { name: "McGill University", country: "Canada", flag: "🇨🇦", type: "Research", scholarship: "Limited Aid", tuition: "$10-30k", acceptance: "46%" },
+  {
+    name: "University of Toronto",
+    country: "Canada",
+    flag: "🇨🇦",
+    type: "Research",
+    scholarship: "Limited Aid",
+    tuition: "$30k+",
+    acceptance: "43%",
+  },
+  {
+    name: "UBC",
+    country: "Canada",
+    flag: "🇨🇦",
+    type: "Research",
+    scholarship: "Limited Aid",
+    tuition: "$30k+",
+    acceptance: "52%",
+  },
+  {
+    name: "McGill University",
+    country: "Canada",
+    flag: "🇨🇦",
+    type: "Research",
+    scholarship: "Limited Aid",
+    tuition: "$10-30k",
+    acceptance: "46%",
+  },
   // Germany
-  { name: "TU Munich", country: "Germany", flag: "🇩🇪", type: "Technical/STEM", scholarship: "Full Scholarship", tuition: "Free", acceptance: "8%" },
-  { name: "RWTH Aachen", country: "Germany", flag: "🇩🇪", type: "Technical/STEM", scholarship: "Full Scholarship", tuition: "Free", acceptance: "10%" },
-  { name: "Heidelberg University", country: "Germany", flag: "🇩🇪", type: "Research", scholarship: "Full Scholarship", tuition: "Free", acceptance: "Open" },
+  {
+    name: "TU Munich",
+    country: "Germany",
+    flag: "🇩🇪",
+    type: "Technical/STEM",
+    scholarship: "Full Scholarship",
+    tuition: "Free",
+    acceptance: "8%",
+  },
+  {
+    name: "RWTH Aachen",
+    country: "Germany",
+    flag: "🇩🇪",
+    type: "Technical/STEM",
+    scholarship: "Full Scholarship",
+    tuition: "Free",
+    acceptance: "10%",
+  },
+  {
+    name: "Heidelberg University",
+    country: "Germany",
+    flag: "🇩🇪",
+    type: "Research",
+    scholarship: "Full Scholarship",
+    tuition: "Free",
+    acceptance: "Open",
+  },
   // Sweden
-  { name: "Uppsala University", country: "Sweden", flag: "🇸🇪", type: "Research", scholarship: "Merit-Based", tuition: "$10-30k", acceptance: "Open" },
-  { name: "Lund University", country: "Sweden", flag: "🇸🇪", type: "Research", scholarship: "Merit-Based", tuition: "$10-30k", acceptance: "Open" },
-  { name: "KTH Royal Institute", country: "Sweden", flag: "🇸🇪", type: "Technical/STEM", scholarship: "Merit-Based", tuition: "$10-30k", acceptance: "Open" },
+  {
+    name: "Uppsala University",
+    country: "Sweden",
+    flag: "🇸🇪",
+    type: "Research",
+    scholarship: "Merit-Based",
+    tuition: "$10-30k",
+    acceptance: "Open",
+  },
+  {
+    name: "Lund University",
+    country: "Sweden",
+    flag: "🇸🇪",
+    type: "Research",
+    scholarship: "Merit-Based",
+    tuition: "$10-30k",
+    acceptance: "Open",
+  },
+  {
+    name: "KTH Royal Institute",
+    country: "Sweden",
+    flag: "🇸🇪",
+    type: "Technical/STEM",
+    scholarship: "Merit-Based",
+    tuition: "$10-30k",
+    acceptance: "Open",
+  },
   // South Korea
-  { name: "Yonsei University", country: "South Korea", flag: "🇰🇷", type: "Research", scholarship: "Full Scholarship", tuition: "$0-10k", acceptance: "Competitive" },
-  { name: "KAIST", country: "South Korea", flag: "🇰🇷", type: "Technical/STEM", scholarship: "Full Scholarship", tuition: "$0-10k", acceptance: "Competitive" },
-  { name: "Seoul National University", country: "South Korea", flag: "🇰🇷", type: "Research", scholarship: "Full Scholarship", tuition: "$0-10k", acceptance: "Competitive" },
+  {
+    name: "Yonsei University",
+    country: "South Korea",
+    flag: "🇰🇷",
+    type: "Research",
+    scholarship: "Full Scholarship",
+    tuition: "$0-10k",
+    acceptance: "Competitive",
+  },
+  {
+    name: "KAIST",
+    country: "South Korea",
+    flag: "🇰🇷",
+    type: "Technical/STEM",
+    scholarship: "Full Scholarship",
+    tuition: "$0-10k",
+    acceptance: "Competitive",
+  },
+  {
+    name: "Seoul National University",
+    country: "South Korea",
+    flag: "🇰🇷",
+    type: "Research",
+    scholarship: "Full Scholarship",
+    tuition: "$0-10k",
+    acceptance: "Competitive",
+  },
 ];
 
 export const TESTIMONIALS = [
@@ -274,8 +628,8 @@ export const FAQS = [
     a: "Scholars Cafe is for Bangladeshi students at any stage of the study abroad journey, from those just exploring options to students actively applying. We work with grades 9–12 and gap year students, and we also support parents who want to understand the process alongside their children.",
   },
   {
-    q: "What countries do you support applications for?",
-    a: "Our primary expertise is USA university admissions. We also support UK, Canada, Germany, Sweden, Netherlands, Finland, New Zealand, Hungary, South Korea, Turkey, and Spain. If you have a specific country not on this list, reach out. We can often still help.",
+    q: "Which countries do you support?",
+    a: "Right now we focus only on universities in the United States, where our experience is deepest.",
   },
   {
     q: "What is the Full Scholarship Track and who should apply?",
@@ -291,7 +645,7 @@ export const FAQS = [
   },
   {
     q: "Which English proficiency test should I take: IELTS, TOEFL, or DET?",
-    a: "It depends on your target countries and universities. IELTS is widely used for UK, Canada, Australia, and New Zealand. TOEFL is preferred by many US universities. The DET is the most affordable and convenient and is accepted by 5,000+ institutions. During your free consultation, we help you decide.",
+    a: "Most US universities accept the TOEFL iBT and the Duolingo English Test (DET), and many also accept IELTS. Check each university's requirements; we help you choose the test that fits your list and budget.",
   },
   {
     q: "How much does Scholars Cafe charge for its services?",
@@ -312,28 +666,85 @@ export const FAQS = [
 ];
 
 export const VALUES: { icon: ScholarIconName; title: string; desc: string }[] = [
-  { icon: "target" satisfies ScholarIconName, title: "Expert Mentorship", desc: "Consultants with deep US and global admissions knowledge. Not agents, but mentors who care about your outcome." },
-  { icon: "globe" satisfies ScholarIconName, title: "International Reach", desc: "12+ countries. Hundreds of universities. A network built over years of real-world application experience." },
-  { icon: "heart" satisfies ScholarIconName, title: "Student-First", desc: "Every student gets dedicated attention, honest advice, and real support. We never give generic guidance." },
-  { icon: "unlock" satisfies ScholarIconName, title: "Free Knowledge", desc: "Our blog, social media, and free resources exist because we believe knowledge shouldn't be locked behind a paywall." },
+  {
+    icon: "target" satisfies ScholarIconName,
+    title: "Expert Mentorship",
+    desc: "Consultants with deep US and global admissions knowledge. Not agents, but mentors who care about your outcome.",
+  },
+  {
+    icon: "globe" satisfies ScholarIconName,
+    title: "International Reach",
+    desc: "Hundreds of US universities. A network built over years of real-world application experience.",
+  },
+  {
+    icon: "heart" satisfies ScholarIconName,
+    title: "Student-First",
+    desc: "Every student gets dedicated attention, honest advice, and real support. We never give generic guidance.",
+  },
+  {
+    icon: "unlock" satisfies ScholarIconName,
+    title: "Free Knowledge",
+    desc: "Our blog, social media, and free resources exist because we believe knowledge shouldn't be locked behind a paywall.",
+  },
 ];
 
 export const TEAM = [
-  { initials: "SK", name: "Sadia Khan", role: "Head of US Admissions", bio: "10+ years guiding students to Ivy League and liberal arts colleges." },
-  { initials: "AR", name: "Arif Rahman", role: "Scholarship Strategist", bio: "Specialist in CSS Profile, ISFAA and need-based aid positioning." },
-  { initials: "MH", name: "Maliha Hossain", role: "Test Prep Lead", bio: "SAT, IELTS, TOEFL, DET. Turns scores into stories." },
-  { initials: "NF", name: "Nabil Faisal", role: "Visa & Departures", bio: "F-1, study permits, and that first month abroad, handled." },
+  {
+    initials: "SK",
+    name: "Sadia Khan",
+    role: "Head of US Admissions",
+    bio: "10+ years guiding students to Ivy League and liberal arts colleges.",
+  },
+  {
+    initials: "AR",
+    name: "Arif Rahman",
+    role: "Scholarship Strategist",
+    bio: "Specialist in CSS Profile, ISFAA and need-based aid positioning.",
+  },
+  {
+    initials: "MH",
+    name: "Maliha Hossain",
+    role: "Test Prep Lead",
+    bio: "SAT, IELTS, TOEFL, DET. Turns scores into stories.",
+  },
+  {
+    initials: "NF",
+    name: "Nabil Faisal",
+    role: "Visa & Departures",
+    bio: "F-1, study permits, and that first month abroad, handled.",
+  },
 ];
 
-export type ResourceCategory = "Essays" | "Applications" | "Scholarships" | "Test Prep" | "Visa" | "Compare";
+export type ResourceCategory =
+  "Essays" | "Applications" | "Scholarships" | "Test Prep" | "Visa" | "Compare";
 
 export const RESOURCE_CATEGORIES: { id: ResourceCategory; label: string; desc: string }[] = [
-  { id: "Essays", label: "Essays & Personal Statements", desc: "Brainstorm, draft, and revise stories admissions remember." },
-  { id: "Applications", label: "Applications & Strategy", desc: "Common App, UCAS, and country-specific portals without the panic." },
-  { id: "Scholarships", label: "Scholarships & Financial Aid", desc: "Need-based, merit, and the forms that unlock them." },
-  { id: "Test Prep", label: "Test Prep", desc: "SAT, IELTS, TOEFL, DET. Strategies that move the needle." },
+  {
+    id: "Essays",
+    label: "Essays & Personal Statements",
+    desc: "Brainstorm, draft, and revise stories admissions remember.",
+  },
+  {
+    id: "Applications",
+    label: "Applications & Strategy",
+    desc: "Common App, Coalition and university portals without the panic.",
+  },
+  {
+    id: "Scholarships",
+    label: "Scholarships & Financial Aid",
+    desc: "Need-based, merit, and the forms that unlock them.",
+  },
+  {
+    id: "Test Prep",
+    label: "Test Prep",
+    desc: "SAT, IELTS, TOEFL, DET. Strategies that move the needle.",
+  },
   { id: "Visa", label: "Visa & Pre-Departure", desc: "From DS-160 to your first month abroad." },
-  { id: "Compare", label: "Country & University Compare", desc: "Side-by-side breakdowns to help you choose." },
+  {
+    id: "Compare",
+    label: "Country & University Compare",
+    desc: "Side-by-side breakdowns to help you choose.",
+  },
 ];
 
 export type Resource = {
@@ -458,4 +869,3 @@ export const RESOURCES: Resource[] = [
     readTime: "11 min read",
   },
 ];
-

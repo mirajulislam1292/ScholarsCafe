@@ -196,3 +196,23 @@ test("Malformed inquiry payloads and off-site submission origins are rejected", 
     .send({ email: "not-an-email" })
     .expect(400);
 });
+
+test("Turnstile is enforced on public forms only when a secret is configured", async () => {
+  const writes = [];
+  const store = { transaction: (fn) => fn({}), query: async (sql) => { writes.push(sql); return { affectedRows: 1 }; } };
+  const body = { email: "student@example.com", consent: true };
+  const send = (app, extra = {}) =>
+    request(app).post("/public/newsletter").set("Origin", config.PUBLIC_ORIGIN).send({ ...body, ...extra });
+  // Without a secret the token is ignored and stripped, so strict schemas still pass.
+  await send(createApp(store, config), { turnstileToken: "anything" }).expect(201);
+  const guarded = createApp(store, {
+    ...config,
+    TURNSTILE_SECRET_KEY: "test-secret",
+    verifyTurnstile: async (_secret, tokenValue) => tokenValue === "good-token",
+  });
+  writes.length = 0;
+  await send(guarded).expect(400);
+  await send(guarded, { turnstileToken: "bad-token" }).expect(400);
+  assert.equal(writes.length, 0);
+  await send(guarded, { turnstileToken: "good-token" }).expect(201);
+});
