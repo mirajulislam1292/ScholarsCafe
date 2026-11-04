@@ -1,6 +1,39 @@
-import { cpSync, readdirSync, writeFileSync } from "fs";
+import { cpSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { createHash } from "crypto";
 import { dirname, join } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
+
+// Static hosting cannot issue per-request nonces, so allow exactly the inline scripts in this
+// build by hash. Any injected or modified inline script is blocked by the browser.
+function writeSecurityPolicy(clientDir, html) {
+  const hashes = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)]
+    .map((m) => m[1])
+    .filter((body) => body.length > 0)
+    .map((body) => `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`);
+  const turnstile = process.env.VITE_TURNSTILE_SITE_KEY ? " https://challenges.cloudflare.com" : "";
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' ${hashes.join(" ")}${turnstile}`,
+    // React/motion set inline style attributes; styles cannot run code.
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https:",
+    "media-src 'self'",
+    "connect-src 'self' https://admin.scholarscafe.com https://cdn.jsdelivr.net",
+    `frame-src${turnstile || " 'none'"}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+  const file = join(clientDir, ".htaccess");
+  const template = readFileSync(file, "utf8");
+  if (!template.includes("__CSP__"))
+    throw new Error(".htaccess is missing the __CSP__ placeholder");
+  writeFileSync(file, template.replace("__CSP__", csp));
+  console.log(`[OK] Content-Security-Policy written with ${hashes.length} inline script hash(es)`);
+}
 
 async function generateIndexHtml() {
   const distDir = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
@@ -20,6 +53,7 @@ async function generateIndexHtml() {
     throw new Error("SSR did not produce the home page; refusing to publish an error page");
   }
   writeFileSync(join(clientDir, "index.html"), html);
+  writeSecurityPolicy(clientDir, html);
 
   // Hostinger's native Git deploy serves the configured `dist` directory,
   // while the TanStack build emits browser assets under `dist/client`.

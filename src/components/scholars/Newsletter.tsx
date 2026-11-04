@@ -3,6 +3,7 @@ import { CmsText } from "@/lib/cms";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Reveal } from "./Reveal";
+import { Turnstile, turnstileEnabled, resetTurnstile } from "./Turnstile";
 import { Mail, Check, PartyPopper } from "lucide-react";
 
 export function Newsletter() {
@@ -19,11 +20,11 @@ export function Newsletter() {
     try {
       const response = await fetch((import.meta.env.VITE_CONTENT_API || "https://admin.scholarscafe.com") + "/public/newsletter", {
         method: "POST", headers: { "Content-Type": "application/json" }, credentials: "omit",
-        body: JSON.stringify({ email, consent: fields.get("consent") === "on", website: fields.get("website") || "" }),
+        body: JSON.stringify({ email, consent: fields.get("consent") === "on", website: fields.get("website") || "", ...(turnstileEnabled ? { turnstileToken: fields.get("cf-turnstile-response") || "" } : {}) }),
       });
       if (!response.ok) throw new Error("Could not save your signup. Please try again later.");
       setDone(true);
-    } catch (e) { setError(e instanceof Error ? e.message : "Unable to connect."); }
+    } catch (e) { setError(e instanceof Error ? e.message : "Unable to connect."); resetTurnstile(); }
     finally { setSending(false); }
   }
 
@@ -74,6 +75,7 @@ export function Newsletter() {
                 <input name="consent" type="checkbox" required className="mt-1" />
                 <span>I agree to receive scholarship news by email. I can ask to unsubscribe at any time. <a href="/privacy" className="underline">Privacy policy</a></span>
               </label>
+              <Turnstile />
               {error && <p role="alert" className="mt-3 text-white">{error}</p>}
             </form>
           ) : (

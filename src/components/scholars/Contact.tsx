@@ -4,6 +4,7 @@ import { CmsText } from "@/lib/cms";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Reveal } from "./Reveal";
+import { Turnstile, turnstileEnabled, resetTurnstile } from "./Turnstile";
 import { EMAIL as CMS_DEFAULT_EMAIL, PHONE as CMS_DEFAULT_PHONE, WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { Mail, MessageCircle, MapPin, Check, Facebook, Instagram, Linkedin, Phone } from "lucide-react";
 
@@ -32,10 +33,10 @@ export function Contact() {
     const data=new FormData(event.currentTarget);setSending(true);
     try{
       const message=['Interest: '+data.get("I'm Interested In"),'Country: '+data.get('Target Country'),'Grade: '+data.get('Current Grade / Year'),String(data.get('message')||'')].join('\n');
-      const response=await fetch(endpoint+'/public/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',body:JSON.stringify({name:data.get('name'),email:data.get('email'),phone:data.get('phone'),message})});
+      const response=await fetch(endpoint+'/public/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',body:JSON.stringify({name:data.get('name'),email:data.get('email'),phone:data.get('phone'),message,...(turnstileEnabled?{turnstileToken:data.get('cf-turnstile-response')||''}:{})})});
       if(!response.ok)throw new Error('Unable to send. Please try again or contact us by WhatsApp.');
       setDone(true);
-    }catch(e){setError(e instanceof Error?e.message:'Unable to send.');}finally{setSending(false);}
+    }catch(e){setError(e instanceof Error?e.message:'Unable to send.');resetTurnstile();}finally{setSending(false);}
   }
   return (
     <section id="contact" className="bg-white py-24 md:py-32">
@@ -137,6 +138,7 @@ export function Contact() {
                       className="w-full resize-none rounded-xl border border-border bg-white px-4 py-3 text-sm focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/15"
                     />
                   </div>
+                  <Turnstile />
                   <button
                     type="submit"
                     disabled={sending}

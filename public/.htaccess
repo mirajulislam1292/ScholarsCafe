@@ -1,8 +1,37 @@
 DirectoryIndex index.html
+Options -Indexes
+
+# Never serve hidden files, source maps, env/log/sql dumps or package manifests.
+<FilesMatch "(^\.|\.(env|sql|log|map|bak|ts|tsx)$|^(package(-lock)?\.json|bun\.lock)$)">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  # Script hashes are filled in by scripts/generate-index.js at build time.
+  Header always set Content-Security-Policy "__CSP__"
+
+  # Build files have content hashes in their names, so they can be cached for a year.
+  <FilesMatch "\.(js|css|woff2|webp|avif|jpg|jpeg|png|svg|mp4|webm)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # One canonical host: send www to https://scholarscafe.com (Hostinger already redirects HTTP to HTTPS)
+  RewriteCond %{HTTP_HOST} ^www\.scholarscafe\.com$ [NC]
+  RewriteRule ^ https://scholarscafe.com%{REQUEST_URI} [R=301,L]
 
   # Allow direct access to real files
   RewriteCond %{REQUEST_FILENAME} -f
@@ -16,4 +45,3 @@ DirectoryIndex index.html
   # Fallback all SPA routes to /index.html
   RewriteRule ^ /index.html [L]
 </IfModule>
-

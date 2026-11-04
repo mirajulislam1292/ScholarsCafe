@@ -98,3 +98,19 @@ export const recordInput = z
       : fields[value.kind].safeParse(value.data);
     if (!parsed.success) ctx.addIssue({ code: "custom", message: "Invalid content fields" });
   });
+
+// Cloudflare Turnstile server-side check. Fails closed on network errors or timeouts.
+export async function verifyTurnstile(secret, responseToken) {
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret, response: responseToken }),
+      signal: AbortSignal.timeout(8000),
+    });
+    const result = await response.json();
+    return result?.success === true;
+  } catch {
+    return false;
+  }
+}

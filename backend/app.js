@@ -15,6 +15,7 @@ import {
   canPublish,
   userInput,
   recordInput,
+  verifyTurnstile,
 } from "./security.js";
 
 const fail = (status, message) => Object.assign(new Error(message), { status });
@@ -64,12 +65,16 @@ export function createApp(
   app.use((req, res, next) => {
     res.set("Cache-Control", "no-store");
     res.set("X-Robots-Tag", "noindex, nofollow");
+    res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
     next();
   });
   app.use(express.json({ limit: "512kb", type: "application/json" }));
   const sharedLimit = (scope, limit, seconds) => async (req, res, next) => {
     if (store.checkRateLimit && !(await store.checkRateLimit(scope, req.ip, limit, seconds)))
-      return res.status(429).set("Retry-After", String(seconds)).json({ error: "Too many requests. Please try again later." });
+      return res
+        .status(429)
+        .set("Retry-After", String(seconds))
+        .json({ error: "Too many requests. Please try again later." });
     next();
   };
   app.use("/auth", sharedLimit("auth", 60, 900));
@@ -112,7 +117,25 @@ export function createApp(
     if (!req.is("application/json")) return res.status(415).json({ error: "JSON required." });
     next();
   });
-  app.use(["/public/inquiries", "/public/feedback", "/public/newsletter"], sharedLimit("submissions", 20, 3600));
+  app.use(
+    ["/public/inquiries", "/public/feedback", "/public/newsletter"],
+    sharedLimit("submissions", 20, 3600),
+  );
+  // Optional Cloudflare Turnstile bot check. Active only when TURNSTILE_SECRET_KEY is set.
+  app.use(
+    ["/public/inquiries", "/public/feedback", "/public/newsletter"],
+    async (req, res, next) => {
+      const tokenValue = req.body?.turnstileToken;
+      if (req.body && typeof req.body === "object") delete req.body.turnstileToken;
+      if (!config.TURNSTILE_SECRET_KEY) return next();
+      if (typeof tokenValue !== "string" || !tokenValue || tokenValue.length > 2048)
+        return res.status(400).json({ error: "Please complete the verification and try again." });
+      const verify = config.verifyTurnstile || verifyTurnstile;
+      if (!(await verify(config.TURNSTILE_SECRET_KEY, tokenValue)))
+        return res.status(400).json({ error: "Verification failed. Please try again." });
+      next();
+    },
+  );
   app.post("/public/inquiries", async (req, res) => {
     const data = z
       .object({
@@ -126,29 +149,67 @@ export function createApp(
       .parse(req.body);
     if (data.website) return res.json({ ok: true });
     await store.transaction(async (c) => {
-      await store.query("INSERT INTO inquiries (id,name,email,phone,message) VALUES (?,?,?,?,?)", [randomUUID(), data.name, data.email, data.phone, data.message], c);
-      await queueNotification(c, "New website inquiry", data.email, `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n\n${data.message}`);
+      await store.query(
+        "INSERT INTO inquiries (id,name,email,phone,message) VALUES (?,?,?,?,?)",
+        [randomUUID(), data.name, data.email, data.phone, data.message],
+        c,
+      );
+      await queueNotification(
+        c,
+        "New website inquiry",
+        data.email,
+        `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n\n${data.message}`,
+      );
     });
     res.status(201).json({ ok: true });
   });
   async function queueNotification(c, subject, email, body) {
-    await store.query("INSERT INTO mail_outbox (id,subject,body,reply_to) VALUES (?,?,?,?)", [randomUUID(), subject, body, email], c);
+    await store.query(
+      "INSERT INTO mail_outbox (id,subject,body,reply_to) VALUES (?,?,?,?)",
+      [randomUUID(), subject, body, email],
+      c,
+    );
   }
   for (const kind of ["feedback", "newsletter"]) {
     app.post("/public/" + kind, async (req, res) => {
-      const data = z.object({
-        email: z.string().trim().email().max(254).transform((s) => s.toLowerCase()),
-        name: z.string().trim().max(160).default(""),
-        message: z.string().trim().max(5000).default(""),
-        consent: z.literal(true),
-        website: z.string().max(200).optional(),
-      }).strict().parse(req.body);
-      if (kind === "feedback" && (!data.name || !data.message)) throw fail(400, "Please enter your name and feedback.");
+      const data = z
+        .object({
+          email: z
+            .string()
+            .trim()
+            .email()
+            .max(254)
+            .transform((s) => s.toLowerCase()),
+          name: z.string().trim().max(160).default(""),
+          message: z.string().trim().max(5000).default(""),
+          consent: z.literal(true),
+          website: z.string().max(200).optional(),
+        })
+        .strict()
+        .parse(req.body);
+      if (kind === "feedback" && (!data.name || !data.message))
+        throw fail(400, "Please enter your name and feedback.");
       if (data.website) return res.json({ ok: true });
       await store.transaction(async (c) => {
-        const result = await store.query("INSERT IGNORE INTO submissions (id,kind,email,name,message,consent_at,dedupe_key) VALUES (?,?,?,?,?,UTC_TIMESTAMP(),?)", [randomUUID(), kind, data.email, data.name, data.message, kind === "newsletter" ? data.email : null], c);
+        const result = await store.query(
+          "INSERT IGNORE INTO submissions (id,kind,email,name,message,consent_at,dedupe_key) VALUES (?,?,?,?,?,UTC_TIMESTAMP(),?)",
+          [
+            randomUUID(),
+            kind,
+            data.email,
+            data.name,
+            data.message,
+            kind === "newsletter" ? data.email : null,
+          ],
+          c,
+        );
         if (result.affectedRows === 1)
-          await queueNotification(c, kind === "newsletter" ? "New newsletter signup" : "New private feedback", data.email, `Type: ${kind}\nName: ${data.name}\nEmail: ${data.email}\nConsent: given on the website\n\n${data.message}`);
+          await queueNotification(
+            c,
+            kind === "newsletter" ? "New newsletter signup" : "New private feedback",
+            data.email,
+            `Type: ${kind}\nName: ${data.name}\nEmail: ${data.email}\nConsent: given on the website\n\n${data.message}`,
+          );
       });
       // Same response for duplicates avoids exposing who is already subscribed.
       res.status(201).json({ ok: true });
@@ -213,26 +274,35 @@ export function createApp(
       throw fail(403, "Google account could not be verified.");
     const session = token(),
       csrf = token();
-    await store.transaction(async (c) => {
-      const rows = await store.query(
-        "SELECT * FROM users WHERE email=? FOR UPDATE",
-        [identity.email.toLowerCase()],
-        c,
-      );
-      const user = rows[0];
-      if (!user?.active || (user.google_sub && user.google_sub !== identity.sub))
-        throw fail(403, "This account has not been granted access.");
-      await store.query("UPDATE users SET google_sub=? WHERE id=?", [identity.sub, user.id], c);
-      const previous = cookie(req, sessionCookie);
-      if (previous)
-        await store.query("DELETE FROM sessions WHERE token_hash=?", [hash(previous)], c);
-      await store.query(
-        "INSERT INTO sessions (token_hash,user_id,csrf,expires_at) VALUES (?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 4 HOUR))",
-        [hash(session), user.id, csrf],
-        c,
-      );
-      await store.audit(user.id, "sign_in", user.email, c);
-    });
+    try {
+      await store.transaction(async (c) => {
+        const rows = await store.query(
+          "SELECT * FROM users WHERE email=? FOR UPDATE",
+          [identity.email.toLowerCase()],
+          c,
+        );
+        const user = rows[0];
+        if (!user?.active || (user.google_sub && user.google_sub !== identity.sub))
+          throw fail(403, "This account has not been granted access.");
+        await store.query("UPDATE users SET google_sub=? WHERE id=?", [identity.sub, user.id], c);
+        const previous = cookie(req, sessionCookie);
+        if (previous)
+          await store.query("DELETE FROM sessions WHERE token_hash=?", [hash(previous)], c);
+        await store.query(
+          "INSERT INTO sessions (token_hash,user_id,csrf,expires_at) VALUES (?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 4 HOUR))",
+          [hash(session), user.id, csrf],
+          c,
+        );
+        await store.audit(user.id, "sign_in", user.email, c);
+      });
+    } catch (error) {
+      // Record refused sign-ins (the transaction above rolled back). The user sees a generic message.
+      if (error.status === 403)
+        await Promise.resolve()
+          .then(() => store.audit(null, "sign_in_denied", identity.email.toLowerCase()))
+          .catch(() => {});
+      throw error;
+    }
     res.cookie(sessionCookie, session, { ...cookieOptions, maxAge: 4 * 60 * 60 * 1000 });
     res.redirect("/");
   });
@@ -247,11 +317,22 @@ export function createApp(
         !equal(req.headers["x-csrf-token"], req.actor.csrf)
       )
         throw fail(403, "Request verification failed. Reload and try again.");
-      if (!(req.method === "POST" && req.path === "/media") && !req.is("application/json")) throw fail(415, "JSON required.");
+      if (!(req.method === "POST" && req.path === "/media") && !req.is("application/json"))
+        throw fail(415, "JSON required.");
     }
     next();
   });
   app.get("/api/me", (req, res) => res.json(req.actor));
+  // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
+  app.get("/api/diagnostics/client-ip", (req, res) => {
+    if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");
+    res.json({
+      ip: req.ip,
+      socket: req.socket.remoteAddress,
+      forwardedFor: req.headers["x-forwarded-for"] || null,
+      trustProxy: Boolean(config.TRUST_PROXY),
+    });
+  });
   installMedia(app, store, config, sharedLimit("media", 30, 3600));
   serveMedia(app, store);
   app.get("/api/inquiries", async (req, res) => {
@@ -264,20 +345,34 @@ export function createApp(
     });
   });
   app.get("/api/submissions", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Submissions are restricted to admins and owners.");
-    res.json({ items: await store.query("SELECT id,kind,email,name,message,consent_at,unsubscribed_at,created_at FROM submissions ORDER BY created_at DESC LIMIT 500") });
+    if (!canPublish(req.actor.role))
+      throw fail(403, "Submissions are restricted to admins and owners.");
+    res.json({
+      items: await store.query(
+        "SELECT id,kind,email,name,message,consent_at,unsubscribed_at,created_at FROM submissions ORDER BY created_at DESC LIMIT 500",
+      ),
+    });
   });
   app.post("/api/submissions/:id/unsubscribe", async (req, res) => {
     if (!canPublish(req.actor.role)) throw fail(403, "Subscriber management is restricted.");
     await store.transaction(async (c) => {
-      await store.query("UPDATE submissions SET unsubscribed_at=UTC_TIMESTAMP() WHERE id=? AND kind='newsletter'", [req.params.id], c);
+      await store.query(
+        "UPDATE submissions SET unsubscribed_at=UTC_TIMESTAMP() WHERE id=? AND kind='newsletter'",
+        [req.params.id],
+        c,
+      );
       await store.audit(req.actor.id, "newsletter_unsubscribe", req.params.id, c);
     });
     res.json({ ok: true });
   });
   app.get("/api/mail-status", async (req, res) => {
     if (!canPublish(req.actor.role)) throw fail(403, "Mail status is restricted.");
-    res.json({ configured: Boolean(config.SMTP_PASSWORD), items: await store.query("SELECT id,subject,attempts,sent_at,created_at FROM mail_outbox ORDER BY created_at DESC LIMIT 200") });
+    res.json({
+      configured: Boolean(config.SMTP_PASSWORD),
+      items: await store.query(
+        "SELECT id,subject,attempts,sent_at,created_at FROM mail_outbox ORDER BY created_at DESC LIMIT 200",
+      ),
+    });
   });
   app.post("/api/logout", async (req, res) => {
     await store.query("DELETE FROM sessions WHERE token_hash=?", [
@@ -296,7 +391,9 @@ export function createApp(
   app.post("/api/content", async (req, res) => {
     const input = recordInput.parse(req.body);
     await store.transaction(async (c) => {
-      const actor = (await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c))[0];
+      const actor = (
+        await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c)
+      )[0];
       if (!actor?.active) throw fail(403, "Your access was removed.");
       const rows = await store.query("SELECT * FROM content WHERE id=? FOR UPDATE", [input.id], c);
       const current = rows[0];
@@ -332,8 +429,11 @@ export function createApp(
     if (!["publish", "unpublish"].includes(req.params.action)) throw fail(404, "Unknown action.");
     if (!Number.isInteger(req.body.version)) throw fail(400, "Version required.");
     await store.transaction(async (c) => {
-      const actor = (await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c))[0];
-      if (!actor?.active || !canPublish(actor.role)) throw fail(403, "Your publishing access was removed.");
+      const actor = (
+        await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c)
+      )[0];
+      if (!actor?.active || !canPublish(actor.role))
+        throw fail(403, "Your publishing access was removed.");
       const result = await store.query(
         req.params.action === "publish"
           ? "UPDATE content SET published=draft,version=version+1 WHERE id=? AND version=?"
@@ -417,16 +517,14 @@ export function createApp(
   app.use((error, _req, res, _next) => {
     const status = error.name === "ZodError" ? 400 : error.status || 500;
     if (status >= 500) console.error("Request failed:", error.code || error.name);
-    res
-      .status(status)
-      .json({
-        error:
-          status === 500
-            ? "Unable to complete request. Please try again."
-            : error.name === "ZodError"
-              ? "Please check the entry fields."
-              : error.message,
-      });
+    res.status(status).json({
+      error:
+        status === 500
+          ? "Unable to complete request. Please try again."
+          : error.name === "ZodError"
+            ? "Please check the entry fields."
+            : error.message,
+    });
   });
   return app;
 }
