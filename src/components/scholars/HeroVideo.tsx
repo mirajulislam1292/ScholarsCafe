@@ -1,7 +1,13 @@
 import { useEffect, useRef } from "react";
-import { HERO_DESKTOP, HERO_MOBILE, HERO_POSTER, type HeroClip } from "@/lib/hero-media";
+import { HERO_DESKTOP, HERO_MOBILE, type HeroClip } from "@/lib/hero-media";
 
-const FADE_MS = 1400;
+// Timing (tweak freely)
+/** Seconds each clip stays on screen before the next one starts fading in. */
+export const HOLD_SECONDS = 12;
+/** Crossfade length between clips, in milliseconds. */
+export const FADE_MS = 1800;
+/** Default playback speed; slower feels calmer. A clip can override it with `rate`. */
+export const DEFAULT_RATE = 0.85;
 
 type NetworkInfo = { saveData?: boolean; effectiveType?: string };
 
@@ -28,6 +34,7 @@ export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void
     if (!videoAllowed()) return;
     const portrait = window.matchMedia("(max-width: 767px) and (orientation: portrait)").matches;
     const clips = portrait ? HERO_MOBILE : HERO_DESKTOP;
+    const webm = layers[0].canPlayType('video/webm; codecs="vp9"') === "probably";
     let index = 0;
     let front = 0;
     let switching = false;
@@ -37,11 +44,17 @@ export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void
 
     const load = (el: HTMLVideoElement, clip: HeroClip) => {
       el.muted = true; // required for autoplay; React does not always reflect the attribute
-      el.src = clip.src;
+      el.poster = clip.poster;
+      el.dataset.rate = String(clip.rate ?? DEFAULT_RATE);
+      el.src = webm && clip.webm ? clip.webm : clip.mp4;
       el.preload = "auto";
       el.load();
     };
-    const tryPlay = (el: HTMLVideoElement) => el.play().catch(() => {});
+    const rateOf = (el: HTMLVideoElement) => Number(el.dataset.rate) || DEFAULT_RATE;
+    const tryPlay = (el: HTMLVideoElement) => {
+      el.playbackRate = rateOf(el); // load() resets the rate, so set it on every play
+      return el.play().catch(() => {});
+    };
 
     const crossfade = () => {
       if (switching || clips.length < 2) return;
@@ -65,7 +78,10 @@ export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void
     const onTime = (e: Event) => {
       const el = e.currentTarget as HTMLVideoElement;
       if (el !== layers[front] || !el.duration) return;
-      if (el.duration - el.currentTime <= FADE_MS / 1000) crossfade();
+      const rate = rateOf(el);
+      // Hand over after HOLD_SECONDS of screen time, or just before the clip runs out.
+      const at = Math.min(HOLD_SECONDS * rate, el.duration - (FADE_MS / 1000) * rate);
+      if (el.currentTime >= at) crossfade();
     };
     const onEnded = (e: Event) => {
       // Single clip, or the fade window was missed: restart cleanly.
@@ -146,13 +162,13 @@ export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void
       <picture>
         <source
           media="(max-width: 767px) and (orientation: portrait)"
-          srcSet={HERO_POSTER.mobile}
+          srcSet={HERO_MOBILE[0].poster}
         />
         <img
-          src={HERO_POSTER.desktop}
+          src={HERO_DESKTOP[0].poster}
           alt=""
-          width={1600}
-          height={900}
+          width={1920}
+          height={1080}
           fetchPriority="high"
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
