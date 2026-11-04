@@ -19,7 +19,7 @@ function writeSecurityPolicy(clientDir, html) {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
     "media-src 'self'",
-    "connect-src 'self' https://admin.scholarscafe.com https://cdn.jsdelivr.net",
+    "connect-src 'self' https://admin.scholarscafe.com",
     `frame-src${turnstile || " 'none'"}`,
     "object-src 'none'",
     "base-uri 'self'",

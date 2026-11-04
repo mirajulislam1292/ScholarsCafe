@@ -1,99 +1,75 @@
 import { useCmsValue } from "@/lib/cms";
-import { CmsText } from "@/lib/cms";
-import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import {
-  COUNTRIES as CMS_DEFAULT_COUNTRIES,
-  WA_LINK as CMS_DEFAULT_WA_LINK,
-} from "@/lib/scholars-data";
 import { ArrowUpRight } from "lucide-react";
+import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import { SITE } from "@/lib/site-content";
+import { Reveal } from "./Reveal";
 
+/** USA focus section: large imagery, very little text. Content: src/content/site.json > usa. */
 export function Destinations() {
-  const COUNTRIES = useCmsValue("data.COUNTRIES", CMS_DEFAULT_COUNTRIES);
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
-
-  const featured = COUNTRIES.find((c) => c.featured)!;
-  const others = COUNTRIES.filter((c) => !c.featured);
+  const usa = SITE.usa;
 
   return (
-    <section id="destinations" className="bg-background py-24 md:py-32">
-      <div className="mx-auto max-w-[1320px] px-5 md:px-10">
-        <Reveal>
-          <div className="grid items-end gap-8 md:grid-cols-[1fr_auto] md:gap-16">
-            <div>
-              <h2 className="mt-5 editorial-h2">
-                <CmsText id="Destinations.18fd83ffc2f5">Choose a country.</CmsText>
-                <br />
-                <span className="font-display italic font-light text-sky">
-                  <CmsText id="Destinations.3322dce1f6ff">We'll handle the rest.</CmsText>
-                </span>
-              </h2>
-            </div>
-            <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              <CmsText id="Destinations.5b7373cdefcb">
-                Our deepest expertise is the USA, where Bangladeshi students consistently earn
-                need-based scholarships at top liberal arts colleges. We also support applications
-                across Europe, Asia, and beyond.
-              </CmsText>
-            </p>
+    <section id="destinations" className="bg-white py-[clamp(96px,12vw,160px)]">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-12">
+        <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <h2 className="max-w-[16ch] font-heading text-[clamp(2.25rem,4vw,3.5rem)] font-normal leading-[1.05] tracking-[-0.025em] text-neutral-900">
+              {usa.heading}
+            </h2>
+            {usa.lead && (
+              <p className="mt-5 max-w-md font-text text-[16px] leading-relaxed text-neutral-600">
+                {usa.lead}
+              </p>
+            )}
           </div>
-        </Reveal>
-
-        {/* Featured country, large editorial card */}
-        <Reveal delay={0.1}>
           <a
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-14 grid overflow-hidden rounded-[28px] border border-border country-feature bg-sky-tint p-8 text-white transition-all hover:-translate-y-1 hover:shadow-card-hover md:grid-cols-[1fr_1.2fr] md:p-12"
+            className="group inline-flex items-center gap-1.5 self-start font-text text-[15px] font-medium text-blue-700 md:self-auto"
           >
-            <div className="flex flex-col justify-between gap-8">
-              <div>
-                <div className="mt-6 text-8xl md:text-9xl">{featured.flag}</div>
-              </div>
-              <div className="font-display text-5xl font-extrabold md:text-6xl">
-                {featured.name}
-              </div>
-            </div>
-            <div className="flex flex-col justify-between gap-8 border-t border-white/15 pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
-              <div>
-                <p className="mt-4 text-2xl font-light leading-snug text-white/85 md:text-3xl">
-                  {featured.note}
-                  <CmsText id="Destinations.86139d839425">
-                    . We've built our practice around helping Bangladeshi students unlock 50–100%
-                    need-based aid at top US universities.
-                  </CmsText>
-                </p>
-              </div>
-              <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-sky-light">
-                <CmsText id="Destinations.6855b9eac5c4">Explore USA pathway</CmsText>
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
-              </div>
-            </div>
+            {usa.cta}
+            <ArrowUpRight
+              aria-hidden
+              className="h-4 w-4 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            />
           </a>
         </Reveal>
 
-        {/* Other countries, minimal editorial grid */}
-        <RevealStagger className="mt-6 country-grid flex flex-wrap gap-px overflow-hidden rounded-[28px] border border-border bg-border">
-          {others.map((c) => (
-            <StaggerItem key={c.name} className="min-w-0 flex-[1_1_220px]">
-              <div className="group relative h-full bg-card p-7 transition-colors hover:bg-secondary">
-                <div className="flex items-start justify-between">
-                  <span className="text-4xl">{c.flag}</span>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                </div>
-                <h3 className="mt-8 font-display text-xl font-bold text-foreground">{c.name}</h3>
-                <div className="mt-2 text-[13px] text-muted-foreground">{c.note}</div>
-                <div className="mt-5 inline-block border-t border-sky pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky">
-                  {c.tag}
-                </div>
-              </div>
-            </StaggerItem>
+        <div className="-mx-6 mt-14 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+          {usa.regions.map((r, i) => (
+            <Reveal key={r.name} delay={i * 0.08} className="w-[82%] shrink-0 snap-start md:w-auto">
+              <figure className="group relative aspect-[4/5] overflow-hidden rounded-3xl bg-blue-950">
+                <img
+                  src={r.image}
+                  alt={r.place}
+                  loading="lazy"
+                  decoding="async"
+                  width={1920}
+                  height={1080}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-premium group-hover:scale-[1.04]"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgb(4_28_49/0.85)_100%)]"
+                />
+                <figcaption className="absolute inset-x-0 bottom-0 p-7">
+                  <div className="font-heading text-[1.75rem] font-light tracking-[-0.02em] text-white">
+                    {r.name}
+                  </div>
+                  <div className="mt-1 font-text text-[13px] text-ice-300/90">{r.place}</div>
+                  {r.note && (
+                    <p className="mt-3 font-text text-[14px] leading-snug text-white/80">
+                      {r.note}
+                    </p>
+                  )}
+                </figcaption>
+              </figure>
+            </Reveal>
           ))}
-        </RevealStagger>
+        </div>
       </div>
     </section>
   );
 }
-
-const COUNTRIES = CMS_DEFAULT_COUNTRIES;
-const WA_LINK = CMS_DEFAULT_WA_LINK;

@@ -1,4 +1,4 @@
-import {useCmsLookup} from "@/lib/cms";
+import { useCmsLookup } from "@/lib/cms";
 import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { useMemo, useState } from "react";
@@ -9,8 +9,9 @@ import {
   type University,
 } from "@/lib/scholars-data";
 import { Search, X, ArrowRight } from "lucide-react";
+import { ENABLED_COUNTRIES, isCountryEnabled } from "@/lib/site-content";
 
-const COUNTRIES = ["All", ...Array.from(new Set(CMS_DEFAULT_UNIVERSITIES.map((u) => u.country)))];
+const COUNTRIES = ["All", ...ENABLED_COUNTRIES];
 const SCHOLARSHIPS = [
   "All",
   "Need-Based 100%",
@@ -24,7 +25,7 @@ const TYPES = ["All", "Liberal Arts", "Research", "Technical/STEM", "Arts & Desi
 const TUITIONS = ["All", "Free", "$0-10k", "$10-30k", "$30k+"];
 
 export function UniversityExplorer() {
- const cmsLabel = useCmsLookup();
+  const cmsLabel = useCmsLookup();
 
   const UNIVERSITIES = useCmsValue("data.UNIVERSITIES", CMS_DEFAULT_UNIVERSITIES);
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
@@ -40,6 +41,7 @@ export function UniversityExplorer() {
   const filtered = useMemo(() => {
     return UNIVERSITIES.filter(
       (u) =>
+        isCountryEnabled(u.country) &&
         (country === "All" || u.country === country) &&
         (scholarship === "All" || u.scholarship === scholarship) &&
         (type === "All" || u.type === type) &&
@@ -75,8 +77,8 @@ export function UniversityExplorer() {
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-slate-600">
             <CmsText id="UniversityExplorer.87c9a85ac63f">
-              Browse our curated database of universities by country, scholarship availability, and
-              type. A starting point for your personalized college list.
+              Browse our curated list of US universities by scholarship availability and type. A
+              starting point for your personalized college list.
             </CmsText>
           </p>
         </Reveal>
@@ -84,16 +86,33 @@ export function UniversityExplorer() {
         {/* Filter bar */}
         <Reveal>
           <div className="mt-12 rounded-3xl border border-border bg-white p-6 shadow-card md:p-8">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              <Select label={cmsLabel("UniversityExplorer.label.701d021d08c5","Country")} value={country} onChange={setCountry} options={COUNTRIES} />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {COUNTRIES.length > 2 && (
+                <Select
+                  label={cmsLabel("UniversityExplorer.label.701d021d08c5", "Country")}
+                  value={country}
+                  onChange={setCountry}
+                  options={COUNTRIES}
+                />
+              )}
               <Select
-                label={cmsLabel("UniversityExplorer.label.100163c6400d","Scholarship")}
+                label={cmsLabel("UniversityExplorer.label.100163c6400d", "Scholarship")}
                 value={scholarship}
                 onChange={setScholarship}
                 options={SCHOLARSHIPS}
               />
-              <Select label={cmsLabel("UniversityExplorer.label.baaddf70fb5d","Type")} value={type} onChange={setType} options={TYPES} />
-              <Select label={cmsLabel("UniversityExplorer.label.c03ee8c1dbae","Tuition")} value={tuition} onChange={setTuition} options={TUITIONS} />
+              <Select
+                label={cmsLabel("UniversityExplorer.label.baaddf70fb5d", "Type")}
+                value={type}
+                onChange={setType}
+                options={TYPES}
+              />
+              <Select
+                label={cmsLabel("UniversityExplorer.label.c03ee8c1dbae", "Tuition")}
+                value={tuition}
+                onChange={setTuition}
+                options={TUITIONS}
+              />
               <div className="relative">
                 <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                   <CmsText id="UniversityExplorer.49c266baaaa7">Search</CmsText>
@@ -102,7 +121,10 @@ export function UniversityExplorer() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={cmsLabel("UniversityExplorer.label.d02ef87a95f7","University name…")}
+                  placeholder={cmsLabel(
+                    "UniversityExplorer.label.d02ef87a95f7",
+                    "University name…",
+                  )}
                   className="w-full rounded-xl border border-border bg-white py-2.5 pl-9 pr-3 text-sm focus:border-sky focus:outline-none focus:ring-4 focus:ring-sky/15"
                 />
               </div>
@@ -187,7 +209,7 @@ export function UniversityExplorer() {
             <button
               onClick={() => setSelected(null)}
               className="absolute right-5 top-5 text-slate-400 hover:text-navy"
-              aria-label={cmsLabel("UniversityExplorer.label.7d9eb7acb13e","Close")}
+              aria-label={cmsLabel("UniversityExplorer.label.7d9eb7acb13e", "Close")}
             >
               <X className="h-5 w-5" />
             </button>
@@ -199,10 +221,22 @@ export function UniversityExplorer() {
               {selected.type}
             </div>
             <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
-              <Fact label={cmsLabel("UniversityExplorer.label.e231b563d447","Acceptance Rate")} value={selected.acceptance} />
-              <Fact label={cmsLabel("UniversityExplorer.label.73607046c317","Financial Aid")} value={selected.scholarship} />
-              <Fact label={cmsLabel("UniversityExplorer.label.66b1b8c96dcf","Tuition Range")} value={selected.tuition} />
-              <Fact label={cmsLabel("UniversityExplorer.label.7a6cde09cd31","University Type")} value={selected.type} />
+              <Fact
+                label={cmsLabel("UniversityExplorer.label.e231b563d447", "Acceptance Rate")}
+                value={selected.acceptance}
+              />
+              <Fact
+                label={cmsLabel("UniversityExplorer.label.73607046c317", "Financial Aid")}
+                value={selected.scholarship}
+              />
+              <Fact
+                label={cmsLabel("UniversityExplorer.label.66b1b8c96dcf", "Tuition Range")}
+                value={selected.tuition}
+              />
+              <Fact
+                label={cmsLabel("UniversityExplorer.label.7a6cde09cd31", "University Type")}
+                value={selected.type}
+              />
             </div>
             <p className="mt-6 text-[14px] leading-relaxed text-slate-600">
               {selected.name}

@@ -1,9 +1,10 @@
-import {useCmsLookup} from "@/lib/cms";
+import { useCmsLookup } from "@/lib/cms";
 import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { EMAIL as CMS_DEFAULT_EMAIL, WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { Facebook, Instagram, Linkedin, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { ENABLED_COUNTRIES } from "@/lib/site-content";
 
 type LinkRef = {
   label: string;
@@ -13,7 +14,7 @@ type LinkRef = {
 };
 
 export function Footer() {
- const cmsLabel = useCmsLookup();
+  const cmsLabel = useCmsLookup();
 
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
@@ -61,29 +62,21 @@ export function Footer() {
           </div>
 
           <Col
-            title={cmsLabel("Footer.label.b6747064b2a6","Programs")}
+            title={cmsLabel("Footer.label.b6747064b2a6", "Programs")}
             links={[
               { label: "General Admission Track", href: "/#programs" },
               { label: "File Opening Service", href: "/#programs" },
             ]}
           />
           <Col
-            title={cmsLabel("Footer.label.72eb63f032e4","Destinations")}
-            links={[
-              { label: "🇺🇸 USA (Primary)", href: "/#destinations" },
-              { label: "🇬🇧 United Kingdom", href: "/#world-map" },
-              { label: "🇨🇦 Canada", href: "/#world-map" },
-              { label: "🇩🇪 Germany", href: "/#world-map" },
-              { label: "🇸🇪 Sweden", href: "/#world-map" },
-              { label: "🇰🇷 South Korea", href: "/#world-map" },
-              { label: "Explore world map →", href: "/#world-map" },
-            ]}
+            title={cmsLabel("Footer.label.72eb63f032e4", "Destinations")}
+            links={ENABLED_COUNTRIES.map((c) => ({ label: c, href: "/#destinations" }))}
           />
         </div>
 
         <div className="mt-12 grid grid-cols-2 gap-10 border-t border-white/7 pt-10 md:grid-cols-4">
           <Col
-            title={cmsLabel("Footer.label.de4743c87973","Company")}
+            title={cmsLabel("Footer.label.de4743c87973", "Company")}
             links={[
               { label: "About Us", href: "/#about" },
               { label: "Success Stories", href: "/#stories" },
@@ -92,7 +85,7 @@ export function Footer() {
             ]}
           />
           <Col
-            title={cmsLabel("Footer.label.e89b30aa1dc3","Resources")}
+            title={cmsLabel("Footer.label.e89b30aa1dc3", "Resources")}
             links={[
               { label: "Knowledge Hub", href: "/#resources" },
               { label: "FAQ", href: "/#faq" },
@@ -100,7 +93,7 @@ export function Footer() {
             ]}
           />
           <Col
-            title={cmsLabel("Footer.label.be91940b79f4","Support")}
+            title={cmsLabel("Footer.label.be91940b79f4", "Support")}
             links={[
               { label: "WhatsApp Support", href: WA_LINK, external: true },
               { label: "Email Support", href: `mailto:${EMAIL}`, external: true },
@@ -108,7 +101,7 @@ export function Footer() {
             ]}
           />
           <Col
-            title={cmsLabel("Footer.label.4787eaf7c938","Legal")}
+            title={cmsLabel("Footer.label.4787eaf7c938", "Legal")}
             links={[
               { label: "Privacy Policy", href: "/privacy", route: "/privacy" },
               { label: "Terms of Service", href: "/terms", route: "/terms" },
