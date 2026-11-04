@@ -1,7 +1,11 @@
 import { useCmsLookup } from "@/lib/cms";
 import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
-import { EMAIL as CMS_DEFAULT_EMAIL, WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import {
+  EMAIL as CMS_DEFAULT_EMAIL,
+  WA_LINK as CMS_DEFAULT_WA_LINK,
+  STUDENT_PORTAL_URL,
+} from "@/lib/scholars-data";
 import { Facebook, Instagram, Linkedin, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEnabledCountries } from "@/lib/site-content";
@@ -96,6 +100,7 @@ export function Footer() {
           <Col
             title={cmsLabel("Footer.label.be91940b79f4", "Support")}
             links={[
+              { label: "Student Login", href: STUDENT_PORTAL_URL },
               { label: "WhatsApp Support", href: WA_LINK, external: true },
               { label: "Email Support", href: `mailto:${EMAIL}`, external: true },
               { label: "Contact Form", href: "/contact" },

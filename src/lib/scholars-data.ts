@@ -869,3 +869,6 @@ export const RESOURCES: Resource[] = [
     readTime: "11 min read",
   },
 ];
+
+/** Student portal (separate sign-in page for students; the team uses admin.scholarscafe.com). */
+export const STUDENT_PORTAL_URL = "https://student.scholarscafe.com";
