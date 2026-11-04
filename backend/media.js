@@ -21,10 +21,13 @@ export function installMedia(app, store, config, limit) {
   // Registered after authentication and CSRF verification. No untrusted file paths.
   app.get("/api/media", async (_req, res) => {
     const items = await store.query(
-      "SELECT id,name,size,mime,created_at FROM media ORDER BY created_at DESC LIMIT 200",
+      "SELECT id,name,size,mime,visibility,created_at FROM media ORDER BY created_at DESC LIMIT 200",
     );
     res.json({
-      items: items.map((item) => ({ ...item, url: config.ADMIN_ORIGIN + "/public/media/" + item.id })),
+      items: items.map((item) => ({
+        ...item,
+        url: item.visibility === "private" ? null : config.ADMIN_ORIGIN + "/public/media/" + item.id,
+      })),
     });
   });
   app.post(
@@ -67,6 +70,8 @@ export function installMedia(app, store, config, limit) {
         mime = "image/webp";
       }
       const id = randomUUID();
+      // Lesson videos are uploaded as private: never on the public route, only to enrolled students.
+      const visibility = req.get("X-Visibility") === "private" ? "private" : "public";
       const name = String(req.get("X-File-Name") || "File").replace(/[\x00-\x1f\x7f]/g, "").slice(0, 200);
       await store.transaction(async (c) => {
         const [actor] = await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c);
@@ -76,14 +81,14 @@ export function installMedia(app, store, config, limit) {
         if (!quota || Number(quota.used_bytes) + bytes.length > QUOTA)
           throw fail(413, "The 250 MB media library is full.");
         await store.query(
-          "INSERT INTO media (id,name,bytes,size,actor_id,mime) VALUES (?,?,?,?,?,?)",
-          [id, name, bytes, bytes.length, req.actor.id, mime],
+          "INSERT INTO media (id,name,bytes,size,actor_id,mime,visibility) VALUES (?,?,?,?,?,?,?)",
+          [id, name, bytes, bytes.length, req.actor.id, mime, visibility],
           c,
         );
         await store.query("UPDATE media_quota SET used_bytes=used_bytes+? WHERE id=1", [bytes.length], c);
         await store.audit(req.actor.id, mime.startsWith("video") ? "upload_video" : "upload_image", id, c);
       });
-      res.status(201).json({ id, url: config.ADMIN_ORIGIN + "/public/media/" + id, mime });
+      res.status(201).json({ id, url: visibility === "private" ? null : config.ADMIN_ORIGIN + "/public/media/" + id, mime, visibility });
     },
   );
 }

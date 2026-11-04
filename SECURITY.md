@@ -63,3 +63,9 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - **API gate:** students reach only `/api/me`, `/api/logout`, `/api/password` and `/api/lms/*`; all staff APIs return 403.
 - **Private media:** `media.visibility = 'private'` files are never served by the public media route (lesson videos; signed access arrives in step 5.3).
 - Verified on MySQL 8 with two students, two mentors, a paused enrollment and a draft course.
+
+## Phase 5.2 additions (staff side: courses and students)
+- API `backend/lms.js` under `/api/lms/*`: reads use `access.js` scopes; writes check the permission table first (refused before any query) and re-check rows inside the transaction. All writes audited.
+- Students are created only by owners/admins (409 on duplicate email). Mentors may only write `staff_notes` for their own students. Enrollment requires an active student, a live course and an active mentor.
+- Lesson videos must be private uploads (`X-Visibility: private`); public files are refused for lessons. Private files return 404 on the public route.
+- Verified on MySQL 8: owner/mentor/student flows, paused enrollment hides the course, draft course and unpublished lesson hidden from the student.

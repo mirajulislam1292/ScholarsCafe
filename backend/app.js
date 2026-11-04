@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { installMedia, serveMedia } from "./media.js";
 import { installAuthRoutes, installAccountRoutes } from "./auth.js";
+import { installLmsRoutes } from "./lms.js";
 import {
   token,
   hash,
@@ -348,6 +349,7 @@ export function createApp(
     next();
   });
   installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
+  installLmsRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
     if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");

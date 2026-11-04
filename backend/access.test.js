@@ -52,7 +52,7 @@ test("Mentors only reach students enrolled with them", async () => {
 
 test("Scope columns are whitelisted (no SQL from callers)", () => {
   assert.throws(() => studentScope(as("student"), "1=1 OR x.user_id"));
-  assert.throws(() => studentScope(as("student"), "m.id"));
+  assert.throws(() => studentScope(as("student"), "m.body"));
 });
 
 test("Write permissions follow the role table", () => {
@@ -85,4 +85,23 @@ test("Private media is never served on the public route", async () => {
   const app = createApp({ query: async (q) => ((sql = q), []) }, { ADMIN_ORIGIN: "https://a", PUBLIC_ORIGIN: "https://b" });
   await request(app).get("/public/media/11111111-1111-4111-8111-111111111111").expect(404);
   assert.match(sql, /visibility='public'/);
+});
+
+test("Course and student writes are refused for students and mentors before touching the database", async () => {
+  const config = { ADMIN_ORIGIN: "https://admin.scholarscafe.com", PUBLIC_ORIGIN: "https://scholarscafe.com", GOOGLE_CLIENT_ID: "t" };
+  for (const role of ["student", "mentor"]) {
+    const writes = [];
+    const app = createApp(
+      { session: async () => ({ id: ME, role, csrf: "abc" }), transaction: (fn) => fn({}), query: async (sql) => (writes.push(sql), []), audit: async () => {} },
+      config,
+    );
+    const post = (path, body) =>
+      request(app).post(path).set("Cookie", "__Host-sc_session=" + "a".repeat(64)).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send(body);
+    await post("/api/lms/courses", { title: "x" }).expect(403);
+    await post("/api/lms/lessons", { course_id: OTHER, title: "x" }).expect(403);
+    await post("/api/lms/students", { email: "a@b.co", full_name: "x" }).expect(403);
+    await post("/api/lms/enrollments", { user_id: ME, course_id: OTHER }).expect(403);
+    await post("/api/lms/students/" + OTHER, { full_name: "x" }).expect(403);
+    assert.deepEqual(writes, []);
+  }
 });

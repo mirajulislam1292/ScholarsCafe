@@ -74,8 +74,19 @@ Admin → **Leads**. Every contact-form message becomes a lead.
 - **Search and filter** by name/email/text, status or mentor. **Export CSV** downloads the filtered list (opens in Excel/Google Sheets).
 - To add a mentor: **Access** → their Gmail → role **mentor** → Save.
 
-## 8. Students and student dashboard
-The student dashboard (courses, lessons, messages, reviews) is **not built yet**; it is a later phase. **Newsletter** shows email signups (mark people as unsubscribed when they ask).
+## 8. Students and courses (student dashboard)
+**Student courses** (Admin/Owner) are the courses students take online. They are separate from *Courses & pricing* on the public site.
+1. **Student courses** → **+ New course** → title, summary → status *Draft* while you build it → **Create course**.
+2. Open it with **Edit →**. Add lessons: title, text, order (10, 20, 30…), **Published** tick, and an optional video (MP4/WebM up to 12 MB). Lesson videos are **private**: only students enrolled in that course can watch them. Click **+ Add lesson** / **Save lesson**.
+3. Set the course to **Published** when it's ready. Draft courses and unpublished lessons are never shown to students.
+
+**Students** (Admin/Owner):
+1. **Add a student**: email, full name, phone, target intake → **Add student**. They sign in at the admin address with Google (if that email is a Google account), an email code, or a password they set. Nobody can sign up on their own.
+2. Open a student → **Enroll** them in a course and pick their **mentor**. Change the status any time: *Active*, *Paused* (locks the course, e.g. unpaid) or *Completed*. **Remove** takes them out of the course.
+3. **Staff notes** are never shown to the student. To block a student completely: **Access** → untick **Active**.
+
+**Mentors** see **Students**: only students enrolled with them, and they can add notes. They cannot change courses or enrollments.
+The students' own dashboard (watching lessons, messages, reviews) arrives in the next steps. **Newsletter** shows email signups.
 
 ## 9. Change colors and fonts
 - Colors and fonts are defined once in `src/styles/design-system.css` (and mirrored in the `@theme` block of `src/styles.css`). The full palette and type are on the private page **https://scholarscafe.com/design-system**.

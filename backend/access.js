@@ -42,11 +42,11 @@ export function lessonScope(actor) {
 }
 /**
  * WHERE fragment for any table keyed by a student: enrollments e (user_id), student_profiles p (user_id),
- * lesson_progress g (user_id), messages m (student_id), reviews r (user_id). Pass the qualified column.
+ * lesson_progress g (user_id), messages m (student_id), reviews r (user_id), users u (id). Pass the qualified column.
  */
 export function studentScope(actor, column) {
   check(actor);
-  if (!/^[a-z]\.(user_id|student_id)$/.test(column)) throw new Error("Invalid scope column");
+  if (!/^[a-z]\.(user_id|student_id|id)$/.test(column)) throw new Error("Invalid scope column");
   if (isStaff(actor)) return ALL;
   if (actor.role === "mentor") return scoped(`${column} IN (${MY_STUDENTS})`, [actor.id]);
   return scoped(`${column}=?`, [actor.id]);

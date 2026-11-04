@@ -269,6 +269,14 @@ function render() {
     renderAccount();
     return;
   }
+  if (section === "Student courses") {
+    renderLmsCourses().catch(report);
+    return;
+  }
+  if (section === "Students") {
+    renderStudents().catch(report);
+    return;
+  }
   if (section === "Private feedback" || section === "Newsletter") {
     renderSubmissions().catch(report);
     return;
@@ -489,7 +497,7 @@ function edit(item) {
     }
   };
 }
-async function upload(file) {
+async function upload(file, visibility = "public") {
   const video = file.type.startsWith("video/");
   if (file.size > (video ? 12 : 5) * 1024 * 1024)
     throw Error(
@@ -501,12 +509,284 @@ async function upload(file) {
       "Content-Type": file.type,
       "X-CSRF-Token": me.csrf,
       "X-File-Name": file.name.replace(/[^a-zA-Z0-9._ -]/g, "_"),
+      "X-Visibility": visibility,
     },
     body: file,
   });
   const result = await response.json();
   if (!response.ok) throw Error(result.error || "Upload failed.");
   return result;
+}
+// ---------- Student dashboard: staff screens ----------
+function input(label, value = "", type = "text", max = 200) {
+  const l = node("label", label);
+  const el = type === "textarea" ? node("textarea") : node("input");
+  if (type !== "textarea") el.type = type;
+  el.value = value ?? "";
+  el.maxLength = max;
+  l.append(el);
+  return [l, el];
+}
+function select(label, options, value) {
+  const l = node("label", label);
+  const el = node("select");
+  for (const [v, t] of options) {
+    const o = node("option", t);
+    o.value = v;
+    el.append(o);
+  }
+  el.value = value ?? "";
+  l.append(el);
+  return [l, el];
+}
+async function renderLmsCourses(openId) {
+  const screen = $("screen");
+  const courses = (await api("lms/courses")).items;
+  if (openId) return renderLmsCourse(courses.find((c) => c.id === openId));
+  screen.append(
+    node("p", "Courses students take in their dashboard (separate from the public pricing list).", "muted"),
+    button("+ New course", () => renderLmsCourse(null), "primary"),
+  );
+  if (!courses.length) screen.append(node("p", "No courses yet.", "empty"));
+  for (const c of courses) {
+    const card = node("article", undefined, "card");
+    card.append(
+      node("h3", c.title),
+      node("span", c.status, "badge"),
+      node("p", `${c.lessons} lessons · ${c.students} students`, "muted"),
+      button("Edit →", () => renderLmsCourse(c)),
+    );
+    screen.append(card);
+  }
+}
+async function renderLmsCourse(course) {
+  const screen = $("screen");
+  screen.replaceChildren(button("← All courses", () => render()));
+  const form = node("form", undefined, "card");
+  const [tl, title] = input("Title", course?.title);
+  const [sl, summary] = input("Summary", course?.summary, "textarea", 5000);
+  const [stl, status] = select("Status", [["draft", "Draft (hidden from students)"], ["published", "Published"]], course?.status || "draft");
+  const save = node("button", course ? "Save course" : "Create course", "primary");
+  save.type = "submit";
+  form.append(node("h2", course ? "Edit course" : "New course"), tl, sl, stl, save);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const body = { title: title.value, summary: summary.value, status: status.value };
+      const id = course ? (await api("lms/courses/" + course.id, body), course.id) : (await api("lms/courses", body)).id;
+      notice("Course saved.");
+      screen.replaceChildren();
+      await renderLmsCourses(id);
+    } catch (err) {
+      report(err);
+    }
+  };
+  screen.append(form);
+  if (!course) return;
+  form.append(
+    button(
+      "Delete course",
+      async () => {
+        if (!confirm("Delete this course? Students lose access at once.")) return;
+        await api("lms/courses/" + course.id + "/delete", {});
+        notice("Course deleted.");
+        render();
+      },
+      "danger",
+    ),
+  );
+  const lessons = (await api("lms/courses/" + course.id + "/lessons")).items;
+  screen.append(node("h2", "Lessons"), node("p", "Videos are private: only students enrolled in this course can watch them.", "muted"));
+  for (const lesson of [...lessons, null]) screen.append(lessonCard(course, lesson, lessons.length));
+}
+function lessonCard(course, lesson, count) {
+  const card = node("form", undefined, lesson ? "card" : "card new");
+  const [tl, title] = input("Lesson title", lesson?.title);
+  const [bl, body] = input("Text / notes", lesson?.body, "textarea", 200000);
+  const [pl, position] = input("Order", lesson?.position ?? (count + 1) * 10, "number");
+  const pub = node("label", "Published");
+  const published = node("input");
+  published.type = "checkbox";
+  published.checked = Boolean(lesson?.published);
+  pub.prepend(published);
+  let videoId = lesson?.video_media_id || null;
+  const videoState = node("p", videoId ? "Video attached." : "No video.", "muted");
+  const file = node("input");
+  file.type = "file";
+  file.accept = "video/mp4,video/webm";
+  file.onchange = async () => {
+    if (!file.files[0]) return;
+    try {
+      videoState.textContent = "Uploading…";
+      videoId = (await upload(file.files[0], "private")).id;
+      videoState.textContent = "Video uploaded. Save the lesson to attach it.";
+    } catch (err) {
+      videoState.textContent = videoId ? "Video attached." : "No video.";
+      report(err);
+    }
+  };
+  const remove = button("Remove video", () => {
+    videoId = null;
+    videoState.textContent = "Video removed. Save the lesson to apply.";
+  });
+  const save = node("button", lesson ? "Save lesson" : "+ Add lesson", "primary");
+  save.type = "submit";
+  card.append(node("h3", lesson ? lesson.title : "New lesson"), tl, bl, pl, pub, videoState, file, remove, save);
+  if (lesson)
+    card.append(
+      button(
+        "Delete lesson",
+        async () => {
+          if (!confirm("Delete this lesson and its progress records?")) return;
+          await api("lms/lessons/" + lesson.id + "/delete", {});
+          notice("Lesson deleted.");
+          $("screen").replaceChildren();
+          await renderLmsCourses(course.id);
+        },
+        "danger",
+      ),
+    );
+  card.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api("lms/lessons" + (lesson ? "/" + lesson.id : ""), {
+        course_id: course.id,
+        title: title.value,
+        body: body.value,
+        position: Number(position.value) || 0,
+        published: published.checked,
+        video_media_id: videoId,
+      });
+      notice("Lesson saved.");
+      $("screen").replaceChildren();
+      await renderLmsCourses(course.id);
+    } catch (err) {
+      report(err);
+    }
+  };
+  return card;
+}
+async function renderStudents() {
+  const screen = $("screen");
+  const staff = canPublishRole(me.role);
+  const [students, courses, mentors] = await Promise.all([
+    api("lms/students").then((r) => r.items),
+    api("lms/courses").then((r) => r.items),
+    staff ? api("mentors").then((r) => r.items) : [],
+  ]);
+  const mentorOptions = [["", "No mentor"], ...mentors.map((m) => [m.id, m.email])];
+  const mentorName = (id) => mentors.find((m) => m.id === id)?.email || (id ? "assigned mentor" : "no mentor");
+  screen.append(
+    node("p", staff ? "Student accounts, their courses and mentors. Students sign in with Google, an email code or a password." : "Students assigned to you. You can keep notes.", "muted"),
+  );
+  if (staff) {
+    const add = node("form", undefined, "card");
+    const [el, email] = input("Email", "", "email", 254);
+    const [nl, name] = input("Full name", "", "text", 160);
+    const [pl, phone] = input("Phone", "", "tel", 80);
+    const [il, intake] = input("Target intake (e.g. Fall 2027)", "", "text", 40);
+    const go = node("button", "Add student", "primary");
+    go.type = "submit";
+    add.append(node("h2", "Add a student"), el, nl, pl, il, go);
+    add.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api("lms/students", { email: email.value, full_name: name.value, phone: phone.value, target_intake: intake.value });
+        notice("Student added. They can now sign in with that email.");
+        render();
+      } catch (err) {
+        report(err);
+      }
+    };
+    screen.append(add);
+  }
+  const search = node("input");
+  search.type = "search";
+  search.placeholder = "Search students";
+  search.setAttribute("aria-label", "Search students");
+  const list = node("div");
+  screen.append(search, list);
+  const draw = () => {
+    const term = search.value.trim().toLowerCase();
+    list.replaceChildren();
+    const shown = students.filter((s) => !term || `${s.full_name} ${s.email}`.toLowerCase().includes(term));
+    if (!shown.length) list.append(node("p", "No students yet.", "empty"));
+    for (const s of shown) list.append(studentCard(s));
+  };
+  const studentCard = (s) => {
+    const card = node("details", undefined, "card");
+    card.append(node("summary", `${s.full_name || "(no name)"} · ${s.email}${s.active ? "" : " · inactive"}`));
+    const form = node("form");
+    const fields = {};
+    if (staff)
+      for (const [key, label, max] of [["full_name", "Full name", 160], ["phone", "Phone", 80], ["target_intake", "Target intake", 40]]) {
+        const [l, el] = input(label, s[key], "text", max);
+        fields[key] = el;
+        form.append(l);
+      }
+    const [nl, notes] = input("Staff notes (never shown to the student)", s.staff_notes, "textarea", 10000);
+    fields.staff_notes = notes;
+    const save = node("button", "Save", "primary");
+    save.type = "submit";
+    form.append(nl, save);
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api("lms/students/" + s.id, Object.fromEntries(Object.entries(fields).map(([k, el]) => [k, el.value])));
+        notice("Saved.");
+      } catch (err) {
+        report(err);
+      }
+    };
+    card.append(form, node("h3", "Courses"));
+    for (const en of s.enrollments) {
+      const row = node("div", undefined, "toolbar");
+      row.append(node("strong", en.title));
+      if (staff) {
+        const [, mentor] = select("Mentor", mentorOptions, en.mentor_id);
+        const [, status] = select("Status", [["active", "Active"], ["paused", "Paused (locked)"], ["completed", "Completed"]], en.status);
+        row.append(
+          mentor,
+          status,
+          button("Save", async () => {
+            await api("lms/enrollments", { user_id: s.id, course_id: en.course_id, mentor_id: mentor.value || null, status: status.value });
+            notice("Enrollment saved.");
+          }),
+          button(
+            "Remove",
+            async () => {
+              if (!confirm("Remove this student from the course?")) return;
+              await api("lms/enrollments/delete", { user_id: s.id, course_id: en.course_id });
+              notice("Removed.");
+              render();
+            },
+            "danger",
+          ),
+        );
+      } else row.append(node("span", `${en.status} · ${mentorName(en.mentor_id)}`, "muted"));
+      card.append(row);
+    }
+    if (!s.enrollments.length) card.append(node("p", "Not enrolled in any course.", "muted"));
+    const open = courses.filter((c) => !s.enrollments.some((en) => en.course_id === c.id));
+    if (staff && open.length) {
+      const row = node("div", undefined, "toolbar");
+      const [, course] = select("Course", open.map((c) => [c.id, c.title + (c.status === "draft" ? " (draft)" : "")]));
+      const [, mentor] = select("Mentor", mentorOptions, "");
+      row.append(
+        course,
+        mentor,
+        button("Enroll", async () => {
+          await api("lms/enrollments", { user_id: s.id, course_id: course.value, mentor_id: mentor.value || null, status: "active" });
+          notice("Enrolled.");
+          render();
+        }, "primary"),
+      );
+      card.append(row);
+    }
+    return card;
+  };
+  search.oninput = draw;
+  draw();
 }
 async function renderMedia() {
   const screen = $("screen");
@@ -943,14 +1223,14 @@ try {
     me.role === "student"
       ? ["Account"]
       : me.role === "mentor"
-      ? ["Leads", "Account"]
+      ? ["Leads", "Students", "Account"]
       : [
           "Overview",
           "Media",
           ...Object.keys(names),
           ...(me.role === "editor"
             ? []
-            : ["Leads", "Access", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
+            : ["Leads", "Students", "Student courses", "Access", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
           "Account",
         ];
   if (me.role === "mentor") section = "Leads";
