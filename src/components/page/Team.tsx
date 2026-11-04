@@ -1,7 +1,20 @@
 import { SITE } from "@/lib/site-content";
+import { useCmsList } from "@/lib/cms";
 import { Reveal } from "../scholars/Reveal";
 
-type Member = { name: string; role: string; title?: string; line?: string; photo?: string };
+type Member = {
+  name: string;
+  role: string;
+  title?: string;
+  line?: string;
+  photo?: string;
+  group?: string;
+};
+
+const DEFAULT_TEAM: Member[] = [
+  ...SITE.team.founders.map((m) => ({ ...m, group: "founder" })),
+  ...SITE.team.mentors.map((m) => ({ ...m, group: "mentor" })),
+];
 
 const initials = (name: string) =>
   name
@@ -63,6 +76,7 @@ function Group({ label, members }: { label: string; members: Member[] }) {
 /** "Our Team": founders and mentors. Content from src/content/site.json > team. */
 export function Team() {
   const team = SITE.team;
+  const members = useCmsList<Member>("team", DEFAULT_TEAM);
   return (
     <section id="team" className="bg-white py-[clamp(96px,13vw,200px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
@@ -70,8 +84,8 @@ export function Team() {
           <h2 className="type-h2 text-neutral-900">{team.heading}</h2>
         </Reveal>
         <div className="mt-16 grid gap-20 md:mt-20">
-          <Group label="Founders" members={team.founders} />
-          <Group label="Mentors" members={team.mentors} />
+          <Group label="Founders" members={members.filter((m) => m.group === "founder")} />
+          <Group label="Mentors" members={members.filter((m) => m.group === "mentor")} />
         </div>
       </div>
     </section>

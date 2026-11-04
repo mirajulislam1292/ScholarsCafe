@@ -4,16 +4,40 @@ let me,
 let catalog = {};
 const $ = (id) => document.getElementById(id);
 const names = {
-  mentors: "Mentors",
-  blogs: "Blogs",
-  feedback: "Feedback",
-  courses: "Courses & pricing",
   copy: "Website text & images",
+  sections: "Page sections",
+  seo: "SEO titles",
+  hero: "Hero videos",
+  universities: "Universities",
+  team: "Our Team",
+  feedback: "Testimonials",
+  faqs: "FAQs",
+  countries: "Countries",
+  courses: "Courses & pricing",
+  blogs: "Blog",
+};
+const canPublishRole = (role) => role === "owner" || role === "admin";
+const ENUMS = { group: ["founder", "mentor"], device: ["desktop", "mobile"] };
+const HELP = {
+  order: "Section ids in display order, separated by commas.",
+  hidden: "Section ids to hide, separated by commas (leave empty to show all).",
+  position: "Lower numbers appear first. Use the ↑ ↓ buttons in the list to reorder.",
+  rate: "Playback speed, 0.5–1.5 (0.85 is calm).",
+  page: "Page path, for example / or /about.",
+  title: "",
 };
 const defaults = {
   mentors: { name: "", role: "", bio: "", photo: "", initials: "" },
   blogs: { title: "", slug: "", excerpt: "", body: "", author: "", image: "" },
-  feedback: { name: "", quote: "", destination: "", outcome: "", year: "", initials: "" },
+  feedback: {
+    name: "",
+    quote: "",
+    destination: "",
+    outcome: "",
+    year: "",
+    initials: "",
+    position: 0,
+  },
   courses: {
     title: "",
     description: "",
@@ -22,8 +46,34 @@ const defaults = {
     features: [],
     cta: "Learn more",
     featured: false,
+    position: 0,
   },
   copy: {},
+  universities: { name: "", position: 0 },
+  team: {
+    name: "",
+    group: "founder",
+    role: "Co-founder",
+    title: "",
+    line: "",
+    photo: "",
+    position: 0,
+  },
+  faqs: { q: "", a: "", position: 0 },
+  countries: { name: "", enabled: false, position: 0 },
+  hero: {
+    place: "",
+    device: "desktop",
+    mp4: "",
+    webm: "",
+    poster: "",
+    credit: "",
+    rate: 0.85,
+    enabled: true,
+    position: 0,
+  },
+  seo: { page: "/", title: "", description: "" },
+  sections: { page: "/", order: "", hidden: "" },
 };
 function node(tag, text, cls) {
   const n = document.createElement(tag);
@@ -73,6 +123,30 @@ function field(form, key, value) {
     Array.isArray(value) ||
     ["body", "bio", "description", "excerpt", "quote"].includes(key) ||
     String(value).length > 100;
+  if (ENUMS[key]) {
+    const select = node("select");
+    for (const opt of ENUMS[key]) {
+      const o = node("option", opt);
+      o.value = opt;
+      select.append(o);
+    }
+    select.value = value;
+    select.id = "field-" + key;
+    label.htmlFor = select.id;
+    form.append(label, select);
+    return () => select.value;
+  }
+  if (typeof value === "number") {
+    const num = node("input");
+    num.type = "number";
+    num.step = key === "rate" ? "0.05" : "1";
+    num.value = String(value);
+    num.id = "field-" + key;
+    label.htmlFor = num.id;
+    form.append(label, num);
+    if (HELP[key]) form.append(node("small", HELP[key], "muted"));
+    return () => Number(num.value);
+  }
   const input = node(typeof value === "boolean" ? "input" : multi ? "textarea" : "input");
   if (typeof value === "boolean") {
     input.type = "checkbox";
@@ -84,16 +158,60 @@ function field(form, key, value) {
   input.id = "field-" + key;
   label.htmlFor = input.id;
   form.append(label, input);
-  if (/(?:photo|image|mobileImage|logo)$/i.test(key) && me.role !== "editor") {
-    const file = node("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp";
+  if (HELP[key]) form.append(node("small", HELP[key], "muted"));
+  if (/^(mp4|webm)$/.test(key) && canPublishRole(me.role)) {
+    const file = node("input");
+    file.type = "file";
+    file.accept = key === "mp4" ? "video/mp4" : "video/webm";
+    file.setAttribute("aria-label", "Upload video for " + key);
+    file.onchange = async () => {
+      if (!file.files[0]) return;
+      file.disabled = true;
+      try {
+        input.value = (await upload(file.files[0])).url;
+        notice("Video uploaded. Save the draft and publish to use it.");
+      } catch (e) {
+        report(e);
+      } finally {
+        file.disabled = false;
+      }
+    };
+    form.append(
+      file,
+      node(
+        "small",
+        "Licensed footage only · " +
+          key.toUpperCase() +
+          " · maximum 12 MB · 1080p, 10–14 s, no audio",
+        "muted",
+      ),
+    );
+  }
+  if (/(?:photo|image|mobileImage|logo|poster)$/i.test(key) && me.role !== "editor") {
+    const file = node("input");
+    file.type = "file";
+    file.accept = "image/png,image/jpeg,image/webp";
     file.setAttribute("aria-label", "Upload image for " + key);
     file.onchange = async () => {
       if (!file.files[0]) return;
       file.disabled = true;
-      try { input.value = (await upload(file.files[0])).url; notice("Image uploaded. Save the draft and publish to use it."); }
-      catch (e) { report(e); } finally { file.disabled = false; }
+      try {
+        input.value = (await upload(file.files[0])).url;
+        notice("Image uploaded. Save the draft and publish to use it.");
+      } catch (e) {
+        report(e);
+      } finally {
+        file.disabled = false;
+      }
     };
-    form.append(file, node("small", "Public images only · PNG, JPEG or WebP · maximum 5 MB / 16 megapixels", "muted"));
+    form.append(
+      file,
+      node(
+        "small",
+        "Public images only · PNG, JPEG or WebP · maximum 5 MB / 16 megapixels",
+        "muted",
+      ),
+    );
   }
   return () =>
     typeof value === "boolean"
@@ -110,7 +228,10 @@ function render() {
   const screen = $("screen");
   screen.replaceChildren();
   for (const b of $("nav").children) b.classList.toggle("active", b.dataset.section === section);
-  if (section === "Media") { renderMedia().catch(report); return; }
+  if (section === "Media") {
+    renderMedia().catch(report);
+    return;
+  }
   if (section === "Overview") {
     const grid = node("div", undefined, "grid");
     for (const [kind, label] of Object.entries(names)) {
@@ -140,8 +261,8 @@ function render() {
     renderAudit().catch(report);
     return;
   }
-  if (section === "Messages") {
-    renderMessages().catch(report);
+  if (section === "Leads") {
+    renderLeads().catch(report);
     return;
   }
   if (section === "Private feedback" || section === "Newsletter") {
@@ -171,16 +292,37 @@ function render() {
     );
   screen.append(bar);
   if (section === "copy") {
-    const existingKeys = new Set(items.filter(i => i.kind === 'copy').flatMap(i => Object.keys(i.data)));
+    const existingKeys = new Set(
+      items.filter((i) => i.kind === "copy").flatMap((i) => Object.keys(i.data)),
+    );
     const missing = Object.entries(catalog).filter(([key]) => !existingKeys.has(key));
-    const groups = [...new Set(missing.map(([key]) => key.split('.')[0]))];
-    for (const group of groups) screen.append(button("Set up " + group + " fields", () => edit({
-      id: crypto.randomUUID(), kind: 'copy', title: group + ' additional fields', version: 0,
-      data: Object.fromEntries(missing.filter(([key]) => key.split('.')[0] === group)),
-    })));
-    screen.append(node('p', 'Existing published edits are preserved. New fields use the website defaults until you save and publish them. Images can be uploaded in image fields or from Media.', 'muted'));
+    const groups = [...new Set(missing.map(([key]) => key.split(".")[0]))];
+    for (const group of groups)
+      screen.append(
+        button("Set up " + group + " fields", () =>
+          edit({
+            id: crypto.randomUUID(),
+            kind: "copy",
+            title: group + " additional fields",
+            version: 0,
+            data: Object.fromEntries(missing.filter(([key]) => key.split(".")[0] === group)),
+          }),
+        ),
+      );
+    screen.append(
+      node(
+        "p",
+        "Existing published edits are preserved. New fields use the website defaults until you save and publish them. Images can be uploaded in image fields or from Media.",
+        "muted",
+      ),
+    );
   }
-  const list = items.filter((i) => i.kind === section);
+  const pos = (i) => (typeof i.data.position === "number" ? i.data.position : 1e9);
+  const list = items
+    .filter((i) => i.kind === section)
+    .sort((a, b) => pos(a) - pos(b) || a.title.localeCompare(b.title));
+  const orderable =
+    list.length > 1 && "position" in (defaults[section] || {}) && canPublishRole(me.role);
   if (!list.length)
     screen.append(
       node(
@@ -191,15 +333,47 @@ function render() {
         "empty",
       ),
     );
-  for (const item of list) {
+  list.forEach((item, index) => {
     const row = node("div", undefined, "card row");
     row.append(
       node("span", item.title),
       node("span", item.published ? "Published · may have a newer draft" : "Draft", "badge"),
-      button("Edit", () => edit(item)),
     );
+    if (orderable) {
+      const up = button("↑", () => move(list, index, -1));
+      const down = button("↓", () => move(list, index, 1));
+      up.setAttribute("aria-label", "Move " + item.title + " up");
+      down.setAttribute("aria-label", "Move " + item.title + " down");
+      up.disabled = index === 0;
+      down.disabled = index === list.length - 1;
+      row.append(up, down);
+    }
+    row.append(button("Edit", () => edit(item)));
     screen.append(row);
+  });
+}
+/** Reorder: renumber the list (10, 20, 30…), save each changed entry and publish it. */
+async function move(list, index, dir) {
+  const order = [...list];
+  const [item] = order.splice(index, 1);
+  order.splice(index + dir, 0, item);
+  for (const [i, entry] of order.entries()) {
+    const position = (i + 1) * 10;
+    if (entry.data.position === position) continue;
+    await api("content", {
+      id: entry.id,
+      kind: entry.kind,
+      title: entry.title,
+      data: { ...entry.data, position },
+      version: entry.version,
+    });
+    const saved = (await api("content")).items.find((x) => x.id === entry.id);
+    if (entry.published)
+      await api("content/" + encodeURIComponent(entry.id) + "/publish", { version: saved.version });
   }
+  await refresh();
+  render();
+  notice("Order saved and published.");
 }
 function navigate(next) {
   section = next;
@@ -240,6 +414,56 @@ function edit(item) {
       );
   actions.append(node("span", "Save your changes before publishing.", "muted"));
   form.append(actions);
+  if (item.version && item.kind !== "copy" && canPublishRole(me.role))
+    form.append(
+      button(
+        "Delete entry",
+        async () => {
+          if (
+            !confirm(
+              'Delete "' +
+                item.title +
+                '"? It disappears from the website. An owner can restore it from Activity.',
+            )
+          )
+            return;
+          await api("content/" + encodeURIComponent(item.id) + "/delete", {
+            version: item.version,
+          });
+          await refresh();
+          render();
+          notice("Deleted.");
+        },
+        "danger",
+      ),
+    );
+  if (item.version) {
+    const history = node("details", undefined, "card");
+    history.append(node("summary", "Version history"));
+    history.ontoggle = async () => {
+      if (!history.open || history.dataset.loaded) return;
+      history.dataset.loaded = "1";
+      const rows = (await api("content/" + encodeURIComponent(item.id) + "/revisions")).items;
+      if (!rows.length) history.append(node("p", "No earlier versions yet.", "muted"));
+      for (const r of rows) {
+        const line = node("div", undefined, "row");
+        line.append(
+          node("span", new Date(r.created_at).toLocaleString() + " · " + (r.email || "unknown")),
+          button("Restore as draft", async () => {
+            await api("content/" + encodeURIComponent(item.id) + "/restore", {
+              revision: r.id,
+              version: item.version,
+            });
+            await refresh();
+            edit(items.find((i) => i.id === item.id));
+            notice("Earlier version restored as a draft. Review it, then publish.");
+          }),
+        );
+        history.append(line);
+      }
+    };
+    form.append(history);
+  }
   form.onsubmit = async (e) => {
     e.preventDefault();
     save.disabled = true;
@@ -262,37 +486,84 @@ function edit(item) {
   };
 }
 async function upload(file) {
-  if (file.size > 5 * 1024 * 1024) throw Error('Choose an image smaller than 5 MB.');
-  const response = await fetch('/api/media', { method: 'POST', headers: {
-    'Content-Type': file.type, 'X-CSRF-Token': me.csrf,
-    'X-File-Name': file.name.replace(/[^a-zA-Z0-9._ -]/g, '_'),
-  }, body: file });
+  const video = file.type.startsWith("video/");
+  if (file.size > (video ? 12 : 5) * 1024 * 1024)
+    throw Error(
+      video ? "Choose a video smaller than 12 MB." : "Choose an image smaller than 5 MB.",
+    );
+  const response = await fetch("/api/media", {
+    method: "POST",
+    headers: {
+      "Content-Type": file.type,
+      "X-CSRF-Token": me.csrf,
+      "X-File-Name": file.name.replace(/[^a-zA-Z0-9._ -]/g, "_"),
+    },
+    body: file,
+  });
   const result = await response.json();
-  if (!response.ok) throw Error(result.error || 'Upload failed.');
+  if (!response.ok) throw Error(result.error || "Upload failed.");
   return result;
 }
 async function renderMedia() {
-  const screen = $('screen');
-  screen.append(node('p', 'Only upload images you own or have permission to use. Uploaded images are public immediately; never upload private documents.', 'muted'));
-  if (me.role !== 'editor') {
-    const file = node('input'); file.type = 'file'; file.accept = 'image/png,image/jpeg,image/webp';
-    file.setAttribute('aria-label', 'Upload public image');
+  const screen = $("screen");
+  screen.append(
+    node(
+      "p",
+      "Only upload images you own or have permission to use. Uploaded images are public immediately; never upload private documents.",
+      "muted",
+    ),
+  );
+  if (me.role !== "editor") {
+    const file = node("input");
+    file.type = "file";
+    file.accept = "image/png,image/jpeg,image/webp,video/mp4,video/webm";
+    file.setAttribute("aria-label", "Upload public image or video");
     file.onchange = async () => {
       if (!file.files[0]) return;
       file.disabled = true;
-      try { await upload(file.files[0]); render(); notice('Image uploaded. Copy its URL into any image field.'); }
-      catch(e) { report(e); } finally { file.disabled = false; }
-    }; screen.append(file);
+      try {
+        await upload(file.files[0]);
+        render();
+        notice("Image uploaded. Copy its URL into any image field.");
+      } catch (e) {
+        report(e);
+      } finally {
+        file.disabled = false;
+      }
+    };
+    screen.append(file);
   }
-  const result = await api('media');
+  const result = await api("media");
   for (const item of result.items) {
-    const card = node('div', undefined, 'card');
-    const image = node('img'); image.src = item.url; image.alt = item.name; image.width = 160; image.loading = 'lazy';
-    const url = node('input'); url.readOnly = true; url.value = item.url; url.setAttribute('aria-label', 'Image URL');
-    card.append(image,node('p', item.name),url,button('Copy URL', async () => { await navigator.clipboard.writeText(item.url); notice('Image URL copied.'); }));
+    const card = node("div", undefined, "card");
+    const isVideo = String(item.mime || "").startsWith("video/");
+    const image = node(isVideo ? "video" : "img");
+    image.src = item.url;
+    image.width = 160;
+    if (isVideo) {
+      image.muted = true;
+      image.preload = "metadata";
+      image.controls = true;
+    } else {
+      image.alt = item.name;
+      image.loading = "lazy";
+    }
+    const url = node("input");
+    url.readOnly = true;
+    url.value = item.url;
+    url.setAttribute("aria-label", "Image URL");
+    card.append(
+      image,
+      node("p", item.name),
+      url,
+      button("Copy URL", async () => {
+        await navigator.clipboard.writeText(item.url);
+        notice("Image URL copied.");
+      }),
+    );
     screen.append(card);
   }
-  if (!result.items.length) screen.append(node('p', 'No uploaded images yet.', 'empty'));
+  if (!result.items.length) screen.append(node("p", "No uploaded images yet.", "empty"));
 }
 async function renderAccess() {
   const users = (await api("users")).items;
@@ -302,7 +573,9 @@ async function renderAccess() {
   const email = field(card, "email", "");
   const label = node("label", "Role");
   const select = node("select");
-  for (const role of me.role === "owner" ? ["editor", "admin", "owner"] : ["editor"]) {
+  for (const role of me.role === "owner"
+    ? ["editor", "mentor", "admin", "owner"]
+    : ["editor", "mentor"]) {
     const option = node("option", role);
     option.value = role;
     select.append(option);
@@ -338,7 +611,7 @@ async function renderAccess() {
       node("span", user.email),
       node("span", user.role + (user.active ? "" : " · revoked"), "badge"),
     );
-    if (user.id !== me.id && (me.role === "owner" || user.role === "editor"))
+    if (user.id !== me.id && (me.role === "owner" || ["editor", "mentor"].includes(user.role)))
       row.append(
         button(user.active ? "Revoke access" : "Restore access", async () => {
           if (!confirm("Change access for " + user.email + "?")) return;
@@ -368,6 +641,117 @@ async function renderAudit() {
   }
   $("screen").append(table);
 }
+async function renderLeads() {
+  const screen = $("screen");
+  const admin = canPublishRole(me.role);
+  const mentors = admin ? (await api("mentors")).items : [];
+  const filters = node("form", undefined, "card toolbar");
+  const q = node("input");
+  q.type = "search";
+  q.placeholder = "Search name, email, phone or message";
+  q.setAttribute("aria-label", "Search leads");
+  const status = node("select");
+  status.setAttribute("aria-label", "Filter by status");
+  for (const v of ["", "new", "contacted", "enrolled", "closed"]) {
+    const o = node("option", v || "All statuses");
+    o.value = v;
+    status.append(o);
+  }
+  const assigned = node("select");
+  assigned.setAttribute("aria-label", "Filter by mentor");
+  if (admin) {
+    for (const [v, t] of [
+      ["", "All mentors"],
+      ["none", "Unassigned"],
+      ...mentors.map((m) => [m.id, m.email]),
+    ]) {
+      const o = node("option", t);
+      o.value = v;
+      assigned.append(o);
+    }
+  }
+  const go = node("button", "Filter", "primary");
+  go.type = "submit";
+  const csv = node("a", "Export CSV");
+  csv.className = "button";
+  filters.append(q, status, ...(admin ? [assigned] : []), go, csv);
+  const list = node("div");
+  screen.append(
+    node(
+      "p",
+      admin
+        ? "Every website enquiry. Assign a mentor, track status and keep notes."
+        : "Leads assigned to you.",
+      "muted",
+    ),
+    filters,
+    list,
+  );
+  const query = () => {
+    const p = new URLSearchParams();
+    if (q.value.trim()) p.set("q", q.value.trim());
+    if (status.value) p.set("status", status.value);
+    if (admin && assigned.value) p.set("assigned", assigned.value);
+    return p.toString();
+  };
+  const load = async () => {
+    csv.href = "/api/leads.csv" + (query() ? "?" + query() : "");
+    const rows = (await api("leads" + (query() ? "?" + query() : ""))).items;
+    list.replaceChildren();
+    if (!rows.length) list.append(node("p", "No leads match.", "empty"));
+    for (const row of rows) {
+      const card = node("article", undefined, "card");
+      card.append(
+        node("h2", row.name),
+        node("p", row.email + " · " + row.phone, "muted"),
+        node("p", row.message),
+        node("p", "Received " + new Date(row.created_at).toLocaleString(), "muted"),
+      );
+      const st = node("select");
+      st.setAttribute("aria-label", "Status for " + row.name);
+      for (const v of ["new", "contacted", "enrolled", "closed"]) {
+        const o = node("option", v);
+        o.value = v;
+        st.append(o);
+      }
+      st.value = row.status || "new";
+      const notes = node("textarea");
+      notes.value = row.notes || "";
+      notes.maxLength = 5000;
+      notes.setAttribute("aria-label", "Notes for " + row.name);
+      const who = node("select");
+      who.setAttribute("aria-label", "Assigned mentor for " + row.name);
+      if (admin) {
+        for (const [v, t] of [["", "Unassigned"], ...mentors.map((m) => [m.id, m.email])]) {
+          const o = node("option", t);
+          o.value = v;
+          who.append(o);
+        }
+        who.value = row.assigned_to || "";
+      }
+      const save = button(
+        "Save",
+        async () => {
+          const body = { status: st.value, notes: notes.value };
+          if (admin) body.assigned_to = who.value || null;
+          await api("leads/" + row.id, body);
+          notice("Lead updated.");
+        },
+        "primary",
+      );
+      card.append(node("label", "Status"), st, node("label", "Notes"), notes);
+      if (admin) card.append(node("label", "Assigned mentor"), who);
+      else if (row.assigned_email) card.append(node("p", "Assigned to you", "badge"));
+      card.append(save);
+      list.append(card);
+    }
+  };
+  filters.onsubmit = (e) => {
+    e.preventDefault();
+    load().catch(report);
+  };
+  await load();
+}
 async function renderMessages() {
   const rows = (await api("inquiries")).items;
   for (const row of rows) {
@@ -385,38 +769,85 @@ async function renderMessages() {
 async function renderSubmissions() {
   const kind = section === "Newsletter" ? "newsletter" : "feedback";
   const rows = (await api("submissions")).items.filter((row) => row.kind === kind);
-  $("screen").append(node("p", kind === "newsletter" ? "Signups are recorded with consent. This dashboard does not send newsletter campaigns. Honor unsubscribe requests before contacting subscribers." : "Private feedback is never published automatically.", "muted"));
+  $("screen").append(
+    node(
+      "p",
+      kind === "newsletter"
+        ? "Signups are recorded with consent. This dashboard does not send newsletter campaigns. Honor unsubscribe requests before contacting subscribers."
+        : "Private feedback is never published automatically.",
+      "muted",
+    ),
+  );
   for (const row of rows) {
     const card = node("article", undefined, "card");
-    card.append(node("h2", row.name || row.email), node("p", row.email), node("p", row.message), node("p", new Date(row.created_at).toLocaleString(), "muted"));
-    if (kind === "newsletter") card.append(row.unsubscribed_at ? node("p", "Unsubscribed", "badge") : button("Mark unsubscribed", async () => { await api("submissions/" + row.id + "/unsubscribe", {}); render(); }));
+    card.append(
+      node("h2", row.name || row.email),
+      node("p", row.email),
+      node("p", row.message),
+      node("p", new Date(row.created_at).toLocaleString(), "muted"),
+    );
+    if (kind === "newsletter")
+      card.append(
+        row.unsubscribed_at
+          ? node("p", "Unsubscribed", "badge")
+          : button("Mark unsubscribed", async () => {
+              await api("submissions/" + row.id + "/unsubscribe", {});
+              render();
+            }),
+      );
     $("screen").append(card);
   }
   if (!rows.length) $("screen").append(node("p", "No entries yet.", "empty"));
 }
 async function renderMail() {
   const result = await api("mail-status");
-  $("screen").append(node("p", result.configured ? "Notifications go to contact@scholarscafe.com. Your original messages remain in the dashboard." : "Mailbox delivery is not connected yet. Entries are saved here and notifications are queued until the mailbox password is configured.", "card"));
+  $("screen").append(
+    node(
+      "p",
+      result.configured
+        ? "Notifications go to contact@scholarscafe.com. Your original messages remain in the dashboard."
+        : "Mailbox delivery is not connected yet. Entries are saved here and notifications are queued until the mailbox password is configured.",
+      "card",
+    ),
+  );
   for (const row of result.items) {
     const card = node("div", undefined, "card row");
-    card.append(node("span", row.subject), node("span", row.sent_at ? "Sent" : row.attempts >= 5 ? "Delivery failed — check mailbox settings" : "Queued", "badge"));
+    card.append(
+      node("span", row.subject),
+      node(
+        "span",
+        row.sent_at
+          ? "Sent"
+          : row.attempts >= 5
+            ? "Delivery failed — check mailbox settings"
+            : "Queued",
+        "badge",
+      ),
+    );
     $("screen").append(card);
   }
 }
 try {
   me = await api("me");
-  const catalogResponse = await fetch('/cms-copy-catalog.json');
+  const catalogResponse = await fetch("/cms-copy-catalog.json");
   if (catalogResponse.ok) catalog = await catalogResponse.json();
-  await refresh();
+  if (me.role !== "mentor") await refresh();
   $("login").hidden = true;
   $("workspace").hidden = false;
   $("identity").textContent = me.email + " · " + me.role;
-  for (const key of [
-    "Overview",
-    "Media",
-    ...Object.keys(names),
-    ...(me.role === "editor" ? [] : ["Access", "Messages", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
-  ]) {
+  const navFor =
+    me.role === "mentor"
+      ? ["Leads"]
+      : [
+          "Overview",
+          "Media",
+          ...Object.keys(names),
+          ...(me.role === "editor"
+            ? []
+            : ["Leads", "Access", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
+        ];
+  if (me.role === "mentor") section = "Leads";
+  for (const key of navFor) {
     const b = button(names[key] || key, () => navigate(key));
     b.dataset.section = key;
     $("nav").append(b);

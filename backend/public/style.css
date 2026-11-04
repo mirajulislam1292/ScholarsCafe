@@ -276,3 +276,15 @@ button:disabled {
     font-size: 11px;
   }
 }
+
+/* Phase 3 additions: filters, danger action, version history, reorder buttons */
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.toolbar input[type="search"] { flex: 1 1 260px; }
+.toolbar select, .toolbar input { min-height: 40px; }
+a.button { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid currentColor; text-decoration: none; }
+button.danger { color: #b3261e; border-color: #b3261e; background: transparent; margin-top: 12px; }
+button.danger:hover { background: #fdecea; }
+details.card summary { cursor: pointer; font-weight: 500; }
+details.card .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid rgb(0 0 0 / 0.06); }
+.card.row button[aria-label^="Move"] { min-width: 36px; }
+article.card textarea { width: 100%; min-height: 80px; }

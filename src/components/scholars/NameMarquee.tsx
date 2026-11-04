@@ -1,4 +1,4 @@
-import { useCmsValue } from "@/lib/cms";
+import { useCmsList } from "@/lib/cms";
 import { UNIVERSITY_ACCEPTANCES } from "@/lib/university-acceptances";
 
 /**
@@ -7,7 +7,7 @@ import { UNIVERSITY_ACCEPTANCES } from "@/lib/university-acceptances";
  * each name carries its own trailing dot so both halves are identical.
  */
 export function NameMarquee() {
-  const items = useCmsValue("universities", UNIVERSITY_ACCEPTANCES).filter((u) => u.name?.trim());
+  const items = useCmsList("universities", UNIVERSITY_ACCEPTANCES).filter((u) => u.name?.trim());
   if (!items.length) return null;
 
   const row = (copy: number) =>

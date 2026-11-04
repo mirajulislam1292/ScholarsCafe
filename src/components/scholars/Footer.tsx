@@ -4,7 +4,7 @@ import { CmsText } from "@/lib/cms";
 import { EMAIL as CMS_DEFAULT_EMAIL, WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { Facebook, Instagram, Linkedin, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { ENABLED_COUNTRIES } from "@/lib/site-content";
+import { useEnabledCountries } from "@/lib/site-content";
 
 type LinkRef = {
   label: string;
@@ -14,6 +14,7 @@ type LinkRef = {
 };
 
 export function Footer() {
+  const countries = useEnabledCountries();
   const cmsLabel = useCmsLookup();
 
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
@@ -70,7 +71,7 @@ export function Footer() {
           />
           <Col
             title={cmsLabel("Footer.label.72eb63f032e4", "Destinations")}
-            links={ENABLED_COUNTRIES.map((c) => ({ label: c, href: "/#destinations" }))}
+            links={countries.map((c) => ({ label: c, href: "/#destinations" }))}
           />
         </div>
 

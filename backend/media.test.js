@@ -46,5 +46,5 @@ test('Re-encodes uploads, strips metadata and serves only a generated public ima
 test('Quota and revoked access are checked transactionally',async()=>{
   const input=await sharp({create:{width:2,height:2,channels:3,background:'blue'}}).png().toBuffer();
   await setup('owner',0).send().set('Content-Type','image/png').send(input).expect(403);
-  await setup('owner',1,100*1024*1024).send().set('Content-Type','image/png').send(input).expect(413);
+  await setup('owner',1,250*1024*1024).send().set('Content-Type','image/png').send(input).expect(413);
 });

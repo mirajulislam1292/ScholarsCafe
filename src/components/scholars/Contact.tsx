@@ -4,7 +4,7 @@ import { CmsText } from "@/lib/cms";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Reveal } from "./Reveal";
-import { ENABLED_COUNTRIES, SITE } from "@/lib/site-content";
+import { useEnabledCountries, SITE } from "@/lib/site-content";
 import { Turnstile, turnstileEnabled, resetTurnstile } from "./Turnstile";
 import {
   EMAIL as CMS_DEFAULT_EMAIL,
@@ -32,10 +32,11 @@ const INTERESTS = [
   "CSS Profile / ISFAA",
   "Just Exploring",
 ];
-const COUNTRIES = [...ENABLED_COUNTRIES, "Other / Not Sure"];
 const GRADES = ["Grade 9", "Grade 10", "Grade 11", "Grade 12", "Gap Year", "Other"];
 
 export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
+  const enabledCountries = useEnabledCountries();
+  const COUNTRIES = [...enabledCountries, "Other / Not Sure"];
   const cmsLabel = useCmsLookup();
 
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
@@ -265,7 +266,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
                     label={cmsLabel("Contact.label.d07f5ef208e1", "I'm Interested In")}
                     options={INTERESTS}
                   />
-                  {ENABLED_COUNTRIES.length > 1 && (
+                  {enabledCountries.length > 1 && (
                     <SelectField
                       label={cmsLabel("Contact.label.8270cf12a2cb", "Target Country")}
                       options={COUNTRIES}

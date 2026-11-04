@@ -13,6 +13,10 @@ import {
   trustedGoogleIdentity,
   canManage,
   canPublish,
+  canEditContent,
+  leadUpdate,
+  LEAD_STATUSES,
+  csvCell,
   userInput,
   recordInput,
   verifyTurnstile,
@@ -323,6 +327,12 @@ export function createApp(
     next();
   });
   app.get("/api/me", (req, res) => res.json(req.actor));
+  // Mentors only reach their own leads; every other admin API is closed to them.
+  app.use("/api", (req, _res, next) => {
+    if (req.actor.role !== "mentor") return next();
+    if (["/me", "/logout"].includes(req.path) || req.path.startsWith("/leads")) return next();
+    throw fail(403, "Mentors can only open their assigned leads.");
+  });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
     if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");
@@ -335,6 +345,123 @@ export function createApp(
   });
   installMedia(app, store, config, sharedLimit("media", 30, 3600));
   serveMedia(app, store);
+  // ---------- Leads CRM (website inquiries) ----------
+  // Row-level scoping: owners/admins see every lead; mentors only rows assigned to them; editors none.
+  const leadScope = (actor) => {
+    if (canPublish(actor.role)) return { where: "1=1", args: [] };
+    if (actor.role === "mentor") return { where: "i.assigned_to=?", args: [actor.id] };
+    throw fail(403, "Leads are restricted to admins, owners and assigned mentors.");
+  };
+  const leadFilter = (req, actor) => {
+    const scope = leadScope(actor);
+    const where = [scope.where];
+    const args = [...scope.args];
+    const q = typeof req.query.q === "string" ? req.query.q.trim().slice(0, 100) : "";
+    if (q) {
+      where.push("(i.name LIKE ? OR i.email LIKE ? OR i.phone LIKE ? OR i.message LIKE ?)");
+      const like = "%" + q.replace(/[\\%_]/g, "\\$&") + "%";
+      args.push(like, like, like, like);
+    }
+    if (LEAD_STATUSES.includes(req.query.status)) {
+      where.push("i.status=?");
+      args.push(req.query.status);
+    }
+    if (canPublish(actor.role) && typeof req.query.assigned === "string") {
+      if (req.query.assigned === "none") where.push("i.assigned_to IS NULL");
+      else if (/^[0-9a-f-]{36}$/.test(req.query.assigned)) {
+        where.push("i.assigned_to=?");
+        args.push(req.query.assigned);
+      }
+    }
+    return { sql: where.join(" AND "), args };
+  };
+  const LEAD_COLUMNS =
+    "i.id,i.name,i.email,i.phone,i.message,i.status,i.notes,i.assigned_to,u.email AS assigned_email,i.created_at,i.updated_at";
+  app.get("/api/leads", async (req, res) => {
+    const f = leadFilter(req, req.actor);
+    res.json({
+      items: await store.query(
+        `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 500`,
+        f.args,
+      ),
+    });
+  });
+  app.get("/api/leads.csv", async (req, res) => {
+    const f = leadFilter(req, req.actor);
+    const rows = await store.query(
+      `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 5000`,
+      f.args,
+    );
+    const head = ["Created", "Name", "Email", "Phone", "Status", "Assigned to", "Notes", "Message"];
+    const lines = [head.map(csvCell).join(",")].concat(
+      rows.map((r) =>
+        [
+          r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
+          r.name,
+          r.email,
+          r.phone,
+          r.status,
+          r.assigned_email,
+          r.notes,
+          r.message,
+        ]
+          .map(csvCell)
+          .join(","),
+      ),
+    );
+    await store.audit(req.actor.id, "leads_export", String(rows.length));
+    res
+      .set("Content-Type", "text/csv; charset=utf-8")
+      .set("Content-Disposition", 'attachment; filename="scholarscafe-leads.csv"')
+      .send("\ufeff" + lines.join("\r\n"));
+  });
+  app.post("/api/leads/:id", async (req, res) => {
+    if (!/^[0-9a-f-]{36}$/.test(req.params.id)) throw fail(404, "Lead not found.");
+    const input = leadUpdate.parse(req.body);
+    const actor = req.actor;
+    const scope = leadScope(actor);
+    if (actor.role === "mentor" && input.assigned_to !== undefined)
+      throw fail(403, "Only admins can assign leads.");
+    await store.transaction(async (c) => {
+      const [row] = await store.query(
+        `SELECT i.id FROM inquiries i WHERE i.id=? AND ${scope.where} FOR UPDATE`,
+        [req.params.id, ...scope.args],
+        c,
+      );
+      if (!row) throw fail(404, "Lead not found.");
+      if (input.assigned_to) {
+        const [m] = await store.query(
+          "SELECT id FROM users WHERE id=? AND role='mentor' AND active=1",
+          [input.assigned_to],
+          c,
+        );
+        if (!m) throw fail(400, "Choose an active mentor.");
+      }
+      const sets = [];
+      const args = [];
+      for (const key of ["status", "notes", "assigned_to"])
+        if (input[key] !== undefined) {
+          sets.push(key + "=?");
+          args.push(input[key]);
+        }
+      if (!sets.length) return;
+      await store.query(
+        `UPDATE inquiries SET ${sets.join(",")},updated_at=UTC_TIMESTAMP() WHERE id=?`,
+        [...args, req.params.id],
+        c,
+      );
+      await store.audit(actor.id, "lead_update:" + Object.keys(input).join("+"), req.params.id, c);
+    });
+    res.json({ ok: true });
+  });
+  app.get("/api/mentors", async (req, res) => {
+    if (!canPublish(req.actor.role)) throw fail(403, "Restricted.");
+    res.json({
+      items: await store.query(
+        "SELECT id,email FROM users WHERE role='mentor' AND active=1 ORDER BY email",
+      ),
+    });
+  });
   app.get("/api/inquiries", async (req, res) => {
     if (!canPublish(req.actor.role))
       throw fail(403, "Messages are restricted to admins and owners.");
@@ -381,14 +508,18 @@ export function createApp(
     res.clearCookie(sessionCookie, cookieOptions);
     res.json({ ok: true });
   });
+  const requireContentRole = (actor) => {
+    if (!canEditContent(actor.role)) throw fail(403, "Content editing is restricted.");
+  };
   app.get("/api/content", async (_req, res) =>
     res.json({
       items: await store.query(
-        "SELECT id,kind,title,draft AS data,version,published IS NOT NULL AS published FROM content ORDER BY kind,title",
+        "SELECT id,kind,title,draft AS data,version,published IS NOT NULL AS published FROM content WHERE deleted_at IS NULL ORDER BY kind,title",
       ),
     }),
   );
   app.post("/api/content", async (req, res) => {
+    requireContentRole(req.actor);
     const input = recordInput.parse(req.body);
     await store.transaction(async (c) => {
       const actor = (
@@ -421,6 +552,76 @@ export function createApp(
           c,
         );
       await store.audit(req.actor.id, "save_draft", input.id, c);
+    });
+    res.json({ ok: true });
+  });
+  // ---------- Content history, restore and delete ----------
+  const requireEditor = (actor) => {
+    if (!canEditContent(actor.role)) throw fail(403, "Content editing is restricted.");
+  };
+  app.get("/api/content/:id/revisions", async (req, res) => {
+    requireEditor(req.actor);
+    res.json({
+      items: await store.query(
+        "SELECT r.id,r.created_at,u.email FROM revisions r LEFT JOIN users u ON u.id=r.actor_id WHERE r.content_id=? ORDER BY r.id DESC LIMIT 50",
+        [req.params.id],
+      ),
+    });
+  });
+  app.post("/api/content/:id/restore", async (req, res) => {
+    requireEditor(req.actor);
+    const revision = Number(req.body?.revision);
+    const version = req.body?.version;
+    if (!Number.isInteger(revision) || !Number.isInteger(version))
+      throw fail(400, "Version required.");
+    await store.transaction(async (c) => {
+      const [current] = await store.query(
+        "SELECT * FROM content WHERE id=? FOR UPDATE",
+        [req.params.id],
+        c,
+      );
+      if (!current || current.version !== version)
+        throw fail(409, "Entry changed. Reload before restoring.");
+      const [rev] = await store.query(
+        "SELECT snapshot FROM revisions WHERE id=? AND content_id=?",
+        [revision, req.params.id],
+        c,
+      );
+      if (!rev) throw fail(404, "Version not found.");
+      // Validate the old snapshot against today's rules before it becomes the draft again.
+      recordInput.parse({
+        id: current.id,
+        kind: current.kind,
+        title: current.title,
+        data: rev.snapshot,
+        version: 0,
+      });
+      await store.query(
+        "INSERT INTO revisions (content_id,actor_id,snapshot) VALUES (?,?,?)",
+        [current.id, req.actor.id, JSON.stringify(current.draft)],
+        c,
+      );
+      await store.query(
+        "UPDATE content SET draft=?,deleted_at=NULL,version=version+1 WHERE id=?",
+        [JSON.stringify(rev.snapshot), current.id],
+        c,
+      );
+      await store.audit(req.actor.id, "restore_version", current.id + "#" + revision, c);
+    });
+    res.json({ ok: true });
+  });
+  app.post("/api/content/:id/delete", async (req, res) => {
+    if (!canPublish(req.actor.role)) throw fail(403, "Only admins and owners can delete.");
+    if (!Number.isInteger(req.body?.version)) throw fail(400, "Version required.");
+    await store.transaction(async (c) => {
+      // Soft delete: hidden everywhere, kept for the audit trail and so startup seeding never revives it.
+      const result = await store.query(
+        "UPDATE content SET deleted_at=UTC_TIMESTAMP(),published=NULL,version=version+1 WHERE id=? AND version=? AND deleted_at IS NULL",
+        [req.params.id, req.body.version],
+        c,
+      );
+      if (result.affectedRows !== 1) throw fail(409, "Entry changed. Reload before deleting.");
+      await store.audit(req.actor.id, "delete", req.params.id, c);
     });
     res.json({ ok: true });
   });

@@ -42,3 +42,10 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - [ ] Rotation: rotate the SMTP mailbox password and Google OAuth client secret if they were ever pasted into chats, emails or screenshots; rotate yearly otherwise.
 - [ ] GitHub: protect `main` (require PR), enable Dependabot alerts. Two deploy paths exist (Hostinger Git auto-deploy and the FTP Action); disable whichever you don't use and delete its secrets.
 - [ ] Monitoring: free uptime checks (e.g. UptimeRobot) on both domains; review the admin audit log monthly.
+
+## Phase 3 additions (admin CMS + leads)
+- **Mentor role:** server-side gate; mentors reach only `/api/me`, `/logout` and `/api/leads*`. Lead queries are scoped in SQL (`assigned_to = mentor id`); others' leads return 404. Mentors cannot reassign. Editors cannot see leads or delete.
+- **Leads CSV:** cells starting with `= + - @` are neutralised (formula injection); every export is audited.
+- **Video uploads:** MP4/WebM only, file-signature checked, ≤12 MB, 250 MB quota, served with Range support. Hostinger MySQL `max_allowed_packet` must allow 12 MB.
+- **Delete/restore:** soft delete (`deleted_at`), version-checked restore, all audited. Seeds never revive deleted entries.
+- Known limits: SEO overrides apply client-side (crawlers see build-time titles); Student role arrives in Phase 4/5.

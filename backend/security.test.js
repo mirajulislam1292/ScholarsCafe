@@ -216,3 +216,26 @@ test("Turnstile is enforced on public forms only when a secret is configured", a
   assert.equal(writes.length, 0);
   await send(guarded, { turnstileToken: "good-token" }).expect(201);
 });
+
+test("Every seed entry passes the content schemas", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const seed = JSON.parse(await readFile(new URL("./seed.json", import.meta.url), "utf8"));
+  for (const item of seed) {
+    const parsed = recordInput.safeParse({ id: item.id, kind: item.kind, title: item.title, data: item.data, version: 0 });
+    assert.ok(parsed.success, "invalid seed entry " + item.id);
+  }
+});
+
+test("Content schemas reject unsafe values in new collections", () => {
+  const ok = (kind, data) => recordInput.safeParse({ id: "x", kind, title: "t", data, version: 0 }).success;
+  const clip = { place: "p", device: "desktop", mp4: "/media/a.mp4", webm: "", poster: "", credit: "", rate: 0.85, enabled: true };
+  assert.equal(ok("hero", clip), true);
+  assert.equal(ok("hero", { ...clip, mp4: "javascript:alert(1)" }), false);
+  assert.equal(ok("hero", { ...clip, mp4: "//evil.example/a.mp4" }), false);
+  assert.equal(ok("hero", { ...clip, mp4: "/media/../../etc/passwd" }), false);
+  assert.equal(ok("hero", { ...clip, device: "tv" }), false);
+  assert.equal(ok("team", { name: "A", group: "founder", role: "", title: "", line: "", photo: "http://x" }), false);
+  assert.equal(ok("sections", { page: "/", order: "hero,names", hidden: "names" }), true);
+  assert.equal(ok("sections", { page: "/", order: "hero;drop table", hidden: "" }), false);
+  assert.equal(ok("universities", { name: "X", position: 10, extra: 1 }), false);
+});

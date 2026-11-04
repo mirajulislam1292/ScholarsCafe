@@ -9,9 +9,8 @@ import {
   type University,
 } from "@/lib/scholars-data";
 import { Search, X, ArrowRight } from "lucide-react";
-import { ENABLED_COUNTRIES, isCountryEnabled } from "@/lib/site-content";
+import { useEnabledCountries } from "@/lib/site-content";
 
-const COUNTRIES = ["All", ...ENABLED_COUNTRIES];
 const SCHOLARSHIPS = [
   "All",
   "Need-Based 100%",
@@ -25,6 +24,8 @@ const TYPES = ["All", "Liberal Arts", "Research", "Technical/STEM", "Arts & Desi
 const TUITIONS = ["All", "Free", "$0-10k", "$10-30k", "$30k+"];
 
 export function UniversityExplorer() {
+  const enabledCountries = useEnabledCountries();
+  const COUNTRIES = ["All", ...enabledCountries];
   const cmsLabel = useCmsLookup();
 
   const UNIVERSITIES = useCmsValue("data.UNIVERSITIES", CMS_DEFAULT_UNIVERSITIES);
@@ -41,14 +42,14 @@ export function UniversityExplorer() {
   const filtered = useMemo(() => {
     return UNIVERSITIES.filter(
       (u) =>
-        isCountryEnabled(u.country) &&
+        enabledCountries.includes(u.country) &&
         (country === "All" || u.country === country) &&
         (scholarship === "All" || u.scholarship === scholarship) &&
         (type === "All" || u.type === type) &&
         (tuition === "All" || u.tuition === tuition) &&
         (search === "" || u.name.toLowerCase().includes(search.toLowerCase())),
     );
-  }, [country, scholarship, type, tuition, search]);
+  }, [UNIVERSITIES, enabledCountries, country, scholarship, type, tuition, search]);
 
   const clear = () => {
     setCountry("All");

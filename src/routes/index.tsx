@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Sections } from "@/components/page/Sections";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Hero } from "@/components/scholars/Hero";
 import { NameMarquee } from "@/components/scholars/NameMarquee";
@@ -20,13 +21,46 @@ function Index() {
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <Hero />
-        <NameMarquee />
-        <Destinations />
-        <PageIndex />
-        <SuccessStories />
-        <BlogPosts />
-        <CtaBand />
+        <Sections
+          page="/"
+          blocks={{
+            hero: (
+              <>
+                <Hero />
+              </>
+            ),
+            names: (
+              <>
+                <NameMarquee />
+              </>
+            ),
+            usa: (
+              <>
+                <Destinations />
+              </>
+            ),
+            pages: (
+              <>
+                <PageIndex />
+              </>
+            ),
+            stories: (
+              <>
+                <SuccessStories />
+              </>
+            ),
+            journal: (
+              <>
+                <BlogPosts />
+              </>
+            ),
+            cta: (
+              <>
+                <CtaBand />
+              </>
+            ),
+          }}
+        />
       </main>
       <Footer />
     </div>

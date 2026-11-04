@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Sections } from "@/components/page/Sections";
 import { CmsText } from "@/lib/cms";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
@@ -26,19 +27,38 @@ function ContactPage() {
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <PageHero
-          title={<CmsText id="Contact.231ff83a4896">Let's Plan Your Future Together</CmsText>}
-          lead={
-            <CmsText id="Contact.d939b4bf1168">
-              Have a question? Ready to start? Just reach out. We respond within 24 hours and always
-              give honest, personalized advice.
-            </CmsText>
-          }
-          image="/media/hero/d2-columbia.webp"
-          imageAlt="Butler Library, Columbia University"
+        <Sections
+          page="/contact"
+          blocks={{
+            hero: (
+              <>
+                <PageHero
+                  title={
+                    <CmsText id="Contact.231ff83a4896">Let's Plan Your Future Together</CmsText>
+                  }
+                  lead={
+                    <CmsText id="Contact.d939b4bf1168">
+                      Have a question? Ready to start? Just reach out. We respond within 24 hours
+                      and always give honest, personalized advice.
+                    </CmsText>
+                  }
+                  image="/media/hero/d2-columbia.webp"
+                  imageAlt="Butler Library, Columbia University"
+                />
+              </>
+            ),
+            form: (
+              <>
+                <Contact showHeader={false} />
+              </>
+            ),
+            names: (
+              <>
+                <NameMarquee />
+              </>
+            ),
+          }}
         />
-        <Contact showHeader={false} />
-        <NameMarquee />
       </main>
       <Footer />
     </div>

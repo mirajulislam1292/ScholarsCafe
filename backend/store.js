@@ -41,6 +41,7 @@ export class Store {
   async initialize() {
     const schema = await readFile(new URL("./schema.sql", import.meta.url), "utf8");
     for (const sql of schema.split(";").filter((s) => s.trim())) await this.query(sql);
+    await this.migrate();
     // Bootstrap only an empty account list. Never re-enable a revoked owner at restart.
     await this.query(
       "INSERT INTO users (id,email,role) SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM users existing)",
@@ -58,6 +59,32 @@ export class Store {
           item.draftOnly ? null : JSON.stringify(item.data),
         ],
       );
+  }
+  /** Idempotent upgrades for databases created by older versions. Safe to run on every start. */
+  async migrate() {
+    const has = async (table, column) =>
+      (
+        await this.query(
+          "SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=?",
+          [table, column],
+        )
+      ).length > 0;
+    const add = async (table, column, ddl) => {
+      if (!(await has(table, column))) await this.query(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+    };
+    await this.query(
+      "ALTER TABLE users MODIFY role ENUM('owner','admin','editor','mentor') NOT NULL",
+    );
+    await add("content", "deleted_at", "deleted_at DATETIME NULL");
+    await add(
+      "inquiries",
+      "status",
+      "status ENUM('new','contacted','enrolled','closed') NOT NULL DEFAULT 'new'",
+    );
+    await add("inquiries", "notes", "notes TEXT NULL");
+    await add("inquiries", "assigned_to", "assigned_to CHAR(36) NULL");
+    await add("inquiries", "updated_at", "updated_at TIMESTAMP NULL");
+    await add("media", "mime", "mime VARCHAR(40) NOT NULL DEFAULT 'image/webp'");
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(
@@ -81,7 +108,10 @@ export class Store {
   async checkRateLimit(scope, identity, limit, seconds) {
     const window = Math.floor(Date.now() / (seconds * 1000));
     const key = createHash("sha256").update(`${scope}:${identity}:${window}`).digest("hex");
-    await this.query("INSERT INTO rate_limits (bucket,hits,expires_at) VALUES (?,1,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE hits=hits+1", [key, (window + 1) * seconds]);
+    await this.query(
+      "INSERT INTO rate_limits (bucket,hits,expires_at) VALUES (?,1,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE hits=hits+1",
+      [key, (window + 1) * seconds],
+    );
     const rows = await this.query("SELECT hits FROM rate_limits WHERE bucket=?", [key]);
     return rows[0].hits <= limit;
   }

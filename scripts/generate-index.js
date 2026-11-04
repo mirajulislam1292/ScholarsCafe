@@ -19,7 +19,7 @@ function writeSecurityPolicy(clientDir, html) {
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self'",
     "img-src 'self' data: https:",
-    "media-src 'self'",
+    "media-src 'self' https://admin.scholarscafe.com",
     "connect-src 'self' https://admin.scholarscafe.com",
     `frame-src${turnstile || " 'none'"}`,
     "object-src 'none'",

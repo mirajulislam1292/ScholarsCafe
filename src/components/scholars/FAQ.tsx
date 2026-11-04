@@ -1,3 +1,4 @@
+import { useCmsList } from "@/lib/cms";
 import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { useState } from "react";
@@ -11,7 +12,7 @@ import { Plus, Mail, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export function FAQ() {
-  const FAQS = useCmsValue("data.FAQS", CMS_DEFAULT_FAQS);
+  const FAQS = useCmsList("faqs", CMS_DEFAULT_FAQS);
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
 

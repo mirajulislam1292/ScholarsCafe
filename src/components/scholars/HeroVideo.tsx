@@ -1,5 +1,26 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useCmsList } from "@/lib/cms";
 import { HERO_DESKTOP, HERO_MOBILE, type HeroClip } from "@/lib/hero-media";
+
+type AdminClip = HeroClip & { device?: "desktop" | "mobile"; enabled?: boolean };
+
+/** Playlist from the admin ("Hero videos"), falling back to the built-in clips. */
+function usePlaylist() {
+  const fallback = useMemo<AdminClip[]>(
+    () => [
+      ...HERO_DESKTOP.map((c) => ({ ...c, device: "desktop" as const, enabled: true })),
+      ...HERO_MOBILE.map((c) => ({ ...c, device: "mobile" as const, enabled: true })),
+    ],
+    [],
+  );
+  const all = useCmsList<AdminClip>("hero", fallback).filter((c) => c.enabled !== false && c.mp4);
+  const desktop = all.filter((c) => c.device !== "mobile");
+  const mobile = all.filter((c) => c.device === "mobile");
+  // Stable identity so the player only restarts when the playlist really changes.
+  const key = JSON.stringify([desktop, mobile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => ({ desktop, mobile: mobile.length ? mobile : desktop }), [key]);
+}
 
 // Timing (tweak freely)
 /** Seconds each clip stays on screen before the next one starts fading in. */
@@ -25,6 +46,7 @@ function videoAllowed() {
  * Two stacked <video> layers; the hidden one preloads the next clip. No controls, always muted.
  */
 export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void }) {
+  const playlist = usePlaylist();
   const a = useRef<HTMLVideoElement>(null);
   const b = useRef<HTMLVideoElement>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -33,7 +55,8 @@ export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void
     const layers = [a.current!, b.current!];
     if (!videoAllowed()) return;
     const portrait = window.matchMedia("(max-width: 767px) and (orientation: portrait)").matches;
-    const clips = portrait ? HERO_MOBILE : HERO_DESKTOP;
+    const clips = portrait ? playlist.mobile : playlist.desktop;
+    if (!clips.length) return;
     const webm = layers[0].canPlayType('video/webm; codecs="vp9"') === "probably";
     let index = 0;
     let front = 0;
@@ -153,7 +176,7 @@ export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void
         el.load();
       });
     };
-  }, [onClip]);
+  }, [onClip, playlist]);
 
   const layer =
     "absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity ease-[cubic-bezier(0.22,1,0.36,1)]";
@@ -162,10 +185,10 @@ export function HeroVideo({ onClip }: { onClip?: (clip: HeroClip | null) => void
       <picture>
         <source
           media="(max-width: 767px) and (orientation: portrait)"
-          srcSet={HERO_MOBILE[0].poster}
+          srcSet={playlist.mobile[0]?.poster}
         />
         <img
-          src={HERO_DESKTOP[0].poster}
+          src={playlist.desktop[0]?.poster}
           alt=""
           width={1920}
           height={1080}

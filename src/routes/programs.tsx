@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Sections } from "@/components/page/Sections";
 import { ArrowUpRight, Check } from "lucide-react";
 import { CmsText, useCmsCollection, useCmsValue } from "@/lib/cms";
 import {
@@ -42,76 +43,103 @@ function ProgramsPage() {
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <PageHero
-          title={<CmsText id="Programs.e2cd5f83037c">Choose Your Path to the World</CmsText>}
-          lead={
-            <CmsText id="Programs.f664216f2985">
-              Whether you're chasing full scholarships or standard admission, we have a structured,
-              mentor-led program built around your goals.
-            </CmsText>
-          }
-          image="/media/pages/oklahoma-autumn.webp"
-          imageSm="/media/pages/oklahoma-autumn-sm.webp"
+        <Sections
+          page="/programs"
+          blocks={{
+            hero: (
+              <>
+                <PageHero
+                  title={
+                    <CmsText id="Programs.e2cd5f83037c">Choose Your Path to the World</CmsText>
+                  }
+                  lead={
+                    <CmsText id="Programs.f664216f2985">
+                      Whether you're chasing full scholarships or standard admission, we have a
+                      structured, mentor-led program built around your goals.
+                    </CmsText>
+                  }
+                  image="/media/pages/oklahoma-autumn.webp"
+                  imageSm="/media/pages/oklahoma-autumn-sm.webp"
+                />
+              </>
+            ),
+            tracks: (
+              <>
+                <Block title={<CmsText id="Programs.1d5c2e2d47ce">Our Tracks</CmsText>}>
+                  <div className="grid gap-6">
+                    {PROGRAMS.map((p, i) => (
+                      <Reveal key={p.id} delay={i * 0.05}>
+                        <ProgramRow p={p} waLink={WA_LINK} />
+                      </Reveal>
+                    ))}
+                  </div>
+                </Block>
+              </>
+            ),
+            process: (
+              <>
+                <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(96px,13vw,200px)] text-white">
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"
+                  />
+                  <div className="mx-auto max-w-[1200px] px-6 md:px-12">
+                    <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                      <h2 className="type-h2 max-w-[14ch]">
+                        <CmsText id="Process.0de600876bfd">
+                          From conversation to acceptance.
+                        </CmsText>
+                      </h2>
+                      <p className="type-lead max-w-md text-ice-300/80">
+                        <CmsText id="Process.a5a96a06b61f">
+                          A six-step path designed to take the chaos out of admissions and replace
+                          it with structure, strategy, and momentum.
+                        </CmsText>
+                      </p>
+                    </Reveal>
+                  </div>
+                  <ol
+                    aria-label="Our process"
+                    className="mx-auto mt-16 flex max-w-[1200px] snap-x snap-mandatory scroll-pl-6 gap-5 overflow-x-auto px-6 pb-4 md:scroll-pl-12 [scrollbar-width:thin] md:mt-20 md:px-12"
+                  >
+                    {PROCESS.map((step) => (
+                      <li
+                        key={step.n}
+                        className="group w-[78%] shrink-0 snap-start rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] sm:w-[46%] lg:w-[31%] md:p-10"
+                      >
+                        <span className="font-heading text-[3.5rem] font-light leading-none text-ice-500 transition-colors duration-700 group-hover:text-ice-200">
+                          {String(step.n).padStart(2, "0")}
+                        </span>
+                        <h3 className="type-h3 mt-14 text-white">{step.title}</h3>
+                        <p className="type-body mt-3 text-ice-300/80">{step.desc}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              </>
+            ),
+            image: (
+              <>
+                <ParallaxImage
+                  src="/media/pages/campus-early-fall.webp"
+                  srcSm="/media/pages/campus-early-fall-sm.webp"
+                  alt="A quiet college campus in early fall"
+                  className="h-[56vh] min-h-[360px] md:h-[80vh]"
+                />
+              </>
+            ),
+            names: (
+              <>
+                <NameMarquee />
+              </>
+            ),
+            cta: (
+              <>
+                <CtaBand />
+              </>
+            ),
+          }}
         />
-
-        {/* Tracks: large editorial rows */}
-        <Block title={<CmsText id="Programs.1d5c2e2d47ce">Our Tracks</CmsText>}>
-          <div className="grid gap-6">
-            {PROGRAMS.map((p, i) => (
-              <Reveal key={p.id} delay={i * 0.05}>
-                <ProgramRow p={p} waLink={WA_LINK} />
-              </Reveal>
-            ))}
-          </div>
-        </Block>
-
-        {/* Process: horizontal scroll row */}
-        <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(96px,13vw,200px)] text-white">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"
-          />
-          <div className="mx-auto max-w-[1200px] px-6 md:px-12">
-            <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-              <h2 className="type-h2 max-w-[14ch]">
-                <CmsText id="Process.0de600876bfd">From conversation to acceptance.</CmsText>
-              </h2>
-              <p className="type-lead max-w-md text-ice-300/80">
-                <CmsText id="Process.a5a96a06b61f">
-                  A six-step path designed to take the chaos out of admissions and replace it with
-                  structure, strategy, and momentum.
-                </CmsText>
-              </p>
-            </Reveal>
-          </div>
-          <ol
-            aria-label="Our process"
-            className="mx-auto mt-16 flex max-w-[1200px] snap-x snap-mandatory scroll-pl-6 gap-5 overflow-x-auto px-6 pb-4 md:scroll-pl-12 [scrollbar-width:thin] md:mt-20 md:px-12"
-          >
-            {PROCESS.map((step) => (
-              <li
-                key={step.n}
-                className="group w-[78%] shrink-0 snap-start rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] sm:w-[46%] lg:w-[31%] md:p-10"
-              >
-                <span className="font-heading text-[3.5rem] font-light leading-none text-ice-500 transition-colors duration-700 group-hover:text-ice-200">
-                  {String(step.n).padStart(2, "0")}
-                </span>
-                <h3 className="type-h3 mt-14 text-white">{step.title}</h3>
-                <p className="type-body mt-3 text-ice-300/80">{step.desc}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <ParallaxImage
-          src="/media/pages/campus-early-fall.webp"
-          srcSm="/media/pages/campus-early-fall-sm.webp"
-          alt="A quiet college campus in early fall"
-          className="h-[56vh] min-h-[360px] md:h-[80vh]"
-        />
-
-        <NameMarquee />
-        <CtaBand />
       </main>
       <Footer />
     </div>

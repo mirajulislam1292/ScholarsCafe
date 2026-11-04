@@ -4,13 +4,14 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { ContentProvider } from "@/lib/cms";
+import { ContentProvider, SeoOverride } from "@/lib/cms";
 
 function NotFoundComponent() {
   return (
@@ -129,10 +130,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   return (
     <QueryClientProvider client={queryClient}>
       <ContentProvider>
+        <SeoOverride path={pathname} />
         <Outlet />
       </ContentProvider>
     </QueryClientProvider>
