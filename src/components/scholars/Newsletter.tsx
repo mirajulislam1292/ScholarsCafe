@@ -47,7 +47,7 @@ export function Newsletter() {
   }
 
   return (
-    <section id="newsletter" className="bg-blue-950 py-[clamp(96px,13vw,200px)]">
+    <section id="newsletter" className="bg-blue-950 py-[clamp(72px,13vw,200px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center text-white">
           <motion.div
@@ -72,7 +72,8 @@ export function Newsletter() {
 
           {!done ? (
             <form onSubmit={subscribe} className="mx-auto mt-10 max-w-[520px]">
-              <div className="flex overflow-hidden rounded-full border border-white/40 bg-white/10">
+              {/* Phones: email and button stacked full width; larger screens: one pill. */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:gap-0 sm:overflow-hidden sm:rounded-full sm:border sm:border-white/40 sm:bg-white/10">
                 <input
                   type="email"
                   required
@@ -83,12 +84,12 @@ export function Newsletter() {
                     "Enter your email address",
                   )}
                   aria-label={cmsLabel("Newsletter.label.f2488fd4ef4a", "Email address")}
-                  className="min-w-0 flex-1 bg-transparent px-6 py-4 text-[15px] text-white placeholder:text-white/70 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-full border border-white/40 bg-white/10 px-6 py-4 text-[16px] text-white placeholder:text-white/70 focus:outline-none sm:rounded-none sm:border-0 sm:bg-transparent sm:text-[15px]"
                 />
                 <button
                   type="submit"
                   disabled={sending}
-                  className="type-button bg-ice-100 px-7 py-4 text-blue-950 transition-colors hover:bg-white"
+                  className="type-button rounded-full bg-ice-100 px-7 py-4 text-blue-950 transition-colors hover:bg-white sm:rounded-none"
                 >
                   <CmsText id="Newsletter.d0f736aa267d">Subscribe →</CmsText>
                 </button>

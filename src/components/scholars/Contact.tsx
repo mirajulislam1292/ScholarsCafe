@@ -86,10 +86,10 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
     }
   }
   return (
-    <section id="contact" className="bg-white py-[clamp(96px,13vw,200px)]">
+    <section id="contact" className="bg-white py-[clamp(72px,13vw,200px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         {showHeader && (
-          <Reveal className="mx-auto max-w-2xl text-center">
+          <Reveal className="max-w-2xl md:mx-auto md:text-center">
             <span className="hidden">
               <CmsText id="Contact.3ee6cddb8ee0">Get In Touch</CmsText>
             </span>
@@ -109,7 +109,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
           className={`${showHeader ? "mt-16" : ""} grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16`}
         >
           {/* Left: contact info */}
-          <Reveal className="space-y-6">
+          <Reveal className="space-y-4 sm:space-y-6">
             <ContactItem
               icon={<Mail className="h-5 w-5" />}
               title={cmsLabel("Contact.label.969ccbd3cf63", "Email")}
@@ -211,7 +211,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
 
           {/* Right: form */}
           <Reveal>
-            <div className="rounded-3xl border border-neutral-900/[0.08] bg-white p-8 shadow-[0_4px_16px_rgb(4_28_49/0.04)] md:p-10">
+            <div className="rounded-3xl border border-neutral-900/[0.08] bg-white p-6 shadow-[0_4px_16px_rgb(4_28_49/0.04)] sm:p-8 md:p-10">
               <h3 className="type-h3 text-neutral-900">
                 <CmsText id="Contact.19ecf8fecb75">Send Us a Message</CmsText>
               </h3>
@@ -288,7 +288,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
                         "Contact.label.2acc8f94e428",
                         "Tell us about your background, goals, target universities, timeline, and any questions you have.",
                       )}
-                      className="w-full resize-none rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
+                      className="w-full resize-none rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-base sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
                     />
                   </div>
                   <Turnstile />
@@ -348,6 +348,7 @@ function ContactItem({
       href={href}
       target={href.startsWith("http") ? "_blank" : undefined}
       rel="noopener noreferrer"
+      className="block"
     >
       {Inner}
     </a>
@@ -404,7 +405,7 @@ function Field({
         name={name}
         type={type}
         required={required}
-        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
+        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-base sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
       />
     </div>
   );
@@ -420,7 +421,7 @@ function SelectField({ label, options }: { label: string; options: string[] }) {
       <label className="mb-1.5 block text-sm font-medium text-neutral-900">{label}</label>
       <select
         name={label}
-        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
+        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-4 py-3 text-base sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
       >
         <option value="">
           <CmsText id="Contact.8e8522783c86">Select an option…</CmsText>

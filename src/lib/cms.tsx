@@ -115,7 +115,19 @@ export function useCmsValue<T>(key: string, fallback: T): T {
         return value;
       return next;
     }
-    if (Array.isArray(value)) return value.map((v, i) => visit(v, path + "." + i));
+    if (Array.isArray(value)) {
+      // When the admin has saved this list, show exactly its length: built-in defaults past the
+      // admin's last item would otherwise appear as stray repeats.
+      const prefix = path + ".";
+      let last = -1;
+      for (const k in copy)
+        if (k.startsWith(prefix)) {
+          const n = Number(k.slice(prefix.length).split(".")[0]);
+          if (Number.isInteger(n) && n > last) last = n;
+        }
+      const list = last >= 0 && last + 1 < value.length ? value.slice(0, last + 1) : value;
+      return list.map((v, i) => visit(v, path + "." + i));
+    }
     if (value && typeof value === "object")
       return Object.fromEntries(
         Object.entries(value).map(([k, v]) => [k, visit(v, path + "." + k)]),

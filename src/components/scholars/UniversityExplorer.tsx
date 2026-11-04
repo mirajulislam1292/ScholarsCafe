@@ -67,9 +67,9 @@ export function UniversityExplorer() {
   if (tuition !== "All") activeTags.push({ label: tuition, onRemove: () => setTuition("All") });
 
   return (
-    <section id="universities" className="bg-white py-[clamp(96px,13vw,200px)]">
+    <section id="universities" className="bg-white py-[clamp(72px,13vw,200px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
-        <Reveal className="mx-auto max-w-2xl text-center">
+        <Reveal className="max-w-2xl md:mx-auto md:text-center">
           <span className="hidden">
             <CmsText id="UniversityExplorer.0d7a9a83ef6d">University Explorer</CmsText>
           </span>
@@ -126,7 +126,7 @@ export function UniversityExplorer() {
                     "UniversityExplorer.label.d02ef87a95f7",
                     "University name…",
                   )}
-                  className="w-full rounded-xl border border-neutral-900/[0.08] bg-white py-2.5 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
+                  className="w-full rounded-xl border border-neutral-900/[0.08] bg-white py-2.5 pl-9 pr-3 text-base sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
                 />
               </div>
             </div>
@@ -157,23 +157,30 @@ export function UniversityExplorer() {
         </Reveal>
 
         {/* Results */}
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {filtered.slice(0, visible).map((u) => (
             <button
               key={u.name}
               onClick={() => setSelected(u)}
-              className="group rounded-2xl border border-neutral-900/[0.08] bg-white p-5 text-left transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_24px_48px_rgb(4_28_49/0.08)]"
+              className="group relative rounded-2xl border border-neutral-900/[0.08] bg-white p-4 text-left transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_24px_48px_rgb(4_28_49/0.08)] sm:p-5"
             >
-              <div className="flex items-start justify-between">
+              {/* Phones: compact card (no big flag), country badge in the corner. */}
+              <span
+                aria-hidden
+                className="absolute right-4 top-4 rounded-full bg-ice-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-700 sm:hidden"
+              >
+                {u.country}
+              </span>
+              <div className="hidden items-start justify-between sm:flex">
                 <div className="text-3xl">{u.flag}</div>
                 <span className="rounded-full bg-ice-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-700">
                   {u.country}
                 </span>
               </div>
-              <h3 className="mt-4 type-h3 text-[1.0625rem] leading-tight text-neutral-900">
+              <h3 className="pr-14 type-h3 text-[1.0625rem] leading-tight text-neutral-900 sm:mt-4 sm:pr-0">
                 {u.name}
               </h3>
-              <div className="mt-3 space-y-1 text-[12px] text-neutral-600">
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-neutral-600 sm:mt-3 sm:block sm:space-y-1">
                 <div>{u.type}</div>
                 <div className="text-blue-700">{u.scholarship}</div>
                 <div>
@@ -285,7 +292,7 @@ function Select({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
+        className="w-full rounded-xl border border-neutral-900/[0.08] bg-white px-3 py-2.5 text-base sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15"
       >
         {options.map((o) => (
           <option key={o} value={o}>
