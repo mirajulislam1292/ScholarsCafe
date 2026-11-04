@@ -2,7 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import request from "supertest";
 import { createApp } from "./app.js";
-import { courseScope, lessonScope, studentScope, profileColumns, can, canReachStudent } from "./access.js";
+import {
+  courseScope,
+  lessonScope,
+  studentScope,
+  profileColumns,
+  can,
+  canReachStudent,
+} from "./access.js";
 import { canManage } from "./security.js";
 
 const ME = "11111111-1111-4111-8111-111111111111";
@@ -69,34 +76,68 @@ test("Write permissions follow the role table", () => {
 });
 
 test("Students are locked out of every staff API", async () => {
-  const config = { ADMIN_ORIGIN: "https://admin.scholarscafe.com", PUBLIC_ORIGIN: "https://scholarscafe.com", GOOGLE_CLIENT_ID: "t" };
+  const config = {
+    ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+    PUBLIC_ORIGIN: "https://scholarscafe.com",
+    GOOGLE_CLIENT_ID: "t",
+  };
   const app = createApp(
-    { session: async () => ({ id: ME, role: "student", csrf: "abc" }), transaction: (fn) => fn({}), query: async () => [], audit: async () => {} },
+    {
+      session: async () => ({ id: ME, role: "student", csrf: "abc" }),
+      transaction: (fn) => fn({}),
+      query: async () => [],
+      audit: async () => {},
+    },
     config,
   );
   const cookie = "__Host-sc_session=" + "a".repeat(64);
-  for (const path of ["/api/content", "/api/leads", "/api/users", "/api/media", "/api/audit", "/api/inquiries", "/api/mentors"])
+  for (const path of [
+    "/api/content",
+    "/api/leads",
+    "/api/users",
+    "/api/media",
+    "/api/audit",
+    "/api/inquiries",
+    "/api/mentors",
+  ])
     await request(app).get(path).set("Cookie", cookie).expect(403);
   await request(app).get("/api/me").set("Cookie", cookie).expect(200);
 });
 
 test("Private media is never served on the public route", async () => {
   let sql;
-  const app = createApp({ query: async (q) => ((sql = q), []) }, { ADMIN_ORIGIN: "https://a", PUBLIC_ORIGIN: "https://b" });
+  const app = createApp(
+    { query: async (q) => ((sql = q), []) },
+    { ADMIN_ORIGIN: "https://a", PUBLIC_ORIGIN: "https://b" },
+  );
   await request(app).get("/public/media/11111111-1111-4111-8111-111111111111").expect(404);
   assert.match(sql, /visibility='public'/);
 });
 
 test("Course and student writes are refused for students and mentors before touching the database", async () => {
-  const config = { ADMIN_ORIGIN: "https://admin.scholarscafe.com", PUBLIC_ORIGIN: "https://scholarscafe.com", GOOGLE_CLIENT_ID: "t" };
+  const config = {
+    ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+    PUBLIC_ORIGIN: "https://scholarscafe.com",
+    GOOGLE_CLIENT_ID: "t",
+  };
   for (const role of ["student", "mentor"]) {
     const writes = [];
     const app = createApp(
-      { session: async () => ({ id: ME, role, csrf: "abc" }), transaction: (fn) => fn({}), query: async (sql) => (writes.push(sql), []), audit: async () => {} },
+      {
+        session: async () => ({ id: ME, role, csrf: "abc" }),
+        transaction: (fn) => fn({}),
+        query: async (sql) => (writes.push(sql), []),
+        audit: async () => {},
+      },
       config,
     );
     const post = (path, body) =>
-      request(app).post(path).set("Cookie", "__Host-sc_session=" + "a".repeat(64)).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send(body);
+      request(app)
+        .post(path)
+        .set("Cookie", "__Host-sc_session=" + "a".repeat(64))
+        .set("Origin", config.ADMIN_ORIGIN)
+        .set("X-CSRF-Token", "abc")
+        .send(body);
     await post("/api/lms/courses", { title: "x" }).expect(403);
     await post("/api/lms/lessons", { course_id: OTHER, title: "x" }).expect(403);
     await post("/api/lms/students", { email: "a@b.co", full_name: "x" }).expect(403);
@@ -107,15 +148,35 @@ test("Course and student writes are refused for students and mentors before touc
 });
 
 test("Lesson video: login required, editors refused, query scoped to the student and private files", async () => {
-  const config = { ADMIN_ORIGIN: "https://admin.scholarscafe.com", PUBLIC_ORIGIN: "https://scholarscafe.com", GOOGLE_CLIENT_ID: "t" };
+  const config = {
+    ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+    PUBLIC_ORIGIN: "https://scholarscafe.com",
+    GOOGLE_CLIENT_ID: "t",
+  };
   const path = "/api/lms/lessons/" + OTHER + "/video";
-  await request(createApp({ session: async () => null }, config)).get(path).expect(401);
+  await request(createApp({ session: async () => null }, config))
+    .get(path)
+    .expect(401);
   const cookie = "__Host-sc_session=" + "a".repeat(64);
-  const appFor = (role, query) => createApp({ session: async () => ({ id: ME, role, csrf: "abc" }), query }, config);
-  await request(appFor("editor", async () => [])).get(path).set("Cookie", cookie).expect(403);
+  const appFor = (role, query) =>
+    createApp({ session: async () => ({ id: ME, role, csrf: "abc" }), query }, config);
+  await request(appFor("editor", async () => []))
+    .get(path)
+    .set("Cookie", cookie)
+    .expect(403);
   let seen;
-  const app = appFor("student", async (sql, args) => ((seen = { sql, args }), [{ bytes: Buffer.from("0123456789"), mime: "video/mp4" }]));
-  const res = await request(app).get(path).set("Cookie", cookie).set("Range", "bytes=2-5").expect(206);
+  const app = appFor(
+    "student",
+    async (sql, args) => (
+      (seen = { sql, args }),
+      [{ bytes: Buffer.from("0123456789"), mime: "video/mp4" }]
+    ),
+  );
+  const res = await request(app)
+    .get(path)
+    .set("Cookie", cookie)
+    .set("Range", "bytes=2-5")
+    .expect(206);
   assert.equal(res.headers["content-range"], "bytes 2-5/10");
   assert.equal(res.headers["cache-control"], "private, no-store");
   assert.match(seen.sql, /m\.visibility='private'/);
@@ -124,7 +185,11 @@ test("Lesson video: login required, editors refused, query scoped to the student
 });
 
 test("Messages: a student cannot read or post in another student's thread; mentors can't moderate reviews", async () => {
-  const config = { ADMIN_ORIGIN: "https://admin.scholarscafe.com", PUBLIC_ORIGIN: "https://scholarscafe.com", GOOGLE_CLIENT_ID: "t" };
+  const config = {
+    ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+    PUBLIC_ORIGIN: "https://scholarscafe.com",
+    GOOGLE_CLIENT_ID: "t",
+  };
   const writes = [];
   const store = (role) => ({
     session: async () => ({ id: ME, role, csrf: "abc" }),
@@ -133,15 +198,32 @@ test("Messages: a student cannot read or post in another student's thread; mento
     audit: async () => {},
     query: async (sql) => {
       if (!sql.startsWith("SELECT")) writes.push(sql);
-      return sql.startsWith("SELECT id FROM users WHERE id=? AND role='student'") ? [{ id: OTHER }] : [];
+      return sql.startsWith("SELECT id FROM users WHERE id=? AND role='student'")
+        ? [{ id: OTHER }]
+        : [];
     },
   });
   const cookie = "__Host-sc_session=" + "a".repeat(64);
   const app = createApp(store("student"), config);
-  await request(app).get("/api/lms/threads/" + OTHER).set("Cookie", cookie).expect(404);
-  await request(app).post("/api/lms/threads/" + OTHER).set("Cookie", cookie).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send({ body: "hi" }).expect(404);
+  await request(app)
+    .get("/api/lms/threads/" + OTHER)
+    .set("Cookie", cookie)
+    .expect(404);
+  await request(app)
+    .post("/api/lms/threads/" + OTHER)
+    .set("Cookie", cookie)
+    .set("Origin", config.ADMIN_ORIGIN)
+    .set("X-CSRF-Token", "abc")
+    .send({ body: "hi" })
+    .expect(404);
   assert.deepEqual(writes, []);
   const mentor = createApp(store("mentor"), config);
   await request(mentor).get("/api/lms/reviews").set("Cookie", cookie).expect(403);
-  await request(mentor).post("/api/lms/reviews/" + OTHER).set("Cookie", cookie).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send({ status: "approved" }).expect(403);
+  await request(mentor)
+    .post("/api/lms/reviews/" + OTHER)
+    .set("Cookie", cookie)
+    .set("Origin", config.ADMIN_ORIGIN)
+    .set("X-CSRF-Token", "abc")
+    .send({ status: "approved" })
+    .expect(403);
 });

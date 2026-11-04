@@ -32,3 +32,5 @@ Downloaded at 2400 px, saved as WebP at 1920 px (and 960/720 px `-sm` versions).
 
 ## Universities
 The marquee under the hero shows university names as text only (no logos).
+## Code and services (Phases 3–5)
+No new third-party assets. Passwords and codes use Node's built-in `crypto` (scrypt, randomInt). Email goes through your Hostinger mailbox (nodemailer, MIT). Admin backend libraries: Express, helmet, express-rate-limit, google-auth-library, mysql2, nodemailer, sharp, zod (all MIT/Apache-2.0).

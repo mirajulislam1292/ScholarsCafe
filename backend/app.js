@@ -57,7 +57,12 @@ export function createApp(
       [hash(session), user.id, token()],
       c,
     );
-    await store.audit(user.id, method === "google" ? "sign_in" : "sign_in_" + method, user.email, c);
+    await store.audit(
+      user.id,
+      method === "google" ? "sign_in" : "sign_in_" + method,
+      user.email,
+      c,
+    );
     return session;
   };
   const setSession = (res, session) =>

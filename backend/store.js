@@ -49,7 +49,11 @@ export class Store {
     // Bootstrap only an empty account list. Never re-enable a revoked owner at restart.
     await this.query(
       "INSERT INTO users (id,email,role) SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM users existing)",
-      [randomUUID(), (this.config?.OWNER_EMAIL || "contact.scholarscafe@gmail.com").toLowerCase(), "owner"],
+      [
+        randomUUID(),
+        (this.config?.OWNER_EMAIL || "contact.scholarscafe@gmail.com").toLowerCase(),
+        "owner",
+      ],
     );
     const seed = JSON.parse(await readFile(new URL("./seed.json", import.meta.url), "utf8"));
     for (const item of seed)
@@ -92,7 +96,11 @@ export class Store {
     await add("users", "failed_logins", "failed_logins INT NOT NULL DEFAULT 0");
     await add("users", "locked_until", "locked_until DATETIME NULL");
     // Private media (lesson videos) is never served by the public media route.
-    await add("media", "visibility", "visibility ENUM('public','private') NOT NULL DEFAULT 'public'");
+    await add(
+      "media",
+      "visibility",
+      "visibility ENUM('public','private') NOT NULL DEFAULT 'public'",
+    );
     await add("media", "mime", "mime VARCHAR(40) NOT NULL DEFAULT 'image/webp'");
   }
   async audit(actor, action, target, c = this.pool) {

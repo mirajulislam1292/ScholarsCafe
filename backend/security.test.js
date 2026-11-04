@@ -12,47 +12,96 @@ const config = {
 test("Newsletter requires consent and queues delivery atomically without exposing duplicate subscribers", async () => {
   let inserts = 0;
   let queued = 0;
-  const store = { transaction: (fn) => fn({}), query: async (sql) => {
-    if (sql.startsWith("INSERT IGNORE INTO submissions")) return { affectedRows: inserts++ === 0 ? 1 : 0 };
-    if (sql.startsWith("INSERT INTO mail_outbox")) { queued++; return {}; }
-    throw Error("Unexpected query");
-  }};
+  const store = {
+    transaction: (fn) => fn({}),
+    query: async (sql) => {
+      if (sql.startsWith("INSERT IGNORE INTO submissions"))
+        return { affectedRows: inserts++ === 0 ? 1 : 0 };
+      if (sql.startsWith("INSERT INTO mail_outbox")) {
+        queued++;
+        return {};
+      }
+      throw Error("Unexpected query");
+    },
+  };
   const app = createApp(store, config);
-  const send = (body) => request(app).post("/public/newsletter").set("Origin", config.PUBLIC_ORIGIN).send(body);
+  const send = (body) =>
+    request(app).post("/public/newsletter").set("Origin", config.PUBLIC_ORIGIN).send(body);
   await send({ email: "student@example.com", consent: false }).expect(400);
-  for (let i = 0; i < 2; i++) await send({ email: "student@example.com", consent: true }).expect(201, { ok: true });
+  for (let i = 0; i < 2; i++)
+    await send({ email: "student@example.com", consent: true }).expect(201, { ok: true });
   assert.equal(queued, 1);
 });
 test("Private submissions and mail status cannot be read by editors or anonymous visitors", async () => {
-  const app = createApp({ session: async () => ({ id: "1", role: "editor", csrf: "abc" }) }, config);
+  const app = createApp(
+    { session: async () => ({ id: "1", role: "editor", csrf: "abc" }) },
+    config,
+  );
   for (const endpoint of ["submissions", "mail-status", "inquiries"]) {
-    await request(app).get("/api/" + endpoint).expect(401);
-    await request(app).get("/api/" + endpoint).set("Cookie", "__Host-sc_session=" + "a".repeat(64)).expect(403);
+    await request(app)
+      .get("/api/" + endpoint)
+      .expect(401);
+    await request(app)
+      .get("/api/" + endpoint)
+      .set("Cookie", "__Host-sc_session=" + "a".repeat(64))
+      .expect(403);
   }
 });
 test("Persistent abuse limit stops submissions before database writes", async () => {
-  const app = createApp({ checkRateLimit: async () => false, query: () => { throw Error("must not write"); } }, config);
-  await request(app).post("/public/feedback").set("Origin", config.PUBLIC_ORIGIN).send({}).expect(429);
+  const app = createApp(
+    {
+      checkRateLimit: async () => false,
+      query: () => {
+        throw Error("must not write");
+      },
+    },
+    config,
+  );
+  await request(app)
+    .post("/public/feedback")
+    .set("Origin", config.PUBLIC_ORIGIN)
+    .send({})
+    .expect(429);
 });
 test("Publishing rechecks revoked access inside the transaction", async () => {
-  const app = createApp({ session: async () => ({ id: "1", role: "owner", csrf: "abc" }), transaction: (fn) => fn({}), query: async (sql) => {
-    assert.match(sql, /^SELECT role,active FROM users/);
-    return [{ role: "editor", active: 1 }];
-  } }, config);
-  await request(app).post("/api/content/example/publish").set("Cookie", "__Host-sc_session=" + "a".repeat(64)).set("Origin", config.ADMIN_ORIGIN).set("X-CSRF-Token", "abc").send({version: 1}).expect(403);
+  const app = createApp(
+    {
+      session: async () => ({ id: "1", role: "owner", csrf: "abc" }),
+      transaction: (fn) => fn({}),
+      query: async (sql) => {
+        assert.match(sql, /^SELECT role,active FROM users/);
+        return [{ role: "editor", active: 1 }];
+      },
+    },
+    config,
+  );
+  await request(app)
+    .post("/api/content/example/publish")
+    .set("Cookie", "__Host-sc_session=" + "a".repeat(64))
+    .set("Origin", config.ADMIN_ORIGIN)
+    .set("X-CSRF-Token", "abc")
+    .send({ version: 1 })
+    .expect(403);
 });
 test("Mail stays disabled without credentials; configured delivery has a fixed recipient", async () => {
   assert.equal(createMailer({}), null);
   const queries = [];
-  const store = { transaction: (fn) => fn({}), query: async (sql) => {
-    queries.push(sql);
-    return sql.startsWith("SELECT") ? [{ id: "test", subject: "Inquiry", body: "Hello", reply_to: "student@example.com" }] : {};
-  } };
-  await deliverMail(store, { sendMail: async (mail) => {
-    assert.equal(mail.to, "contact@scholarscafe.com");
-    assert.equal(mail.replyTo, "student@example.com");
-    assert.equal(mail.html, undefined);
-  } });
+  const store = {
+    transaction: (fn) => fn({}),
+    query: async (sql) => {
+      queries.push(sql);
+      return sql.startsWith("SELECT")
+        ? [{ id: "test", subject: "Inquiry", body: "Hello", reply_to: "student@example.com" }]
+        : {};
+    },
+  };
+  await deliverMail(store, {
+    sendMail: async (mail) => {
+      assert.equal(mail.to, "contact@scholarscafe.com");
+      assert.equal(mail.replyTo, "student@example.com");
+      assert.equal(mail.html, undefined);
+    },
+  });
   assert.ok(queries.some((sql) => sql.includes("sent_at=UTC_TIMESTAMP()")));
 });
 test("Role management prevents editor escalation and admin ownership grants", () => {
@@ -199,10 +248,19 @@ test("Malformed inquiry payloads and off-site submission origins are rejected", 
 
 test("Turnstile is enforced on public forms only when a secret is configured", async () => {
   const writes = [];
-  const store = { transaction: (fn) => fn({}), query: async (sql) => { writes.push(sql); return { affectedRows: 1 }; } };
+  const store = {
+    transaction: (fn) => fn({}),
+    query: async (sql) => {
+      writes.push(sql);
+      return { affectedRows: 1 };
+    },
+  };
   const body = { email: "student@example.com", consent: true };
   const send = (app, extra = {}) =>
-    request(app).post("/public/newsletter").set("Origin", config.PUBLIC_ORIGIN).send({ ...body, ...extra });
+    request(app)
+      .post("/public/newsletter")
+      .set("Origin", config.PUBLIC_ORIGIN)
+      .send({ ...body, ...extra });
   // Without a secret the token is ignored and stripped, so strict schemas still pass.
   await send(createApp(store, config), { turnstileToken: "anything" }).expect(201);
   const guarded = createApp(store, {
@@ -221,20 +279,39 @@ test("Every seed entry passes the content schemas", async () => {
   const { readFile } = await import("node:fs/promises");
   const seed = JSON.parse(await readFile(new URL("./seed.json", import.meta.url), "utf8"));
   for (const item of seed) {
-    const parsed = recordInput.safeParse({ id: item.id, kind: item.kind, title: item.title, data: item.data, version: 0 });
+    const parsed = recordInput.safeParse({
+      id: item.id,
+      kind: item.kind,
+      title: item.title,
+      data: item.data,
+      version: 0,
+    });
     assert.ok(parsed.success, "invalid seed entry " + item.id);
   }
 });
 
 test("Content schemas reject unsafe values in new collections", () => {
-  const ok = (kind, data) => recordInput.safeParse({ id: "x", kind, title: "t", data, version: 0 }).success;
-  const clip = { place: "p", device: "desktop", mp4: "/media/a.mp4", webm: "", poster: "", credit: "", rate: 0.85, enabled: true };
+  const ok = (kind, data) =>
+    recordInput.safeParse({ id: "x", kind, title: "t", data, version: 0 }).success;
+  const clip = {
+    place: "p",
+    device: "desktop",
+    mp4: "/media/a.mp4",
+    webm: "",
+    poster: "",
+    credit: "",
+    rate: 0.85,
+    enabled: true,
+  };
   assert.equal(ok("hero", clip), true);
   assert.equal(ok("hero", { ...clip, mp4: "javascript:alert(1)" }), false);
   assert.equal(ok("hero", { ...clip, mp4: "//evil.example/a.mp4" }), false);
   assert.equal(ok("hero", { ...clip, mp4: "/media/../../etc/passwd" }), false);
   assert.equal(ok("hero", { ...clip, device: "tv" }), false);
-  assert.equal(ok("team", { name: "A", group: "founder", role: "", title: "", line: "", photo: "http://x" }), false);
+  assert.equal(
+    ok("team", { name: "A", group: "founder", role: "", title: "", line: "", photo: "http://x" }),
+    false,
+  );
   assert.equal(ok("sections", { page: "/", order: "hero,names", hidden: "names" }), true);
   assert.equal(ok("sections", { page: "/", order: "hero;drop table", hidden: "" }), false);
   assert.equal(ok("universities", { name: "X", position: 10, extra: 1 }), false);

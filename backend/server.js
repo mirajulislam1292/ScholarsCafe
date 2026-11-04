@@ -34,12 +34,19 @@ async function start() {
   const mailTimer = setInterval(async () => {
     if (delivering || !mailer) return;
     delivering = true;
-    try { await deliverMail(store, mailer); }
-    catch { console.error("Mailbox queue check failed"); }
-    finally { delivering = false; }
+    try {
+      await deliverMail(store, mailer);
+    } catch {
+      console.error("Mailbox queue check failed");
+    } finally {
+      delivering = false;
+    }
   }, 15000);
   mailTimer.unref();
-  const server = createApp(store, process.env, undefined, mailer).listen(Number(process.env.PORT || 3000), "0.0.0.0");
+  const server = createApp(store, process.env, undefined, mailer).listen(
+    Number(process.env.PORT || 3000),
+    "0.0.0.0",
+  );
   process.on("SIGTERM", () => server.close(() => store.pool.end().then(() => process.exit(0))));
 }
 start().catch((error) => {

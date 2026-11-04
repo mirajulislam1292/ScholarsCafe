@@ -557,7 +557,11 @@ async function renderLmsCourses(openId) {
   const courses = (await api("lms/courses")).items;
   if (openId) return renderLmsCourse(courses.find((c) => c.id === openId));
   screen.append(
-    node("p", "Courses students take in their dashboard (separate from the public pricing list).", "muted"),
+    node(
+      "p",
+      "Courses students take in their dashboard (separate from the public pricing list).",
+      "muted",
+    ),
     button("+ New course", () => renderLmsCourse(null), "primary"),
   );
   if (!courses.length) screen.append(node("p", "No courses yet.", "empty"));
@@ -578,7 +582,14 @@ async function renderLmsCourse(course) {
   const form = node("form", undefined, "card");
   const [tl, title] = input("Title", course?.title);
   const [sl, summary] = input("Summary", course?.summary, "textarea", 5000);
-  const [stl, status] = select("Status", [["draft", "Draft (hidden from students)"], ["published", "Published"]], course?.status || "draft");
+  const [stl, status] = select(
+    "Status",
+    [
+      ["draft", "Draft (hidden from students)"],
+      ["published", "Published"],
+    ],
+    course?.status || "draft",
+  );
   const save = node("button", course ? "Save course" : "Create course", "primary");
   save.type = "submit";
   form.append(node("h2", course ? "Edit course" : "New course"), tl, sl, stl, save);
@@ -586,7 +597,9 @@ async function renderLmsCourse(course) {
     e.preventDefault();
     try {
       const body = { title: title.value, summary: summary.value, status: status.value };
-      const id = course ? (await api("lms/courses/" + course.id, body), course.id) : (await api("lms/courses", body)).id;
+      const id = course
+        ? (await api("lms/courses/" + course.id, body), course.id)
+        : (await api("lms/courses", body)).id;
       notice("Course saved.");
       screen.replaceChildren();
       await renderLmsCourses(id);
@@ -609,8 +622,12 @@ async function renderLmsCourse(course) {
     ),
   );
   const lessons = (await api("lms/courses/" + course.id + "/lessons")).items;
-  screen.append(node("h2", "Lessons"), node("p", "Videos are private: only students enrolled in this course can watch them.", "muted"));
-  for (const lesson of [...lessons, null]) screen.append(lessonCard(course, lesson, lessons.length));
+  screen.append(
+    node("h2", "Lessons"),
+    node("p", "Videos are private: only students enrolled in this course can watch them.", "muted"),
+  );
+  for (const lesson of [...lessons, null])
+    screen.append(lessonCard(course, lesson, lessons.length));
 }
 function lessonCard(course, lesson, count) {
   const card = node("form", undefined, lesson ? "card" : "card new");
@@ -644,7 +661,17 @@ function lessonCard(course, lesson, count) {
   });
   const save = node("button", lesson ? "Save lesson" : "+ Add lesson", "primary");
   save.type = "submit";
-  card.append(node("h3", lesson ? lesson.title : "New lesson"), tl, bl, pl, pub, videoState, file, remove, save);
+  card.append(
+    node("h3", lesson ? lesson.title : "New lesson"),
+    tl,
+    bl,
+    pl,
+    pub,
+    videoState,
+    file,
+    remove,
+    save,
+  );
   if (lesson)
     card.append(
       button(
@@ -688,9 +715,16 @@ async function renderStudents() {
     staff ? api("mentors").then((r) => r.items) : [],
   ]);
   const mentorOptions = [["", "No mentor"], ...mentors.map((m) => [m.id, m.email])];
-  const mentorName = (id) => mentors.find((m) => m.id === id)?.email || (id ? "assigned mentor" : "no mentor");
+  const mentorName = (id) =>
+    mentors.find((m) => m.id === id)?.email || (id ? "assigned mentor" : "no mentor");
   screen.append(
-    node("p", staff ? "Student accounts, their courses and mentors. Students sign in with Google, an email code or a password." : "Students assigned to you. You can keep notes.", "muted"),
+    node(
+      "p",
+      staff
+        ? "Student accounts, their courses and mentors. Students sign in with Google, an email code or a password."
+        : "Students assigned to you. You can keep notes.",
+      "muted",
+    ),
   );
   if (staff) {
     const add = node("form", undefined, "card");
@@ -704,7 +738,12 @@ async function renderStudents() {
     add.onsubmit = async (e) => {
       e.preventDefault();
       try {
-        await api("lms/students", { email: email.value, full_name: name.value, phone: phone.value, target_intake: intake.value });
+        await api("lms/students", {
+          email: email.value,
+          full_name: name.value,
+          phone: phone.value,
+          target_intake: intake.value,
+        });
         notice("Student added. They can now sign in with that email.");
         render();
       } catch (err) {
@@ -722,22 +761,35 @@ async function renderStudents() {
   const draw = () => {
     const term = search.value.trim().toLowerCase();
     list.replaceChildren();
-    const shown = students.filter((s) => !term || `${s.full_name} ${s.email}`.toLowerCase().includes(term));
+    const shown = students.filter(
+      (s) => !term || `${s.full_name} ${s.email}`.toLowerCase().includes(term),
+    );
     if (!shown.length) list.append(node("p", "No students yet.", "empty"));
     for (const s of shown) list.append(studentCard(s));
   };
   const studentCard = (s) => {
     const card = node("details", undefined, "card");
-    card.append(node("summary", `${s.full_name || "(no name)"} · ${s.email}${s.active ? "" : " · inactive"}`));
+    card.append(
+      node("summary", `${s.full_name || "(no name)"} · ${s.email}${s.active ? "" : " · inactive"}`),
+    );
     const form = node("form");
     const fields = {};
     if (staff)
-      for (const [key, label, max] of [["full_name", "Full name", 160], ["phone", "Phone", 80], ["target_intake", "Target intake", 40]]) {
+      for (const [key, label, max] of [
+        ["full_name", "Full name", 160],
+        ["phone", "Phone", 80],
+        ["target_intake", "Target intake", 40],
+      ]) {
         const [l, el] = input(label, s[key], "text", max);
         fields[key] = el;
         form.append(l);
       }
-    const [nl, notes] = input("Staff notes (never shown to the student)", s.staff_notes, "textarea", 10000);
+    const [nl, notes] = input(
+      "Staff notes (never shown to the student)",
+      s.staff_notes,
+      "textarea",
+      10000,
+    );
     fields.staff_notes = notes;
     const save = node("button", "Save", "primary");
     save.type = "submit";
@@ -745,7 +797,10 @@ async function renderStudents() {
     form.onsubmit = async (e) => {
       e.preventDefault();
       try {
-        await api("lms/students/" + s.id, Object.fromEntries(Object.entries(fields).map(([k, el]) => [k, el.value])));
+        await api(
+          "lms/students/" + s.id,
+          Object.fromEntries(Object.entries(fields).map(([k, el]) => [k, el.value])),
+        );
         notice("Saved.");
       } catch (err) {
         report(err);
@@ -757,12 +812,25 @@ async function renderStudents() {
       row.append(node("strong", en.title));
       if (staff) {
         const [, mentor] = select("Mentor", mentorOptions, en.mentor_id);
-        const [, status] = select("Status", [["active", "Active"], ["paused", "Paused (locked)"], ["completed", "Completed"]], en.status);
+        const [, status] = select(
+          "Status",
+          [
+            ["active", "Active"],
+            ["paused", "Paused (locked)"],
+            ["completed", "Completed"],
+          ],
+          en.status,
+        );
         row.append(
           mentor,
           status,
           button("Save", async () => {
-            await api("lms/enrollments", { user_id: s.id, course_id: en.course_id, mentor_id: mentor.value || null, status: status.value });
+            await api("lms/enrollments", {
+              user_id: s.id,
+              course_id: en.course_id,
+              mentor_id: mentor.value || null,
+              status: status.value,
+            });
             notice("Enrollment saved.");
           }),
           button(
@@ -783,16 +851,28 @@ async function renderStudents() {
     const open = courses.filter((c) => !s.enrollments.some((en) => en.course_id === c.id));
     if (staff && open.length) {
       const row = node("div", undefined, "toolbar");
-      const [, course] = select("Course", open.map((c) => [c.id, c.title + (c.status === "draft" ? " (draft)" : "")]));
+      const [, course] = select(
+        "Course",
+        open.map((c) => [c.id, c.title + (c.status === "draft" ? " (draft)" : "")]),
+      );
       const [, mentor] = select("Mentor", mentorOptions, "");
       row.append(
         course,
         mentor,
-        button("Enroll", async () => {
-          await api("lms/enrollments", { user_id: s.id, course_id: course.value, mentor_id: mentor.value || null, status: "active" });
-          notice("Enrolled.");
-          render();
-        }, "primary"),
+        button(
+          "Enroll",
+          async () => {
+            await api("lms/enrollments", {
+              user_id: s.id,
+              course_id: course.value,
+              mentor_id: mentor.value || null,
+              status: "active",
+            });
+            notice("Enrolled.");
+            render();
+          },
+          "primary",
+        ),
       );
       card.append(row);
     }
@@ -807,7 +887,9 @@ async function renderMyCourses() {
   const courses = (await api("lms/my/courses")).items;
   screen.append(node("p", "Your courses. Pick up where you left off.", "muted"));
   if (!courses.length)
-    screen.append(node("p", "You're not enrolled in a course yet. Your mentor will add you.", "empty"));
+    screen.append(
+      node("p", "You're not enrolled in a course yet. Your mentor will add you.", "empty"),
+    );
   for (const c of courses) {
     const card = node("article", undefined, "card");
     const pct = c.lessons ? Math.round((c.done / c.lessons) * 100) : 0;
@@ -832,7 +914,8 @@ async function renderMyCourse(courseId, lessonId) {
   $("heading").textContent = course.title;
   const layout = node("div", undefined, "course-layout");
   const list = node("ol", undefined, "lesson-list");
-  const current = lessons.find((l) => l.id === lessonId) || lessons.find((l) => !l.done) || lessons[0];
+  const current =
+    lessons.find((l) => l.id === lessonId) || lessons.find((l) => !l.done) || lessons[0];
   for (const l of lessons) {
     const item = node("li");
     const b = button((l.done ? "✓ " : "") + l.title, () => renderMyCourse(courseId, l.id));
@@ -853,15 +936,22 @@ async function renderMyCourse(courseId, lessonId) {
       video.setAttribute("controlsList", "nodownload noplaybackrate");
       video.oncontextmenu = (e) => e.preventDefault();
       video.src = "/api/lms/lessons/" + current.id + "/video";
-      video.onerror = () => report(Error("This video can't play right now. Your access may have changed; reload the page."));
+      video.onerror = () =>
+        report(
+          Error("This video can't play right now. Your access may have changed; reload the page."),
+        );
       view.append(video);
     }
     if (current.body) view.append(node("p", current.body, "lesson-body"));
-    const toggle = button(current.done ? "Mark as not done" : "Mark as done ✓", async () => {
-      await api("lms/my/progress", { lesson_id: current.id, done: !current.done });
-      const next = lessons[lessons.indexOf(current) + 1];
-      await renderMyCourse(courseId, !current.done && next ? next.id : current.id);
-    }, current.done ? "" : "primary");
+    const toggle = button(
+      current.done ? "Mark as not done" : "Mark as done ✓",
+      async () => {
+        await api("lms/my/progress", { lesson_id: current.id, done: !current.done });
+        const next = lessons[lessons.indexOf(current) + 1];
+        await renderMyCourse(courseId, !current.done && next ? next.id : current.id);
+      },
+      current.done ? "" : "primary",
+    );
     view.append(toggle);
   }
   layout.append(list, view);
@@ -879,7 +969,11 @@ async function renderMyDetails() {
   card.onsubmit = async (e) => {
     e.preventDefault();
     try {
-      await api("lms/my/profile", { full_name: name.value, phone: phone.value, target_intake: intake.value });
+      await api("lms/my/profile", {
+        full_name: name.value,
+        phone: phone.value,
+        target_intake: intake.value,
+      });
       notice("Details saved.");
     } catch (err) {
       report(err);
@@ -888,11 +982,13 @@ async function renderMyDetails() {
   $("screen").prepend(card);
 }
 // ---------- Messages and reviews ----------
-const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+const when = (t) =>
+  new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 function senderLabel(m) {
   if (m.mine) return "You";
   if (m.sender_role === "student") return "Student";
-  if (me.role === "student") return m.sender_role === "mentor" ? "Your mentor" : "Scholars Cafe team";
+  if (me.role === "student")
+    return m.sender_role === "mentor" ? "Your mentor" : "Scholars Cafe team";
   return m.sender_email || m.sender_role || "Staff";
 }
 async function renderThread(studentId, title, back) {
@@ -903,10 +999,21 @@ async function renderThread(studentId, title, back) {
   if (title) $("heading").textContent = title;
   const list = node("div", undefined, "thread");
   if (!messages.length)
-    list.append(node("p", me.role === "student" ? "Ask your mentor anything here. They'll reply as soon as they can." : "No messages yet.", "empty"));
+    list.append(
+      node(
+        "p",
+        me.role === "student"
+          ? "Ask your mentor anything here. They'll reply as soon as they can."
+          : "No messages yet.",
+        "empty",
+      ),
+    );
   for (const m of messages) {
     const bubble = node("article", undefined, "message" + (m.mine ? " mine" : ""));
-    bubble.append(node("p", `${senderLabel(m)} · ${when(m.created_at)}`, "muted"), node("p", m.body, "lesson-body"));
+    bubble.append(
+      node("p", `${senderLabel(m)} · ${when(m.created_at)}`, "muted"),
+      node("p", m.body, "lesson-body"),
+    );
     list.append(bubble);
   }
   const form = node("form", undefined, "card");
@@ -932,14 +1039,27 @@ async function renderThread(studentId, title, back) {
 async function renderThreads() {
   const screen = $("screen");
   const items = (await api("lms/threads")).items;
-  screen.append(node("p", me.role === "mentor" ? "Conversations with your students." : "Conversations with every student.", "muted"));
+  screen.append(
+    node(
+      "p",
+      me.role === "mentor"
+        ? "Conversations with your students."
+        : "Conversations with every student.",
+      "muted",
+    ),
+  );
   if (!items.length) screen.append(node("p", "No students yet.", "empty"));
   for (const t of items) {
     const card = node("article", undefined, "card");
     const name = t.full_name || t.email;
     card.append(
       node("h3", name),
-      node("p", (t.last_at ? "Last message " + when(t.last_at) : "No messages yet") + (t.unread ? ` · ${t.unread} unread` : ""), t.unread ? "badge" : "muted"),
+      node(
+        "p",
+        (t.last_at ? "Last message " + when(t.last_at) : "No messages yet") +
+          (t.unread ? ` · ${t.unread} unread` : ""),
+        t.unread ? "badge" : "muted",
+      ),
       button("Open →", () => renderThread(t.id, name, () => navigate("Messages"))),
     );
     screen.append(card);
@@ -948,16 +1068,40 @@ async function renderThreads() {
 async function reviewForm(courseId) {
   const mine = (await api("lms/my/reviews")).items.find((r) => r.course_id === courseId);
   const form = node("form", undefined, "card");
-  const [rl, rating] = select("Rating", [["5", "★★★★★ Excellent"], ["4", "★★★★ Good"], ["3", "★★★ OK"], ["2", "★★ Poor"], ["1", "★ Bad"]], String(mine?.rating || 5));
+  const [rl, rating] = select(
+    "Rating",
+    [
+      ["5", "★★★★★ Excellent"],
+      ["4", "★★★★ Good"],
+      ["3", "★★★ OK"],
+      ["2", "★★ Poor"],
+      ["1", "★ Bad"],
+    ],
+    String(mine?.rating || 5),
+  );
   const [bl, body] = input("Your review (at least 10 characters)", mine?.body, "textarea", 2000);
   const save = node("button", mine ? "Update review" : "Send review", "primary");
   save.type = "submit";
-  const state = { pending: "Waiting for approval.", approved: "Approved. Thank you!", rejected: "Not approved. You can edit and send it again." };
-  form.append(node("h2", "Review this course"), ...(mine ? [node("p", state[mine.status], "muted")] : []), rl, bl, save);
+  const state = {
+    pending: "Waiting for approval.",
+    approved: "Approved. Thank you!",
+    rejected: "Not approved. You can edit and send it again.",
+  };
+  form.append(
+    node("h2", "Review this course"),
+    ...(mine ? [node("p", state[mine.status], "muted")] : []),
+    rl,
+    bl,
+    save,
+  );
   form.onsubmit = async (e) => {
     e.preventDefault();
     try {
-      await api("lms/my/reviews", { course_id: courseId, rating: Number(rating.value), body: body.value });
+      await api("lms/my/reviews", {
+        course_id: courseId,
+        rating: Number(rating.value),
+        body: body.value,
+      });
       notice("Thanks! Your review will appear after the team approves it.");
       form.replaceWith(await reviewForm(courseId));
     } catch (err) {
@@ -968,11 +1112,29 @@ async function reviewForm(courseId) {
 }
 async function renderReviews() {
   const screen = $("screen");
-  const [fl, filter] = select("Show", [["pending", "Waiting for approval"], ["approved", "Approved"], ["rejected", "Rejected"], ["", "All"]], "pending");
+  const [fl, filter] = select(
+    "Show",
+    [
+      ["pending", "Waiting for approval"],
+      ["approved", "Approved"],
+      ["rejected", "Rejected"],
+      ["", "All"],
+    ],
+    "pending",
+  );
   const list = node("div");
-  screen.append(node("p", "Students review courses they're enrolled in. Approve before anyone else can see them.", "muted"), fl, list);
+  screen.append(
+    node(
+      "p",
+      "Students review courses they're enrolled in. Approve before anyone else can see them.",
+      "muted",
+    ),
+    fl,
+    list,
+  );
   const load = async () => {
-    const items = (await api("lms/reviews" + (filter.value ? "?status=" + filter.value : ""))).items;
+    const items = (await api("lms/reviews" + (filter.value ? "?status=" + filter.value : "")))
+      .items;
     list.replaceChildren();
     if (!items.length) list.append(node("p", "Nothing here.", "empty"));
     for (const r of items) {
@@ -983,14 +1145,21 @@ async function renderReviews() {
         node("p", r.body, "lesson-body"),
         node("span", r.status, "badge"),
       );
-      for (const [label, status] of [["Approve", "approved"], ["Reject", "rejected"]])
+      for (const [label, status] of [
+        ["Approve", "approved"],
+        ["Reject", "rejected"],
+      ])
         if (r.status !== status)
           card.append(
-            button(label, async () => {
-              await api("lms/reviews/" + r.id, { status });
-              notice("Review " + status + ".");
-              await load();
-            }, status === "approved" ? "primary" : "danger"),
+            button(
+              label,
+              async () => {
+                await api("lms/reviews/" + r.id, { status });
+                notice("Review " + status + ".");
+                await load();
+              },
+              status === "approved" ? "primary" : "danger",
+            ),
           );
       list.append(card);
     }
@@ -1105,7 +1274,10 @@ async function renderAccess() {
       node("span", user.email),
       node("span", user.role + (user.active ? "" : " · revoked"), "badge"),
     );
-    if (user.id !== me.id && (me.role === "owner" || ["editor", "mentor", "student"].includes(user.role)))
+    if (
+      user.id !== me.id &&
+      (me.role === "owner" || ["editor", "mentor", "student"].includes(user.role))
+    )
       row.append(
         button(user.active ? "Revoke access" : "Restore access", async () => {
           if (!confirm("Change access for " + user.email + "?")) return;
@@ -1398,7 +1570,9 @@ function renderAccount() {
     card.append(l);
     return input;
   };
-  const current = me.has_password ? field("Current password", "pw-current", "current-password") : null;
+  const current = me.has_password
+    ? field("Current password", "pw-current", "current-password")
+    : null;
   const next = field("New password", "pw-new", "new-password");
   const again = field("Repeat new password", "pw-again", "new-password");
   const save = node("button", "Save password", "primary");
@@ -1433,16 +1607,27 @@ try {
     me.role === "student"
       ? ["My courses", "Messages", "Account"]
       : me.role === "mentor"
-      ? ["Leads", "Students", "Messages", "Account"]
-      : [
-          "Overview",
-          "Media",
-          ...Object.keys(names),
-          ...(me.role === "editor"
-            ? []
-            : ["Leads", "Students", "Student courses", "Messages", "Reviews", "Access", "Private feedback", "Newsletter", "Email delivery", "Activity"]),
-          "Account",
-        ];
+        ? ["Leads", "Students", "Messages", "Account"]
+        : [
+            "Overview",
+            "Media",
+            ...Object.keys(names),
+            ...(me.role === "editor"
+              ? []
+              : [
+                  "Leads",
+                  "Students",
+                  "Student courses",
+                  "Messages",
+                  "Reviews",
+                  "Access",
+                  "Private feedback",
+                  "Newsletter",
+                  "Email delivery",
+                  "Activity",
+                ]),
+            "Account",
+          ];
   if (me.role === "mentor") section = "Leads";
   if (me.role === "student") section = "My courses";
   if (me.role === "student") {

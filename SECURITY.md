@@ -1,6 +1,6 @@
-# Security review (Phase 1, November 2026)
+# Security review (November 2026, Phases 1–5)
 
-Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS backend (`admin.scholarscafe.com`, Express + MySQL). The student dashboard does not exist yet; its controls are planned in Phase 4.
+Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS backend (`admin.scholarscafe.com`, Express + MySQL). The student dashboard lives in the admin app; its controls are in the Phase 5 sections below. Final checks (November 2026): build, type check, ESLint (0 errors), 47 backend tests, `npm audit --omit=dev` 0 (site), `npm audit` 0 (backend).
 
 ## Findings and fixes
 
@@ -29,10 +29,13 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 1. **Rate limits may be shared by all visitors.** Behind Hostinger's proxy every request may appear to come from one IP, so the 10/hour form limit could become site-wide. Check with `GET /api/diagnostics/client-ip` (owner only) and set `TRUST_PROXY` to the proxy range it reveals.
 2. **MFA:** the app cannot verify Google 2-Step Verification. Enforce it on every owner/admin Google account (free).
 3. **`.htaccess` headers only work if Hostinger honors them.** Verify after deploy: `curl -sI https://scholarscafe.com | grep -i -E "strict|content-security|x-frame"`.
-4. CSP still allows inline style attributes, Google Fonts (to be self-hosted in Phase 2) and map data from jsDelivr (self-host later).
-5. Dev-only advisories remain: `basic-ftp` (FTP deploy script; needs a major upgrade that requires testing with your FTP account) and the ESLint chain. Neither ships to visitors.
-6. Media-library images are public by design. Private files and lesson videos (Phase 4) must use short-lived signed URLs.
-7. Many unused UI packages remain; prune in Phase 5.
+4. CSP still allows inline style attributes (`'unsafe-inline'` in style-src). Fonts are self-hosted; no third-party script hosts remain.
+5. Dev-only advisories remain: `basic-ftp` (high; only the FTP deploy script, only exploitable by a malicious FTP server; fix is a major upgrade to test with your FTP account) and `minimatch` in the ESLint chain (moderate; fix needs an ESLint major). Neither ships to visitors.
+6. Media-library images are public by design. Lesson videos are private and checked per request (Phase 5.3). Screen recording cannot be prevented.
+7. Many unused UI packages remain in `package.json` (not shipped unless imported); prune when convenient.
+8. **MySQL has no row-level security.** Isolation depends on every student-data query using `backend/access.js`; code review must enforce this. Tests cover each role.
+9. **Email codes** are only as safe as the user's mailbox; no email alerts yet for new messages.
+10. **Uploads ≤12 MB need MySQL `max_allowed_packet` ≥ 16 MB** on Hostinger, or large videos fail to save (see DEPLOYMENT.md).
 
 ## Your manual checklist
 - [ ] Turn on 2-Step Verification for every Google account with admin access, and for GitHub and Hostinger logins.
@@ -41,6 +44,7 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - [ ] Backups: enable daily Hostinger database backups and do one test restore.
 - [ ] Rotation: rotate the SMTP mailbox password and Google OAuth client secret if they were ever pasted into chats, emails or screenshots; rotate yearly otherwise.
 - [ ] GitHub: protect `main` (require PR), enable Dependabot alerts. Two deploy paths exist (Hostinger Git auto-deploy and the FTP Action); disable whichever you don't use and delete its secrets.
+- [ ] Before the first deploy of this branch: back up the database (migrations add columns and tables automatically on start).
 - [ ] Monitoring: free uptime checks (e.g. UptimeRobot) on both domains; review the admin audit log monthly.
 
 ## Phase 3 additions (admin CMS + leads)

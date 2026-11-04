@@ -26,7 +26,8 @@ export function installMedia(app, store, config, limit) {
     res.json({
       items: items.map((item) => ({
         ...item,
-        url: item.visibility === "private" ? null : config.ADMIN_ORIGIN + "/public/media/" + item.id,
+        url:
+          item.visibility === "private" ? null : config.ADMIN_ORIGIN + "/public/media/" + item.id,
       })),
     });
   });
@@ -48,15 +49,21 @@ export function installMedia(app, store, config, limit) {
       let mime;
       if (VIDEO_TYPES.includes(type)) {
         if (req.body.length > MAX_VIDEO) throw fail(413, "Videos must be 12 MB or smaller.");
-        if (!videoSignatureOk(type, req.body)) throw fail(415, "The video could not be read. Use MP4 (H.264) or WebM.");
+        if (!videoSignatureOk(type, req.body))
+          throw fail(415, "The video could not be read. Use MP4 (H.264) or WebM.");
         bytes = req.body; // stored as uploaded; never executed or transformed
         mime = type;
       } else {
         if (req.body.length > 5 * 1024 * 1024) throw fail(413, "Images must be 5 MB or smaller.");
         try {
-          const image = sharp(req.body, { limitInputPixels: 16000000, animated: false, failOn: "warning" });
+          const image = sharp(req.body, {
+            limitInputPixels: 16000000,
+            animated: false,
+            failOn: "warning",
+          });
           const info = await image.metadata();
-          if (!["png", "jpeg", "webp"].includes(info.format) || (info.pages || 1) > 1) throw Error("format");
+          if (!["png", "jpeg", "webp"].includes(info.format) || (info.pages || 1) > 1)
+            throw Error("format");
           // Re-encode and remove metadata; never serve the original upload.
           bytes = await image
             .rotate()
@@ -64,7 +71,10 @@ export function installMedia(app, store, config, limit) {
             .webp({ quality: 88 })
             .toBuffer();
         } catch {
-          throw fail(415, "The image could not be read. Use a static PNG, JPEG or WebP under 16 megapixels.");
+          throw fail(
+            415,
+            "The image could not be read. Use a static PNG, JPEG or WebP under 16 megapixels.",
+          );
         }
         if (bytes.length > 4 * 1024 * 1024) throw fail(413, "Please choose a smaller image.");
         mime = "image/webp";
@@ -72,12 +82,23 @@ export function installMedia(app, store, config, limit) {
       const id = randomUUID();
       // Lesson videos are uploaded as private: never on the public route, only to enrolled students.
       const visibility = req.get("X-Visibility") === "private" ? "private" : "public";
-      const name = String(req.get("X-File-Name") || "File").replace(/[\x00-\x1f\x7f]/g, "").slice(0, 200);
+      const name = String(req.get("X-File-Name") || "File")
+        .replace(/[\x00-\x1f\x7f]/g, "")
+        .slice(0, 200);
       await store.transaction(async (c) => {
-        const [actor] = await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c);
-        if (!actor?.active || !canPublish(actor.role)) throw fail(403, "Upload access was removed.");
+        const [actor] = await store.query(
+          "SELECT role,active FROM users WHERE id=? FOR UPDATE",
+          [req.actor.id],
+          c,
+        );
+        if (!actor?.active || !canPublish(actor.role))
+          throw fail(403, "Upload access was removed.");
         // A single locked quota row serializes concurrent uploads across all admins.
-        const [quota] = await store.query("SELECT used_bytes FROM media_quota WHERE id=1 FOR UPDATE", [], c);
+        const [quota] = await store.query(
+          "SELECT used_bytes FROM media_quota WHERE id=1 FOR UPDATE",
+          [],
+          c,
+        );
         if (!quota || Number(quota.used_bytes) + bytes.length > QUOTA)
           throw fail(413, "The 250 MB media library is full.");
         await store.query(
@@ -85,18 +106,36 @@ export function installMedia(app, store, config, limit) {
           [id, name, bytes, bytes.length, req.actor.id, mime, visibility],
           c,
         );
-        await store.query("UPDATE media_quota SET used_bytes=used_bytes+? WHERE id=1", [bytes.length], c);
-        await store.audit(req.actor.id, mime.startsWith("video") ? "upload_video" : "upload_image", id, c);
+        await store.query(
+          "UPDATE media_quota SET used_bytes=used_bytes+? WHERE id=1",
+          [bytes.length],
+          c,
+        );
+        await store.audit(
+          req.actor.id,
+          mime.startsWith("video") ? "upload_video" : "upload_image",
+          id,
+          c,
+        );
       });
-      res.status(201).json({ id, url: visibility === "private" ? null : config.ADMIN_ORIGIN + "/public/media/" + id, mime, visibility });
+      res.status(201).json({
+        id,
+        url: visibility === "private" ? null : config.ADMIN_ORIGIN + "/public/media/" + id,
+        mime,
+        visibility,
+      });
     },
   );
 }
 
 export function serveMedia(app, store) {
   app.get("/public/media/:id", async (req, res) => {
-    if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(req.params.id)) throw fail(404, "Not found.");
-    const [file] = await store.query("SELECT bytes,mime FROM media WHERE id=? AND visibility='public'", [req.params.id]);
+    if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(req.params.id))
+      throw fail(404, "Not found.");
+    const [file] = await store.query(
+      "SELECT bytes,mime FROM media WHERE id=? AND visibility='public'",
+      [req.params.id],
+    );
     if (!file) throw fail(404, "Not found.");
     const mime = [...IMAGE_TYPES, ...VIDEO_TYPES].includes(file.mime) ? file.mime : "image/webp";
     const bytes = file.bytes;
@@ -111,7 +150,6 @@ export function serveMedia(app, store) {
     sendBytes(req, res, bytes);
   });
 }
-
 
 /** Sends a stored file, answering HTTP Range requests (Safari needs them for video; seeking uses them). */
 export function sendBytes(req, res, bytes) {

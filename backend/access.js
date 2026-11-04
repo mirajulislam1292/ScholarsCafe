@@ -14,7 +14,8 @@ const ROLES = new Set(["owner", "admin", "mentor", "student"]);
 export const isStaff = (actor) => STAFF.has(actor?.role);
 
 function check(actor) {
-  if (!actor?.id || !ROLES.has(actor.role)) throw fail(403, "Student dashboard access is not allowed for this account.");
+  if (!actor?.id || !ROLES.has(actor.role))
+    throw fail(403, "Student dashboard access is not allowed for this account.");
 }
 const scoped = (sql, params = []) => ({ sql, params });
 const ALL = scoped("1=1");
@@ -84,6 +85,10 @@ export async function canReachStudent(actor, studentId, query, c) {
   check(actor);
   if (isStaff(actor)) return true;
   if (actor.role === "student") return actor.id === studentId;
-  const rows = await query("SELECT 1 FROM enrollments WHERE user_id=? AND mentor_id=? LIMIT 1", [studentId, actor.id], c);
+  const rows = await query(
+    "SELECT 1 FROM enrollments WHERE user_id=? AND mentor_id=? LIMIT 1",
+    [studentId, actor.id],
+    c,
+  );
   return rows.length > 0;
 }

@@ -53,23 +53,30 @@ The full list with comments is in `backend/.env.example`. After changing variabl
 - Turn on **Force HTTPS** for each domain if it isn't already.
 
 ## 5. Check the live site after each deploy
-1. Open https://scholarscafe.com: the hero video should play, logos should scroll under it.
+1. Open https://scholarscafe.com: the hero video should play, university names should scroll under it.
 2. Security headers:
    `curl -sI https://scholarscafe.com | grep -iE "strict-transport|content-security|x-frame"` (all three should print)
 3. `https://www.scholarscafe.com` should redirect to `https://scholarscafe.com`.
-4. Open https://admin.scholarscafe.com and sign in with Google.
-5. Send a test message from the contact form and check it appears in the admin under **Inquiries**.
+4. Open https://admin.scholarscafe.com and sign in with Google, then sign out and try an email code (see `BACKEND_SETUP.md`).
+5. Send a test message from the contact form and check it appears in the admin under **Leads**.
 
 If the hero video doesn't play, open the browser console. A blocked video means the CSP or the file path changed; see USER_MANUAL.md → Troubleshooting.
 
 ## 6. Updating the live site later
-- **Text, courses, mentors, blogs, logos:** edit in the admin and click **Publish**. No deploy needed; the site picks it up within a minute.
+- **Text, sections, SEO, hero videos, universities, team, FAQs, countries, courses, students:** edit in the admin and click **Publish**. No deploy needed; the site picks it up within a minute.
 - **Code, images, videos, `src/content/site.json`:** commit to a branch → open a pull request → merge into `main`. Hostinger rebuilds automatically (about 2–4 minutes). Check progress in hPanel → Node.js → Deployments.
 - **Roll back:** in hPanel → Deployments, redeploy an earlier successful build, or revert the commit in GitHub.
 
-## 7. Local build (for developers)
+## 7. Database (first deploy of the CMS + student dashboard)
+1. **Back up first:** hPanel → **Databases → MySQL** → your CMS database → **Backups** (or phpMyAdmin → Export).
+2. Nothing to run by hand: on start the admin app creates new tables and adds columns automatically (safe to repeat). Existing content and leads are kept; old leads get status *new*.
+3. **Upload size:** in phpMyAdmin → **Variables**, check `max_allowed_packet`. It must be **16 MB or more** for 12 MB videos. If it is smaller and can't be changed on your plan, keep videos under that size.
+4. **Order:** both apps deploy from `main`. The website falls back to its built-in content until the admin has published the new collections, so the order doesn't matter, but check the admin started cleanly (hPanel → Node.js → logs) right after the merge.
+
+## 8. Local build (for developers)
 ```bash
 npm ci --legacy-peer-deps
 npm run build          # public site → dist/
 cd backend && npm ci && npm test
+npx tsc --noEmit && npx eslint .   # 0 errors expected
 ```

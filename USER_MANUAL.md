@@ -22,7 +22,8 @@ Only accounts you have approved can sign in. Sessions end automatically after 4 
 | **Owner** (Super Admin) | Everything, including giving and removing access |
 | **Admin** | Edit and publish content, read messages, manage editors |
 | **Editor** | Write drafts only (cannot publish, delete or see leads) |
-| **Mentor** | Sees only **Leads** assigned to them; can change status and notes |
+| **Mentor** | Their **Leads**, **Students** and **Messages** only; can add notes |
+| **Student** | Their own courses, lessons, messages, reviews and details |
 
 **Give someone access:** Admin → **Access** → enter their Gmail address → choose a role → Save. To remove access, untick **Active** and save. Their session ends immediately.
 
@@ -106,6 +107,8 @@ Admin → **Leads**. Every contact-form message becomes a lead.
 | Contact form says it can't send | Check that the admin site is up. If you enabled Turnstile, both keys must be set (see `DEPLOYMENT.md`). |
 | Hero video doesn't play | On phones with data saver, slow connections or "reduce motion" turned on, a still image is shown on purpose. Otherwise check the clip is *enabled* and its file opens. |
 | Upload refused | Images: PNG/JPEG/WebP up to 5 MB. Videos: MP4/WebM up to 12 MB. Renamed files are rejected. |
+| A student can't see a course | The course must be **Published**, the student enrolled with status **Active**, and the lessons ticked **Published**. |
+| "Too many codes requested" | Wait 15 minutes, or sign in with Google or a password. |
 | Site is down after an update | hPanel → Websites → Node.js → Deployments: open the failed build's log, or redeploy the last good build. |
 
 For anything else, contact your developer with a screenshot and the time it happened.
