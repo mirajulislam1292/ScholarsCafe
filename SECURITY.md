@@ -56,3 +56,10 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - Email codes: 6 random digits + 256-bit link token, only hashes stored, 10-minute expiry, single use, destroyed after 5 wrong tries, 3 sends per address per 15 min, same reply for unknown emails, sent without awaiting (no timing leak).
 - Magic link: GET only shows a button (mail scanners can't consume it); POST requires the admin Origin. All sign-in POSTs check Origin (no login CSRF). Session cookie unchanged (`__Host-`, HttpOnly, Secure, SameSite=Lax, 4 h).
 - Risk: an email code is only as safe as the mailbox. Keep 2-Step Verification on mailboxes of admin accounts.
+
+## Phase 5.1 additions (student dashboard: schema and access rules)
+- New tables: `lms_courses`, `lms_lessons`, `enrollments` (student, course, mentor, status), `student_profiles`, `lesson_progress`, `messages`, `reviews`. New role `student` (admins can create them; no self sign-up).
+- **Row-level rules:** MySQL has no built-in RLS, so `backend/access.js` is the single source of WHERE clauses for student data, always built from the session user's id. Students: own rows, published courses they're actively enrolled in (paused = locked), published lessons only, staff notes never selected. Mentors: only students enrolled with them. Owners/admins: all. Editors: none. Scope columns are whitelisted.
+- **API gate:** students reach only `/api/me`, `/api/logout`, `/api/password` and `/api/lms/*`; all staff APIs return 403.
+- **Private media:** `media.visibility = 'private'` files are never served by the public media route (lesson videos; signed access arrives in step 5.3).
+- Verified on MySQL 8 with two students, two mentors, a paused enrollment and a draft course.

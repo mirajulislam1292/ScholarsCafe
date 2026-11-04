@@ -578,8 +578,8 @@ async function renderAccess() {
   const label = node("label", "Role");
   const select = node("select");
   for (const role of me.role === "owner"
-    ? ["editor", "mentor", "admin", "owner"]
-    : ["editor", "mentor"]) {
+    ? ["student", "editor", "mentor", "admin", "owner"]
+    : ["student", "editor", "mentor"]) {
     const option = node("option", role);
     option.value = role;
     select.append(option);
@@ -615,7 +615,7 @@ async function renderAccess() {
       node("span", user.email),
       node("span", user.role + (user.active ? "" : " · revoked"), "badge"),
     );
-    if (user.id !== me.id && (me.role === "owner" || ["editor", "mentor"].includes(user.role)))
+    if (user.id !== me.id && (me.role === "owner" || ["editor", "mentor", "student"].includes(user.role)))
       row.append(
         button(user.active ? "Revoke access" : "Restore access", async () => {
           if (!confirm("Change access for " + user.email + "?")) return;
@@ -935,12 +935,14 @@ try {
   me = await api("me");
   const catalogResponse = await fetch("/cms-copy-catalog.json");
   if (catalogResponse.ok) catalog = await catalogResponse.json();
-  if (me.role !== "mentor") await refresh();
+  if (!["mentor", "student"].includes(me.role)) await refresh();
   $("login").hidden = true;
   $("workspace").hidden = false;
   $("identity").textContent = me.email + " · " + me.role;
   const navFor =
-    me.role === "mentor"
+    me.role === "student"
+      ? ["Account"]
+      : me.role === "mentor"
       ? ["Leads", "Account"]
       : [
           "Overview",
@@ -952,6 +954,7 @@ try {
           "Account",
         ];
   if (me.role === "mentor") section = "Leads";
+  if (me.role === "student") section = "Account";
   for (const key of navFor) {
     const b = button(names[key] || key, () => navigate(key));
     b.dataset.section = key;

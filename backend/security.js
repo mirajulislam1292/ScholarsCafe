@@ -11,8 +11,8 @@ export function equal(a, b) {
     timingSafeEqual(Buffer.from(a), Buffer.from(b))
   );
 }
-// Roles: owner (Super Admin) > admin > editor | mentor. Admins may manage editors and mentors only.
-const ADMIN_MANAGED = ["editor", "mentor"];
+// Roles: owner (Super Admin) > admin > editor | mentor | student. Admins may manage editors, mentors and students only.
+const ADMIN_MANAGED = ["editor", "mentor", "student"];
 export function canManage(actor, targetRole, newRole) {
   return (
     actor === "owner" ||
@@ -38,7 +38,7 @@ export const userInput = z
       .email()
       .max(254)
       .transform((s) => s.toLowerCase()),
-    role: z.enum(["owner", "admin", "editor", "mentor"]),
+    role: z.enum(["owner", "admin", "editor", "mentor", "student"]),
     active: z.boolean(),
   })
   .strict();

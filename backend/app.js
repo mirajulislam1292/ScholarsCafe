@@ -337,10 +337,15 @@ export function createApp(
   });
   app.get("/api/me", (req, res) => res.json(req.actor));
   // Mentors only reach their own leads; every other admin API is closed to them.
+  // Mentors reach their leads and the student dashboard API (/lms); students reach only /lms.
+  // Every other admin API is closed to them. Row-level rules for /lms live in access.js.
   app.use("/api", (req, _res, next) => {
-    if (req.actor.role !== "mentor") return next();
-    if (["/me", "/logout", "/password"].includes(req.path) || req.path.startsWith("/leads")) return next();
-    throw fail(403, "Mentors can only open their assigned leads.");
+    const own = ["/me", "/logout", "/password"].includes(req.path) || req.path.startsWith("/lms/");
+    if (req.actor.role === "mentor" && (own || req.path.startsWith("/leads"))) return next();
+    if (req.actor.role === "student" && own) return next();
+    if (req.actor.role === "mentor") throw fail(403, "Mentors can only open their assigned leads.");
+    if (req.actor.role === "student") throw fail(403, "This area is for staff only.");
+    next();
   });
   installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.

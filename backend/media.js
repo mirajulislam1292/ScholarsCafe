@@ -91,7 +91,7 @@ export function installMedia(app, store, config, limit) {
 export function serveMedia(app, store) {
   app.get("/public/media/:id", async (req, res) => {
     if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(req.params.id)) throw fail(404, "Not found.");
-    const [file] = await store.query("SELECT bytes,mime FROM media WHERE id=?", [req.params.id]);
+    const [file] = await store.query("SELECT bytes,mime FROM media WHERE id=? AND visibility='public'", [req.params.id]);
     if (!file) throw fail(404, "Not found.");
     const mime = [...IMAGE_TYPES, ...VIDEO_TYPES].includes(file.mime) ? file.mime : "image/webp";
     const bytes = file.bytes;

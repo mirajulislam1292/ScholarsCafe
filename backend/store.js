@@ -74,7 +74,7 @@ export class Store {
       if (!(await has(table, column))) await this.query(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
     };
     await this.query(
-      "ALTER TABLE users MODIFY role ENUM('owner','admin','editor','mentor') NOT NULL",
+      "ALTER TABLE users MODIFY role ENUM('owner','admin','editor','mentor','student') NOT NULL",
     );
     await add("content", "deleted_at", "deleted_at DATETIME NULL");
     await add(
@@ -88,6 +88,8 @@ export class Store {
     await add("users", "password_hash", "password_hash VARCHAR(255) NULL");
     await add("users", "failed_logins", "failed_logins INT NOT NULL DEFAULT 0");
     await add("users", "locked_until", "locked_until DATETIME NULL");
+    // Private media (lesson videos) is never served by the public media route.
+    await add("media", "visibility", "visibility ENUM('public','private') NOT NULL DEFAULT 'public'");
     await add("media", "mime", "mime VARCHAR(40) NOT NULL DEFAULT 'image/webp'");
   }
   async audit(actor, action, target, c = this.pool) {
