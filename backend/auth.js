@@ -1,5 +1,6 @@
 // Email sign-in for approved accounts: password (scrypt) and a one-time email code / magic link.
-// No self sign-up: every method only works for an active row in `users` (created under Access).
+// Student portal only. No self sign-up: every method only works for an active student account
+// (created by an admin under Students). Team accounts are never found here.
 import express from "express";
 import { scrypt, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
@@ -81,7 +82,7 @@ export function installAuthRoutes(app, { store, config, mailer, fail, startSessi
   app.post("/auth/password", sameOrigin, async (req, res) => {
     const { email: address, password } = passwordLogin.parse(req.body);
     const rows = await store.query(
-      "SELECT id,email,role,active,password_hash,(locked_until IS NOT NULL AND locked_until>UTC_TIMESTAMP()) AS locked FROM users WHERE email=?",
+      "SELECT id,email,role,active,password_hash,(locked_until IS NOT NULL AND locked_until>UTC_TIMESTAMP()) AS locked FROM users WHERE email=? AND role='student'",
       [address],
     );
     const user = rows[0];
@@ -115,9 +116,10 @@ export function installAuthRoutes(app, { store, config, mailer, fail, startSessi
     if (store.checkRateLimit && !(await store.checkRateLimit("email-code", address, 3, 900)))
       throw fail(429, "Too many codes requested for this email. Wait 15 minutes.");
     if (!mailer && !devLog) throw fail(503, "Email sign-in is not set up yet. Use Google.");
-    const rows = await store.query("SELECT id,email FROM users WHERE email=? AND active=1", [
-      address,
-    ]);
+    const rows = await store.query(
+      "SELECT id,email FROM users WHERE email=? AND active=1 AND role='student'",
+      [address],
+    );
     const user = rows[0];
     if (user) {
       const code = newCode(),
@@ -146,7 +148,7 @@ export function installAuthRoutes(app, { store, config, mailer, fail, startSessi
     const outcome = await store.transaction(async (c) => {
       const rows = await store.query(
         `SELECT u.id,u.email,u.role,e.code_hash,e.attempts FROM users u JOIN email_codes e ON e.user_id=u.id
-         WHERE u.email=? AND u.active=1 AND e.expires_at>UTC_TIMESTAMP() FOR UPDATE`,
+         WHERE u.email=? AND u.active=1 AND u.role='student' AND e.expires_at>UTC_TIMESTAMP() FOR UPDATE`,
         [address],
         c,
       );
@@ -200,7 +202,7 @@ export function installAuthRoutes(app, { store, config, mailer, fail, startSessi
         if (!link) return null;
         const rows = await store.query(
           `SELECT u.id,u.email,u.role FROM email_codes e JOIN users u ON u.id=e.user_id
-         WHERE e.link_hash=? AND e.expires_at>UTC_TIMESTAMP() AND u.active=1 FOR UPDATE`,
+         WHERE e.link_hash=? AND e.expires_at>UTC_TIMESTAMP() AND u.active=1 AND u.role='student' FOR UPDATE`,
           [hash(link)],
           c,
         );

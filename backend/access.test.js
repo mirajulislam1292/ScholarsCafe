@@ -12,6 +12,9 @@ import {
 } from "./access.js";
 import { canManage } from "./security.js";
 
+// Student sessions only work on the student portal (PORTAL=student); team sessions on the admin.
+const forRole = (config, role) => (role === "student" ? { ...config, PORTAL: "student" } : config);
+
 const ME = "11111111-1111-4111-8111-111111111111";
 const OTHER = "22222222-2222-4222-8222-222222222222";
 const as = (role) => ({ id: ME, role });
@@ -88,7 +91,7 @@ test("Students are locked out of every staff API", async () => {
       query: async () => [],
       audit: async () => {},
     },
-    config,
+    forRole(config, "student"),
   );
   const cookie = "__Host-sc_session=" + "a".repeat(64);
   for (const path of [
@@ -129,7 +132,7 @@ test("Course and student writes are refused for students and mentors before touc
         query: async (sql) => (writes.push(sql), []),
         audit: async () => {},
       },
-      config,
+      forRole(config, role),
     );
     const post = (path, body) =>
       request(app)
@@ -159,7 +162,10 @@ test("Lesson video: login required, editors refused, query scoped to the student
     .expect(401);
   const cookie = "__Host-sc_session=" + "a".repeat(64);
   const appFor = (role, query) =>
-    createApp({ session: async () => ({ id: ME, role, csrf: "abc" }), query }, config);
+    createApp(
+      { session: async () => ({ id: ME, role, csrf: "abc" }), query },
+      forRole(config, role),
+    );
   await request(appFor("editor", async () => []))
     .get(path)
     .set("Cookie", cookie)
@@ -204,7 +210,7 @@ test("Messages: a student cannot read or post in another student's thread; mento
     },
   });
   const cookie = "__Host-sc_session=" + "a".repeat(64);
-  const app = createApp(store("student"), config);
+  const app = createApp(store("student"), forRole(config, "student"));
   await request(app)
     .get("/api/lms/threads/" + OTHER)
     .set("Cookie", cookie)
@@ -226,4 +232,94 @@ test("Messages: a student cannot read or post in another student's thread; mento
     .set("X-CSRF-Token", "abc")
     .send({ status: "approved" })
     .expect(403);
+});
+
+test("Admin and student portals are separate: each refuses the other's sessions and sign-in methods", async () => {
+  const base = {
+    ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+    PUBLIC_ORIGIN: "https://scholarscafe.com",
+    GOOGLE_CLIENT_ID: "t",
+  };
+  const cookie = "__Host-sc_session=" + "a".repeat(64);
+  const appAs = (role, config) =>
+    createApp(
+      {
+        session: async () => ({ id: ME, role, csrf: "abc" }),
+        query: async () => [],
+        checkRateLimit: async () => true,
+      },
+      config,
+    );
+  const admin = (role) => appAs(role, base);
+  const student = (role) => appAs(role, { ...base, PORTAL: "student" });
+  // A student session is useless on the admin; a team session is useless on the student portal.
+  await request(admin("student")).get("/api/me").set("Cookie", cookie).expect(401);
+  for (const role of ["owner", "admin", "editor", "mentor"])
+    await request(student(role)).get("/api/me").set("Cookie", cookie).expect(401);
+  await request(admin("owner")).get("/api/me").set("Cookie", cookie).expect(200);
+  await request(student("student")).get("/api/me").set("Cookie", cookie).expect(200);
+  // Admin is Google only: no email code or password routes exist there.
+  const origin = base.ADMIN_ORIGIN;
+  await request(admin("owner"))
+    .post("/auth/password")
+    .set("Origin", origin)
+    .send({ email: "a@b.co", password: "x" })
+    .expect(404);
+  await request(admin("owner"))
+    .post("/auth/email/start")
+    .set("Origin", origin)
+    .send({ email: "a@b.co" })
+    .expect(404);
+  await request(admin("owner"))
+    .post("/api/password")
+    .set("Cookie", cookie)
+    .set("Origin", origin)
+    .set("X-CSRF-Token", "abc")
+    .send({ password: "x".repeat(12) })
+    .expect(404);
+  // The student portal does not serve the website's content or forms.
+  await request(student("student")).get("/public/content").expect(404);
+  assert.deepEqual((await request(student("student")).get("/auth/config")).body, {
+    portal: "student",
+  });
+  assert.deepEqual((await request(admin("owner")).get("/auth/config")).body, { portal: "admin" });
+});
+
+test("Google sign-in on the wrong portal is refused with a friendly redirect and no session", async () => {
+  const google = {
+    generateAuthUrl: () => "https://accounts.google.com",
+    getToken: async () => ({ tokens: { id_token: "x" } }),
+    verifyIdToken: async () => ({
+      getPayload: () => ({ sub: "s1", email: "stu@gmail.com", email_verified: true, nonce: "n" }),
+    }),
+  };
+  const writes = [];
+  const store = (role) => ({
+    transaction: async (fn) => fn({}),
+    audit: async () => {},
+    query: async (sql) => {
+      if (sql.startsWith("SELECT * FROM oauth_attempts")) return [{ nonce: "n", verifier: "v" }];
+      if (sql.startsWith("SELECT * FROM users"))
+        return [{ id: ME, email: "stu@gmail.com", role, active: 1, google_sub: null }];
+      if (!sql.startsWith("DELETE FROM oauth")) writes.push(sql);
+      return [];
+    },
+  });
+  const config = {
+    ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+    PUBLIC_ORIGIN: "https://scholarscafe.com",
+    GOOGLE_CLIENT_ID: "t",
+  };
+  const res = await request(createApp(store("student"), config, google))
+    .get("/auth/callback?state=valid&code=c")
+    .set("Cookie", "__Host-sc_oauth=valid")
+    .expect(303);
+  assert.equal(res.headers.location, "/?signin=other-portal");
+  assert.ok(!(res.headers["set-cookie"] || []).some((c) => c.startsWith("__Host-sc_session=")));
+  assert.deepEqual(writes, []);
+  const res2 = await request(createApp(store("owner"), { ...config, PORTAL: "student" }, google))
+    .get("/auth/callback?state=valid&code=c")
+    .set("Cookie", "__Host-sc_oauth=valid")
+    .expect(303);
+  assert.equal(res2.headers.location, "/?signin=other-portal");
 });

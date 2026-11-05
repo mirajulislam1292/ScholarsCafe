@@ -48,8 +48,11 @@ hPanel → **Websites** → `admin.scholarscafe.com` → **Node.js**:
 
 The full list with comments is in `backend/.env.example`. After changing variables, click **Restart**.
 
+### Student portal: `student.scholarscafe.com`
+A second Node.js app from the same repository and `backend` folder, with `PORTAL=student` and `STUDENT_ORIGIN=https://student.scholarscafe.com` added to the admin's variables. Step by step: `BACKEND_SETUP.md`, section 4.
+
 ## 4. Domain and SSL
-- Both domains already point to Hostinger. In hPanel → **Security → SSL**, make sure SSL is **Active** for `scholarscafe.com`, `www.scholarscafe.com` and `admin.scholarscafe.com` (free SSL, auto-renewing).
+- Both domains already point to Hostinger. In hPanel → **Security → SSL**, make sure SSL is **Active** for `scholarscafe.com`, `www.scholarscafe.com`, `admin.scholarscafe.com` and `student.scholarscafe.com` (free SSL, auto-renewing).
 - Turn on **Force HTTPS** for each domain if it isn't already.
 
 ## 5. Check the live site after each deploy

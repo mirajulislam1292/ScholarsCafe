@@ -36,6 +36,16 @@ const cookieOptions = { httpOnly: true, secure: true, sameSite: "lax", path: "/"
 const sessionCookie = "__Host-sc_session";
 const stateCookie = "__Host-sc_oauth";
 
+// Two portals run from this same code: the team admin (default) and the student portal (PORTAL=student),
+// each on its own domain with its own cookie. Each refuses the other's accounts at sign-in and per request.
+export const portalOf = (config) => (config.PORTAL === "student" ? "student" : "admin");
+export const roleFits = (portal, role) =>
+  portal === "student" ? role === "student" : role !== "student";
+/** The student deployment uses STUDENT_ORIGIN as its own origin everywhere (cookies, CSRF, links). */
+export function portalConfig(env) {
+  return env.PORTAL === "student" ? { ...env, ADMIN_ORIGIN: env.STUDENT_ORIGIN } : env;
+}
+
 export function createApp(
   store,
   config,
@@ -123,7 +133,12 @@ export function createApp(
       legacyHeaders: false,
     }),
   );
+  const portal = portalOf(config);
   app.get("/health", (_req, res) => res.json({ status: "ok" }));
+  // Tells the sign-in screen which portal it is (admin: Google only; student: Google, email code, password).
+  app.get("/auth/config", (_req, res) => res.json({ portal }));
+  // The website's content and forms are served by the admin deployment only.
+  if (portal === "student") app.use("/public", (_req, _res, next) => next(fail(404, "Not found.")));
   app.use(
     ["/public/inquiries", "/public/feedback", "/public/newsletter"],
     rateLimit({
@@ -309,27 +324,34 @@ export function createApp(
         );
         const user = rows[0];
         if (!user?.active || (user.google_sub && user.google_sub !== identity.sub))
-          throw fail(403, "This account has not been granted access.");
+          throw fail(403, "denied");
+        if (!roleFits(portal, user.role)) throw fail(403, "portal");
         await store.query("UPDATE users SET google_sub=? WHERE id=?", [identity.sub, user.id], c);
         return startSession(c, user, req, "google");
       });
     } catch (error) {
-      // Record refused sign-ins (the transaction above rolled back). The user sees a generic message.
-      if (error.status === 403)
-        await Promise.resolve()
-          .then(() => store.audit(null, "sign_in_denied", identity.email.toLowerCase()))
-          .catch(() => {});
-      throw error;
+      // Record refused sign-ins (the transaction above rolled back) and show a friendly message.
+      if (error.status !== 403) throw error;
+      await Promise.resolve()
+        .then(() => store.audit(null, "sign_in_denied", identity.email.toLowerCase()))
+        .catch(() => {});
+      return res.redirect(
+        303,
+        "/?signin=" + (error.message === "portal" ? "other-portal" : "denied"),
+      );
     }
     setSession(res, session);
     res.redirect("/");
   });
-  installAuthRoutes(app, { store, config, mailer, fail, startSession, setSession });
+  // Email code and password sign-in exist only on the student portal; the team admin is Google only.
+  if (portal === "student")
+    installAuthRoutes(app, { store, config, mailer, fail, startSession, setSession });
   app.use("/api", async (req, res, next) => {
     const raw = cookie(req, sessionCookie);
     if (!raw || raw.length !== 64) throw fail(401, "Please sign in.");
     req.actor = await store.session(hash(raw));
     if (!req.actor) throw fail(401, "Your session has expired or access was removed.");
+    if (!roleFits(portal, req.actor.role)) throw fail(401, "Please sign in on the right page.");
     if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
       if (
         req.headers.origin !== config.ADMIN_ORIGIN ||
@@ -353,7 +375,8 @@ export function createApp(
     if (req.actor.role === "student") throw fail(403, "This area is for staff only.");
     next();
   });
-  installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
+  if (portal === "student")
+    installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
   installStudentRoutes(app, { store, fail, sendBytes });
   installLmsRoutes(app, { store, fail });
   installMessageRoutes(app, { store, fail });

@@ -2,7 +2,7 @@ import { useCmsLookup, useCmsValue, CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import { WA_LINK as CMS_DEFAULT_WA_LINK, STUDENT_PORTAL_URL } from "@/lib/scholars-data";
 
 const DEFAULT_NAV = [
   { label: "Home", href: "/" },
@@ -81,6 +81,16 @@ export function Navbar() {
 
           <div className="flex items-center gap-2">
             <a
+              href={STUDENT_PORTAL_URL}
+              className={`inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 type-button transition-colors duration-500 ease-premium ${
+                solid
+                  ? "text-neutral-700 ring-1 ring-neutral-900/15 hover:bg-neutral-100 hover:text-neutral-900"
+                  : "text-white/85 ring-1 ring-white/20 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <CmsText id="Navbar.studentlogin">Student login</CmsText>
+            </a>
+            <a
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
@@ -149,10 +159,16 @@ export function Navbar() {
               ))}
             </nav>
             <a
+              href={STUDENT_PORTAL_URL}
+              className="mt-auto inline-flex h-12 items-center justify-center rounded-full type-button text-white ring-1 ring-white/25 hover:bg-white/10"
+            >
+              <CmsText id="Navbar.studentlogin.mobile">Student login</CmsText>
+            </a>
+            <a
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-auto inline-flex h-12 items-center justify-center rounded-full bg-ice-100 type-button text-blue-950"
+              className="mt-3 inline-flex h-12 items-center justify-center rounded-full bg-ice-100 type-button text-blue-950"
             >
               <CmsText id="Navbar.b2151df99763">Book Call</CmsText>
             </a>

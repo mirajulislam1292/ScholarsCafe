@@ -1,7 +1,7 @@
 # Project notes (keep under 15 lines)
 - Public site: React 19 + TanStack Start/Router + Vite 7 + Tailwind 4, prerendered to static `dist/` (`npm run build` → `scripts/generate-index.js`). Deployed to Hostinger (scholarscafe.com) on push to `main`.
 - Admin/CMS: `backend/` Express 5 + MySQL (mysql2), entry `server.js`, deployed separately to admin.scholarscafe.com (Hostinger Node, root `backend`).
-- Admin UI is plain JS in `backend/public/` (app.js, style.css). Auth: Google OAuth + email/password + email code/magic link (`backend/auth.js`, setup in BACKEND_SETUP.md), roles owner > admin > editor | mentor (leads only) in `users` table. Collections: universities, team, faqs, countries, hero, seo, sections (`backend/seed.json`, read via `useCmsList`); page order via `<Sections>`. Leads CRM: `/api/leads*`.
+- Admin UI is plain JS in `backend/public/` (app.js, style.css). Auth: two portals from one codebase — admin (Google only) and student (`PORTAL=student`: Google + email code + password, `backend/auth.js`); setup in BACKEND_SETUP.md; roles owner > admin > editor | mentor (leads only) in `users` table. Collections: universities, team, faqs, countries, hero, seo, sections (`backend/seed.json`, read via `useCmsList`); page order via `<Sections>`. Leads CRM: `/api/leads*`.
 - Sessions: random token, SHA-256 hash stored in `sessions`, `__Host-` cookie, 4h expiry, CSRF token per session, `audit` table.
 - Public site reads published CMS content from `GET /public/content`; forms POST to `/public/inquiries|feedback|newsletter`.
 - CMS text: `<CmsText id>` / `useCmsValue(key)`; keep ids stable (admin catalog in `public/cms-copy-catalog.json`).

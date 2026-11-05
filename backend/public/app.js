@@ -721,7 +721,7 @@ async function renderStudents() {
     node(
       "p",
       staff
-        ? "Student accounts, their courses and mentors. Students sign in with Google, an email code or a password."
+        ? "Student accounts, their courses and mentors. Students sign in at student.scholarscafe.com (Google, an email code or a password)."
         : "Students assigned to you. You can keep notes.",
       "muted",
     ),
@@ -744,7 +744,7 @@ async function renderStudents() {
           phone: phone.value,
           target_intake: intake.value,
         });
-        notice("Student added. They can now sign in with that email.");
+        notice("Student added. They sign in at student.scholarscafe.com with this email.");
         render();
       } catch (err) {
         report(err);
@@ -1493,6 +1493,28 @@ async function renderMail() {
     $("screen").append(card);
   }
 }
+// Which portal is this? Team admin (Google only) or student portal (Google, email code, password).
+const portal = await fetch("/auth/config")
+  .then((r) => r.json())
+  .then((j) => j.portal)
+  .catch(() => "admin");
+if (portal === "student") {
+  document.title = "Scholars Cafe · Student portal";
+  $("login-eyebrow").textContent = "STUDENT PORTAL";
+  $("login-title").textContent = "Your journey, in one place.";
+  $("login-lead").textContent = "Sign in to see your courses, lessons and messages.";
+  $("email-signin").hidden = false;
+}
+const signinResult = new URLSearchParams(location.search).get("signin");
+if (signinResult) {
+  $("login-message").textContent =
+    signinResult === "other-portal"
+      ? portal === "student"
+        ? "This is the student portal. Team members sign in at admin.scholarscafe.com."
+        : "This page is for the Scholars Cafe team. Students sign in at student.scholarscafe.com."
+      : "This Google account doesn't have access. Ask an admin to add it.";
+  history.replaceState(null, "", "/");
+}
 // Sign-in screen: password, or a one-time email code (the email also holds a magic link).
 async function authPost(path, body) {
   const r = await fetch(path, {
@@ -1607,7 +1629,7 @@ try {
     me.role === "student"
       ? ["My courses", "Messages", "Account"]
       : me.role === "mentor"
-        ? ["Leads", "Students", "Messages", "Account"]
+        ? ["Leads", "Students", "Messages"]
         : [
             "Overview",
             "Media",
@@ -1626,7 +1648,6 @@ try {
                   "Email delivery",
                   "Activity",
                 ]),
-            "Account",
           ];
   if (me.role === "mentor") section = "Leads";
   if (me.role === "student") section = "My courses";
