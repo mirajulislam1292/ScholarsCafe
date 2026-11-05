@@ -1,18 +1,23 @@
 import nodemailer from "nodemailer";
 
+// The mailbox that sends (and signs in to SMTP). Set SMTP_USER=no-reply@scholarscafe.com once that mailbox exists.
+export const sender = (config) =>
+  (config.SMTP_USER || "contact@scholarscafe.com").trim().toLowerCase();
 export function createMailer(config) {
   if (!config.SMTP_PASSWORD) return null;
-  return nodemailer.createTransport({
+  const transport = nodemailer.createTransport({
     host: "smtp.hostinger.com",
     port: 465,
     secure: true,
-    auth: { user: "contact@scholarscafe.com", pass: config.SMTP_PASSWORD },
+    auth: { user: sender(config), pass: config.SMTP_PASSWORD },
     tls: { minVersion: "TLSv1.2", rejectUnauthorized: true },
     connectionTimeout: 10000,
     socketTimeout: 20000,
     disableFileAccess: true,
     disableUrlAccess: true,
   });
+  transport.sender = sender(config);
+  return transport;
 }
 
 // At-least-once delivery: a crash after sending can cause a duplicate, never lost records.
@@ -28,7 +33,7 @@ export async function deliverMail(store, transport) {
     const row = rows[0];
     try {
       await transport.sendMail({
-        from: "Scholars Cafe Website <contact@scholarscafe.com>",
+        from: `Scholars Cafe Website <${transport.sender || "contact@scholarscafe.com"}>`,
         to: "contact@scholarscafe.com",
         replyTo: row.reply_to || undefined,
         subject: row.subject,
@@ -55,7 +60,7 @@ export async function deliverMail(store, transport) {
 // Sign-in code + magic link, sent straight to the account's own address (not via the outbox).
 export async function sendLoginEmail(transport, to, code, url, minutes) {
   await transport.sendMail({
-    from: "Scholars Cafe <contact@scholarscafe.com>",
+    from: `Scholars Cafe <${transport.sender || "contact@scholarscafe.com"}>`,
     to,
     subject: "Your Scholars Cafe sign-in code",
     text: `Your sign-in code is ${code}\n\nOr open this link to sign in:\n${url}\n\nThe code and link expire in ${minutes} minutes and work once. If you did not ask for this, ignore this email; nobody can sign in without the code.`,

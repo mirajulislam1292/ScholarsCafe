@@ -171,3 +171,9 @@ CREATE TABLE IF NOT EXISTS reviews (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (course_id) REFERENCES lms_courses(id) ON DELETE CASCADE
 );
+-- Owner-only settings (Phase 1): e.g. student_signup = open | invite
+CREATE TABLE IF NOT EXISTS settings (
+  name VARCHAR(64) PRIMARY KEY,
+  value VARCHAR(255) NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

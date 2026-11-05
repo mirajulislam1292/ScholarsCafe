@@ -1231,6 +1231,46 @@ async function renderMedia() {
 async function renderAccess() {
   const users = (await api("users")).items;
   const screen = $("screen");
+  // Student sign-up switch: everyone sees it, only the Super Admin (owner) can change it.
+  const settings = await api("settings");
+  const signup = node("form", undefined, "card");
+  signup.append(
+    node("h2", "Student sign-up"),
+    node(
+      "p",
+      "Open: anyone can create a student account at student.scholarscafe.com; it has no access until you add a course or package. Invite only: just the students you add under Students.",
+      "muted",
+    ),
+  );
+  const mode = node("select");
+  for (const [value, text] of [
+    ["open", "Open sign-up"],
+    ["invite", "Invite only"],
+  ]) {
+    const o = node("option", text);
+    o.value = value;
+    o.selected = settings.student_signup === value;
+    mode.append(o);
+  }
+  mode.disabled = me.role !== "owner";
+  const modeLabel = node("label", "Mode");
+  modeLabel.append(mode);
+  signup.append(modeLabel);
+  if (me.role === "owner") {
+    const save = node("button", "Save", "primary");
+    save.type = "submit";
+    signup.append(save);
+    signup.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api("settings", { student_signup: mode.value });
+        notice("Student sign-up saved.");
+      } catch (err) {
+        report(err);
+      }
+    };
+  } else signup.append(node("p", "Only the Super Admin can change this.", "muted"));
+  screen.append(signup);
   const card = node("form", undefined, "card");
   card.append(node("h2", "Approve a Google account"));
   const email = field(card, "email", "");
@@ -1494,16 +1534,20 @@ async function renderMail() {
   }
 }
 // Which portal is this? Team admin (Google only) or student portal (Google, email code, password).
-const portal = await fetch("/auth/config")
+const authConfig = await fetch("/auth/config")
   .then((r) => r.json())
-  .then((j) => j.portal)
-  .catch(() => "admin");
+  .catch(() => ({ portal: "admin" }));
+const portal = authConfig.portal;
 if (portal === "student") {
   document.title = "Scholars Cafe · Student portal";
   $("login-eyebrow").textContent = "STUDENT PORTAL";
   $("login-title").textContent = "Your journey, in one place.";
   $("login-lead").textContent = "Sign in to see your courses, lessons and messages.";
   $("email-signin").hidden = false;
+  $("show-signup").hidden = !authConfig.signup;
+  $("login-foot").textContent = authConfig.signup
+    ? "Team members sign in at admin.scholarscafe.com."
+    : "Sign-up is by invitation. Team members sign in at admin.scholarscafe.com.";
 }
 const signinResult = new URLSearchParams(location.search).get("signin");
 if (signinResult) {
@@ -1546,18 +1590,72 @@ $("send-code").onclick = async () => {
   if (!email) return loginMessage("Enter your email first.");
   try {
     const j = await authPost("/auth/email/start", { email });
-    $("password-form").hidden = true;
-    $("code-form").hidden = false;
+    showForm("code-form");
     $("login-code").focus();
     loginMessage(j.message);
   } catch (err) {
     loginMessage(err.message);
   }
 };
-$("code-back").onclick = () => {
-  $("code-form").hidden = true;
-  $("password-form").hidden = false;
+// Shows one of the sign-in forms and hides the others.
+function showForm(id) {
+  for (const f of ["password-form", "code-form", "signup-form", "reset-form"])
+    $(f).hidden = f !== id;
   loginMessage("");
+}
+$("code-back").onclick = () => showForm("password-form");
+$("signup-back").onclick = () => showForm("password-form");
+$("reset-back").onclick = () => showForm("password-form");
+$("show-signup").onclick = () => {
+  showForm("signup-form");
+  $("signup-email").value = $("login-email").value;
+  $("signup-name").focus();
+};
+$("signup-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const email = $("signup-email").value.trim();
+  const name = $("signup-name").value.trim();
+  if (!email || !name) return loginMessage("Enter your name and email.");
+  try {
+    const j = await authPost("/auth/signup", {
+      email,
+      name,
+      phone: $("signup-phone").value.trim(),
+    });
+    $("login-email").value = email;
+    showForm("code-form");
+    $("login-code").focus();
+    loginMessage(j.message);
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+$("forgot").onclick = async () => {
+  const email = $("login-email").value.trim();
+  if (!email) return loginMessage("Enter your email first, then tap Forgot password.");
+  try {
+    const j = await authPost("/auth/email/start", { email });
+    showForm("reset-form");
+    $("reset-code").focus();
+    loginMessage(j.message);
+  } catch (err) {
+    loginMessage(err.message);
+  }
+};
+$("reset-form").onsubmit = async (e) => {
+  e.preventDefault();
+  if ($("reset-password").value !== $("reset-again").value)
+    return loginMessage("The two passwords don't match.");
+  try {
+    await authPost("/auth/password/reset", {
+      email: $("login-email").value.trim(),
+      code: $("reset-code").value.trim(),
+      password: $("reset-password").value,
+    });
+    location.reload();
+  } catch (err) {
+    loginMessage(err.message);
+  }
 };
 $("code-form").onsubmit = async (e) => {
   e.preventDefault();

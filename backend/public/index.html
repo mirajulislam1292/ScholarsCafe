@@ -44,6 +44,62 @@
           /></label>
           <button class="primary" type="submit">Sign in with password</button>
           <button id="send-code" type="button">Email me a one-time code</button>
+          <p class="login-links">
+            <button id="forgot" class="link" type="button">Forgot password?</button>
+            <button id="show-signup" class="link" type="button" hidden>
+              New here? Create an account
+            </button>
+          </p>
+        </form>
+        <form id="signup-form" class="login-form" hidden novalidate>
+          <label
+            >Full name<input id="signup-name" autocomplete="name" maxlength="160" required
+          /></label>
+          <label
+            >Email<input
+              id="signup-email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              required
+          /></label>
+          <label
+            >Phone (optional)<input id="signup-phone" type="tel" autocomplete="tel" maxlength="40"
+          /></label>
+          <button class="primary" type="submit">Create account</button>
+          <button id="signup-back" type="button">I already have an account</button>
+          <p class="muted small">
+            New accounts open once Scholars Cafe adds your course or package.
+          </p>
+        </form>
+        <form id="reset-form" class="login-form" hidden novalidate>
+          <label
+            >6-digit code from your email<input
+              id="reset-code"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              required
+          /></label>
+          <label
+            >New password (12+ characters)<input
+              id="reset-password"
+              type="password"
+              autocomplete="new-password"
+              maxlength="128"
+              required
+          /></label>
+          <label
+            >Repeat new password<input
+              id="reset-again"
+              type="password"
+              autocomplete="new-password"
+              maxlength="128"
+              required
+          /></label>
+          <button class="primary" type="submit">Set password and sign in</button>
+          <button id="reset-back" type="button">Back to sign-in</button>
         </form>
         <form id="code-form" class="login-form" hidden>
           <label
@@ -60,7 +116,7 @@
         </form>
       </div>
       <p id="login-message" role="status" aria-live="polite"></p>
-      <p class="muted">Access is limited to approved accounts.</p>
+      <p class="muted" id="login-foot">Access is limited to approved accounts.</p>
     </div>
     <div id="workspace" hidden>
       <aside>
