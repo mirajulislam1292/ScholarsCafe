@@ -51,7 +51,13 @@ export class Store {
       "INSERT INTO users (id,email,role) SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM users existing)",
       [
         randomUUID(),
-        (this.config?.OWNER_EMAIL || "contact.scholarscafe@gmail.com").toLowerCase(),
+        (
+          this.config?.SUPER_ADMIN_EMAIL ||
+          this.config?.OWNER_EMAIL ||
+          "contact.scholarscafe@gmail.com"
+        )
+          .trim()
+          .toLowerCase(),
         "owner",
       ],
     );

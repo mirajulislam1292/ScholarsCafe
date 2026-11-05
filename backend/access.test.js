@@ -281,6 +281,7 @@ test("Admin and student portals are separate: each refuses the other's sessions 
   await request(student("student")).get("/public/content").expect(404);
   assert.deepEqual((await request(student("student")).get("/auth/config")).body, {
     portal: "student",
+    signup: true,
   });
   assert.deepEqual((await request(admin("owner")).get("/auth/config")).body, { portal: "admin" });
 });
@@ -322,4 +323,50 @@ test("Google sign-in on the wrong portal is refused with a friendly redirect and
     .set("Cookie", "__Host-sc_oauth=valid")
     .expect(303);
   assert.equal(res2.headers.location, "/?signin=other-portal");
+});
+
+test("Security settings: only the Super Admin changes them; editors, mentors and students can't read them", async () => {
+  const base = {
+    ADMIN_ORIGIN: "https://admin.scholarscafe.com",
+    PUBLIC_ORIGIN: "https://scholarscafe.com",
+    GOOGLE_CLIENT_ID: "t",
+  };
+  const writes = [];
+  const appAs = (role) =>
+    createApp(
+      {
+        session: async () => ({ id: ME, role, csrf: "abc" }),
+        query: async (sql, args) => (
+          sql.startsWith("INSERT INTO settings") && writes.push(args),
+          []
+        ),
+        transaction: (fn) => fn({}),
+        audit: async () => {},
+        checkRateLimit: async () => true,
+      },
+      role === "student"
+        ? { ...base, PORTAL: "student", ADMIN_ORIGIN: "https://student.scholarscafe.com" }
+        : base,
+    );
+  const cookie = "__Host-sc_session=" + "a".repeat(64);
+  const set = (role, body, origin = base.ADMIN_ORIGIN) =>
+    request(appAs(role))
+      .post("/api/settings")
+      .set("Cookie", cookie)
+      .set("Origin", origin)
+      .set("X-CSRF-Token", "abc")
+      .send(body);
+  await set("admin", { student_signup: "invite" }).expect(403);
+  await set("editor", { student_signup: "invite" }).expect(403);
+  await set("mentor", { student_signup: "invite" }).expect(403);
+  await set("student", { student_signup: "invite" }, "https://student.scholarscafe.com").expect(
+    403,
+  );
+  assert.equal(writes.length, 0);
+  await set("owner", { student_signup: "maybe" }).expect(400);
+  await set("owner", { student_signup: "invite" }).expect(200);
+  assert.deepEqual(writes, [["invite"]]);
+  await request(appAs("admin")).get("/api/settings").set("Cookie", cookie).expect(200);
+  await request(appAs("editor")).get("/api/settings").set("Cookie", cookie).expect(403);
+  await request(appAs("mentor")).get("/api/settings").set("Cookie", cookie).expect(403);
 });

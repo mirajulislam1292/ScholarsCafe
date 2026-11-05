@@ -6,7 +6,7 @@ import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { installMedia, serveMedia, sendBytes } from "./media.js";
-import { installAuthRoutes, installAccountRoutes } from "./auth.js";
+import { installAuthRoutes, installAccountRoutes, signupOpen } from "./auth.js";
 import { installLmsRoutes, installStudentRoutes, installMessageRoutes } from "./lms.js";
 import {
   token,
@@ -57,13 +57,16 @@ export function createApp(
   mailer = null,
 ) {
   const app = express();
+  const portal = portalOf(config);
+  // Team sessions are short (2 hours); students stay signed in for 12 hours.
+  const sessionHours = portal === "student" ? 12 : 2;
   // Every sign-in method ends here: replace any previous session, create a new one, audit it.
   const startSession = async (c, user, req, method) => {
     const session = token();
     const previous = cookie(req, sessionCookie);
     if (previous) await store.query("DELETE FROM sessions WHERE token_hash=?", [hash(previous)], c);
     await store.query(
-      "INSERT INTO sessions (token_hash,user_id,csrf,expires_at) VALUES (?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 4 HOUR))",
+      `INSERT INTO sessions (token_hash,user_id,csrf,expires_at) VALUES (?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL ${sessionHours} HOUR))`,
       [hash(session), user.id, token()],
       c,
     );
@@ -76,7 +79,7 @@ export function createApp(
     return session;
   };
   const setSession = (res, session) =>
-    res.cookie(sessionCookie, session, { ...cookieOptions, maxAge: 4 * 60 * 60 * 1000 });
+    res.cookie(sessionCookie, session, { ...cookieOptions, maxAge: sessionHours * 60 * 60 * 1000 });
   // No generic trust-proxy setting: only an explicitly verified Hostinger proxy range may be trusted.
   if (config.TRUST_PROXY) app.set("trust proxy", config.TRUST_PROXY.split(","));
   app.disable("x-powered-by");
@@ -133,10 +136,11 @@ export function createApp(
       legacyHeaders: false,
     }),
   );
-  const portal = portalOf(config);
   app.get("/health", (_req, res) => res.json({ status: "ok" }));
   // Tells the sign-in screen which portal it is (admin: Google only; student: Google, email code, password).
-  app.get("/auth/config", (_req, res) => res.json({ portal }));
+  app.get("/auth/config", async (_req, res) =>
+    res.json(portal === "student" ? { portal, signup: await signupOpen(store) } : { portal }),
+  );
   // The website's content and forms are served by the admin deployment only.
   if (portal === "student") app.use("/public", (_req, _res, next) => next(fail(404, "Not found.")));
   app.use(
@@ -322,7 +326,27 @@ export function createApp(
           [identity.email.toLowerCase()],
           c,
         );
-        const user = rows[0];
+        let user = rows[0];
+        // Student portal with open sign-up: a new Google account becomes a student with no access yet.
+        if (!user && portal === "student" && (await signupOpen(store, c))) {
+          user = {
+            id: randomUUID(),
+            email: identity.email.toLowerCase(),
+            role: "student",
+            active: 1,
+          };
+          await store.query(
+            "INSERT INTO users (id,email,role,active) VALUES (?,?,'student',1)",
+            [user.id, user.email],
+            c,
+          );
+          await store.query(
+            "INSERT INTO student_profiles (user_id,full_name,updated_at) VALUES (?,?,UTC_TIMESTAMP())",
+            [user.id, String(identity.name || "").slice(0, 160)],
+            c,
+          );
+          await store.audit(user.id, "student_signup_google", user.email, c);
+        }
         if (!user?.active || (user.google_sub && user.google_sub !== identity.sub))
           throw fail(403, "denied");
         if (!roleFits(portal, user.role)) throw fail(403, "portal");
@@ -691,6 +715,28 @@ export function createApp(
       );
       if (result.affectedRows !== 1) throw fail(409, "Entry changed. Reload before publishing.");
       await store.audit(req.actor.id, req.params.action, req.params.id, c);
+    });
+    res.json({ ok: true });
+  });
+  // Security settings: everyone on the team except editors may read them; only the owner (Super Admin) changes them.
+  app.get("/api/settings", async (req, res) => {
+    if (!canPublish(req.actor.role)) throw fail(403, "Settings are restricted.");
+    res.json({ student_signup: (await signupOpen(store)) ? "open" : "invite" });
+  });
+  app.post("/api/settings", async (req, res) => {
+    if (req.actor.role !== "owner")
+      throw fail(403, "Only the Super Admin can change security settings.");
+    const { student_signup } = z
+      .object({ student_signup: z.enum(["open", "invite"]) })
+      .strict()
+      .parse(req.body);
+    await store.transaction(async (c) => {
+      await store.query(
+        "INSERT INTO settings (name,value) VALUES ('student_signup',?) ON DUPLICATE KEY UPDATE value=VALUES(value)",
+        [student_signup],
+        c,
+      );
+      await store.audit(req.actor.id, "setting_student_signup", student_signup, c);
     });
     res.json({ ok: true });
   });
