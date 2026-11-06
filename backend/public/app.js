@@ -314,8 +314,13 @@ function render() {
   $("subtitle").textContent = ABOUT[section] || "";
   const screen = $("screen");
   screen.replaceChildren();
-  for (const b of $("nav").querySelectorAll("button"))
+  for (const b of document.querySelectorAll("#nav button, #tabbar button"))
     b.classList.toggle("active", b.dataset.section === section);
+  // Gentle fade-in between screens (skipped when reduced motion is preferred, see style.css).
+  screen.classList.remove("enter");
+  void screen.offsetWidth;
+  screen.classList.add("enter");
+  window.scrollTo(0, 0);
   if (section === "Packages") {
     renderPackages().catch(report);
     return;
@@ -1444,7 +1449,7 @@ function openLink(url, text) {
 }
 function openCourse(courseId, lessonId) {
   section = "My courses";
-  for (const b of $("nav").querySelectorAll("button"))
+  for (const b of document.querySelectorAll("#nav button, #tabbar button"))
     b.classList.toggle("active", b.dataset.section === section);
   $("subtitle").textContent = "";
   $("screen").replaceChildren();
@@ -3389,6 +3394,67 @@ function renderAccount() {
   };
   $("screen").append(card);
 }
+// ---------- Mobile: bottom tab bar (up to 5 tabs) and a "More" sheet with the full menu ----------
+const TAB_ICONS = {
+  Home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  "My courses":
+    "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z",
+  Resources: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.2 5.8-2.1 6.3-6.3 2.1 2.1-6.3z",
+  Documents: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6",
+  Messages: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+  Account: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+  Overview: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+  Leads:
+    "M22 12h-6l-2 3h-4l-2-3H2M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+  Students:
+    "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+  More: "M4 6h16M4 12h16M4 18h16",
+};
+const TAB_LABELS = { "My courses": "Courses", Account: "Profile", Overview: "Website" };
+function icon(path) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  p.setAttribute("d", path);
+  svg.append(p);
+  return svg;
+}
+function setMenu(open) {
+  document.body.classList.toggle("menu-open", open);
+  $("tabbar")?.querySelector('[data-section="More"]')?.setAttribute("aria-expanded", String(open));
+}
+function buildTabbar(keys) {
+  const priority = {
+    student: ["Home", "My courses", "Resources", "Messages", "Documents", "Account"],
+    mentor: ["Leads", "Students", "Documents", "Messages"],
+  }[me.role] || ["Overview", "Leads", "Students", "Messages"];
+  const tabs =
+    keys.length <= 5 ? keys : [...priority.filter((k) => keys.includes(k)).slice(0, 4), "More"];
+  const bar = node("nav", undefined, "tabbar");
+  bar.id = "tabbar";
+  bar.setAttribute("aria-label", "Main");
+  for (const key of tabs) {
+    const b = node("button");
+    b.type = "button";
+    b.dataset.section = key;
+    b.append(icon(TAB_ICONS[key] || TAB_ICONS.More), node("span", TAB_LABELS[key] || label(key)));
+    if (key === "More") {
+      b.setAttribute("aria-expanded", "false");
+      b.setAttribute("aria-controls", "nav");
+      b.onclick = () => setMenu(!document.body.classList.contains("menu-open"));
+    } else
+      b.onclick = () => {
+        setMenu(false);
+        navigate(key);
+      };
+    bar.append(b);
+  }
+  const backdrop = node("div", undefined, "menu-backdrop");
+  backdrop.onclick = () => setMenu(false);
+  document.body.append(backdrop, bar);
+}
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 try {
   me = await api("me");
   const catalogResponse = await fetch("/cms-copy-catalog.json");
@@ -3463,16 +3529,22 @@ try {
   for (const [group, keys] of navFor) {
     if (group) $("nav").append(node("p", group, "nav-group"));
     for (const key of keys) {
-      const b = button(label(key), () => navigate(key));
+      const b = button(label(key), () => {
+        setMenu(false);
+        navigate(key);
+      });
       b.dataset.section = key;
       $("nav").append(b);
     }
   }
+  buildTabbar(navFor.flatMap(([, keys]) => keys));
   if (me.role === "student")
     api("lms/my/unread")
       .then(({ unread }) => {
         const b = $("nav").querySelector('[data-section="Messages"]');
         if (unread && b) b.textContent = `Messages (${unread})`;
+        const t = $("tabbar")?.querySelector('[data-section="Messages"]');
+        if (unread && t) t.dataset.badge = unread > 9 ? "9+" : String(unread);
       })
       .catch(() => {});
   $("logout").onclick = async () => {

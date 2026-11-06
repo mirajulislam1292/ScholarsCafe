@@ -4,6 +4,7 @@ import { rateLimit } from "express-rate-limit";
 import { OAuth2Client } from "google-auth-library";
 import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { installMedia, serveMedia, sendBytes } from "./media.js";
 import { installAuthRoutes, installAccountRoutes, signupOpen } from "./auth.js";
@@ -143,6 +144,49 @@ export function createApp(
     }),
   );
   app.get("/health", (_req, res) => res.json({ status: "ok" }));
+  // Installable app (PWA): manifest and service worker, per portal. Served by Node (not as static files)
+  // so the headers are exact and the worker changes with every deploy.
+  const started = String(Date.now());
+  const swSource = readFileSync(fileURLToPath(new URL("./sw.js", import.meta.url)), "utf8").replace(
+    "__VERSION__",
+    started,
+  );
+  app.get("/sw.js", (_req, res) =>
+    res
+      .set({
+        "Content-Type": "text/javascript; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "Service-Worker-Allowed": "/",
+      })
+      .send(swSource),
+  );
+  app.get("/manifest.webmanifest", (_req, res) =>
+    res.set({ "Content-Type": "application/manifest+json", "Cache-Control": "no-cache" }).json({
+      name: portal === "student" ? "Scholars Cafe Student" : "Scholars Cafe Studio",
+      short_name: portal === "student" ? "Scholars Cafe" : "SC Studio",
+      description:
+        portal === "student"
+          ? "Your courses, resources, documents and mentor."
+          : "Scholars Cafe team workspace.",
+      id: "/",
+      start_url: "/",
+      scope: "/",
+      display: "standalone",
+      orientation: "portrait",
+      background_color: "#fbfcfd",
+      theme_color: "#041c31",
+      icons: [
+        { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+        {
+          src: "/icons/maskable-512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "maskable",
+        },
+      ],
+    }),
+  );
   // Tells the sign-in screen which portal it is (admin: Google only; student: Google, email code, password).
   app.get("/auth/config", async (_req, res) =>
     res.json(portal === "student" ? { portal, signup: await signupOpen(store) } : { portal }),

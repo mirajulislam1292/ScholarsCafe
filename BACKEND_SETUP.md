@@ -215,3 +215,18 @@ Students without a feature don't see that menu item, and the server refuses the 
 - Order uses `position`; untick `enabled` to hide one.
 - Click counts (last 30 days and total) appear next to each link in the admin. Only a daily counter per link is stored, nothing about the visitor.
 - Until you publish links, the page shows the site's existing links: socials, a WhatsApp call, guides, the portal and the website.
+
+## 14. Install as an app, and mobile (Phase 6)
+
+**Install:** both portals can be added to a phone's home screen and open full screen with the Scholars Cafe icon.
+
+- **iPhone:** open the portal in Safari, tap Share, then **Add to Home Screen**.
+- **Android:** open it in Chrome, open the menu, then **Install app**.
+
+**Offline:** without a connection, the app shows an "You're offline" page.
+
+**What is stored on the device:** only the app's own files (layout, script, logo, font), never `/api`, `/auth` or `/public`. So no personal data, messages, files, videos or API answers are kept. The app's files are always re-checked with the server first, so everyone gets the newest version right after a deploy. This also fixes having to hard-refresh the admin.
+
+**Mobile:** under 800 px wide, the menu becomes a bottom tab bar (up to four main screens plus **More**, which opens the full menu as a sheet). The layout respects the iPhone notch and home bar, tap targets are at least 44 px, and screens fade in gently (off when "Reduce motion" is on). Checked at 360, 390 and 430 px with no sideways scrolling.
+
+Screenshots (sample data): `docs/screenshots/` (student and admin, desktop and mobile).
