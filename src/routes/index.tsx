@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Hero } from "@/components/scholars/Hero";
@@ -13,6 +14,13 @@ import { PageIndex } from "@/components/page/PageIndex";
 import { CtaBand } from "@/components/page/PageParts";
 
 export const Route = createFileRoute("/")({
+  head: () =>
+    seo({
+      path: "/",
+      title: "Study in the USA from Bangladesh | Scholars Cafe",
+      description:
+        "One-to-one mentors for Bangladeshi students applying to US universities: college lists, essays, scholarships, CSS Profile, ISFAA and F-1 visa prep.",
+    }),
   component: Index,
 });
 

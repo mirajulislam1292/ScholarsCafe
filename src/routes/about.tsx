@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { CmsText, useCmsValue } from "@/lib/cms";
 import { VALUES as CMS_DEFAULT_VALUES } from "@/lib/scholars-data";
@@ -10,17 +11,13 @@ import { Block, CtaBand, PageHero, ParallaxImage } from "@/components/page/PageP
 import { Team } from "@/components/page/Team";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "Scholars Cafe mentors Bangladeshi students applying to universities in the United States. Meet the team.",
-      },
-      { property: "og:title", content: "About - Scholars Cafe" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/about",
+      title: "About Scholars Cafe: Mentors for Bangladeshi Students",
+      description:
+        "Scholars Cafe mentors Bangladeshi students applying to universities in the United States. Meet the founders and mentors behind it.",
+    }),
   component: AboutPage,
 });
 

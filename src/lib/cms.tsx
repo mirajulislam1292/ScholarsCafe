@@ -62,6 +62,10 @@ function BrandSettings() {
   }, [brand.image]);
   return null;
 }
+/** True once the admin's published content has loaded (false while loading or when offline). */
+export function useCmsReady() {
+  return useContext(Content) !== null;
+}
 export function CmsText({ id, children }: { id: string; children: ReactNode }) {
   const items = useContext(Content);
   const replacement = items?.find((i) => i.kind === "copy" && typeof i.data[id] === "string")?.data[

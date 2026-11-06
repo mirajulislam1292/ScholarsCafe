@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import {
   ArrowUpRight,
   Facebook,
@@ -10,21 +11,19 @@ import {
   Play,
   Youtube,
 } from "lucide-react";
-import type { ComponentType } from "react";
-import { CmsText, useCmsList, useCmsValue } from "@/lib/cms";
+import { useEffect, useState, type ComponentType } from "react";
+import { CmsText, useCmsList, useCmsReady, useCmsValue } from "@/lib/cms";
 import { EMAIL, STUDENT_PORTAL_URL, WA_LINK } from "@/lib/scholars-data";
 
 // Link-in-bio page (scholarscafe.com/links). Everything is edited in the admin under Website → Link page.
 export const Route = createFileRoute("/links")({
-  head: () => ({
-    meta: [
-      { title: "Scholars Cafe · Links" },
-      {
-        name: "description",
-        content: "Guides, free strategy calls and the student portal from Scholars Cafe.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/links",
+      title: "Scholars Cafe \u00b7 Links",
+      description:
+        "Scholars Cafe on YouTube, Instagram, Facebook, LinkedIn, TikTok and WhatsApp, plus our website and student portal.",
+    }),
   component: LinksPage,
 });
 
@@ -111,9 +110,36 @@ function LinksPage() {
     ...(d as Omit<Item, "id">),
     id,
   })).filter((i) => i.enabled !== false);
-  // Social and normal links share one list (in order); YouTube links get video cards below.
-  const rows = withIds.filter((i) => i.type !== "youtube");
+  // YouTube *videos* get cards below; everything else (including a YouTube channel link) is a list button.
   const videos = withIds.filter((i) => i.type === "youtube" && youtubeId(i.url));
+  const rows = withIds
+    .filter((i) => !videos.includes(i))
+    .map((i) => (i.type === "youtube" && !i.platform ? { ...i, platform: "youtube" } : i));
+  // The page is pre-built before your links load: show quiet placeholders instead of the built-in
+  // starter links, so nothing jumps. The starter links appear only if loading fails (e.g. offline).
+  const ready = useCmsReady();
+  const [waited, setWaited] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setWaited(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+  const loading = !ready && !waited;
+  // Always end with a button to the main website (unless the admin already added one).
+  const hasSite = rows.some(
+    (r) => r.url === "/" || /^https:\/\/(www\.)?scholarscafe\.com\/?$/.test(r.url),
+  );
+  const list = hasSite
+    ? rows
+    : [
+        ...rows,
+        {
+          id: "site",
+          type: "link" as const,
+          platform: "website",
+          label: "Scholars Cafe website",
+          url: "/",
+        },
+      ];
   const tagline = useCmsValue("links.tagline", "");
   const go = (i: Item) => ({
     href: fixLink(i.url),
@@ -143,38 +169,43 @@ function LinksPage() {
           )}
         </p>
         {/* One list of buttons in the admin's order, each with its network's icon; featured ones get an outline. */}
-        <div className="mt-10 grid w-full gap-3">
-          {rows.map((l) => {
-            const Icon = l.platform ? ICONS[l.platform] || Globe : null;
-            return (
-              <a
-                key={l.id}
-                {...go(l)}
-                className={`group flex min-h-16 items-center gap-4 rounded-3xl bg-ice-100 px-5 py-4 text-blue-950 transition-[transform,box-shadow] duration-500 ease-premium hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgb(0_0_0/0.35)] ${l.highlight ? "ring-2 ring-ice-300 ring-offset-2 ring-offset-blue-950" : ""}`}
-              >
-                {Icon && (
-                  <span
-                    aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-950/[0.08]"
-                  >
-                    <Icon className="h-[18px] w-[18px]" />
-                  </span>
-                )}
-                <span className="min-w-0 flex-1">
-                  <span className="type-button block">{l.label}</span>
-                  {l.note && (
-                    <span className="type-caption mt-1 block text-blue-900/70">{l.note}</span>
+        <div className="mt-10 grid w-full gap-3" aria-busy={loading}>
+          {loading &&
+            [0, 1, 2, 3].map((n) => (
+              <div key={n} aria-hidden className="h-16 animate-pulse rounded-3xl bg-white/[0.06]" />
+            ))}
+          {!loading &&
+            list.map((l) => {
+              const Icon = l.platform ? ICONS[l.platform] || Globe : null;
+              return (
+                <a
+                  key={l.id}
+                  {...go(l)}
+                  className={`group flex min-h-16 items-center gap-4 rounded-3xl bg-ice-100 px-5 py-4 text-blue-950 transition-[transform,box-shadow] duration-500 ease-premium hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgb(0_0_0/0.35)] ${l.highlight ? "ring-2 ring-ice-300 ring-offset-2 ring-offset-blue-950" : ""}`}
+                >
+                  {Icon && (
+                    <span
+                      aria-hidden
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-950/[0.08]"
+                    >
+                      <Icon className="h-[18px] w-[18px]" />
+                    </span>
                   )}
-                </span>
-                <ArrowUpRight
-                  aria-hidden
-                  className="h-4 w-4 shrink-0 opacity-70 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                />
-              </a>
-            );
-          })}
+                  <span className="min-w-0 flex-1">
+                    <span className="type-button block">{l.label}</span>
+                    {l.note && (
+                      <span className="type-caption mt-1 block text-blue-900/70">{l.note}</span>
+                    )}
+                  </span>
+                  <ArrowUpRight
+                    aria-hidden
+                    className="h-4 w-4 shrink-0 opacity-70 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  />
+                </a>
+              );
+            })}
         </div>
-        {videos.length > 0 && (
+        {!loading && videos.length > 0 && (
           <section className="mt-12 w-full">
             <h2 className="type-caption text-ice-400">Watch</h2>
             <div className="mt-4 grid gap-4">
@@ -203,9 +234,6 @@ function LinksPage() {
             </div>
           </section>
         )}
-        <a href="/" className="type-caption mt-14 text-ice-400 hover:text-ice-100">
-          scholarscafe.com
-        </a>
       </div>
     </main>
   );

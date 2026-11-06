@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { CmsText, useCmsValue } from "@/lib/cms";
 import { SERVICES as CMS_DEFAULT_SERVICES } from "@/lib/scholars-data";
@@ -9,17 +10,13 @@ import { Reveal } from "@/components/scholars/Reveal";
 import { Block, CtaBand, PageHero, ParallaxImage } from "@/components/page/PageParts";
 
 export const Route = createFileRoute("/services")({
-  head: () => ({
-    meta: [
-      { title: "Services - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "Individual admissions services for US universities: planning, essays, financial aid, visas and more.",
-      },
-      { property: "og:title", content: "Services - Scholars Cafe" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/services",
+      title: "US Application Help: Essays, Aid & Visa | Scholars Cafe",
+      description:
+        "Individual services for US university applications from Bangladesh: college list, Common App essays, CSS Profile and ISFAA, and F-1 visa interview prep.",
+    }),
   component: ServicesPage,
 });
 

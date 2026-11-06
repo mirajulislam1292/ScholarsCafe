@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { ArrowUpRight, Check } from "lucide-react";
 import { CmsText, useCmsCollection, useCmsValue } from "@/lib/cms";
@@ -14,17 +15,13 @@ import { Reveal } from "@/components/scholars/Reveal";
 import { Block, CtaBand, PageHero, ParallaxImage } from "@/components/page/PageParts";
 
 export const Route = createFileRoute("/programs")({
-  head: () => ({
-    meta: [
-      { title: "Programs - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "Mentor-led tracks for Bangladeshi students applying to US universities: full scholarship, general admission and file opening.",
-      },
-      { property: "og:title", content: "Programs - Scholars Cafe" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/programs",
+      title: "Full Scholarship & US Admission Programs | Scholars Cafe",
+      description:
+        "Mentor-led programs for Bangladeshi students applying to US universities: the full scholarship track, general admission and file opening.",
+    }),
   component: ProgramsPage,
 });
 

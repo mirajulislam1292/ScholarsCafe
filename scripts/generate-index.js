@@ -36,6 +36,32 @@ function writeSecurityPolicy(clientDir, html) {
   console.log(`[OK] Content-Security-Policy written with ${hashes.length} inline script hash(es)`);
 }
 
+// sitemap.xml for search engines: every public page (not the form shell). Paths with a priority hint for
+// the pages that matter most for search.
+function writeSitemap(clientDir, pages) {
+  const site = "https://scholarscafe.com";
+  const today = new Date().toISOString().slice(0, 10);
+  const weight = {
+    "/": "1.0",
+    "/programs": "0.9",
+    "/services": "0.9",
+    "/resources": "0.9",
+    "/contact": "0.8",
+  };
+  const urls = pages
+    .filter((p) => !p.startsWith("/forms/"))
+    .map(
+      (p) =>
+        `  <url><loc>${site}${p === "/" ? "/" : p}</loc><lastmod>${today}</lastmod>` +
+        `<priority>${weight[p] || (["/privacy", "/terms", "/cookies"].includes(p) ? "0.3" : "0.6")}</priority></url>`,
+    );
+  writeFileSync(
+    join(clientDir, "sitemap.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`,
+  );
+  console.log(`[OK] sitemap.xml written with ${urls.length} pages`);
+}
+
 async function generateIndexHtml() {
   const distDir = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
   const clientDir = join(distDir, "client");
@@ -74,6 +100,7 @@ async function generateIndexHtml() {
     rendered.push(html);
   }
   writeSecurityPolicy(clientDir, rendered.join("\n"));
+  writeSitemap(clientDir, pages);
   console.log(`[OK] Pre-rendered ${pages.length} pages`);
 
   // Hostinger's native Git deploy serves the configured `dist` directory,
