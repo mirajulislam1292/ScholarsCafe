@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
@@ -16,17 +17,13 @@ import { Newsletter } from "@/components/scholars/Newsletter";
 import { Block, CtaBand, PageHero } from "@/components/page/PageParts";
 
 export const Route = createFileRoute("/resources")({
-  head: () => ({
-    meta: [
-      { title: "Resources - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "Free guides for US university applications, a university explorer, and answers to common questions.",
-      },
-      { property: "og:title", content: "Resources - Scholars Cafe" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/resources",
+      title: "Free Guides to Study in the USA from Bangladesh",
+      description:
+        "Free guides for Bangladeshi students applying to US universities: essays, scholarships, financial aid, tests and visas, plus a university explorer and FAQs.",
+    }),
   component: ResourcesPage,
 });
 

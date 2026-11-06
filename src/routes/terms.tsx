@@ -1,28 +1,20 @@
 import { useCmsLookup } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { LegalPage } from "@/components/scholars/LegalPage";
 import { EMAIL } from "@/lib/scholars-data";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "Terms of Service - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "The terms that govern your use of Scholars Cafe's admissions consultancy, test prep, and related services.",
-      },
-      { property: "og:title", content: "Terms of Service - Scholars Cafe" },
-      {
-        property: "og:description",
-        content:
-          "The terms that govern your use of Scholars Cafe's admissions consultancy, test prep, and related services.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/terms",
+      title: "Terms of Service - Scholars Cafe",
+      description:
+        "The terms that govern your use of Scholars Cafe's admissions consultancy, test prep, and related services.",
+    }),
   component: TermsPage,
 });
 

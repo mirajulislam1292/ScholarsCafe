@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { CmsText } from "@/lib/cms";
 import { Navbar } from "@/components/scholars/Navbar";
@@ -8,17 +9,13 @@ import { NameMarquee } from "@/components/scholars/NameMarquee";
 import { PageHero } from "@/components/page/PageParts";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "Talk to Scholars Cafe about applying to US universities. Free 30-minute consultation; replies within 24 hours.",
-      },
-      { property: "og:title", content: "Contact - Scholars Cafe" },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/contact",
+      title: "Free Consultation: Study in the USA | Scholars Cafe",
+      description:
+        "Talk to Scholars Cafe about applying to US universities from Bangladesh. Free 30-minute consultation; we reply within 24 hours.",
+    }),
   component: ContactPage,
 });
 

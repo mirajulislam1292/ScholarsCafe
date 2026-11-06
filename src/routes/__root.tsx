@@ -1,3 +1,4 @@
+import { ORGANIZATION_JSON_LD } from "@/lib/seo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -75,22 +76,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Scholars Cafe - Your Dream University Starts Here" },
-      {
-        name: "description",
-        content:
-          "Bangladesh's #1 study abroad consultancy. Expert mentorship for USA, UK, Canada, Germany & 8+ more countries.",
-      },
       { name: "author", content: "Scholars Cafe" },
-      { property: "og:title", content: "Scholars Cafe - Your Dream University Starts Here" },
-      {
-        property: "og:description",
-        content:
-          "From Bangladesh to the World. Expert university admissions, scholarship strategy, and test prep.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "theme-color", content: "#041c31" },
     ],
+    // Structured data: who Scholars Cafe is (see src/lib/seo.ts). Pages add their own title, description and canonical.
+    scripts: [{ type: "application/ld+json", children: ORGANIZATION_JSON_LD }],
     links: [
       { rel: "icon", type: "image/png", href: "/brand/icon-180.png" },
       { rel: "apple-touch-icon", href: "/brand/icon-180.png" },

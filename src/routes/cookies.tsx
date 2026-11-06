@@ -1,28 +1,20 @@
 import { useCmsLookup } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { LegalPage } from "@/components/scholars/LegalPage";
 import { EMAIL } from "@/lib/scholars-data";
 
 export const Route = createFileRoute("/cookies")({
-  head: () => ({
-    meta: [
-      { title: "Cookie Notice - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "How Scholars Cafe uses cookies and similar technologies on its website, and how you can control them.",
-      },
-      { property: "og:title", content: "Cookie Notice - Scholars Cafe" },
-      {
-        property: "og:description",
-        content:
-          "How Scholars Cafe uses cookies and similar technologies on its website, and how you can control them.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/cookies",
+      title: "Cookie Notice - Scholars Cafe",
+      description:
+        "How Scholars Cafe uses cookies and similar technologies on its website, and how you can control them.",
+    }),
   component: CookiesPage,
 });
 

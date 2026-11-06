@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import {
   ArrowUpRight,
   Facebook,
@@ -16,15 +17,13 @@ import { EMAIL, STUDENT_PORTAL_URL, WA_LINK } from "@/lib/scholars-data";
 
 // Link-in-bio page (scholarscafe.com/links). Everything is edited in the admin under Website → Link page.
 export const Route = createFileRoute("/links")({
-  head: () => ({
-    meta: [
-      { title: "Scholars Cafe · Links" },
-      {
-        name: "description",
-        content: "Guides, free strategy calls and the student portal from Scholars Cafe.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/links",
+      title: "Scholars Cafe \u00b7 Links",
+      description:
+        "Scholars Cafe on YouTube, Instagram, Facebook, LinkedIn, TikTok and WhatsApp, plus our website and student portal.",
+    }),
   component: LinksPage,
 });
 

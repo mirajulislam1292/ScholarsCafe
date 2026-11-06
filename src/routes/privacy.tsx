@@ -1,28 +1,20 @@
 import { useCmsLookup } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { LegalPage } from "@/components/scholars/LegalPage";
 import { EMAIL } from "@/lib/scholars-data";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacy Policy - Scholars Cafe" },
-      {
-        name: "description",
-        content:
-          "How Scholars Cafe collects, uses, and protects the personal information of students and families using our admissions services.",
-      },
-      { property: "og:title", content: "Privacy Policy - Scholars Cafe" },
-      {
-        property: "og:description",
-        content:
-          "How Scholars Cafe collects, uses, and protects the personal information of students and families using our admissions services.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: "/privacy",
+      title: "Privacy Policy - Scholars Cafe",
+      description:
+        "How Scholars Cafe collects, uses, and protects the personal information of students and families using our admissions services.",
+    }),
   component: PrivacyPage,
 });
 

@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /design-system
 Disallow: /forms/
+
+Sitemap: https://scholarscafe.com/sitemap.xml
