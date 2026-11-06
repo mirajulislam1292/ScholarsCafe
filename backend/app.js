@@ -65,8 +65,9 @@ export function createApp(
 ) {
   const app = express();
   const portal = portalOf(config);
-  // Team sessions are short (2 hours); students stay signed in for 12 hours.
-  const sessionHours = portal === "student" ? 12 : 2;
+  // Sessions last 7 days and are renewed whenever the app is opened (see /api/me), so people stay signed in
+  // while they use it and are asked again only after a week away, after Sign out, or when access changes.
+  const sessionHours = 7 * 24;
   // Every sign-in method ends here: replace any previous session, create a new one, audit it.
   const startSession = async (c, user, req, method) => {
     const session = token();
@@ -471,7 +472,20 @@ export function createApp(
     }
     next();
   });
-  app.get("/api/me", (req, res) => res.json(req.actor));
+  // Opening the app renews the session (sliding 7 days); signing out or a role change still ends it at once.
+  app.get("/api/me", async (req, res) => {
+    const raw = cookie(req, sessionCookie);
+    try {
+      await store.query(
+        `UPDATE sessions SET expires_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL ${sessionHours} HOUR) WHERE token_hash=?`,
+        [hash(raw)],
+      );
+    } catch {
+      /* renewal is best effort; the current session stays valid */
+    }
+    setSession(res, raw);
+    res.json(req.actor);
+  });
   // Mentors only reach their own leads; every other admin API is closed to them.
   // Mentors reach their leads and the student dashboard API (/lms); students reach only /lms.
   // Every other admin API is closed to them. Row-level rules for /lms live in access.js.
