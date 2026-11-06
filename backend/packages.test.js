@@ -25,7 +25,12 @@ function appFor(role, query) {
       audit: async (_a, action) => audits.push(action),
     },
     role === "student"
-      ? { ...config, PORTAL: "student", STUDENT_ORIGIN: "https://s.example" }
+      ? {
+          ...config,
+          PORTAL: "student",
+          STUDENT_ORIGIN: "https://s.example",
+          ADMIN_ORIGIN: "https://s.example",
+        }
       : config,
   );
   const post = (path, body) =>

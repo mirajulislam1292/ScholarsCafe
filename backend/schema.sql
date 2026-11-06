@@ -257,3 +257,45 @@ CREATE TABLE IF NOT EXISTS resource_packages (
   FOREIGN KEY (resource_id) REFERENCES student_resources(id) ON DELETE CASCADE,
   FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE
 );
+-- Student files (Phase 4): on disk under a random id, outside the web root. Name and type are metadata only.
+CREATE TABLE IF NOT EXISTS files (
+  id CHAR(36) PRIMARY KEY,
+  student_id CHAR(36) NOT NULL,
+  uploaded_by CHAR(36) NOT NULL,
+  name VARCHAR(150) NOT NULL,
+  mime VARCHAR(100) NOT NULL,
+  size INT UNSIGNED NOT NULL,
+  sha256 CHAR(64) NOT NULL,
+  purpose ENUM('message','document') NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  INDEX student (student_id),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-- Document reviews: a student's essay, SOP, CV or transcript and the mentor's comments and status.
+CREATE TABLE IF NOT EXISTS documents (
+  id CHAR(36) PRIMARY KEY,
+  student_id CHAR(36) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  kind ENUM('essay','sop','cv','transcript','lor','other') NOT NULL,
+  file_id CHAR(36) NOT NULL,
+  note TEXT NULL,
+  status ENUM('shared','submitted','in_review','changes_requested','approved') NOT NULL DEFAULT 'submitted',
+  reviewer_id CHAR(36) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  INDEX student (student_id, status),
+  FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (file_id) REFERENCES files(id)
+);
+CREATE TABLE IF NOT EXISTS document_comments (
+  id CHAR(36) PRIMARY KEY,
+  document_id CHAR(36) NOT NULL,
+  author_id CHAR(36) NOT NULL,
+  body TEXT NOT NULL,
+  file_id CHAR(36) NULL,
+  status VARCHAR(32) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX doc (document_id, created_at),
+  FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
+);

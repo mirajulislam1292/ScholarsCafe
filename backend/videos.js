@@ -1,7 +1,8 @@
 // Private videos (Phase 3). Files live on disk OUTSIDE the web root (default ~/sc-private/videos, shared by the
 // admin and student apps because both run as the same hosting user). Staff upload in 5 MB chunks; students only
 // get a short-lived play link that is tied to their own session and re-checked on every byte-range request.
-import { createHmac, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
+import { makeToken, readToken } from "./tokens.js";
 import { createReadStream } from "node:fs";
 import { mkdir, open, stat, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -32,34 +33,13 @@ const startInput = z
 export const videoDir = (config) => config.VIDEO_DIR || join(homedir(), "sc-private", "videos");
 const fileOf = (config, video) => join(videoDir(config), `${video.id}.${TYPES[video.mime]}`);
 
-// ---------- Play links: HMAC over {video, user, what, exp}. The key lives only in this process. ----------
-const KEY = randomBytes(32);
-const sign = (payload) => createHmac("sha256", KEY).update(payload).digest("base64url");
+// ---------- Play links: signed {video, user, what}, valid 10 minutes. ----------
 export function playLink(videoId, userId, kind, refId, now = Date.now()) {
-  const payload = Buffer.from(
-    JSON.stringify({
-      v: videoId,
-      u: userId,
-      k: kind,
-      r: refId,
-      e: Math.floor(now / 1000) + LINK_SECONDS,
-    }),
-  ).toString("base64url");
-  return "/api/lms/stream/" + payload + "." + sign(payload);
+  return (
+    "/api/lms/stream/" + makeToken({ v: videoId, u: userId, k: kind, r: refId }, LINK_SECONDS, now)
+  );
 }
-export function readLink(token, now = Date.now()) {
-  const [payload, mac] = String(token).split(".");
-  if (!payload || !mac) return null;
-  const want = Buffer.from(sign(payload));
-  const got = Buffer.from(mac);
-  if (want.length !== got.length || !timingSafeEqual(want, got)) return null;
-  try {
-    const data = JSON.parse(Buffer.from(payload, "base64url").toString());
-    return data.e * 1000 > now ? data : null;
-  } catch {
-    return null;
-  }
-}
+export const readLink = readToken;
 
 /** Streams a file with HTTP Range support (Safari needs it; seeking uses it). */
 async function sendFile(req, res, path, mime) {

@@ -799,3 +799,39 @@ a.button-link:focus-visible {
     order: -1;
   }
 }
+
+/* Phase 4: attachments, documents */
+.file-chip {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  padding: 6px 12px;
+}
+.file-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 12px 0;
+}
+.file-picker input {
+  width: auto;
+}
+button.small {
+  font-size: 12px;
+  padding: 5px 10px;
+  margin-top: 8px;
+}
+.badge.status-submitted,
+.badge.status-in_review {
+  background: #fff4dc;
+  color: #7a5200;
+}
+.badge.status-changes_requested {
+  background: #ffe7e3;
+  color: #8f2a1c;
+}
+.badge.status-approved {
+  background: #e3f6ea;
+  color: #1d6b3c;
+}
