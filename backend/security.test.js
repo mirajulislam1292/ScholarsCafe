@@ -313,6 +313,12 @@ test("Content schemas reject unsafe values in new collections", () => {
     ok("team", { name: "A", group: "founder", role: "", title: "", line: "", photo: "http://x" }),
     false,
   );
+  // Team groups: founder, mentor or any short name; blank or overlong names are refused.
+  const member = { name: "A", role: "", title: "", line: "", photo: "/team/a.webp" };
+  for (const group of ["founder", "mentor", "Executive members", "Members", "Editors", "Team"])
+    assert.equal(ok("team", { ...member, group }), true, group);
+  assert.equal(ok("team", { ...member, group: "  " }), false);
+  assert.equal(ok("team", { ...member, group: "x".repeat(61) }), false);
   assert.equal(ok("sections", { page: "/", order: "hero,names", hidden: "names" }), true);
   assert.equal(ok("sections", { page: "/", order: "hero;drop table", hidden: "" }), false);
   assert.equal(ok("universities", { name: "X", position: 10, extra: 1 }), false);

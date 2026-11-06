@@ -73,7 +73,27 @@ function Group({ label, members }: { label: string; members: Member[] }) {
   );
 }
 
-/** "Our Team": founders and mentors. Content from src/content/site.json > team. */
+// Older entries say "founder"/"mentor"; show them as "Founders"/"Mentors". Any other group name is shown as typed.
+const LEGACY: Record<string, string> = { founder: "Founders", mentor: "Mentors" };
+const ORDER = ["founders", "mentors", "executive members"];
+const groupName = (g?: string) => {
+  const name = (g || "").trim();
+  return LEGACY[name.toLowerCase()] || name || "Team";
+};
+/** Groups in a fixed order (founders, mentors, executive members), then any others as they first appear. */
+function byGroup(members: Member[]) {
+  const groups = new Map<string, { label: string; members: Member[] }>();
+  for (const m of members) {
+    const label = groupName(m.group);
+    const key = label.toLowerCase();
+    if (!groups.has(key)) groups.set(key, { label, members: [] });
+    groups.get(key)!.members.push(m);
+  }
+  const rank = (k: string) => (ORDER.includes(k) ? ORDER.indexOf(k) : ORDER.length);
+  return [...groups.entries()].sort((a, b) => rank(a[0]) - rank(b[0])).map(([, g]) => g);
+}
+
+/** "Our Team": one section per group (founders, mentors, executive members, …). Edited in the admin under Our Team. */
 export function Team() {
   const team = SITE.team;
   const members = useCmsList<Member>("team", DEFAULT_TEAM);
@@ -84,8 +104,9 @@ export function Team() {
           <h2 className="type-h2 text-neutral-900">{team.heading}</h2>
         </Reveal>
         <div className="mt-16 grid gap-20 md:mt-20">
-          <Group label="Founders" members={members.filter((m) => m.group === "founder")} />
-          <Group label="Mentors" members={members.filter((m) => m.group === "mentor")} />
+          {byGroup(members).map((g) => (
+            <Group key={g.label} label={g.label} members={g.members} />
+          ))}
         </div>
       </div>
     </section>
