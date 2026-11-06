@@ -208,3 +208,52 @@ CREATE TABLE IF NOT EXISTS user_packages (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE
 );
+-- Lesson and resource videos (Phase 3): files on disk outside the web root, uploaded in chunks.
+CREATE TABLE IF NOT EXISTS videos (
+  id CHAR(36) PRIMARY KEY,
+  name VARCHAR(200) NOT NULL,
+  mime VARCHAR(40) NOT NULL,
+  size BIGINT UNSIGNED NOT NULL,
+  received BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  status ENUM('uploading','ready') NOT NULL DEFAULT 'uploading',
+  created_by CHAR(36) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+-- Where each student stopped in a lesson video (resume playback).
+CREATE TABLE IF NOT EXISTS video_progress (
+  user_id CHAR(36) NOT NULL,
+  lesson_id CHAR(36) NOT NULL,
+  seconds INT UNSIGNED NOT NULL DEFAULT 0,
+  duration INT UNSIGNED NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, lesson_id),
+  INDEX recent (user_id, updated_at),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (lesson_id) REFERENCES lms_lessons(id) ON DELETE CASCADE
+);
+-- Student-only resources and announcements. No package rows = every student who has a package.
+CREATE TABLE IF NOT EXISTS student_resources (
+  id CHAR(36) PRIMARY KEY,
+  type ENUM('announcement','live','video','guide','link') NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  body TEXT NULL,
+  url VARCHAR(2000) NOT NULL DEFAULT '',
+  video_id CHAR(36) NULL,
+  tags VARCHAR(300) NOT NULL DEFAULT '',
+  country VARCHAR(80) NOT NULL DEFAULT '',
+  starts_at DATETIME NULL,
+  published BOOLEAN NOT NULL DEFAULT FALSE,
+  pinned BOOLEAN NOT NULL DEFAULT FALSE,
+  created_by CHAR(36) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  deleted_at DATETIME NULL,
+  INDEX listing (published, deleted_at, type)
+);
+CREATE TABLE IF NOT EXISTS resource_packages (
+  resource_id CHAR(36) NOT NULL,
+  package_id CHAR(36) NOT NULL,
+  PRIMARY KEY (resource_id, package_id),
+  FOREIGN KEY (resource_id) REFERENCES student_resources(id) ON DELETE CASCADE,
+  FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE
+);

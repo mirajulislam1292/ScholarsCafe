@@ -108,6 +108,8 @@ export class Store {
       "visibility ENUM('public','private') NOT NULL DEFAULT 'public'",
     );
     await add("media", "mime", "mime VARCHAR(40) NOT NULL DEFAULT 'image/webp'");
+    // Phase 3: lessons use disk videos (videos table); video_media_id stays for older uploads.
+    await add("lms_lessons", "video_id", "video_id CHAR(36) NULL");
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(

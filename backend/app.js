@@ -9,6 +9,8 @@ import { installMedia, serveMedia, sendBytes } from "./media.js";
 import { installAuthRoutes, installAccountRoutes, signupOpen } from "./auth.js";
 import { installLmsRoutes, installStudentRoutes, installMessageRoutes } from "./lms.js";
 import { installPackageRoutes } from "./packages.js";
+import { installVideoRoutes } from "./videos.js";
+import { installResourceRoutes, streamAccess } from "./resources.js";
 import {
   token,
   hash,
@@ -383,8 +385,10 @@ export function createApp(
         !equal(req.headers["x-csrf-token"], req.actor.csrf)
       )
         throw fail(403, "Request verification failed. Reload and try again.");
-      if (!(req.method === "POST" && req.path === "/media") && !req.is("application/json"))
-        throw fail(415, "JSON required.");
+      const binary =
+        req.method === "POST" &&
+        (req.path === "/media" || /^\/videos\/[^/]+\/chunk$/.test(req.path));
+      if (!binary && !req.is("application/json")) throw fail(415, "JSON required.");
     }
     next();
   });
@@ -405,6 +409,8 @@ export function createApp(
   installStudentRoutes(app, { store, fail, sendBytes });
   installLmsRoutes(app, { store, fail });
   installPackageRoutes(app, { store, fail });
+  installVideoRoutes(app, { store, fail, config, allowed: streamAccess(store) });
+  installResourceRoutes(app, { store, fail });
   installMessageRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {

@@ -126,3 +126,30 @@ Never put real secrets in Git. Paste them only into hPanel. The full list with c
 - Changing a package's courses updates everyone who has it.
 - **Mentor and access:** set one mentor for all of a student's courses; "Block sign-in" signs the student out everywhere.
 - The feature switches are stored now and enforced when messaging, uploads and reviews are gated (Phases 3–4).
+
+## 11. Student portal and videos (Phase 3)
+
+**Students see:** Home (continue learning, their package, mentor, upcoming live sessions, announcements), My courses, Resources (ongoing courses plus live links, videos, guides; filter by type, country, tag), Messages and Profile.
+
+**Admin → Student resources:** announcements, live sessions (Google Meet / Facebook Live link and start time), videos, guides and links.
+
+- Tick packages to limit who sees an item. Leave them unticked for every student who has a package.
+- Students without a package see nothing.
+
+**Videos**
+
+- Upload them in a lesson (Courses & videos) or in Student resources. They go up in 5 MB pieces, up to 2 GB each and 30 GB in total. Keep the page open while uploading.
+- Files are stored outside the website folder, at `~/sc-private/videos` (override with `VIDEO_DIR`).
+- Recommended export: MP4, H.264, 720p, about 1.5 Mbps (about 0.7 GB per hour).
+- Delete videos nothing uses in Student resources → Video library.
+
+**What the protection does:**
+
+- Playback links last 10 minutes and only work for the signed-in student they were made for.
+- Access is re-checked on every request. Removing a package, pausing an enrollment or blocking the student stops playback.
+- No download button, no picture-in-picture, no right-click menu.
+- A faint watermark with the student's email moves around the video, including in full screen.
+
+**What it cannot prevent (honestly):** a determined student can still record their screen or film it with a phone, and technical users can save what their browser receives. The watermark makes a leaked recording traceable to the student; it doesn't stop it. Real DRM (Widevine/FairPlay) needs a paid streaming service.
+
+**Hosting note:** Hostinger's terms don't allow shared hosting to be used mainly for streaming. Course videos for your students are fine at this scale; if viewing grows to many hours a day, move the files to Backblaze B2 (see ARCHITECTURE.md).
