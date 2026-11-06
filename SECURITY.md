@@ -26,7 +26,7 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 - **Privacy:** privacy, terms and cookie pages exist; the public site sets no cookies.
 
 ## Remaining risks
-1. **Rate limits may be shared by all visitors.** Behind Hostinger's proxy every request may appear to come from one IP, so the 10/hour form limit could become site-wide. Check with `GET /api/diagnostics/client-ip` (owner only) and set `TRUST_PROXY` to the proxy range it reveals.
+1. **Client IPs behind Hostinger's proxy.** Verified 2026-11-06: the app sees every request from `127.0.0.1` and the real address in `X-Forwarded-For`. `TRUST_PROXY=loopback` on both apps makes rate limits per visitor. Re-check with `GET /api/diagnostics/client-ip` (owner only) if hosting changes.
 2. **MFA:** the app cannot verify Google 2-Step Verification. Enforce it on every owner/admin Google account (free).
 3. **`.htaccess` headers only work if Hostinger honors them.** Verify after deploy: `curl -sI https://scholarscafe.com | grep -i -E "strict|content-security|x-frame"`.
 4. CSP still allows inline style attributes (`'unsafe-inline'` in style-src). Fonts are self-hosted; no third-party script hosts remain.
@@ -40,7 +40,7 @@ Scope: public site (`scholarscafe.com`, static build on Hostinger) and admin/CMS
 ## Your manual checklist
 - [ ] Turn on 2-Step Verification for every Google account with admin access, and for GitHub and Hostinger logins.
 - [ ] Turnstile: create a free widget at dash.cloudflare.com (domain `scholarscafe.com`). Set `VITE_TURNSTILE_SITE_KEY` as a build variable for the website and `TURNSTILE_SECRET_KEY` for the admin app in Hostinger, then redeploy both.
-- [ ] Run the client-IP diagnostic and set `TRUST_PROXY` (risk 1).
+- [x] Run the client-IP diagnostic and set `TRUST_PROXY` (risk 1).
 - [ ] Backups: enable daily Hostinger database backups and do one test restore.
 - [ ] Rotation: rotate the SMTP mailbox password and Google OAuth client secret if they were ever pasted into chats, emails or screenshots; rotate yearly otherwise.
 - [ ] GitHub: protect `main` (require PR), enable Dependabot alerts. Two deploy paths exist (Hostinger Git auto-deploy and the FTP Action); disable whichever you don't use and delete its secrets.

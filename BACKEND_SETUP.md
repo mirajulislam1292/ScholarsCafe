@@ -86,7 +86,7 @@ Never put real secrets in Git. Paste them only into hPanel. The full list with c
 | `SUPER_ADMIN_EMAIL`                        | first master admin (section 6); `OWNER_EMAIL` also works | only for a new, empty database |
 | `SMTP_USER`                                | `no-reply@scholarscafe.com` once it exists               | optional                       |
 | `TURNSTILE_SECRET_KEY`                     | Cloudflare Turnstile secret (see SECURITY.md)            | optional                       |
-| `TRUST_PROXY`                              | leave empty until verified (SECURITY.md)                 | optional                       |
+| `TRUST_PROXY`                              | `loopback` (verified: Hostinger's proxy is 127.0.0.1)     | yes, on both apps              |
 | Leave `PORTAL` unset on the admin app.     |
 
 ## 6. The master admin (first Super Admin)
