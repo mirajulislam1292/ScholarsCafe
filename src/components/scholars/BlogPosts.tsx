@@ -8,11 +8,15 @@ type Blog = {
   excerpt: string;
   author: string;
   image: string;
+  date?: string;
 };
 export function BlogPosts() {
   const cmsLabel = useCmsLookup();
 
-  const posts = useCmsCollection<Blog>("blogs", [], (data, id) => ({ ...data, id }) as Blog);
+  // Latest five: newest date first (posts without a date go last).
+  const posts = useCmsCollection<Blog>("blogs", [], (data, id) => ({ ...data, id }) as Blog)
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
+    .slice(0, 5);
   const [selected, setSelected] = useState<string | null>(null);
   if (!posts.length) return null;
   return (

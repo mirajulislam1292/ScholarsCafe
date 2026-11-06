@@ -79,6 +79,10 @@ const fields = {
     excerpt: text,
     author: text,
     image: safeUrl,
+    date: z
+      .string()
+      .regex(/^(\d{4}-\d{2}-\d{2})?$/)
+      .optional(),
   }),
   feedback: z.object({
     position,
@@ -123,6 +127,20 @@ const fields = {
   }),
   // The /links page (link-in-bio).
   links: z.object({
+    // link = button, social = icon row, youtube = video card (thumbnail; opens YouTube).
+    type: z.enum(["link", "social", "youtube"]).optional(),
+    platform: z
+      .enum([
+        "instagram",
+        "facebook",
+        "youtube",
+        "tiktok",
+        "linkedin",
+        "whatsapp",
+        "email",
+        "website",
+      ])
+      .optional(),
     label: short,
     url: safeUrlOrPath,
     note: short,

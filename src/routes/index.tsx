@@ -6,6 +6,8 @@ import { NameMarquee } from "@/components/scholars/NameMarquee";
 import { Destinations } from "@/components/scholars/Destinations";
 import { SuccessStories } from "@/components/scholars/SuccessStories";
 import { BlogPosts } from "@/components/scholars/BlogPosts";
+import { ResourcesPreview } from "@/components/scholars/ResourcesPreview";
+import { PortalCta } from "@/components/scholars/PortalCta";
 import { Footer } from "@/components/scholars/Footer";
 import { PageIndex } from "@/components/page/PageIndex";
 import { CtaBand } from "@/components/page/PageParts";
@@ -14,7 +16,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// Home: hero → names → USA → page index → proof → CTA. Detailed content lives on the inner pages.
+// Home: hero → names → USA → page index → proof → journal → resources → portal → CTA. Detailed content lives on the inner pages.
 // The stats band (src/components/scholars/Stats.tsx) is hidden until the numbers are verified.
 function Index() {
   return (
@@ -52,6 +54,16 @@ function Index() {
             journal: (
               <>
                 <BlogPosts />
+              </>
+            ),
+            resources: (
+              <>
+                <ResourcesPreview />
+              </>
+            ),
+            portal: (
+              <>
+                <PortalCta />
               </>
             ),
             cta: (

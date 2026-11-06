@@ -116,6 +116,9 @@ export class Store {
     await add("messages", "deleted_by", "deleted_by CHAR(36) NULL");
     await add("reviews", "public_consent", "public_consent BOOLEAN NOT NULL DEFAULT FALSE");
     await add("reviews", "featured", "featured BOOLEAN NOT NULL DEFAULT FALSE");
+    // Phase 5: form submissions live in the leads CRM.
+    await add("inquiries", "form_id", "form_id CHAR(36) NULL");
+    await add("inquiries", "data", "data JSON NULL");
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(

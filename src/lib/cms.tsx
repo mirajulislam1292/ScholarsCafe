@@ -144,7 +144,7 @@ export function useCmsValue<T>(key: string, fallback: T): T {
 export function useCmsList<T>(
   kind: string,
   fallback: T[],
-  map?: (data: Record<string, unknown>) => T,
+  map?: (data: Record<string, unknown>, id: string) => T,
 ): T[] {
   const items = useContext(Content);
   const rows = (items || []).filter((i) => i.kind === kind);
@@ -152,7 +152,7 @@ export function useCmsList<T>(
   const pos = (d: Record<string, unknown>) => (typeof d.position === "number" ? d.position : 1e9);
   return [...rows]
     .sort((a, b) => pos(a.data) - pos(b.data))
-    .map((i) => (map ? map(i.data) : (i.data as T)));
+    .map((i) => (map ? map(i.data, i.id) : (i.data as T)));
 }
 
 /** Section order and visibility for a page, from the admin's "Page sections" (ids not listed keep their default place). */

@@ -13,6 +13,7 @@ import { installVideoRoutes } from "./videos.js";
 import { installResourceRoutes, streamAccess } from "./resources.js";
 import { installFileRoutes } from "./files.js";
 import { installDocumentRoutes } from "./documents.js";
+import { installFormAdminRoutes, installPublicFormRoutes } from "./forms.js";
 import {
   token,
   hash,
@@ -266,6 +267,36 @@ export function createApp(
       res.status(201).json({ ok: true });
     });
   }
+  installPublicFormRoutes(app, { store, fail, config, sharedLimit });
+  // /links page click counts: one counter per link per day, nothing about the visitor is stored.
+  app.post(
+    "/public/links/:id/click",
+    rateLimit({
+      windowMs: 60 * 60 * 1000,
+      limit: 120,
+      standardHeaders: "draft-8",
+      legacyHeaders: false,
+    }),
+    async (req, res) => {
+      if (req.headers.origin !== config.PUBLIC_ORIGIN) return res.sendStatus(403);
+      res.set("Access-Control-Allow-Origin", config.PUBLIC_ORIGIN);
+      res.vary("Origin");
+      const linkId = z
+        .string()
+        .regex(/^[a-zA-Z0-9_.-]{1,120}$/)
+        .parse(req.params.id);
+      const [link] = await store.query(
+        "SELECT id FROM content WHERE id=? AND kind='links' AND published IS NOT NULL AND deleted_at IS NULL",
+        [linkId],
+      );
+      if (!link) return res.sendStatus(404);
+      await store.query(
+        "INSERT INTO link_clicks (link_id,day,clicks) VALUES (?,UTC_DATE(),1) ON DUPLICATE KEY UPDATE clicks=clicks+1",
+        [linkId],
+      );
+      res.sendStatus(204);
+    },
+  );
   app.get("/public/content", async (req, res) => {
     if (req.headers.origin === config.PUBLIC_ORIGIN) {
       res.set("Access-Control-Allow-Origin", config.PUBLIC_ORIGIN);
@@ -417,6 +448,7 @@ export function createApp(
   installResourceRoutes(app, { store, fail });
   installFileRoutes(app, { store, fail, config });
   installDocumentRoutes(app, { store, fail });
+  installFormAdminRoutes(app, { store, fail, canPublish });
   installMessageRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
@@ -451,6 +483,12 @@ export function createApp(
       where.push("i.status=?");
       args.push(req.query.status);
     }
+    // Source: "website" = the contact form, or a form id from the form builder.
+    if (req.query.form === "website") where.push("i.form_id IS NULL");
+    else if (typeof req.query.form === "string" && /^[0-9a-f-]{36}$/.test(req.query.form)) {
+      where.push("i.form_id=?");
+      args.push(req.query.form);
+    }
     if (canPublish(actor.role) && typeof req.query.assigned === "string") {
       if (req.query.assigned === "none") where.push("i.assigned_to IS NULL");
       else if (/^[0-9a-f-]{36}$/.test(req.query.assigned)) {
@@ -461,12 +499,12 @@ export function createApp(
     return { sql: where.join(" AND "), args };
   };
   const LEAD_COLUMNS =
-    "i.id,i.name,i.email,i.phone,i.message,i.status,i.notes,i.assigned_to,u.email AS assigned_email,i.created_at,i.updated_at";
+    "i.id,i.name,i.email,i.phone,i.message,i.status,i.notes,i.assigned_to,u.email AS assigned_email,i.created_at,i.updated_at,i.form_id,fm.title AS form_title";
   app.get("/api/leads", async (req, res) => {
     const f = leadFilter(req, req.actor);
     res.json({
       items: await store.query(
-        `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 500`,
+        `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to LEFT JOIN forms fm ON fm.id=i.form_id WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 500`,
         f.args,
       ),
     });
@@ -474,14 +512,25 @@ export function createApp(
   app.get("/api/leads.csv", async (req, res) => {
     const f = leadFilter(req, req.actor);
     const rows = await store.query(
-      `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 5000`,
+      `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to LEFT JOIN forms fm ON fm.id=i.form_id WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 5000`,
       f.args,
     );
-    const head = ["Created", "Name", "Email", "Phone", "Status", "Assigned to", "Notes", "Message"];
+    const head = [
+      "Created",
+      "Source",
+      "Name",
+      "Email",
+      "Phone",
+      "Status",
+      "Assigned to",
+      "Notes",
+      "Message",
+    ];
     const lines = [head.map(csvCell).join(",")].concat(
       rows.map((r) =>
         [
           r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
+          r.form_title || "Website contact form",
           r.name,
           r.email,
           r.phone,
@@ -805,6 +854,16 @@ export function createApp(
       );
     });
     res.json({ ok: true });
+  });
+  app.get("/api/links/clicks", async (req, res) => {
+    if (!canPublish(req.actor.role)) throw fail(403, "Restricted to owners and admins.");
+    res.json({
+      items: await store.query(
+        `SELECT link_id,SUM(clicks) AS total,
+          SUM(CASE WHEN day >= UTC_DATE() - INTERVAL 30 DAY THEN clicks ELSE 0 END) AS last30
+         FROM link_clicks GROUP BY link_id`,
+      ),
+    });
   });
   app.get("/api/audit", async (req, res) => {
     if (!canPublish(req.actor.role)) throw fail(403, "Audit log is restricted.");

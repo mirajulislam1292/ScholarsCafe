@@ -14,11 +14,13 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DesignSystemRouteImport } from './routes/design-system'
+import { Route as LinksRouteImport } from './routes/links'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,6 +45,11 @@ const CookiesRoute = CookiesRouteImport.update({
 const DesignSystemRoute = DesignSystemRouteImport.update({
   id: '/design-system',
   path: '/design-system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LinksRoute = LinksRouteImport.update({
+  id: '/links',
+  path: '/links',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -70,6 +77,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FormsSlugRoute = FormsSlugRouteImport.update({
+  id: '/forms/$slug',
+  path: '/forms/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -77,11 +89,13 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/design-system': typeof DesignSystemRoute
+  '/links': typeof LinksRoute
   '/privacy': typeof PrivacyRoute
   '/programs': typeof ProgramsRoute
   '/resources': typeof ResourcesRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/forms/$slug': typeof FormsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,11 +103,13 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/design-system': typeof DesignSystemRoute
+  '/links': typeof LinksRoute
   '/privacy': typeof PrivacyRoute
   '/programs': typeof ProgramsRoute
   '/resources': typeof ResourcesRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/forms/$slug': typeof FormsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,11 +118,13 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/design-system': typeof DesignSystemRoute
+  '/links': typeof LinksRoute
   '/privacy': typeof PrivacyRoute
   '/programs': typeof ProgramsRoute
   '/resources': typeof ResourcesRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/forms/$slug': typeof FormsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -116,11 +134,13 @@ export interface FileRouteTypes {
     | '/contact'
     | '/cookies'
     | '/design-system'
+    | '/links'
     | '/privacy'
     | '/programs'
     | '/resources'
     | '/services'
     | '/terms'
+    | '/forms/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,11 +148,13 @@ export interface FileRouteTypes {
     | '/contact'
     | '/cookies'
     | '/design-system'
+    | '/links'
     | '/privacy'
     | '/programs'
     | '/resources'
     | '/services'
     | '/terms'
+    | '/forms/$slug'
   id:
     | '__root__'
     | '/'
@@ -140,11 +162,13 @@ export interface FileRouteTypes {
     | '/contact'
     | '/cookies'
     | '/design-system'
+    | '/links'
     | '/privacy'
     | '/programs'
     | '/resources'
     | '/services'
     | '/terms'
+    | '/forms/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,11 +177,13 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
   DesignSystemRoute: typeof DesignSystemRoute
+  LinksRoute: typeof LinksRoute
   PrivacyRoute: typeof PrivacyRoute
   ProgramsRoute: typeof ProgramsRoute
   ResourcesRoute: typeof ResourcesRoute
   ServicesRoute: typeof ServicesRoute
   TermsRoute: typeof TermsRoute
+  FormsSlugRoute: typeof FormsSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -197,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DesignSystemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/links': {
+      id: '/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof LinksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -232,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forms/$slug': {
+      id: '/forms/$slug'
+      path: '/forms/$slug'
+      fullPath: '/forms/$slug'
+      preLoaderRoute: typeof FormsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -241,11 +281,13 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
   DesignSystemRoute: DesignSystemRoute,
+  LinksRoute: LinksRoute,
   PrivacyRoute: PrivacyRoute,
   ProgramsRoute: ProgramsRoute,
   ResourcesRoute: ResourcesRoute,
   ServicesRoute: ServicesRoute,
   TermsRoute: TermsRoute,
+  FormsSlugRoute: FormsSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
