@@ -86,11 +86,12 @@ const HELP = {
   rate: "Playback speed, 0.5–1.5 (0.85 is calm).",
   page: "Page path, for example / or /about.",
   title: "",
-  type: "link = a button · social = an icon in the top row · youtube = a video card (paste the YouTube link).",
+  type: "link or social = a button in the list (social shows the network's icon) · youtube = a video card (paste the YouTube link).",
   platform: "For social icons: which network.",
   group:
-    "Section on the About page. Pick one or type a new one (e.g. Advisors). Members with the same group appear together.",
-  highlight: "Featured: shown larger, at the top.",
+    "Category on the About page. Choose one, or pick “+ New category…” to add your own (e.g. Advisors). People in the same category appear together.",
+  highlight:
+    "Featured: the button gets a light outline so it stands out. Order is set by position.",
   date: "Publish date, YYYY-MM-DD. The home page shows the five newest.",
 };
 // Free-text fields with suggestions (pick one or type a new value).
@@ -239,22 +240,38 @@ function field(form, key, value) {
     return () => Number(num.value);
   }
   if (SUGGEST[key]) {
-    const text = node("input");
-    const list = node("datalist");
-    list.id = "suggest-" + key;
-    for (const opt of SUGGEST[key]) {
-      const o = node("option");
+    // A real dropdown: the standard categories, any custom ones already in use, and "New category…".
+    const legacy = { founder: "Founders", mentor: "Mentors" };
+    const current = legacy[String(value || "").toLowerCase()] || String(value || "").trim();
+    const used = items
+      .filter((i) => i.kind === "team")
+      .map(
+        (i) =>
+          legacy[String(i.data.group || "").toLowerCase()] || String(i.data.group || "").trim(),
+      );
+    const options = [...new Set([...SUGGEST[key], ...used, current].filter(Boolean))];
+    const pick = node("select");
+    for (const opt of [...options, "+ New category…"]) {
+      const o = node("option", opt);
       o.value = opt;
-      list.append(o);
+      pick.append(o);
     }
-    text.value = value ?? "";
-    text.maxLength = 60;
-    text.setAttribute("list", list.id);
-    text.id = "field-" + key;
-    label.htmlFor = text.id;
-    form.append(label, text, list);
+    pick.value = current || options[0];
+    pick.id = "field-" + key;
+    label.htmlFor = pick.id;
+    const custom = node("input");
+    custom.maxLength = 60;
+    custom.placeholder = "Category name, e.g. Advisors";
+    custom.setAttribute("aria-label", "New category name");
+    custom.hidden = true;
+    pick.onchange = () => {
+      custom.hidden = pick.value !== "+ New category…";
+      if (!custom.hidden) custom.focus();
+    };
+    form.append(label, pick, custom);
     if (HELP[key]) form.append(node("small", HELP[key], "muted"));
-    return () => text.value.trim();
+    return () =>
+      pick.value === "+ New category…" ? custom.value.trim() || current || "Team" : pick.value;
   }
   const input = node(typeof value === "boolean" ? "input" : multi ? "textarea" : "input");
   if (typeof value === "boolean") {

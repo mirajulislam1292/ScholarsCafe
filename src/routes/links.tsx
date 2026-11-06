@@ -39,6 +39,13 @@ type Item = {
   enabled?: boolean;
 };
 const API = import.meta.env.VITE_CONTENT_API || "https://admin.scholarscafe.com";
+function TikTok({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+    </svg>
+  );
+}
 const ICONS: Record<string, ComponentType<{ className?: string }>> = {
   instagram: Instagram,
   facebook: Facebook,
@@ -47,7 +54,7 @@ const ICONS: Record<string, ComponentType<{ className?: string }>> = {
   whatsapp: MessageCircle,
   email: Mail,
   website: Globe,
-  tiktok: Play,
+  tiktok: TikTok,
 };
 // Until links are published in the admin, show the links the site already uses (footer and contact).
 const FALLBACK: Item[] = [
@@ -81,6 +88,13 @@ const FALLBACK: Item[] = [
 const youtubeId = (url: string) =>
   /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/.exec(url)?.[1];
 const external = (url: string) => /^https?:/.test(url);
+/** wa.me links only work with digits ("https://wa.me/8801…"); remove spaces, "+", dashes and hidden characters. */
+const fixLink = (url: string) => {
+  const m = /^https:\/\/wa\.me\/([^?]*)(\?.*)?$/.exec(url.trim());
+  if (!m) return url;
+  const query = (m[2] || "").replace(/^\?text=$/, "");
+  return "https://wa.me/" + m[1].replace(/\D/g, "") + query;
+};
 
 function track(item: Item) {
   // Only admin-published links are counted; one anonymous counter per link per day.
@@ -97,13 +111,12 @@ function LinksPage() {
     ...(d as Omit<Item, "id">),
     id,
   })).filter((i) => i.enabled !== false);
-  const social = withIds.filter((i) => i.type === "social");
-  const featured = withIds.filter((i) => (i.type ?? "link") === "link" && i.highlight);
-  const links = withIds.filter((i) => (i.type ?? "link") === "link" && !i.highlight);
+  // Social and normal links share one list (in order); YouTube links get video cards below.
+  const rows = withIds.filter((i) => i.type !== "youtube");
   const videos = withIds.filter((i) => i.type === "youtube" && youtubeId(i.url));
   const tagline = useCmsValue("links.tagline", "");
   const go = (i: Item) => ({
-    href: i.url,
+    href: fixLink(i.url),
     onClick: () => track(i),
     ...(external(i.url) ? { target: "_blank", rel: "noopener noreferrer" } : {}),
   });
@@ -129,58 +142,37 @@ function LinksPage() {
             </CmsText>
           )}
         </p>
-        {social.length > 0 && (
-          <ul className="mt-6 flex flex-wrap justify-center gap-3">
-            {social.map((s) => {
-              const Icon = ICONS[s.platform || "website"] || Globe;
-              return (
-                <li key={s.id}>
-                  <a
-                    {...go(s)}
-                    aria-label={s.label}
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] transition-[background-color,border-color] duration-500 ease-premium hover:border-white/30 hover:bg-white/[0.1]"
+        {/* One list of buttons in the admin's order, each with its network's icon; featured ones get an outline. */}
+        <div className="mt-10 grid w-full gap-3">
+          {rows.map((l) => {
+            const Icon = l.platform ? ICONS[l.platform] || Globe : null;
+            return (
+              <a
+                key={l.id}
+                {...go(l)}
+                className={`group flex min-h-16 items-center gap-4 rounded-3xl bg-ice-100 px-5 py-4 text-blue-950 transition-[transform,box-shadow] duration-500 ease-premium hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgb(0_0_0/0.35)] ${l.highlight ? "ring-2 ring-ice-300 ring-offset-2 ring-offset-blue-950" : ""}`}
+              >
+                {Icon && (
+                  <span
+                    aria-hidden
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-950/[0.08]"
                   >
                     <Icon className="h-[18px] w-[18px]" />
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-        <div className="mt-10 grid w-full gap-3">
-          {featured.map((l) => (
-            <a
-              key={l.id}
-              {...go(l)}
-              className="group flex min-h-16 items-center justify-between gap-4 rounded-3xl bg-ice-100 px-6 py-4 text-blue-950 transition-[transform,box-shadow] duration-500 ease-premium hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgb(0_0_0/0.35)]"
-            >
-              <span>
-                <span className="type-button block">{l.label}</span>
-                {l.note && (
-                  <span className="type-caption mt-1 block text-blue-900/70">{l.note}</span>
+                  </span>
                 )}
-              </span>
-              <ArrowUpRight
-                aria-hidden
-                className="h-4 w-4 shrink-0 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </a>
-          ))}
-          {links.map((l) => (
-            <a
-              key={l.id}
-              {...go(l)}
-              className="flex min-h-14 items-center justify-between gap-4 rounded-3xl border border-white/12 bg-white/[0.04] px-6 py-3.5 transition-[background-color,border-color] duration-500 ease-premium hover:border-white/25 hover:bg-white/[0.08]"
-            >
-              <span>
-                <span className="type-button block">{l.label}</span>
-                {l.note && (
-                  <span className="type-caption mt-1 block text-ice-300/80">{l.note}</span>
-                )}
-              </span>
-              <ArrowUpRight aria-hidden className="h-4 w-4 shrink-0 opacity-70" />
-            </a>
-          ))}
+                <span className="min-w-0 flex-1">
+                  <span className="type-button block">{l.label}</span>
+                  {l.note && (
+                    <span className="type-caption mt-1 block text-blue-900/70">{l.note}</span>
+                  )}
+                </span>
+                <ArrowUpRight
+                  aria-hidden
+                  className="h-4 w-4 shrink-0 opacity-70 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                />
+              </a>
+            );
+          })}
         </div>
         {videos.length > 0 && (
           <section className="mt-12 w-full">
