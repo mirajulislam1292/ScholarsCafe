@@ -24,6 +24,7 @@ const LABELS = {
   Activity: "Audit log",
   "Student courses": "Courses & videos",
   Media: "Media library",
+  Account: "Profile",
 };
 const ABOUT = {
   Overview: "Everything on the website, at a glance.",
@@ -54,6 +55,10 @@ const ABOUT = {
   Activity: "Every change, who made it and when.",
   Account: "Your password and sign-in details.",
   "My courses": "Your courses and lessons.",
+  Home: "",
+  Resources: "Live sessions, videos and guides included in your package.",
+  "Student resources":
+    "Resources and announcements for students, by package. Lesson and resource videos.",
 };
 const label = (key) => names[key] || LABELS[key] || key;
 const canPublishRole = (role) => role === "owner" || role === "admin";
@@ -328,6 +333,18 @@ function render() {
   if (section === "Account") {
     renderAccount();
     if (me.role === "student") renderMyDetails().catch(report);
+    return;
+  }
+  if (section === "Home") {
+    renderHome().catch(report);
+    return;
+  }
+  if (section === "Resources") {
+    renderMyResources().catch(report);
+    return;
+  }
+  if (section === "Student resources") {
+    renderStudentResources().catch(report);
     return;
   }
   if (section === "My courses") {
@@ -700,24 +717,27 @@ function lessonCard(course, lesson, count) {
   published.type = "checkbox";
   published.checked = Boolean(lesson?.published);
   pub.prepend(published);
-  let videoId = lesson?.video_media_id || null;
-  const videoState = node("p", videoId ? "Video attached." : "No video.", "muted");
-  const file = node("input");
-  file.type = "file";
-  file.accept = "video/mp4,video/webm";
-  file.onchange = async () => {
-    if (!file.files[0]) return;
-    try {
-      videoState.textContent = "Uploading…";
-      videoId = (await upload(file.files[0], "private")).id;
-      videoState.textContent = "Video uploaded. Save the lesson to attach it.";
-    } catch (err) {
-      videoState.textContent = videoId ? "Video attached." : "No video.";
-      report(err);
-    }
-  };
+  // New uploads go to private disk storage (video_id); video_media_id is kept for older small uploads.
+  let videoId = lesson?.video_id || null;
+  let legacyId = lesson?.video_media_id || null;
+  const attached = () =>
+    videoId
+      ? "Video: " + (lesson?.video_id === videoId ? lesson.video_name || "attached" : "new upload")
+      : legacyId
+        ? "Video attached (older upload)."
+        : "No video.";
+  const videoState = node("p", attached(), "muted");
+  const file = videoFileInput(
+    (state) => (videoState.textContent = state),
+    (uploaded) => {
+      videoId = uploaded.id;
+      legacyId = null;
+      videoState.textContent = "Uploaded " + uploaded.name + ". Save the lesson to attach it.";
+    },
+  );
   const remove = button("Remove video", () => {
     videoId = null;
+    legacyId = null;
     videoState.textContent = "Video removed. Save the lesson to apply.";
   });
   const save = node("button", lesson ? "Save lesson" : "+ Add lesson", "primary");
@@ -756,7 +776,8 @@ function lessonCard(course, lesson, count) {
         body: body.value,
         position: Number(position.value) || 0,
         published: published.checked,
-        video_media_id: videoId,
+        video_media_id: legacyId,
+        video_id: videoId,
       });
       notice("Lesson saved.");
       $("screen").replaceChildren();
@@ -1201,6 +1222,589 @@ function packageForm(p, courses) {
   };
   screen.append(form);
 }
+// ---------- Private videos: chunked upload (staff) and the protected player ----------
+const VIDEO_MAX = 2 * 1024 * 1024 * 1024;
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+/** Uploads in chunks; resumes from the server's byte count after a dropped connection. */
+async function uploadVideo(file, progress) {
+  if (!["video/mp4", "video/webm"].includes(file.type))
+    throw Error("Choose an MP4 (H.264) or WebM video.");
+  if (file.size > VIDEO_MAX) throw Error("Videos must be 2 GB or smaller.");
+  const { id, chunk } = await api("videos", {
+    name: file.name.slice(0, 200),
+    size: file.size,
+    mime: file.type,
+  });
+  let at = 0,
+    failures = 0;
+  while (at < file.size) {
+    try {
+      const r = await fetch("/api/videos/" + id + "/chunk", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "X-Offset": String(at),
+          "X-CSRF-Token": me.csrf,
+        },
+        body: file.slice(at, at + chunk),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.status === 409 && /Resume from byte (\d+)/.test(j.error || "")) {
+        at = Number(/Resume from byte (\d+)/.exec(j.error)[1]);
+        progress(at / file.size);
+        continue;
+      }
+      if (!r.ok) throw Object.assign(Error(j.error || "Upload failed."), { final: r.status < 500 });
+      at = j.received;
+      failures = 0;
+      progress(at / file.size);
+    } catch (e) {
+      if (e.final || ++failures > 5) throw e;
+      await pause(2000 * failures);
+    }
+  }
+  await api("videos/" + id + "/complete", {});
+  return { id, name: file.name };
+}
+/** A file picker that uploads a video with a progress message. */
+function videoFileInput(onState, onDone) {
+  const file = node("input");
+  file.type = "file";
+  file.accept = "video/mp4,video/webm";
+  file.setAttribute("aria-label", "Upload a video (MP4 or WebM, up to 2 GB)");
+  file.onchange = async () => {
+    if (!file.files[0]) return;
+    file.disabled = true;
+    const leave = (e) => e.preventDefault();
+    window.addEventListener("beforeunload", leave);
+    try {
+      onState("Uploading… 0%");
+      const done = await uploadVideo(file.files[0], (p) =>
+        onState("Uploading… " + Math.floor(p * 100) + "% (keep this page open)"),
+      );
+      onDone(done);
+    } catch (err) {
+      onState("Upload failed.");
+      report(err);
+    } finally {
+      window.removeEventListener("beforeunload", leave);
+      file.disabled = false;
+      file.value = "";
+    }
+  };
+  return file;
+}
+/**
+ * Protected player: short-lived link tied to this sign-in, no download button, a moving watermark with the
+ * viewer's email (also in full screen), and resume for lessons. Expired links are renewed at the same second.
+ */
+function videoPlayer(playPath, lessonId) {
+  const wrap = node("div", undefined, "player");
+  const video = node("video");
+  video.controls = true;
+  video.preload = "metadata";
+  video.playsInline = true;
+  video.disablePictureInPicture = true;
+  video.setAttribute("controlsList", "nodownload noplaybackrate noremoteplayback");
+  video.setAttribute("disableRemotePlayback", "");
+  video.oncontextmenu = (e) => e.preventDefault();
+  const mark = node("div", undefined, "watermark");
+  mark.setAttribute("aria-hidden", "true");
+  const full = button("Full screen", () =>
+    document.fullscreenElement ? document.exitFullscreen() : wrap.requestFullscreen?.(),
+  );
+  full.className = "player-full";
+  wrap.append(video, mark, full);
+  // Full screen on the wrapper (not the video) so the watermark stays visible.
+  video.ondblclick = (e) => {
+    e.preventDefault();
+    full.click();
+  };
+  let retried = false,
+    lastSaved = 0;
+  const load = async (resumeAt) => {
+    const link = await api(playPath);
+    mark.textContent = link.watermark;
+    video.onloadedmetadata = () => {
+      const at = resumeAt ?? link.position;
+      if (at > 5 && at < video.duration - 10) video.currentTime = at;
+    };
+    video.src = link.url;
+  };
+  video.onplaying = () => (retried = false);
+  video.onerror = async () => {
+    if (retried)
+      return report(Error("This video can't play right now. Your access may have changed."));
+    retried = true;
+    const at = video.currentTime;
+    try {
+      await load(at);
+      await video.play().catch(() => {});
+    } catch (err) {
+      report(err);
+    }
+  };
+  const save = () => {
+    if (!lessonId || !video.duration || me.role !== "student") return;
+    lastSaved = Date.now();
+    api("lms/my/position", {
+      lesson_id: lessonId,
+      seconds: video.currentTime,
+      duration: video.duration,
+    }).catch(() => {});
+  };
+  video.ontimeupdate = () => Date.now() - lastSaved > 15000 && !video.paused && save();
+  video.onpause = save;
+  video.onended = save;
+  const move = setInterval(() => {
+    if (!wrap.isConnected) return clearInterval(move);
+    mark.style.left = 4 + Math.random() * 56 + "%";
+    mark.style.top = 6 + Math.random() * 74 + "%";
+  }, 7000);
+  load().catch(report);
+  return wrap;
+}
+
+// ---------- Student portal: Home and Resources ----------
+const TYPE_LABELS = {
+  live: "Live session",
+  video: "Video",
+  guide: "Guide",
+  link: "Link",
+  announcement: "Announcement",
+};
+const dateTime = (t) =>
+  new Date(String(t).replace(" ", "T") + (/Z|[+-]\d\d:?\d\d$/.test(t) ? "" : "Z")).toLocaleString(
+    undefined,
+    { dateStyle: "medium", timeStyle: "short" },
+  );
+function openLink(url, text) {
+  const a = node("a", text, "button-link");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  return a;
+}
+function openCourse(courseId, lessonId) {
+  section = "My courses";
+  for (const b of $("nav").querySelectorAll("button"))
+    b.classList.toggle("active", b.dataset.section === section);
+  $("subtitle").textContent = "";
+  $("screen").replaceChildren();
+  renderMyCourse(courseId, lessonId).catch(report);
+}
+async function renderHome() {
+  const h = await api("lms/my/home");
+  const first = h.name.trim().split(/\s+/)[0];
+  $("heading").textContent = first ? "Hi, " + first : "Welcome";
+  const screen = $("screen");
+  const grid = node("div", undefined, "home-grid");
+  const card = (title) => {
+    const c = node("section", undefined, "card home-card");
+    c.append(node("p", title, "eyebrow"));
+    grid.append(c);
+    return c;
+  };
+  const cont = card("CONTINUE LEARNING");
+  if (h.next) {
+    cont.append(node("h3", h.next.title), node("p", h.next.course, "muted"));
+    if (h.next.duration) {
+      const bar = node("progress");
+      bar.max = h.next.duration;
+      bar.value = h.next.seconds;
+      bar.setAttribute("aria-label", "Watched so far");
+      cont.append(bar);
+    }
+    cont.append(
+      button(
+        h.next.seconds ? "Resume →" : "Start →",
+        () => openCourse(h.next.course_id, h.next.lesson_id),
+        "primary",
+      ),
+    );
+  } else
+    cont.append(
+      node(
+        "p",
+        h.packages.length
+          ? "No lessons yet. They'll appear here as soon as they're published."
+          : "Your courses appear here once you have a package.",
+        "muted",
+      ),
+    );
+  const pk = card(h.packages.length > 1 ? "MY PACKAGES" : "MY PACKAGE");
+  if (!h.packages.length)
+    pk.append(
+      node("p", "You don't have a package yet.", ""),
+      node(
+        "p",
+        "When you enrol, we'll add it here and your courses and resources unlock automatically.",
+        "muted",
+      ),
+    );
+  for (const p of h.packages) {
+    pk.append(node("h3", p.name));
+    if (p.includes.length) {
+      const ul = node("ul", undefined, "ticks");
+      for (const i of p.includes) ul.append(node("li", i));
+      pk.append(ul);
+    }
+  }
+  const mentor = card(h.mentors.length > 1 ? "MY MENTORS" : "MY MENTOR");
+  if (!h.mentors.length) mentor.append(node("p", "Your mentor will be assigned soon.", "muted"));
+  for (const m of h.mentors) mentor.append(node("p", m));
+  if (h.mentors.length) mentor.append(button("Send a message", () => navigate("Messages")));
+  if (h.live.length) {
+    const live = card("UPCOMING LIVE SESSIONS");
+    for (const r of h.live) {
+      const row = node("div", undefined, "row");
+      const info = node("div");
+      info.append(node("span", r.title, "row-title"), node("p", dateTime(r.starts_at), "muted"));
+      row.append(info);
+      if (r.url) row.append(openLink(r.url, "Join ↗"));
+      live.append(row);
+    }
+  }
+  screen.append(grid);
+  const news = node("section", undefined, "card");
+  news.append(node("p", "ANNOUNCEMENTS", "eyebrow"));
+  if (!h.announcements.length) news.append(node("p", "No announcements yet.", "muted"));
+  for (const a of h.announcements) {
+    const item = node("article", undefined, "announcement");
+    item.append(
+      node("h3", (a.pinned ? "📌 " : "") + a.title),
+      node("p", dateTime(a.created_at), "muted"),
+    );
+    if (a.body) item.append(node("p", a.body, "pre-line"));
+    if (a.url) item.append(openLink(a.url, "Open ↗"));
+    news.append(item);
+  }
+  screen.append(news);
+}
+async function renderMyResources() {
+  const screen = $("screen");
+  const [{ items }, { items: courses }] = await Promise.all([
+    api("lms/my/resources"),
+    api("lms/my/courses"),
+  ]);
+  if (courses.length) {
+    const box = node("section", undefined, "card");
+    box.append(node("p", "ONGOING COURSES", "eyebrow"));
+    for (const c of courses) {
+      const row = node("div", undefined, "row");
+      const info = node("div");
+      info.append(
+        node("span", c.title, "row-title"),
+        node("p", `${c.done} of ${c.lessons} lessons done`, "muted"),
+      );
+      row.append(
+        info,
+        button("Open →", () => openCourse(c.id)),
+      );
+      box.append(row);
+    }
+    screen.append(box);
+  }
+  const bar = node("div", undefined, "toolbar filters");
+  const types = ["all", ...new Set(items.map((r) => r.type))];
+  let type = "all";
+  const chips = node("div", undefined, "chips");
+  chips.setAttribute("role", "group");
+  chips.setAttribute("aria-label", "Filter by type");
+  for (const t of types) {
+    const b = button(t === "all" ? "All" : TYPE_LABELS[t] + "s", () => {
+      type = t;
+      for (const x of chips.children) x.setAttribute("aria-pressed", String(x === b));
+      draw();
+    });
+    b.setAttribute("aria-pressed", String(t === "all"));
+    chips.append(b);
+  }
+  const countries = [...new Set(items.map((r) => r.country).filter(Boolean))].sort();
+  const [, country] = select("Country", [["", "All countries"], ...countries.map((c) => [c, c])]);
+  country.setAttribute("aria-label", "Filter by country");
+  const search = node("input");
+  search.type = "search";
+  search.placeholder = "Search title or tag";
+  search.setAttribute("aria-label", "Search resources");
+  bar.append(chips);
+  if (countries.length) bar.append(country);
+  bar.append(search);
+  const list = node("div");
+  if (items.length) screen.append(bar);
+  screen.append(list);
+  const draw = () => {
+    const term = search.value.trim().toLowerCase();
+    const shown = items.filter(
+      (r) =>
+        (type === "all" || r.type === type) &&
+        (!country.value || r.country === country.value) &&
+        (!term || (r.title + " " + r.tags).toLowerCase().includes(term)),
+    );
+    list.replaceChildren();
+    if (!shown.length)
+      list.append(
+        node(
+          "p",
+          items.length
+            ? "Nothing matches these filters."
+            : "No resources yet. Live sessions, videos and guides from your package will appear here.",
+          "empty",
+        ),
+      );
+    for (const r of shown) {
+      const c = node("article", undefined, "card resource");
+      const meta = [TYPE_LABELS[r.type]];
+      if (r.starts_at) meta.push(dateTime(r.starts_at));
+      if (r.country) meta.push(r.country);
+      c.append(node("p", meta.join(" · "), "eyebrow"), node("h3", r.title));
+      if (r.body) c.append(node("p", r.body, "pre-line muted"));
+      if (r.tags) {
+        const tags = node("p", undefined, "tags");
+        for (const t of r.tags.split(",")) tags.append(node("span", "#" + t, "badge"));
+        c.append(tags);
+      }
+      if (r.has_video) {
+        const play = button(
+          "▶ Play video",
+          () => {
+            play.replaceWith(videoPlayer("lms/resources/" + r.id + "/play"));
+          },
+          "primary",
+        );
+        c.append(play);
+      }
+      if (r.url) c.append(openLink(r.url, r.type === "live" ? "Join ↗" : "Open ↗"));
+      list.append(c);
+    }
+  };
+  for (const el of [country, search]) el.oninput = draw;
+  draw();
+}
+
+// ---------- Admin: student resources, announcements and the video library ----------
+async function renderStudentResources(openId) {
+  const screen = $("screen");
+  const [{ items }, { items: packages }, { items: videos }] = await Promise.all([
+    api("resources"),
+    api("packages"),
+    api("videos"),
+  ]);
+  if (openId !== undefined)
+    return resourceForm(
+      items.find((r) => r.id === openId) || {
+        type: "announcement",
+        title: "",
+        body: "",
+        url: "",
+        video_id: null,
+        tags: "",
+        country: "",
+        starts_at: null,
+        published: false,
+        pinned: false,
+        package_ids: [],
+      },
+      packages,
+      videos,
+    );
+  const bar = node("div", undefined, "toolbar");
+  bar.append(
+    node("p", items.length + " item" + (items.length === 1 ? "" : "s"), "muted"),
+    button(
+      "+ New",
+      () => {
+        screen.replaceChildren();
+        renderStudentResources(null).catch(report);
+      },
+      "primary",
+    ),
+  );
+  screen.append(bar);
+  if (!items.length)
+    screen.append(
+      node(
+        "p",
+        "Nothing yet. Add an announcement, a live-session link, a guide or an exclusive video.",
+        "empty",
+      ),
+    );
+  const pkName = (id) => packages.find((p) => p.id === id)?.name || "removed package";
+  for (const r of items) {
+    const row = node("div", undefined, "card row");
+    const info = node("div");
+    info.append(
+      node("span", (r.pinned ? "📌 " : "") + r.title, "row-title"),
+      node(
+        "p",
+        [
+          TYPE_LABELS[r.type],
+          r.package_ids.length
+            ? r.package_ids.map(pkName).join(", ")
+            : "Every student with a package",
+        ].join(" · "),
+        "muted",
+      ),
+    );
+    row.append(
+      info,
+      node("span", r.published ? "Published" : "Draft", "badge"),
+      button("Edit", () => {
+        screen.replaceChildren();
+        renderStudentResources(r.id).catch(report);
+      }),
+    );
+    screen.append(row);
+  }
+  // Video library: delete videos nothing uses any more (frees disk space).
+  const lib = node("details", undefined, "card");
+  lib.append(node("summary", `Video library (${videos.length})`));
+  const total = videos.reduce((n, v) => n + Number(v.size), 0);
+  lib.append(node("p", (total / 1024 ** 3).toFixed(2) + " GB of 30 GB used.", "muted"));
+  for (const v of videos) {
+    const row = node("div", undefined, "row");
+    row.append(
+      node("span", v.name + " · " + (Number(v.size) / 1024 ** 2).toFixed(0) + " MB"),
+      button(
+        "Delete",
+        async () => {
+          if (!confirm("Delete " + v.name + "? This can't be undone.")) return;
+          await api("videos/" + v.id + "/delete", {});
+          notice("Video deleted.");
+          render();
+        },
+        "danger",
+      ),
+    );
+    lib.append(row);
+  }
+  screen.append(lib);
+}
+function resourceForm(r, packages, videos) {
+  const screen = $("screen");
+  screen.replaceChildren();
+  const form = node("form", undefined, "card");
+  form.append(
+    button("← Back", () => render()),
+    node("h2", r.id ? r.title : "New resource or announcement"),
+  );
+  const [yl, type] = select(
+    "Type",
+    Object.entries(TYPE_LABELS).map(([k, v]) => [k, v]),
+    r.type,
+  );
+  const [tl, title] = input("Title", r.title, "text", 200);
+  title.required = true;
+  const [bl, body] = input("Text", r.body || "", "textarea", 20000);
+  const [ul, url] = input(
+    "Link (https://…, e.g. Google Meet or Facebook Live)",
+    r.url,
+    "url",
+    2000,
+  );
+  const [sl, starts] = input("Starts at (live sessions)", "", "datetime-local", 20);
+  if (r.starts_at) {
+    const d = new Date(
+      String(r.starts_at).replace(" ", "T") + (String(r.starts_at).endsWith("Z") ? "" : "Z"),
+    );
+    starts.value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
+  const [gl, tags] = input("Tags (comma separated, e.g. sop, scholarships)", r.tags, "text", 300);
+  const [cl, country] = input("Country (e.g. USA, UK)", r.country, "text", 80);
+  let videoId = r.video_id;
+  const [vl, picker] = select(
+    "Video",
+    [["", "No video"], ...videos.map((v) => [v.id, v.name])],
+    videoId || "",
+  );
+  picker.onchange = () => (videoId = picker.value || null);
+  const videoState = node("p", "", "muted");
+  const file = videoFileInput(
+    (s) => (videoState.textContent = s),
+    (v) => {
+      const o = node("option", v.name);
+      o.value = v.id;
+      picker.append(o);
+      picker.value = videoId = v.id;
+      videoState.textContent = "Uploaded. Save to attach it.";
+    },
+  );
+  const audience = node("fieldset", undefined, "checks");
+  audience.append(
+    node("legend", "Who sees it"),
+    node(
+      "p",
+      "Tick packages to limit it. Leave all unticked for every student with a package.",
+      "muted",
+    ),
+  );
+  const boxes = packages.map((p) => {
+    const l = node("label", undefined, "check");
+    const c = node("input");
+    c.type = "checkbox";
+    c.value = p.id;
+    c.checked = r.package_ids.includes(p.id);
+    l.append(c, document.createTextNode(" " + p.name + (p.active ? "" : " (inactive)")));
+    audience.append(l);
+    return c;
+  });
+  if (!packages.length) audience.append(node("p", "No packages yet.", "muted"));
+  const flag = (text, value) => {
+    const l = node("label", undefined, "check");
+    const c = node("input");
+    c.type = "checkbox";
+    c.checked = value;
+    l.append(c, document.createTextNode(" " + text));
+    return [l, c];
+  };
+  const [pl, published] = flag("Published (visible to students)", r.published);
+  const [nl, pinned] = flag("Pinned to the top", r.pinned);
+  form.append(yl, tl, bl, ul, sl, gl, cl, vl, file, videoState, audience, pl, nl);
+  const actions = node("div", undefined, "actions");
+  const save = node("button", "Save", "primary");
+  save.type = "submit";
+  actions.append(save);
+  if (r.id)
+    actions.append(
+      button(
+        "Delete",
+        async () => {
+          if (!confirm('Delete "' + r.title + '"?')) return;
+          await api("resources/" + r.id + "/delete", {});
+          render();
+          notice("Deleted.");
+        },
+        "danger",
+      ),
+    );
+  form.append(actions);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    save.disabled = true;
+    try {
+      await api(r.id ? "resources/" + r.id : "resources", {
+        type: type.value,
+        title: title.value,
+        body: body.value,
+        url: url.value.trim(),
+        video_id: videoId,
+        tags: tags.value,
+        country: country.value,
+        starts_at: starts.value ? new Date(starts.value).toISOString() : null,
+        published: published.checked,
+        pinned: pinned.checked,
+        package_ids: boxes.filter((c) => c.checked).map((c) => c.value),
+      });
+      render();
+      notice("Saved.");
+    } catch (err) {
+      report(err);
+    } finally {
+      save.disabled = false;
+    }
+  };
+  screen.append(form);
+}
 // ---------- Student dashboard: student screens ----------
 async function renderMyCourses() {
   const screen = $("screen");
@@ -1247,21 +1851,8 @@ async function renderMyCourse(courseId, lessonId) {
   if (!current) view.append(node("p", "Lessons will appear here soon.", "empty"));
   else {
     view.append(node("h2", current.title));
-    if (current.has_video) {
-      const video = node("video");
-      video.controls = true;
-      video.preload = "metadata";
-      video.playsInline = true;
-      video.disablePictureInPicture = true;
-      video.setAttribute("controlsList", "nodownload noplaybackrate");
-      video.oncontextmenu = (e) => e.preventDefault();
-      video.src = "/api/lms/lessons/" + current.id + "/video";
-      video.onerror = () =>
-        report(
-          Error("This video can't play right now. Your access may have changed; reload the page."),
-        );
-      view.append(video);
-    }
+    if (current.has_video)
+      view.append(videoPlayer("lms/lessons/" + current.id + "/play", current.id));
     if (current.body) view.append(node("p", current.body, "lesson-body"));
     const toggle = button(
       current.done ? "Mark as not done" : "Mark as done ✓",
@@ -2062,7 +2653,7 @@ try {
   ];
   const navFor =
     me.role === "student"
-      ? [["", ["My courses", "Messages", "Account"]]]
+      ? [["", ["Home", "My courses", "Resources", "Messages", "Account"]]]
       : me.role === "mentor"
         ? [["", ["Leads", "Students", "Messages"]]]
         : [
@@ -2071,13 +2662,23 @@ try {
             ...(me.role === "editor"
               ? []
               : [
-                  ["Students", ["Students", "Packages", "Student courses", "Messages", "Reviews"]],
+                  [
+                    "Students",
+                    [
+                      "Students",
+                      "Packages",
+                      "Student courses",
+                      "Student resources",
+                      "Messages",
+                      "Reviews",
+                    ],
+                  ],
                   ["Inbox", ["Leads", "Private feedback", "Newsletter"]],
                   ["Settings", ["Access", "Email delivery", "Activity"]],
                 ]),
           ];
   if (me.role === "mentor") section = "Leads";
-  if (me.role === "student") section = "My courses";
+  if (me.role === "student") section = "Home";
   if (me.role === "student") {
     document.querySelector("aside .eyebrow").textContent = "STUDENT DASHBOARD";
     document.querySelector("main header .eyebrow").textContent = "SCHOLARS CAFE / STUDENT";

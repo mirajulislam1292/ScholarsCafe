@@ -677,3 +677,125 @@ label.check input {
   display: inline;
   margin: 0;
 }
+
+/* Phase 3: student portal and protected player */
+.player {
+  position: relative;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.player video {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+}
+.player:fullscreen {
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+}
+.player:fullscreen video {
+  max-height: 100vh;
+  height: 100%;
+}
+.watermark {
+  position: absolute;
+  left: 8%;
+  top: 12%;
+  pointer-events: none;
+  user-select: none;
+  color: #fff;
+  opacity: 0.38;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  transition:
+    left 2.5s cubic-bezier(0.22, 1, 0.36, 1),
+    top 2.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.player-full {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: 12px;
+  padding: 6px 12px;
+  opacity: 0.85;
+}
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.home-card {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.home-card h3,
+.announcement h3,
+.resource h3 {
+  margin: 0;
+}
+.home-card progress {
+  width: 100%;
+}
+ul.ticks {
+  margin: 4px 0 0;
+  padding-left: 20px;
+}
+.announcement {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--ice-100);
+}
+.announcement:last-child {
+  border-bottom: 0;
+}
+.pre-line {
+  white-space: pre-line;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chips button[aria-pressed="true"] {
+  background: var(--blue-700);
+  color: var(--white);
+  border-color: var(--blue-700);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+a.button-link {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 100px;
+  border: 1px solid var(--ice-200);
+  color: var(--blue-700);
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: 8px;
+}
+a.button-link:hover,
+a.button-link:focus-visible {
+  border-color: var(--blue-700);
+}
+.resource .eyebrow {
+  margin: 0 0 6px;
+}
+/* With the sidebar, the course page needs room for the video: stack below 1100px, video first. */
+@media (max-width: 1100px) {
+  .course-layout {
+    grid-template-columns: 1fr;
+  }
+  .course-layout .lesson-view {
+    order: -1;
+  }
+}

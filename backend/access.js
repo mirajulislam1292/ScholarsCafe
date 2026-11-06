@@ -52,6 +52,25 @@ export function studentScope(actor, column) {
   if (actor.role === "mentor") return scoped(`${column} IN (${MY_STUDENTS})`, [actor.id]);
   return scoped(`${column}=?`, [actor.id]);
 }
+/**
+ * WHERE fragment for `student_resources r` (resources and announcements).
+ * Students: published, not deleted, and they hold a package that unlocks it. A resource with no package rows
+ * is for every student who has at least one package; a student with no package sees nothing.
+ * Staff see everything; mentors and editors are refused.
+ */
+export function resourceScope(actor) {
+  check(actor);
+  if (isStaff(actor)) return ALL;
+  if (actor.role !== "student") throw fail(403, "Resources are managed by owners and admins.");
+  return scoped(
+    `r.published=1 AND r.deleted_at IS NULL
+     AND EXISTS (SELECT 1 FROM user_packages up5 WHERE up5.user_id=?)
+     AND (NOT EXISTS (SELECT 1 FROM resource_packages rp5 WHERE rp5.resource_id=r.id)
+       OR EXISTS (SELECT 1 FROM resource_packages rp6 JOIN user_packages up6 ON up6.package_id=rp6.package_id
+         WHERE rp6.resource_id=r.id AND up6.user_id=?))`,
+    [actor.id, actor.id],
+  );
+}
 /** Columns of student_profiles a role may read. Staff notes never reach students. */
 export const profileColumns = (actor) =>
   actor.role === "student"
@@ -64,6 +83,7 @@ const WRITE = {
   "lesson.write": ["owner", "admin"],
   "enrollment.write": ["owner", "admin"],
   "package.write": ["owner", "admin"], // packages, assigning them, student access and mentor
+  "resource.write": ["owner", "admin"], // student resources, announcements and videos
   "profile.write": ["owner", "admin", "student"], // student: own row, not staff_notes
   "profile.notes": ["owner", "admin", "mentor"], // mentor: own students only
   "progress.write": ["student"], // own lessons in open courses only

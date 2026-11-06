@@ -28,6 +28,7 @@ const lessonInput = z
     title: z.string().trim().min(1).max(200),
     body: z.string().max(200000).default(""),
     video_media_id: uuid.nullable().default(null),
+    video_id: uuid.nullable().default(null),
     published: z.boolean().default(false),
     position: z.number().int().min(0).max(10000).default(0),
   })
@@ -128,7 +129,8 @@ export function installLmsRoutes(app, { store, fail }) {
   app.get("/api/lms/courses/:id/lessons", async (req, res) => {
     const s = lessonScope(req.actor);
     const items = await q(
-      `SELECT l.id,l.course_id,l.position,l.title,l.body,l.video_media_id,l.published FROM lms_lessons l
+      `SELECT l.id,l.course_id,l.position,l.title,l.body,l.video_media_id,l.video_id,l.published,v.name AS video_name
+       FROM lms_lessons l LEFT JOIN videos v ON v.id=l.video_id
        WHERE l.course_id=? AND ${s.sql} ORDER BY l.position,l.title`,
       [id(req), ...s.params],
     );
@@ -151,17 +153,21 @@ export function installLmsRoutes(app, { store, fail }) {
       );
       if (!course) throw fail(404, "Course not found.");
       await checkVideo(d.video_media_id, c);
-      const args = [d.title, d.body, d.video_media_id, d.published, d.position];
+      if (d.video_id) {
+        const [v] = await q("SELECT id FROM videos WHERE id=? AND status='ready'", [d.video_id], c);
+        if (!v) throw fail(400, "Choose an uploaded video.");
+      }
+      const args = [d.title, d.body, d.video_media_id, d.video_id, d.published, d.position];
       if (lessonId) {
         const r = await q(
-          "UPDATE lms_lessons SET title=?,body=?,video_media_id=?,published=?,position=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND course_id=?",
+          "UPDATE lms_lessons SET title=?,body=?,video_media_id=?,video_id=?,published=?,position=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND course_id=?",
           [...args, lessonId, d.course_id],
           c,
         );
         if (!r.affectedRows) throw fail(404, "Lesson not found.");
       } else
         await q(
-          "INSERT INTO lms_lessons (title,body,video_media_id,published,position,id,course_id) VALUES (?,?,?,?,?,?,?)",
+          "INSERT INTO lms_lessons (title,body,video_media_id,video_id,published,position,id,course_id) VALUES (?,?,?,?,?,?,?,?)",
           [...args, (lessonId = randomUUID()), d.course_id],
           c,
         );
@@ -353,7 +359,7 @@ export function installStudentRoutes(app, { store, fail, sendBytes }) {
     if (!course) throw fail(404, "Course not found.");
     const l = lessonScope(req.actor);
     const lessons = await q(
-      `SELECT l.id,l.title,l.body,l.position,(l.video_media_id IS NOT NULL) AS has_video,
+      `SELECT l.id,l.title,l.body,l.position,(l.video_media_id IS NOT NULL OR l.video_id IS NOT NULL) AS has_video,
         EXISTS(SELECT 1 FROM lesson_progress g WHERE g.user_id=? AND g.lesson_id=l.id) AS done
        FROM lms_lessons l WHERE l.course_id=? AND ${l.sql} ORDER BY l.position,l.title`,
       [req.actor.id, courseId, ...l.params],
