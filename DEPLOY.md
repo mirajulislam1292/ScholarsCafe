@@ -1,4 +1,6 @@
-# Hostinger Deployment Guide
+# Hostinger Deployment Guide (legacy FTP method)
+
+> **Legacy.** The sites now deploy with Hostinger Git auto-deploy. See **DEPLOYMENT.md**. Keep this only if you go back to FTP uploads.
 
 ## Quick Deploy to Hostinger
 

@@ -43,16 +43,19 @@ export function Footer() {
               </CmsText>
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              <FootIcon href="https://www.facebook.com/profile.php?id=61571394902795">
+              <FootIcon
+                label="Facebook"
+                href="https://www.facebook.com/profile.php?id=61571394902795"
+              >
                 <Facebook className="h-4 w-4" />
               </FootIcon>
-              <FootIcon href="https://www.instagram.com/scholars_cafe_/">
+              <FootIcon label="Instagram" href="https://www.instagram.com/scholars_cafe_/">
                 <Instagram className="h-4 w-4" />
               </FootIcon>
-              <FootIcon href="https://www.linkedin.com/company/scholars-cafe09/">
+              <FootIcon label="LinkedIn" href="https://www.linkedin.com/company/scholars-cafe09/">
                 <Linkedin className="h-4 w-4" />
               </FootIcon>
-              <FootIcon href={WA_LINK}>
+              <FootIcon label="WhatsApp" href={WA_LINK}>
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487 2.981 1.287 2.981.858 3.518.804.537-.054 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413" />
                 </svg>
@@ -176,13 +179,22 @@ function Col({ title, links }: { title: string; links: LinkRef[] }) {
   );
 }
 
-function FootIcon({ href, children }: { href: string; children: React.ReactNode }) {
+function FootIcon({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: React.ReactNode;
+}) {
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
     <a
       href={href}
+      aria-label={label}
       target="_blank"
       rel="noopener noreferrer"
       className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/70 transition-all hover:border-sky hover:bg-sky hover:text-white"
