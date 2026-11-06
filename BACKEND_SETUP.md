@@ -194,3 +194,24 @@ Students without a feature don't see that menu item, and the server refuses the 
 - In Reviews, approve it, then click **Add to website testimonials**. This creates a draft in Website → Testimonials for you to check and publish.
 
 **AI-writing detectors:** not added. Open-source detectors (RoBERTa-based classifiers, Binoculars, DetectGPT-style methods) need Python and large models (hundreds of MB to several GB, ideally a GPU), which Hostinger shared hosting can't run. Their accuracy is also unreliable: high false-positive rates, especially for non-native English writers, and easy to evade by paraphrasing. Even OpenAI withdrew its own detector for low accuracy. If wanted later, it can only ever be an indicator, never proof.
+
+## 13. Landing page, forms and the link page (Phase 5)
+
+**Home page:** after the stories it now shows the five newest blog posts (set a date on each post), three guides from Resources, and a "Log in to the portal" section linking to student.scholarscafe.com. Reorder or hide them in Website → Page sections (ids `journal`, `resources`, `portal`).
+
+**Forms (Inbox → Forms):**
+
+- **Building:** questions can be short or long text, email, phone, number, date, link, dropdown, single or multiple choice, or a consent checkbox. Each can be required, have help text, a maximum length, and "show only when" another answer has a given value. Add steps for a multi-page form.
+- **Template:** "Start from the contact form" recreates the website's contact form.
+- **Publishing:** published forms are live at `scholarscafe.com/forms/<address>`.
+- **Answers are checked twice:** in the browser, then again on the server.
+- **Spam protection:** Turnstile (when the keys are set), 10 submissions an hour per visitor, and a hidden honeypot field.
+- **Where submissions go:** to Leads, labelled with the form's name, so status, notes, mentor assignment and the CSV export all work. The Source filter shows one form. "Email me" sends each one to the team inbox.
+- **Replacing a Google Form:** build it here, publish it, and point your links to the new address.
+
+**Link page (Website → Link page):**
+
+- `scholarscafe.com/links` shows social icons (type `social`), featured buttons (`highlight`), normal links, and YouTube videos (type `youtube`; a thumbnail that opens YouTube).
+- Order uses `position`; untick `enabled` to hide one.
+- Click counts (last 30 days and total) appear next to each link in the admin. Only a daily counter per link is stored, nothing about the visitor.
+- Until you publish links, the page shows the site's existing links: socials, a WhatsApp call, guides, the portal and the website.

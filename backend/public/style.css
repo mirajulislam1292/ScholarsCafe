@@ -835,3 +835,16 @@ button.small {
   background: #e3f6ea;
   color: #1d6b3c;
 }
+
+/* Phase 5: form builder */
+.builder-step {
+  background: var(--white);
+}
+.builder-field {
+  margin: 0;
+  padding: 14px 18px;
+}
+.builder-field summary {
+  cursor: pointer;
+  font-weight: 500;
+}

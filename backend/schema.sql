@@ -299,3 +299,25 @@ CREATE TABLE IF NOT EXISTS document_comments (
   INDEX doc (document_id, created_at),
   FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
 );
+-- Native forms (Phase 5). Submissions are rows in inquiries (form_id + data) so they use the leads CRM.
+CREATE TABLE IF NOT EXISTS forms (
+  id CHAR(36) PRIMARY KEY,
+  slug VARCHAR(80) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  intro TEXT NULL,
+  success VARCHAR(500) NOT NULL DEFAULT '',
+  published BOOLEAN NOT NULL DEFAULT FALSE,
+  notify BOOLEAN NOT NULL DEFAULT TRUE,
+  definition JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  deleted_at DATETIME NULL,
+  UNIQUE KEY slug (slug)
+);
+-- Clicks on the /links page, per link per day (no visitor data stored).
+CREATE TABLE IF NOT EXISTS link_clicks (
+  link_id VARCHAR(120) NOT NULL,
+  day DATE NOT NULL,
+  clicks INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (link_id, day)
+);

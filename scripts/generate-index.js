@@ -53,6 +53,9 @@ async function generateIndexHtml() {
     "/privacy",
     "/terms",
     "/cookies",
+    "/links",
+    // Shell for every form: .htaccess serves it at /forms/<slug>; the form loads in the browser.
+    "/forms/_",
   ];
   const rendered = [];
   for (const path of pages) {

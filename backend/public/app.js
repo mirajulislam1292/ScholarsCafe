@@ -47,7 +47,8 @@ const ABOUT = {
   "Student courses": "Courses, lessons and private lesson videos.",
   Messages: "Conversations between students and mentors.",
   Reviews: "Approve or reject student reviews.",
-  Leads: "Enquiries from the website contact form.",
+  Leads: "Enquiries from the website contact form and your forms.",
+  Forms: "Your own forms at scholarscafe.com/forms/…, replacing Google Forms. Answers go to Leads.",
   "Private feedback": "Private feedback sent from the website.",
   Newsletter: "Newsletter sign-ups.",
   Access: "Who can sign in to this workspace, and with which role.",
@@ -67,6 +68,17 @@ const ENUMS = {
   group: ["founder", "mentor"],
   device: ["desktop", "mobile"],
   category: ["guide", "video", "live", "course", "template", "other"],
+  type: ["link", "social", "youtube"],
+  platform: [
+    "instagram",
+    "facebook",
+    "youtube",
+    "tiktok",
+    "linkedin",
+    "whatsapp",
+    "email",
+    "website",
+  ],
 };
 const HELP = {
   order: "Section ids in display order, separated by commas.",
@@ -75,10 +87,14 @@ const HELP = {
   rate: "Playback speed, 0.5–1.5 (0.85 is calm).",
   page: "Page path, for example / or /about.",
   title: "",
+  type: "link = a button · social = an icon in the top row · youtube = a video card (paste the YouTube link).",
+  platform: "For social icons: which network.",
+  highlight: "Featured: shown larger, at the top.",
+  date: "Publish date, YYYY-MM-DD. The home page shows the five newest.",
 };
 const defaults = {
   mentors: { name: "", role: "", bio: "", photo: "", initials: "" },
-  blogs: { title: "", slug: "", excerpt: "", body: "", author: "", image: "" },
+  blogs: { title: "", slug: "", date: "", excerpt: "", body: "", author: "", image: "" },
   feedback: {
     name: "",
     quote: "",
@@ -133,7 +149,16 @@ const defaults = {
     image: "",
     position: 0,
   },
-  links: { label: "", url: "", note: "", highlight: false, enabled: true, position: 0 },
+  links: {
+    type: "link",
+    platform: "website",
+    label: "",
+    url: "",
+    note: "",
+    highlight: false,
+    enabled: true,
+    position: 0,
+  },
 };
 function node(tag, text, cls) {
   const n = document.createElement(tag);
@@ -194,6 +219,7 @@ function field(form, key, value) {
     select.id = "field-" + key;
     label.htmlFor = select.id;
     form.append(label, select);
+    if (HELP[key]) form.append(node("small", HELP[key], "muted"));
     return () => select.value;
   }
   if (typeof value === "number") {
@@ -344,6 +370,10 @@ function render() {
     renderMyResources().catch(report);
     return;
   }
+  if (section === "Forms") {
+    renderForms().catch(report);
+    return;
+  }
   if (section === "Documents") {
     renderDocuments().catch(report);
     return;
@@ -455,9 +485,31 @@ function render() {
       down.disabled = index === list.length - 1;
       row.append(up, down);
     }
+    if (section === "links") {
+      const clicks = node("span", "", "muted");
+      clicks.dataset.link = item.id;
+      row.append(clicks);
+    }
     row.append(button("Edit", () => edit(item)));
     screen.append(row);
   });
+  if (section === "links" && list.length)
+    api("links/clicks")
+      .then(({ items: counts }) => {
+        for (const el of screen.querySelectorAll("[data-link]")) {
+          const c = counts.find((x) => x.link_id === el.dataset.link);
+          el.textContent = `${Number(c?.last30 || 0)} clicks (30 days) · ${Number(c?.total || 0)} total`;
+        }
+      })
+      .catch(() => {});
+  if (section === "links")
+    screen.append(
+      node(
+        "p",
+        "The page is live at scholarscafe.com/links once at least one entry is published.",
+        "muted",
+      ),
+    );
 }
 /** Reorder: renumber the list (10, 20, 30…), save each changed entry and publish it. */
 async function move(list, index, dir) {
@@ -1828,6 +1880,7 @@ const DOC_STATUS = {
   approved: "Approved",
 };
 let myFeatures = {};
+let leadsForm = "";
 async function renderDocuments() {
   const screen = $("screen");
   const student = me.role === "student";
@@ -2002,6 +2055,362 @@ async function renderDocument(docId) {
       report(err);
     } finally {
       send.disabled = false;
+    }
+  };
+  screen.append(form);
+}
+// ---------- Form builder (owner/admin): fields, required, validation, conditions, steps ----------
+const FIELD_TYPES = {
+  text: "Short text",
+  textarea: "Long text",
+  email: "Email",
+  phone: "Phone",
+  number: "Number",
+  date: "Date",
+  url: "Link (https)",
+  select: "Dropdown",
+  radio: "Single choice",
+  checkbox: "Multiple choice",
+  consent: "Consent checkbox",
+};
+const CHOICE_TYPES = ["select", "radio", "checkbox"];
+const slugify = (s, max = 40) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/^(\d)/, "f_$1")
+    .slice(0, max) || "field";
+async function renderForms(openId) {
+  const screen = $("screen");
+  const { items, template } = await api("forms");
+  if (openId !== undefined) {
+    const blank = {
+      slug: "",
+      title: "",
+      intro: "",
+      success: "Thank you! We'll get back to you within 24 hours.",
+      published: false,
+      notify: true,
+      definition: {
+        steps: [
+          {
+            title: "",
+            fields: [
+              { id: "name", label: "Full name", type: "text", required: true, role: "name" },
+            ],
+          },
+        ],
+      },
+    };
+    return formBuilder(
+      openId === "template"
+        ? structuredClone(template)
+        : items.find((f) => f.id === openId) || blank,
+    );
+  }
+  const bar = node("div", undefined, "toolbar");
+  bar.append(
+    node("p", items.length + " form" + (items.length === 1 ? "" : "s"), "muted"),
+    node("span"),
+  );
+  bar.lastChild.append(
+    button("Start from the contact form", () => renderFormsOpen("template")),
+    button("+ New form", () => renderFormsOpen(null), "primary"),
+  );
+  screen.append(bar);
+  if (!items.length)
+    screen.append(
+      node(
+        "p",
+        "No forms yet. Start from the website's contact form, or build one from scratch.",
+        "empty",
+      ),
+    );
+  for (const f of items) {
+    const row = node("div", undefined, "card row");
+    const info = node("div");
+    info.append(
+      node("span", f.title, "row-title"),
+      node(
+        "p",
+        `scholarscafe.com/forms/${f.slug} · ${f.submissions} submission${f.submissions === 1 ? "" : "s"}${f.unread ? ` (${f.unread} new)` : ""}`,
+        "muted",
+      ),
+    );
+    row.append(
+      info,
+      node("span", f.published ? "Published" : "Draft", "badge"),
+      button("Submissions", () => {
+        leadsForm = f.id;
+        navigate("Leads");
+      }),
+      button("Edit", () => renderFormsOpen(f.id)),
+    );
+    screen.append(row);
+  }
+}
+const renderFormsOpen = (id) => {
+  $("screen").replaceChildren();
+  renderForms(id).catch(report);
+};
+function formBuilder(f) {
+  const screen = $("screen");
+  screen.replaceChildren();
+  const def = structuredClone(f.definition);
+  const form = node("form", undefined, "card");
+  form.append(
+    button("← Forms", () => render()),
+    node("h2", f.id ? f.title : "New form"),
+  );
+  const [tl, title] = input("Title", f.title, "text", 200);
+  title.required = true;
+  const [sl, slug] = input("Address: scholarscafe.com/forms/…", f.slug, "text", 60);
+  slug.required = true;
+  slug.pattern = "[a-z0-9]+(-[a-z0-9]+)*";
+  title.oninput = () => {
+    if (!f.id && !slug.dataset.touched) slug.value = slugify(title.value, 60).replace(/_/g, "-");
+  };
+  slug.oninput = () => (slug.dataset.touched = "1");
+  const [il, intro] = input("Short introduction (optional)", f.intro, "textarea", 2000);
+  const [ml, success] = input("Message after sending", f.success, "text", 500);
+  const flag = (text, value) => {
+    const l = node("label", undefined, "check");
+    const c = node("input");
+    c.type = "checkbox";
+    c.checked = value;
+    l.append(c, document.createTextNode(" " + text));
+    return [l, c];
+  };
+  const [pl, published] = flag("Published (anyone with the link can fill it in)", f.published);
+  const [nl, notify] = flag("Email me each new submission", f.notify);
+  form.append(tl, sl, il, ml, pl, nl);
+  if (f.id && f.published) {
+    const a = node("a", "Open the live form ↗", "button-link");
+    a.href = "https://scholarscafe.com/forms/" + f.slug;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    form.append(a);
+  }
+  const stepsBox = node("div");
+  form.append(node("h3", "Questions"), stepsBox);
+  const allFields = () => def.steps.flatMap((s) => s.fields);
+  const drawSteps = () => {
+    stepsBox.replaceChildren();
+    def.steps.forEach((step, si) => {
+      const box = node("fieldset", undefined, "checks builder-step");
+      box.append(node("legend", def.steps.length > 1 ? `Step ${si + 1}` : "Questions"));
+      if (def.steps.length > 1) {
+        const [stl, st] = input("Step title", step.title, "text", 120);
+        st.oninput = () => (step.title = st.value);
+        box.append(stl);
+      }
+      step.fields.forEach((field, fi) => box.append(fieldEditor(step, field, fi, si)));
+      const tools = node("div", undefined, "toolbar");
+      tools.append(
+        button("+ Question", () => {
+          let id = "question_" + (allFields().length + 1);
+          while (allFields().some((x) => x.id === id)) id += "_";
+          step.fields.push({ id, label: "New question", type: "text", required: false });
+          drawSteps();
+        }),
+      );
+      if (def.steps.length > 1)
+        tools.append(
+          button(
+            "Remove step",
+            () => {
+              if (!confirm("Remove this step and its questions?")) return;
+              def.steps.splice(si, 1);
+              drawSteps();
+            },
+            "danger",
+          ),
+        );
+      box.append(tools);
+      stepsBox.append(box);
+    });
+    stepsBox.append(
+      button("+ Add a step (multi-page form)", () => {
+        def.steps.push({
+          title: "",
+          fields: [
+            {
+              id: "step" + (def.steps.length + 1) + "_q1",
+              label: "New question",
+              type: "text",
+              required: false,
+            },
+          ],
+        });
+        drawSteps();
+      }),
+    );
+  };
+  const fieldEditor = (step, field, fi, si) => {
+    const card = node("details", undefined, "card builder-field");
+    card.open = !f.id && fi === step.fields.length - 1 && field.label === "New question";
+    const summary = node(
+      "summary",
+      `${field.label}${field.required ? " *" : ""} · ${FIELD_TYPES[field.type]}${field.show_if ? " · conditional" : ""}`,
+    );
+    card.append(summary);
+    const [ll, labelIn] = input("Question", field.label, "text", 300);
+    labelIn.oninput = () => (field.label = labelIn.value);
+    const [yl, type] = select("Answer type", Object.entries(FIELD_TYPES), field.type);
+    type.onchange = () => {
+      field.type = type.value;
+      drawSteps();
+    };
+    const [rl, req] = flag("Required", Boolean(field.required));
+    req.onchange = () => (field.required = req.checked);
+    card.append(ll, yl, rl);
+    if (CHOICE_TYPES.includes(field.type)) {
+      const [ol, opts] = input(
+        "Choices (one per line)",
+        (field.options || []).join("\n"),
+        "textarea",
+        6000,
+      );
+      opts.oninput = () =>
+        (field.options = opts.value
+          .split("\n")
+          .map((x) => x.trim())
+          .filter(Boolean));
+      card.append(ol);
+    }
+    if (["text", "email", "phone"].includes(field.type)) {
+      const [rol, role] = select(
+        "Use in Leads as",
+        [
+          ["", "—"],
+          ["name", "Name"],
+          ["email", "Email (reply-to)"],
+          ["phone", "Phone"],
+        ],
+        field.role || "",
+      );
+      role.onchange = () => (field.role = role.value || null);
+      card.append(rol);
+    }
+    if (["text", "textarea"].includes(field.type)) {
+      const [xl, max] = input(
+        "Maximum characters",
+        String(field.max_length || (field.type === "textarea" ? 5000 : 300)),
+        "number",
+        5,
+      );
+      max.min = "1";
+      max.max = "5000";
+      max.oninput = () => (field.max_length = Number(max.value) || undefined);
+      card.append(xl);
+    }
+    const [hl, help] = input("Help text (optional)", field.help || "", "text", 300);
+    help.oninput = () => (field.help = help.value);
+    card.append(hl);
+    // Conditional: show only when an earlier choice question has a given answer.
+    const earlier = def.steps
+      .slice(0, si + 1)
+      .flatMap((s, i) => (i < si ? s.fields : s.fields.slice(0, fi)))
+      .filter((x) => CHOICE_TYPES.includes(x.type));
+    if (earlier.length) {
+      const [cl, when] = select(
+        "Show only when",
+        [["", "Always show"], ...earlier.map((x) => [x.id, x.label])],
+        field.show_if?.field || "",
+      );
+      const source = earlier.find((x) => x.id === field.show_if?.field);
+      card.append(cl);
+      if (source) {
+        const [vl, eq] = select(
+          "is",
+          source.options.map((o) => [o, o]),
+          field.show_if.equals,
+        );
+        eq.onchange = () => (field.show_if = { field: source.id, equals: eq.value });
+        card.append(vl);
+      }
+      when.onchange = () => {
+        const src = earlier.find((x) => x.id === when.value);
+        field.show_if = src ? { field: src.id, equals: src.options[0] } : null;
+        drawSteps();
+      };
+    }
+    const tools = node("div", undefined, "toolbar");
+    const move = (dir) => {
+      const j = fi + dir;
+      if (j < 0 || j >= step.fields.length) return;
+      [step.fields[fi], step.fields[j]] = [step.fields[j], step.fields[fi]];
+      drawSteps();
+    };
+    tools.append(
+      button("↑", () => move(-1)),
+      button("↓", () => move(1)),
+      button(
+        "Delete question",
+        () => {
+          if (step.fields.length === 1) return report(Error("A step needs at least one question."));
+          step.fields.splice(fi, 1);
+          drawSteps();
+        },
+        "danger",
+      ),
+    );
+    card.append(tools);
+    return card;
+  };
+  drawSteps();
+  const actions = node("div", undefined, "actions");
+  const save = node("button", "Save form", "primary");
+  save.type = "submit";
+  actions.append(save);
+  if (f.id)
+    actions.append(
+      button(
+        "Delete form",
+        async () => {
+          if (!confirm(`Delete "${f.title}"? Its submissions stay in Leads.`)) return;
+          await api("forms/" + f.id + "/delete", {});
+          render();
+          notice("Form deleted.");
+        },
+        "danger",
+      ),
+    );
+  form.append(actions);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    save.disabled = true;
+    try {
+      // Field ids are hidden from editors; keep them stable, derive new ones from the label.
+      const used = new Set();
+      for (const fld of allFields()) {
+        if (/^question_\d+_*$|^step\d+_q1$/.test(fld.id)) fld.id = slugify(fld.label);
+        while (used.has(fld.id)) fld.id = (fld.id + "_2").slice(0, 40);
+        used.add(fld.id);
+        if (!CHOICE_TYPES.includes(fld.type)) delete fld.options;
+        if (!["text", "email", "phone"].includes(fld.type)) fld.role = null;
+        if (!["text", "textarea"].includes(fld.type)) delete fld.max_length;
+      }
+      const saved = await api(f.id ? "forms/" + f.id : "forms", {
+        slug: slug.value.trim(),
+        title: title.value,
+        intro: intro.value,
+        success: success.value,
+        published: published.checked,
+        notify: notify.checked,
+        definition: def,
+      });
+      notice(
+        "Form saved." +
+          (published.checked ? " It's live at scholarscafe.com/forms/" + slug.value.trim() : ""),
+      );
+      renderFormsOpen(saved.id);
+    } catch (err) {
+      report(err);
+    } finally {
+      save.disabled = false;
     }
   };
   screen.append(form);
@@ -2624,11 +3033,26 @@ async function renderLeads() {
       assigned.append(o);
     }
   }
+  // Source: the website contact form or a form from the builder.
+  const source = node("select");
+  source.setAttribute("aria-label", "Filter by source");
+  const forms = admin ? (await api("forms")).items : [];
+  for (const [v, t] of [
+    ["", "All sources"],
+    ["website", "Website contact form"],
+    ...forms.map((f) => [f.id, f.title]),
+  ]) {
+    const o = node("option", t);
+    o.value = v;
+    source.append(o);
+  }
+  source.value = leadsForm || "";
+  leadsForm = "";
   const go = node("button", "Filter", "primary");
   go.type = "submit";
   const csv = node("a", "Export CSV");
   csv.className = "button";
-  filters.append(q, status, ...(admin ? [assigned] : []), go, csv);
+  filters.append(q, status, ...(admin ? [assigned, source] : []), go, csv);
   const list = node("div");
   screen.append(
     node(
@@ -2646,6 +3070,7 @@ async function renderLeads() {
     if (q.value.trim()) p.set("q", q.value.trim());
     if (status.value) p.set("status", status.value);
     if (admin && assigned.value) p.set("assigned", assigned.value);
+    if (admin && source.value) p.set("form", source.value);
     return p.toString();
   };
   const load = async () => {
@@ -2657,8 +3082,9 @@ async function renderLeads() {
       const card = node("article", undefined, "card");
       card.append(
         node("h2", row.name),
-        node("p", row.email + " · " + row.phone, "muted"),
-        node("p", row.message),
+        node("span", row.form_title || "Website contact form", "badge"),
+        node("p", [row.email, row.phone].filter(Boolean).join(" · "), "muted"),
+        node("p", row.message, "pre-line"),
         node("p", "Received " + new Date(row.created_at).toLocaleString(), "muted"),
       );
       const st = node("select");
@@ -3024,7 +3450,7 @@ try {
                       "Reviews",
                     ],
                   ],
-                  ["Inbox", ["Leads", "Private feedback", "Newsletter"]],
+                  ["Inbox", ["Leads", "Forms", "Private feedback", "Newsletter"]],
                   ["Settings", ["Access", "Email delivery", "Activity"]],
                 ]),
           ];
