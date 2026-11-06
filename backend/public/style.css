@@ -612,3 +612,68 @@ progress {
     text-align: center;
   }
 }
+
+/* Phase 2: grouped sidebar, page subtitle, checkbox groups */
+nav {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+  align-content: start;
+}
+.nav-group {
+  margin: 14px 0 2px;
+  padding-left: 16px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ice-700);
+  opacity: 0.7;
+}
+#subtitle {
+  margin: 6px 0 0;
+}
+#subtitle:empty {
+  display: none;
+}
+fieldset.checks {
+  border: 1px solid var(--ice-200);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin: 18px 0;
+  display: grid;
+  gap: 10px;
+}
+fieldset.checks legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+label.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 400;
+}
+label.check input {
+  width: auto;
+}
+@media (max-width: 800px) {
+  .nav-group {
+    grid-column: 1 / -1;
+    padding-left: 0;
+  }
+}
+.row-title {
+  display: block;
+  font-weight: 600;
+  font-size: 16px;
+}
+.row .muted {
+  margin: 4px 0 0;
+}
+.card .toolbar strong,
+.card .row strong {
+  font-size: 15px;
+  display: inline;
+  margin: 0;
+}

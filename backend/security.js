@@ -111,6 +111,25 @@ const fields = {
     position,
   }),
   faqs: z.object({ q: short, a: text, position }),
+  // Public resources (guides, templates, live links). Package-only student material is private (Phase 3).
+  resources: z.object({
+    title: short,
+    category: z.enum(["guide", "video", "live", "course", "template", "other"]),
+    country: short,
+    url: safeUrlOrPath,
+    description: text,
+    image: safeUrlOrPath,
+    position,
+  }),
+  // The /links page (link-in-bio).
+  links: z.object({
+    label: short,
+    url: safeUrlOrPath,
+    note: short,
+    highlight: z.boolean(),
+    enabled: z.boolean(),
+    position,
+  }),
   countries: z.object({ name: short, enabled: z.boolean(), position }),
   hero: z.object({
     place: short,
@@ -166,6 +185,8 @@ export const recordInput = z
       "hero",
       "seo",
       "sections",
+      "resources",
+      "links",
     ]),
     title: z.string().min(1).max(255),
     data: z.unknown(),
