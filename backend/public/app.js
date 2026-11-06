@@ -65,7 +65,6 @@ const ABOUT = {
 const label = (key) => names[key] || LABELS[key] || key;
 const canPublishRole = (role) => role === "owner" || role === "admin";
 const ENUMS = {
-  group: ["founder", "mentor"],
   device: ["desktop", "mobile"],
   category: ["guide", "video", "live", "course", "template", "other"],
   type: ["link", "social", "youtube"],
@@ -89,8 +88,14 @@ const HELP = {
   title: "",
   type: "link = a button · social = an icon in the top row · youtube = a video card (paste the YouTube link).",
   platform: "For social icons: which network.",
+  group:
+    "Section on the About page. Pick one or type a new one (e.g. Advisors). Members with the same group appear together.",
   highlight: "Featured: shown larger, at the top.",
   date: "Publish date, YYYY-MM-DD. The home page shows the five newest.",
+};
+// Free-text fields with suggestions (pick one or type a new value).
+const SUGGEST = {
+  group: ["Founders", "Mentors", "Executive members", "Members", "Editors", "Team"],
 };
 const defaults = {
   mentors: { name: "", role: "", bio: "", photo: "", initials: "" },
@@ -118,7 +123,7 @@ const defaults = {
   universities: { name: "", position: 0 },
   team: {
     name: "",
-    group: "founder",
+    group: "Founders",
     role: "Co-founder",
     title: "",
     line: "",
@@ -232,6 +237,24 @@ function field(form, key, value) {
     form.append(label, num);
     if (HELP[key]) form.append(node("small", HELP[key], "muted"));
     return () => Number(num.value);
+  }
+  if (SUGGEST[key]) {
+    const text = node("input");
+    const list = node("datalist");
+    list.id = "suggest-" + key;
+    for (const opt of SUGGEST[key]) {
+      const o = node("option");
+      o.value = opt;
+      list.append(o);
+    }
+    text.value = value ?? "";
+    text.maxLength = 60;
+    text.setAttribute("list", list.id);
+    text.id = "field-" + key;
+    label.htmlFor = text.id;
+    form.append(label, text, list);
+    if (HELP[key]) form.append(node("small", HELP[key], "muted"));
+    return () => text.value.trim();
   }
   const input = node(typeof value === "boolean" ? "input" : multi ? "textarea" : "input");
   if (typeof value === "boolean") {

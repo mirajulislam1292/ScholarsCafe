@@ -107,7 +107,8 @@ const fields = {
   universities: z.object({ name: short, position }),
   team: z.object({
     name: short,
-    group: z.enum(["founder", "mentor"]),
+    // Section on the About page: founder, mentor, or any name (e.g. "Executive members").
+    group: z.string().trim().min(1).max(60),
     role: short,
     title: short,
     line: short,
