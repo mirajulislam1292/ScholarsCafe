@@ -13,6 +13,7 @@ import {
   canReachStudent,
   isStaff,
 } from "./access.js";
+import { featuresOf } from "./files.js";
 
 const uuid = z.string().uuid();
 const courseInput = z
@@ -439,12 +440,16 @@ export function installStudentRoutes(app, { store, fail, sendBytes }) {
 }
 
 // ---------- Messages (one thread per student) and course reviews ----------
-const messageInput = z.object({ body: z.string().trim().min(1).max(5000) }).strict();
+const messageInput = z
+  .object({ body: z.string().trim().max(5000).default(""), file_id: uuid.nullable().default(null) })
+  .strict()
+  .refine((m) => m.body || m.file_id, "Write a message or attach a file.");
 const reviewInput = z
   .object({
     course_id: uuid,
     rating: z.number().int().min(1).max(5),
     body: z.string().trim().min(10).max(2000),
+    public_consent: z.boolean().default(false),
   })
   .strict();
 const moderation = z.object({ status: z.enum(["approved", "rejected", "pending"]) }).strict();
@@ -484,32 +489,73 @@ export function installMessageRoutes(app, { store, fail }) {
         c,
       );
       return q(
-        `SELECT m.id,m.body,m.created_at,m.read_at,m.sender_id,s.role AS sender_role,
-          ${fromStudent ? "NULL" : "s.email"} AS sender_email
-         FROM messages m LEFT JOIN users s ON s.id=m.sender_id
+        `SELECT m.id,m.body,m.created_at,m.read_at,m.sender_id,s.role AS sender_role,m.deleted_at,
+          ${fromStudent ? "NULL" : "s.email"} AS sender_email,f.id AS file_id,f.name AS file_name
+         FROM messages m LEFT JOIN users s ON s.id=m.sender_id LEFT JOIN files f ON f.id=m.file_id
          WHERE m.student_id=? ORDER BY m.created_at,m.id LIMIT 500`,
         [studentId],
         c,
       );
     });
-    res.json({ items: messages.map((m) => ({ ...m, mine: m.sender_id === req.actor.id })) });
+    // Removed messages: staff still see them (marked); everyone else sees only that something was removed.
+    const staff = isStaff(req.actor);
+    res.json({
+      items: messages.map((m) => ({
+        ...m,
+        mine: m.sender_id === req.actor.id,
+        removed: Boolean(m.deleted_at),
+        ...(m.deleted_at && !staff ? { body: "", file_id: null, file_name: null } : {}),
+      })),
+    });
   });
   app.post("/api/lms/threads/:id", async (req, res) => {
     requireCan(req.actor, "message.send");
     const studentId = uuid.parse(req.params.id);
-    const { body } = messageInput.parse(req.body);
+    const { body, file_id } = messageInput.parse(req.body);
     if (store.checkRateLimit && !(await store.checkRateLimit("message", req.actor.id, 30, 3600)))
       throw fail(429, "You've sent a lot of messages. Please wait a little.");
     const messageId = randomUUID();
     await store.transaction(async (c) => {
       await reach(req, studentId, c);
+      // Students can message only when one of their packages includes messaging.
+      if (req.actor.role === "student" && !(await featuresOf(store, studentId, c)).messaging)
+        throw fail(403, "Messaging isn't included in your package.");
+      if (file_id) {
+        const [f] = await q(
+          `SELECT id FROM files WHERE id=? AND student_id=? AND uploaded_by=? AND purpose='message' AND deleted_at IS NULL
+           AND NOT EXISTS (SELECT 1 FROM messages m WHERE m.file_id=files.id)`,
+          [file_id, studentId, req.actor.id],
+          c,
+        );
+        if (!f) throw fail(400, "Attach a file you just uploaded.");
+      }
       await q(
-        "INSERT INTO messages (id,student_id,sender_id,body) VALUES (?,?,?,?)",
-        [messageId, studentId, req.actor.id, body],
+        "INSERT INTO messages (id,student_id,sender_id,body,file_id) VALUES (?,?,?,?,?)",
+        [messageId, studentId, req.actor.id, body, file_id],
         c,
       );
     });
     res.status(201).json({ id: messageId });
+  });
+  // Moderation: owners and admins can remove a message (kept for the audit trail, hidden from others).
+  app.post("/api/lms/messages/:id/delete", async (req, res) => {
+    requireCan(req.actor, "message.moderate");
+    const messageId = uuid.parse(req.params.id);
+    await store.transaction(async (c) => {
+      const r = await q(
+        "UPDATE messages SET deleted_at=UTC_TIMESTAMP(),deleted_by=? WHERE id=? AND deleted_at IS NULL",
+        [req.actor.id, messageId],
+        c,
+      );
+      if (!r.affectedRows) throw fail(404, "Message not found.");
+      await store.audit(req.actor.id, "message_remove", messageId, c);
+    });
+    res.json({ ok: true });
+  });
+  // Students: which features their packages include (menu and pages adapt).
+  app.get("/api/lms/my/features", async (req, res) => {
+    if (req.actor.role !== "student") throw fail(403, "This page is for students.");
+    res.json(await featuresOf(store, req.actor.id));
   });
   // Students: unread count for the menu badge.
   app.get("/api/lms/my/unread", async (req, res) => {
@@ -527,7 +573,7 @@ export function installMessageRoutes(app, { store, fail }) {
     const s = studentScope(req.actor, "r.user_id");
     res.json({
       items: await q(
-        `SELECT r.course_id,r.rating,r.body,r.status FROM reviews r WHERE ${s.sql}`,
+        `SELECT r.course_id,r.rating,r.body,r.status,r.public_consent FROM reviews r WHERE ${s.sql}`,
         s.params,
       ),
     });
@@ -545,9 +591,10 @@ export function installMessageRoutes(app, { store, fail }) {
       );
       if (!course) throw fail(404, "Course not found.");
       await q(
-        `INSERT INTO reviews (id,user_id,course_id,rating,body,status) VALUES (?,?,?,?,?,'pending')
-         ON DUPLICATE KEY UPDATE rating=VALUES(rating),body=VALUES(body),status='pending',created_at=CURRENT_TIMESTAMP`,
-        [randomUUID(), req.actor.id, d.course_id, d.rating, d.body],
+        `INSERT INTO reviews (id,user_id,course_id,rating,body,status,public_consent) VALUES (?,?,?,?,?,'pending',?)
+         ON DUPLICATE KEY UPDATE rating=VALUES(rating),body=VALUES(body),status='pending',
+           public_consent=VALUES(public_consent),created_at=CURRENT_TIMESTAMP`,
+        [randomUUID(), req.actor.id, d.course_id, d.rating, d.body, d.public_consent],
         c,
       );
     });
@@ -557,7 +604,7 @@ export function installMessageRoutes(app, { store, fail }) {
     requireCan(req.actor, "review.moderate");
     const status = moderation.shape.status.safeParse(req.query.status).data;
     const items = await q(
-      `SELECT r.id,r.rating,r.body,r.status,r.created_at,c.title AS course,u.email,p.full_name
+      `SELECT r.id,r.rating,r.body,r.status,r.created_at,r.public_consent,r.featured,c.title AS course,u.email,p.full_name
        FROM reviews r JOIN lms_courses c ON c.id=r.course_id JOIN users u ON u.id=r.user_id
        LEFT JOIN student_profiles p ON p.user_id=r.user_id
        ${status ? "WHERE r.status=?" : ""} ORDER BY r.created_at DESC LIMIT 500`,
@@ -575,5 +622,52 @@ export function installMessageRoutes(app, { store, fail }) {
       await store.audit(req.actor.id, "review_" + status, reviewId, c);
     });
     res.json({ ok: true });
+  });
+  // Approved review with the student's consent → a draft testimonial on the website (first name only).
+  // An admin still reviews and publishes it from Website → Testimonials.
+  app.post("/api/lms/reviews/:id/feature", async (req, res) => {
+    requireCan(req.actor, "review.moderate");
+    const reviewId = uuid.parse(req.params.id);
+    const contentId = await store.transaction(async (c) => {
+      const [r] = await q(
+        `SELECT r.id,r.body,r.status,r.public_consent,r.featured,p.full_name,c.title AS course
+         FROM reviews r JOIN lms_courses c ON c.id=r.course_id LEFT JOIN student_profiles p ON p.user_id=r.user_id
+         WHERE r.id=? FOR UPDATE`,
+        [reviewId],
+        c,
+      );
+      if (!r) throw fail(404, "Review not found.");
+      if (r.status !== "approved") throw fail(400, "Approve the review first.");
+      if (!r.public_consent)
+        throw fail(400, "The student didn't agree to show this review on the website.");
+      if (r.featured) throw fail(409, "Already added to the website testimonials.");
+      const first =
+        String(r.full_name || "")
+          .trim()
+          .split(/\s+/)[0] || "Student";
+      const id = "review-" + r.id;
+      await q(
+        "INSERT IGNORE INTO content (id,kind,title,draft) VALUES (?,?,?,?)",
+        [
+          id,
+          "feedback",
+          first + " – " + r.course,
+          JSON.stringify({
+            name: first,
+            quote: r.body,
+            destination: "",
+            outcome: "",
+            year: String(new Date().getUTCFullYear()),
+            initials: first[0].toUpperCase(),
+            position: 0,
+          }),
+        ],
+        c,
+      );
+      await q("UPDATE reviews SET featured=1 WHERE id=?", [reviewId], c);
+      await store.audit(req.actor.id, "review_feature", reviewId, c);
+      return id;
+    });
+    res.json({ ok: true, content_id: contentId });
   });
 }

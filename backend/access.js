@@ -84,6 +84,9 @@ const WRITE = {
   "enrollment.write": ["owner", "admin"],
   "package.write": ["owner", "admin"], // packages, assigning them, student access and mentor
   "resource.write": ["owner", "admin"], // student resources, announcements and videos
+  "file.upload": ["owner", "admin", "mentor", "student"], // into a reachable student's space; students need the feature
+  "document.review": ["owner", "admin", "mentor"], // mentors: their own students only
+  "message.moderate": ["owner", "admin"],
   "profile.write": ["owner", "admin", "student"], // student: own row, not staff_notes
   "profile.notes": ["owner", "admin", "mentor"], // mentor: own students only
   "progress.write": ["student"], // own lessons in open courses only

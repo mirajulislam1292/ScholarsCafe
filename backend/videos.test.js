@@ -52,7 +52,14 @@ test("Resource scope: students need a package that unlocks it; mentors and edito
 function app(role, query, extra = {}) {
   const sql = [];
   const config =
-    role === "student" ? { ...base, PORTAL: "student", STUDENT_ORIGIN: "https://s.example" } : base;
+    role === "student"
+      ? {
+          ...base,
+          PORTAL: "student",
+          STUDENT_ORIGIN: "https://s.example",
+          ADMIN_ORIGIN: "https://s.example",
+        }
+      : base;
   const a = createApp(
     {
       session: async () => ({ id: ME, role, email: "me@example.com", csrf: "abc" }),

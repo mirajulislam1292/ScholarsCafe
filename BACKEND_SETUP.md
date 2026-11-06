@@ -153,3 +153,44 @@ Never put real secrets in Git. Paste them only into hPanel. The full list with c
 **What it cannot prevent (honestly):** a determined student can still record their screen or film it with a phone, and technical users can save what their browser receives. The watermark makes a leaked recording traceable to the student; it doesn't stop it. Real DRM (Widevine/FairPlay) needs a paid streaming service.
 
 **Hosting note:** Hostinger's terms don't allow shared hosting to be used mainly for streaming. Course videos for your students are fine at this scale; if viewing grows to many hours a day, move the files to Backblaze B2 (see ARCHITECTURE.md).
+
+## 12. Messaging, files, document reviews, testimonials (Phase 4)
+
+The package switches now apply:
+
+| Package feature | Student gets                                                          |
+| --------------- | --------------------------------------------------------------------- |
+| Messaging       | Messages with their mentor (with attachments)                         |
+| Uploads         | Documents page: share files with the team (transcripts, certificates) |
+| Reviews         | Documents page: submit essays/SOPs/CVs for mentor review              |
+
+Students without a feature don't see that menu item, and the server refuses the action.
+
+**Messages**
+
+- Mentors see only their own students; owners and admins see everyone.
+- A conversation refreshes every 15 seconds while it's open, and unread counts show in the menu.
+- Admins can remove a message. The student and mentor then see "removed by the Scholars Cafe team"; admins still see the original for the record.
+- Limit: 30 messages an hour per person.
+
+**Files**
+
+- Accepted types: PDF, Word (.docx), plain text, PNG and JPEG, up to 10 MB each and 300 MB per student, 20 uploads an hour.
+- The content is checked, not the file name.
+- PDFs with scripts or embedded files, and Word files with macros or embedded objects, are refused.
+- Files are stored outside the website under random names (`~/sc-private/files`, override with `FILE_DIR`).
+- Downloads use 5-minute links tied to the signed-in user and always download, never open in the browser.
+- **Virus scanning:** there is no free scanner that runs on Hostinger shared hosting (ClamAV needs its own service and about 1 GB of memory). The type checks and download-only rule above are the protection. Open student files on an up-to-date computer.
+
+**Document reviews**
+
+- A student submits a document and it shows as "Waiting for review".
+- The mentor replies with comments, an optional marked-up file and a status: In review, Changes requested or Approved.
+- A new version from the student puts it back in the queue. Find them under Students → Documents.
+
+**Testimonials**
+
+- In a course review, the student can tick "may show this on the website with my first name".
+- In Reviews, approve it, then click **Add to website testimonials**. This creates a draft in Website → Testimonials for you to check and publish.
+
+**AI-writing detectors:** not added. Open-source detectors (RoBERTa-based classifiers, Binoculars, DetectGPT-style methods) need Python and large models (hundreds of MB to several GB, ideally a GPU), which Hostinger shared hosting can't run. Their accuracy is also unreliable: high false-positive rates, especially for non-native English writers, and easy to evade by paraphrasing. Even OpenAI withdrew its own detector for low accuracy. If wanted later, it can only ever be an indicator, never proof.

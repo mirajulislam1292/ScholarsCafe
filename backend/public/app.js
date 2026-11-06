@@ -56,6 +56,7 @@ const ABOUT = {
   Account: "Your password and sign-in details.",
   "My courses": "Your courses and lessons.",
   Home: "",
+  Documents: "Essays, SOPs, CVs and transcripts, with your mentor's feedback.",
   Resources: "Live sessions, videos and guides included in your package.",
   "Student resources":
     "Resources and announcements for students, by package. Lesson and resource videos.",
@@ -341,6 +342,10 @@ function render() {
   }
   if (section === "Resources") {
     renderMyResources().catch(report);
+    return;
+  }
+  if (section === "Documents") {
+    renderDocuments().catch(report);
     return;
   }
   if (section === "Student resources") {
@@ -1453,7 +1458,8 @@ async function renderHome() {
   const mentor = card(h.mentors.length > 1 ? "MY MENTORS" : "MY MENTOR");
   if (!h.mentors.length) mentor.append(node("p", "Your mentor will be assigned soon.", "muted"));
   for (const m of h.mentors) mentor.append(node("p", m));
-  if (h.mentors.length) mentor.append(button("Send a message", () => navigate("Messages")));
+  if (h.mentors.length && myFeatures.messaging)
+    mentor.append(button("Send a message", () => navigate("Messages")));
   if (h.live.length) {
     const live = card("UPCOMING LIVE SESSIONS");
     for (const r of h.live) {
@@ -1805,6 +1811,201 @@ function resourceForm(r, packages, videos) {
   };
   screen.append(form);
 }
+// ---------- Documents: submit (students), review with comments and status (mentors and staff) ----------
+const DOC_KINDS = {
+  essay: "Essay",
+  sop: "Statement of purpose",
+  cv: "CV / résumé",
+  transcript: "Transcript",
+  lor: "Recommendation letter",
+  other: "Other",
+};
+const DOC_STATUS = {
+  shared: "Shared with the team",
+  submitted: "Waiting for review",
+  in_review: "In review",
+  changes_requested: "Changes requested",
+  approved: "Approved",
+};
+let myFeatures = {};
+async function renderDocuments() {
+  const screen = $("screen");
+  const student = me.role === "student";
+  const [fl, filter] = student
+    ? [null, null]
+    : select("Show", [["", "All"], ...Object.entries(DOC_STATUS)], "submitted");
+  const list = node("div");
+  if (student) {
+    const add = node("form", undefined, "card");
+    const [tl, title] = input("Title (e.g. SOP for University of Toronto)", "", "text", 200);
+    title.required = true;
+    const [kl, kind] = select("Type", Object.entries(DOC_KINDS), "sop");
+    const [nl, note] = input("Note for your mentor (optional)", "", "textarea", 5000);
+    const picker = filePicker(me.id, "document", "Document file");
+    const options = [];
+    if (myFeatures.reviews) options.push(["review", "Ask my mentor to review it"]);
+    if (myFeatures.uploads) options.push(["share", "Just share it with the team"]);
+    const [ml, mode] = select("What should we do with it?", options, options[0]?.[0]);
+    const go = node("button", "Submit", "primary");
+    go.type = "submit";
+    add.append(node("h2", "Submit a document"), tl, kl, picker, nl);
+    if (options.length > 1) add.append(ml);
+    add.append(go);
+    add.onsubmit = async (e) => {
+      e.preventDefault();
+      if (!picker.uploaded) return report(Error("Choose a file and wait for it to upload."));
+      go.disabled = true;
+      try {
+        await api("lms/documents", {
+          title: title.value,
+          kind: kind.value,
+          file_id: picker.uploaded.id,
+          note: note.value,
+          review: mode.value === "review",
+        });
+        notice(
+          mode.value === "review"
+            ? "Submitted. Your mentor will review it and reply here."
+            : "Shared with the team.",
+        );
+        render();
+      } catch (err) {
+        report(err);
+      } finally {
+        go.disabled = false;
+      }
+    };
+    screen.append(add);
+  } else screen.append(fl);
+  screen.append(list);
+  const load = async () => {
+    const items = (await api("lms/documents" + (filter?.value ? "?status=" + filter.value : "")))
+      .items;
+    list.replaceChildren();
+    if (!items.length)
+      list.append(
+        node("p", student ? "You haven't submitted anything yet." : "Nothing here.", "empty"),
+      );
+    for (const d of items) {
+      const row = node("div", undefined, "card row");
+      const info = node("div");
+      info.append(
+        node("span", d.title, "row-title"),
+        node(
+          "p",
+          [
+            DOC_KINDS[d.kind],
+            ...(student ? [] : [d.full_name || d.email]),
+            "updated " + when(d.updated_at || d.created_at),
+            d.comments + " comment" + (Number(d.comments) === 1 ? "" : "s"),
+          ].join(" · "),
+          "muted",
+        ),
+      );
+      row.append(
+        info,
+        node("span", DOC_STATUS[d.status], "badge status-" + d.status),
+        button("Open", () => renderDocument(d.id)),
+      );
+      list.append(row);
+    }
+  };
+  if (filter) filter.onchange = () => load().catch(report);
+  await load();
+}
+async function renderDocument(docId) {
+  const screen = $("screen");
+  const { document: d, comments } = await api("lms/documents/" + docId);
+  const student = me.role === "student";
+  screen.replaceChildren(button("← Documents", () => render()));
+  $("heading").textContent = d.title;
+  const head = node("section", undefined, "card");
+  head.append(
+    node("p", DOC_KINDS[d.kind] + " · submitted " + when(d.created_at), "eyebrow"),
+    node("span", DOC_STATUS[d.status], "badge status-" + d.status),
+  );
+  if (d.file) head.append(node("p"), fileChip(d.file.id, d.file.name));
+  if (d.note) head.append(node("p", d.note, "pre-line"));
+  screen.append(head);
+  const thread = node("div", undefined, "thread");
+  for (const k of comments) {
+    const who = k.mine
+      ? "You"
+      : k.author_role === "student"
+        ? "Student"
+        : student
+          ? k.author_role === "mentor"
+            ? "Your mentor"
+            : "Scholars Cafe team"
+          : k.author_email || "Staff";
+    const bubble = node("article", undefined, "message" + (k.mine ? " mine" : ""));
+    bubble.append(node("p", `${who} · ${when(k.created_at)}`, "muted"));
+    if (k.status) bubble.append(node("span", "→ " + (DOC_STATUS[k.status] || k.status), "badge"));
+    if (k.body) bubble.append(node("p", k.body, "lesson-body"));
+    if (k.file_id) bubble.append(fileChip(k.file_id, k.file_name));
+    thread.append(bubble);
+  }
+  if (!comments.length)
+    thread.append(
+      node(
+        "p",
+        student ? "No feedback yet. Your mentor will reply here." : "No comments yet.",
+        "empty",
+      ),
+    );
+  screen.append(thread);
+  const form = node("form", undefined, "card");
+  const [cl, body] = input(
+    student ? "Reply or explain your changes" : "Feedback",
+    "",
+    "textarea",
+    10000,
+  );
+  const picker = filePicker(
+    d.student_id,
+    "document",
+    student ? "New version" : "Marked-up file (optional)",
+  );
+  form.append(node("h3", student ? "Reply or send a new version" : "Review"), cl, picker);
+  let status = null;
+  if (!student) {
+    [, status] = select(
+      "Set status",
+      [
+        ["", "Keep: " + DOC_STATUS[d.status]],
+        ["in_review", DOC_STATUS.in_review],
+        ["changes_requested", DOC_STATUS.changes_requested],
+        ["approved", DOC_STATUS.approved],
+      ],
+      "",
+    );
+    status.setAttribute("aria-label", "Set status");
+    form.append(status);
+  }
+  const send = node("button", "Send", "primary");
+  send.type = "submit";
+  form.append(send);
+  if (student && d.status !== "shared")
+    form.append(node("p", "Sending a new version puts it back in the review queue.", "muted"));
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    send.disabled = true;
+    try {
+      await api("lms/documents/" + docId + "/comments", {
+        body: body.value,
+        file_id: picker.uploaded?.id || null,
+        status: status?.value || null,
+      });
+      notice("Sent.");
+      await renderDocument(docId);
+    } catch (err) {
+      report(err);
+    } finally {
+      send.disabled = false;
+    }
+  };
+  screen.append(form);
+}
 // ---------- Student dashboard: student screens ----------
 async function renderMyCourses() {
   const screen = $("screen");
@@ -1902,50 +2103,159 @@ function senderLabel(m) {
     return m.sender_role === "mentor" ? "Your mentor" : "Scholars Cafe team";
   return m.sender_email || m.sender_role || "Staff";
 }
+// ---------- Student files: upload (private, checked on the server) and 5-minute download links ----------
+const FILE_ACCEPT =
+  ".pdf,.docx,.txt,.png,.jpg,.jpeg,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/png,image/jpeg";
+async function uploadFile(file, studentId, purpose) {
+  if (file.size > 10 * 1024 * 1024) throw Error("Files must be 10 MB or smaller.");
+  const type =
+    file.type ||
+    {
+      docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      txt: "text/plain",
+    }[file.name.split(".").pop().toLowerCase()] ||
+    "";
+  const r = await fetch(`/api/lms/files?student=${studentId}&purpose=${purpose}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": type,
+      "X-CSRF-Token": me.csrf,
+      "X-File-Name": file.name.replace(/[^\w .()-]/g, "_").slice(0, 150),
+    },
+    body: file,
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Error(j.error || "Upload failed.");
+  return j;
+}
+async function downloadFile(fileId) {
+  const { url, name } = await api("lms/files/" + fileId);
+  const a = node("a");
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+}
+function fileChip(id, name) {
+  const b = button("📎 " + name, () => downloadFile(id));
+  b.className = "file-chip";
+  return b;
+}
+/** File picker that uploads straight away and remembers the uploaded id. */
+function filePicker(studentId, purpose, label) {
+  const wrap = node("div", undefined, "file-picker");
+  const input = node("input");
+  input.type = "file";
+  input.accept = FILE_ACCEPT;
+  input.setAttribute("aria-label", label);
+  const state = node("span", "PDF, Word, text, PNG or JPEG · up to 10 MB", "muted");
+  wrap.append(input, state);
+  wrap.uploaded = null;
+  input.onchange = async () => {
+    wrap.uploaded = null;
+    if (!input.files[0]) return;
+    input.disabled = true;
+    state.textContent = "Uploading…";
+    try {
+      wrap.uploaded = await uploadFile(input.files[0], studentId, purpose);
+      state.textContent = "Ready: " + wrap.uploaded.name;
+    } catch (err) {
+      input.value = "";
+      state.textContent = err.message;
+    } finally {
+      input.disabled = false;
+    }
+  };
+  wrap.reset = () => {
+    input.value = "";
+    wrap.uploaded = null;
+    state.textContent = "PDF, Word, text, PNG or JPEG · up to 10 MB";
+  };
+  return wrap;
+}
 async function renderThread(studentId, title, back) {
   const screen = $("screen");
-  const messages = (await api("lms/threads/" + studentId)).items;
   screen.replaceChildren();
   if (back) screen.append(button("← All conversations", back));
   if (title) $("heading").textContent = title;
   const list = node("div", undefined, "thread");
-  if (!messages.length)
-    list.append(
-      node(
-        "p",
-        me.role === "student"
-          ? "Ask your mentor anything here. They'll reply as soon as they can."
-          : "No messages yet.",
-        "empty",
-      ),
-    );
-  for (const m of messages) {
-    const bubble = node("article", undefined, "message" + (m.mine ? " mine" : ""));
-    bubble.append(
-      node("p", `${senderLabel(m)} · ${when(m.created_at)}`, "muted"),
-      node("p", m.body, "lesson-body"),
-    );
-    list.append(bubble);
-  }
+  list.setAttribute("aria-live", "polite");
+  let shown = "";
+  const draw = async () => {
+    const messages = (await api("lms/threads/" + studentId)).items;
+    const key = JSON.stringify(messages.map((m) => [m.id, m.removed]));
+    if (key === shown) return;
+    shown = key;
+    list.replaceChildren();
+    if (!messages.length)
+      list.append(
+        node(
+          "p",
+          me.role === "student"
+            ? "Ask your mentor anything here. They'll reply as soon as they can."
+            : "No messages yet.",
+          "empty",
+        ),
+      );
+    for (const m of messages) {
+      const bubble = node("article", undefined, "message" + (m.mine ? " mine" : ""));
+      bubble.append(node("p", `${senderLabel(m)} · ${when(m.created_at)}`, "muted"));
+      if (m.removed && me.role !== "owner" && me.role !== "admin")
+        bubble.append(node("p", "This message was removed by the Scholars Cafe team.", "muted"));
+      else {
+        if (m.removed) bubble.append(node("span", "Removed (only admins see this)", "badge"));
+        if (m.body) bubble.append(node("p", m.body, "lesson-body"));
+        if (m.file_id) bubble.append(fileChip(m.file_id, m.file_name));
+        if (!m.removed && (me.role === "owner" || me.role === "admin"))
+          bubble.append(
+            button(
+              "Remove",
+              async () => {
+                if (!confirm("Remove this message? The student and mentor won't see it any more."))
+                  return;
+                await api("lms/messages/" + m.id + "/delete", {});
+                await draw();
+              },
+              "danger small",
+            ),
+          );
+      }
+      list.append(bubble);
+    }
+    list.lastElementChild?.scrollIntoView({ block: "nearest" });
+  };
   const form = node("form", undefined, "card");
   const [l, text] = input("Message", "", "textarea", 5000);
+  const attach = filePicker(studentId, "message", "Attach a file");
   const send = node("button", "Send", "primary");
   send.type = "submit";
-  form.append(l, send);
+  form.append(l, attach, send);
   form.onsubmit = async (e) => {
     e.preventDefault();
-    if (!text.value.trim()) return;
+    if (!text.value.trim() && !attach.uploaded) return;
     try {
       send.disabled = true;
-      await api("lms/threads/" + studentId, { body: text.value });
-      await renderThread(studentId, title, back);
+      await api("lms/threads/" + studentId, {
+        body: text.value,
+        file_id: attach.uploaded?.id || null,
+      });
+      text.value = "";
+      attach.reset();
+      await draw();
     } catch (err) {
-      send.disabled = false;
       report(err);
+    } finally {
+      send.disabled = false;
     }
   };
   screen.append(list, form);
-  list.lastElementChild?.scrollIntoView({ block: "nearest" });
+  await draw();
+  // Near-real-time: check for new messages every 15 seconds while this conversation is open and visible.
+  const timer = setInterval(() => {
+    if (!list.isConnected) return clearInterval(timer);
+    if (!document.hidden) draw().catch(() => {});
+  }, 15000);
 }
 async function renderThreads() {
   const screen = $("screen");
@@ -1991,6 +2301,16 @@ async function reviewForm(courseId) {
     String(mine?.rating || 5),
   );
   const [bl, body] = input("Your review (at least 10 characters)", mine?.body, "textarea", 2000);
+  const cl = node("label", undefined, "check");
+  const consent = node("input");
+  consent.type = "checkbox";
+  consent.checked = Boolean(mine?.public_consent);
+  cl.append(
+    consent,
+    document.createTextNode(
+      " Scholars Cafe may show this review on its website with my first name.",
+    ),
+  );
   const save = node("button", mine ? "Update review" : "Send review", "primary");
   save.type = "submit";
   const state = {
@@ -2003,6 +2323,7 @@ async function reviewForm(courseId) {
     ...(mine ? [node("p", state[mine.status], "muted")] : []),
     rl,
     bl,
+    cl,
     save,
   );
   form.onsubmit = async (e) => {
@@ -2012,6 +2333,7 @@ async function reviewForm(courseId) {
         course_id: courseId,
         rating: Number(rating.value),
         body: body.value,
+        public_consent: consent.checked,
       });
       notice("Thanks! Your review will appear after the team approves it.");
       form.replaceWith(await reviewForm(courseId));
@@ -2055,7 +2377,22 @@ async function renderReviews() {
         node("p", `${r.full_name || r.email} · ${when(r.created_at)}`, "muted"),
         node("p", r.body, "lesson-body"),
         node("span", r.status, "badge"),
+        node(
+          "span",
+          r.public_consent ? "May be shown on the website" : "Private (no consent to publish)",
+          "badge",
+        ),
       );
+      if (r.status === "approved" && r.public_consent && !r.featured)
+        card.append(
+          button("Add to website testimonials", async () => {
+            await api("lms/reviews/" + r.id + "/feature", {});
+            notice("Added as a draft in Website → Testimonials. Check it and publish it there.");
+            await refresh();
+            await load();
+          }),
+        );
+      if (r.featured) card.append(node("span", "On the website (Testimonials)", "badge"));
       for (const [label, status] of [
         ["Approve", "approved"],
         ["Reject", "rejected"],
@@ -2631,6 +2968,7 @@ try {
   const catalogResponse = await fetch("/cms-copy-catalog.json");
   if (catalogResponse.ok) catalog = await catalogResponse.json();
   if (!["mentor", "student"].includes(me.role)) await refresh();
+  if (me.role === "student") myFeatures = await api("lms/my/features").catch(() => ({}));
   $("login").hidden = true;
   $("workspace").hidden = false;
   $("identity").textContent = me.email + " · " + me.role;
@@ -2653,9 +2991,21 @@ try {
   ];
   const navFor =
     me.role === "student"
-      ? [["", ["Home", "My courses", "Resources", "Messages", "Account"]]]
+      ? [
+          [
+            "",
+            [
+              "Home",
+              "My courses",
+              "Resources",
+              ...(myFeatures.uploads || myFeatures.reviews ? ["Documents"] : []),
+              ...(myFeatures.messaging ? ["Messages"] : []),
+              "Account",
+            ],
+          ],
+        ]
       : me.role === "mentor"
-        ? [["", ["Leads", "Students", "Messages"]]]
+        ? [["", ["Leads", "Students", "Documents", "Messages"]]]
         : [
             ["", ["Overview"]],
             ["Website", website],
@@ -2669,6 +3019,7 @@ try {
                       "Packages",
                       "Student courses",
                       "Student resources",
+                      "Documents",
                       "Messages",
                       "Reviews",
                     ],

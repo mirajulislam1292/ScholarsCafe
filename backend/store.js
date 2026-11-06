@@ -110,6 +110,12 @@ export class Store {
     await add("media", "mime", "mime VARCHAR(40) NOT NULL DEFAULT 'image/webp'");
     // Phase 3: lessons use disk videos (videos table); video_media_id stays for older uploads.
     await add("lms_lessons", "video_id", "video_id CHAR(36) NULL");
+    // Phase 4: message attachments and moderation; testimonial consent on course reviews.
+    await add("messages", "file_id", "file_id CHAR(36) NULL");
+    await add("messages", "deleted_at", "deleted_at DATETIME NULL");
+    await add("messages", "deleted_by", "deleted_by CHAR(36) NULL");
+    await add("reviews", "public_consent", "public_consent BOOLEAN NOT NULL DEFAULT FALSE");
+    await add("reviews", "featured", "featured BOOLEAN NOT NULL DEFAULT FALSE");
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(

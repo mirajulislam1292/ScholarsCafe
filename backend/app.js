@@ -11,6 +11,8 @@ import { installLmsRoutes, installStudentRoutes, installMessageRoutes } from "./
 import { installPackageRoutes } from "./packages.js";
 import { installVideoRoutes } from "./videos.js";
 import { installResourceRoutes, streamAccess } from "./resources.js";
+import { installFileRoutes } from "./files.js";
+import { installDocumentRoutes } from "./documents.js";
 import {
   token,
   hash,
@@ -387,7 +389,9 @@ export function createApp(
         throw fail(403, "Request verification failed. Reload and try again.");
       const binary =
         req.method === "POST" &&
-        (req.path === "/media" || /^\/videos\/[^/]+\/chunk$/.test(req.path));
+        (req.path === "/media" ||
+          req.path === "/lms/files" ||
+          /^\/videos\/[^/]+\/chunk$/.test(req.path));
       if (!binary && !req.is("application/json")) throw fail(415, "JSON required.");
     }
     next();
@@ -411,6 +415,8 @@ export function createApp(
   installPackageRoutes(app, { store, fail });
   installVideoRoutes(app, { store, fail, config, allowed: streamAccess(store) });
   installResourceRoutes(app, { store, fail });
+  installFileRoutes(app, { store, fail, config });
+  installDocumentRoutes(app, { store, fail });
   installMessageRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
