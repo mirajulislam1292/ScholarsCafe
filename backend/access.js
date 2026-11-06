@@ -63,6 +63,7 @@ const WRITE = {
   "course.write": ["owner", "admin"],
   "lesson.write": ["owner", "admin"],
   "enrollment.write": ["owner", "admin"],
+  "package.write": ["owner", "admin"], // packages, assigning them, student access and mentor
   "profile.write": ["owner", "admin", "student"], // student: own row, not staff_notes
   "profile.notes": ["owner", "admin", "mentor"], // mentor: own students only
   "progress.write": ["student"], // own lessons in open courses only

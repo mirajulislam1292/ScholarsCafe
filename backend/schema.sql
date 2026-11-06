@@ -177,3 +177,34 @@ CREATE TABLE IF NOT EXISTS settings (
   value VARCHAR(255) NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+-- Packages (Phase 2): what a student buys. Assigning one enrolls the student in its courses.
+CREATE TABLE IF NOT EXISTS packages (
+  id CHAR(36) PRIMARY KEY,
+  name VARCHAR(160) NOT NULL,
+  price VARCHAR(80) NOT NULL DEFAULT '',
+  description TEXT NULL,
+  includes JSON NULL,
+  features JSON NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  position INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  deleted_at DATETIME NULL
+);
+CREATE TABLE IF NOT EXISTS package_courses (
+  package_id CHAR(36) NOT NULL,
+  course_id CHAR(36) NOT NULL,
+  PRIMARY KEY (package_id, course_id),
+  FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES lms_courses(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS user_packages (
+  user_id CHAR(36) NOT NULL,
+  package_id CHAR(36) NOT NULL,
+  granted_by CHAR(36) NULL,
+  granted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, package_id),
+  INDEX package (package_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE
+);

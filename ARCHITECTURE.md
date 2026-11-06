@@ -30,8 +30,8 @@ MySQL has no RLS. Instead, every query goes through `access.js` scopes, which fi
 
 **New tables:**
 - `packages`: name, price, description, included features, active.
-- `package_items`: package → course, resource or feature (`messaging`, `uploads`, `reviews`, `live`).
-- `user_packages`: student, package, granted_by, expires_at. Gives access; a sign-up starts with none.
+- `package_courses`: package → course. Features (`messaging`, `uploads`, `reviews`, `live`) are a JSON field on `packages` (built in Phase 2).
+- `user_packages`: student, package, granted_by. Giving a package enrolls the student in its courses; a sign-up starts with none. (No expiry yet.)
 - `mentor_students`: which students each mentor can see.
 - `files`: private uploads with a random name, checked type and size, owner, and a signed-access log.
 - `forms`, `form_submissions`: form definition JSON, submission data, status, notes, Turnstile result.

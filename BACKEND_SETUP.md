@@ -86,7 +86,7 @@ Never put real secrets in Git. Paste them only into hPanel. The full list with c
 | `SUPER_ADMIN_EMAIL`                        | first master admin (section 6); `OWNER_EMAIL` also works | only for a new, empty database |
 | `SMTP_USER`                                | `no-reply@scholarscafe.com` once it exists               | optional                       |
 | `TURNSTILE_SECRET_KEY`                     | Cloudflare Turnstile secret (see SECURITY.md)            | optional                       |
-| `TRUST_PROXY`                              | `loopback` (verified: Hostinger's proxy is 127.0.0.1)     | yes, on both apps              |
+| `TRUST_PROXY`                              | `loopback` (verified: Hostinger's proxy is 127.0.0.1)    | yes, on both apps              |
 | Leave `PORTAL` unset on the admin app.     |
 
 ## 6. The master admin (first Super Admin)
@@ -110,10 +110,19 @@ Never put real secrets in Git. Paste them only into hPanel. The full list with c
 
 ## 9. Permissions (enforced on the server, tested)
 
-|                                   | Super Admin (owner) | Admin                      | Editor      | Mentor                     | Student       |
-| --------------------------------- | ------------------- | -------------------------- | ----------- | -------------------------- | ------------- |
-| Site content, blog, media         | ✓                   | ✓                          | edit drafts | –                          | –             |
-| Publish, leads, students, courses | ✓                   | ✓                          | –           | own leads + their students | own data only |
-| Access: add/remove team           | everyone            | editors, mentors, students | –           | –                          | –             |
-| Security settings (sign-up mode)  | ✓                   | view                       | –           | –                          | –             |
-| Activity log                      | ✓                   | ✓                          | –           | –                          | –             |
+|                                                 | Super Admin (owner) | Admin                      | Editor      | Mentor                     | Student       |
+| ----------------------------------------------- | ------------------- | -------------------------- | ----------- | -------------------------- | ------------- |
+| Site content, blog, resources, link page, media | ✓                   | ✓                          | edit drafts | –                          | –             |
+| Publish, leads, students, courses               | ✓                   | ✓                          | –           | own leads + their students | own data only |
+| Packages, giving them, block sign-in            | ✓                   | ✓                          | –           | –                          | –             |
+| Access: add/remove team                         | everyone            | editors, mentors, students | –           | –                          | –             |
+| Security settings (sign-up mode)                | ✓                   | view                       | –           | –                          | –             |
+| Activity log                                    | ✓                   | ✓                          | –           | –                          | –             |
+
+## 10. Packages (Phase 2)
+
+- **Packages page:** name, price, description, what's included, the features it turns on (messaging, uploads, reviews, live) and its courses.
+- **Students page → a student → Packages:** "Give package" enrolls the student in every course of that package (optionally with a mentor). "Remove" takes away the courses that no other package of theirs includes. A student with no package sees nothing.
+- Changing a package's courses updates everyone who has it.
+- **Mentor and access:** set one mentor for all of a student's courses; "Block sign-in" signs the student out everywhere.
+- The feature switches are stored now and enforced when messaging, uploads and reviews are gated (Phases 3–4).

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { installMedia, serveMedia, sendBytes } from "./media.js";
 import { installAuthRoutes, installAccountRoutes, signupOpen } from "./auth.js";
 import { installLmsRoutes, installStudentRoutes, installMessageRoutes } from "./lms.js";
+import { installPackageRoutes } from "./packages.js";
 import {
   token,
   hash,
@@ -403,6 +404,7 @@ export function createApp(
     installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
   installStudentRoutes(app, { store, fail, sendBytes });
   installLmsRoutes(app, { store, fail });
+  installPackageRoutes(app, { store, fail });
   installMessageRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {

@@ -15,9 +15,53 @@ const names = {
   countries: "Countries",
   courses: "Courses & pricing",
   blogs: "Blog",
+  resources: "Resources",
+  links: "Link page",
 };
+// Sidebar labels and one-line page descriptions for the non-content screens.
+const LABELS = {
+  Access: "Users & roles",
+  Activity: "Audit log",
+  "Student courses": "Courses & videos",
+  Media: "Media library",
+};
+const ABOUT = {
+  Overview: "Everything on the website, at a glance.",
+  Media: "Images and videos for the website. Lesson videos stay private.",
+  copy: "Every heading, paragraph and image on the public website.",
+  sections: "Show, hide and reorder the sections of each page.",
+  seo: "The title and description search engines show for each page.",
+  hero: "The background videos on the home page.",
+  universities: "Universities shown on the website.",
+  team: "Founders and mentors on the About page.",
+  feedback: "Student testimonials.",
+  faqs: "Frequently asked questions.",
+  countries: "Study destinations.",
+  courses: "Programmes and prices shown on the website.",
+  blogs: "Articles on the website blog.",
+  resources: "Free public guides, templates and live-session links.",
+  links: "The short link page for Instagram, TikTok and Facebook bios.",
+  Packages: "What students buy: price, what's included, courses and features.",
+  Students: "Student accounts, packages, mentors and sign-in access.",
+  "Student courses": "Courses, lessons and private lesson videos.",
+  Messages: "Conversations between students and mentors.",
+  Reviews: "Approve or reject student reviews.",
+  Leads: "Enquiries from the website contact form.",
+  "Private feedback": "Private feedback sent from the website.",
+  Newsletter: "Newsletter sign-ups.",
+  Access: "Who can sign in to this workspace, and with which role.",
+  "Email delivery": "Outgoing notification emails and their status.",
+  Activity: "Every change, who made it and when.",
+  Account: "Your password and sign-in details.",
+  "My courses": "Your courses and lessons.",
+};
+const label = (key) => names[key] || LABELS[key] || key;
 const canPublishRole = (role) => role === "owner" || role === "admin";
-const ENUMS = { group: ["founder", "mentor"], device: ["desktop", "mobile"] };
+const ENUMS = {
+  group: ["founder", "mentor"],
+  device: ["desktop", "mobile"],
+  category: ["guide", "video", "live", "course", "template", "other"],
+};
 const HELP = {
   order: "Section ids in display order, separated by commas.",
   hidden: "Section ids to hide, separated by commas (leave empty to show all).",
@@ -74,6 +118,16 @@ const defaults = {
   },
   seo: { page: "/", title: "", description: "" },
   sections: { page: "/", order: "", hidden: "" },
+  resources: {
+    title: "",
+    category: "guide",
+    country: "",
+    url: "",
+    description: "",
+    image: "",
+    position: 0,
+  },
+  links: { label: "", url: "", note: "", highlight: false, enabled: true, position: 0 },
 };
 function node(tag, text, cls) {
   const n = document.createElement(tag);
@@ -224,10 +278,16 @@ function field(form, key, value) {
         : input.value;
 }
 function render() {
-  $("heading").textContent = names[section] || section;
+  $("heading").textContent = label(section);
+  $("subtitle").textContent = ABOUT[section] || "";
   const screen = $("screen");
   screen.replaceChildren();
-  for (const b of $("nav").children) b.classList.toggle("active", b.dataset.section === section);
+  for (const b of $("nav").querySelectorAll("button"))
+    b.classList.toggle("active", b.dataset.section === section);
+  if (section === "Packages") {
+    renderPackages().catch(report);
+    return;
+  }
   if (section === "Media") {
     renderMedia().catch(report);
     return;
@@ -548,7 +608,8 @@ function select(label, options, value) {
     o.value = v;
     el.append(o);
   }
-  el.value = value ?? "";
+  // Without a preset value, keep the first option selected (an unmatched "" would show a blank box).
+  if (value !== undefined) el.value = value ?? "";
   l.append(el);
   return [l, el];
 }
@@ -709,10 +770,11 @@ function lessonCard(course, lesson, count) {
 async function renderStudents() {
   const screen = $("screen");
   const staff = canPublishRole(me.role);
-  const [students, courses, mentors] = await Promise.all([
+  const [students, courses, mentors, pk] = await Promise.all([
     api("lms/students").then((r) => r.items),
     api("lms/courses").then((r) => r.items),
     staff ? api("mentors").then((r) => r.items) : [],
+    staff ? api("packages") : { items: [], assigned: [] },
   ]);
   const mentorOptions = [["", "No mentor"], ...mentors.map((m) => [m.id, m.email])];
   const mentorName = (id) =>
@@ -806,7 +868,9 @@ async function renderStudents() {
         report(err);
       }
     };
-    card.append(form, node("h3", "Courses"));
+    card.append(form);
+    if (staff) card.append(...studentControls(s));
+    card.append(node("h3", "Courses"));
     for (const en of s.enrollments) {
       const row = node("div", undefined, "toolbar");
       row.append(node("strong", en.title));
@@ -878,8 +942,264 @@ async function renderStudents() {
     }
     return card;
   };
+  // Packages, one mentor for every course, and sign-in access (owner/admin).
+  const studentControls = (s) => {
+    const out = [node("h3", "Packages")];
+    const mine = pk.assigned.filter((a) => a.user_id === s.id);
+    for (const a of mine) {
+      const p = pk.items.find((x) => x.id === a.package_id);
+      const row = node("div", undefined, "toolbar");
+      row.append(
+        node("strong", p ? p.name : "Package"),
+        node("span", "since " + new Date(a.granted_at).toLocaleDateString(), "muted"),
+        button(
+          "Remove",
+          async () => {
+            if (
+              !confirm(
+                "Remove this package? The student loses its courses unless another package includes them.",
+              )
+            )
+              return;
+            await api("packages/unassign", { user_id: s.id, package_id: a.package_id });
+            notice("Package removed.");
+            render();
+          },
+          "danger",
+        ),
+      );
+      out.push(row);
+    }
+    if (!mine.length)
+      out.push(node("p", "No package yet. Without one, the student sees nothing.", "muted"));
+    const free = pk.items.filter((p) => p.active && !mine.some((a) => a.package_id === p.id));
+    if (free.length) {
+      const row = node("div", undefined, "toolbar");
+      const [, choice] = select(
+        "Package",
+        free.map((p) => [p.id, p.name + (p.price ? " · " + p.price : "")]),
+      );
+      const [, mentor] = select("Mentor", mentorOptions, "");
+      choice.setAttribute("aria-label", "Package to give");
+      mentor.setAttribute("aria-label", "Mentor for this package's courses");
+      row.append(
+        choice,
+        mentor,
+        button(
+          "Give package",
+          async () => {
+            await api("packages/assign", {
+              user_id: s.id,
+              package_id: choice.value,
+              mentor_id: mentor.value || null,
+            });
+            notice("Package given. The student is now enrolled in its courses.");
+            render();
+          },
+          "primary",
+        ),
+      );
+      out.push(row);
+    } else if (!pk.items.length)
+      out.push(node("p", "Create packages on the Packages page first.", "muted"));
+    const access = node("div", undefined, "toolbar");
+    const [, mentorAll] = select("Mentor", mentorOptions, "");
+    mentorAll.setAttribute("aria-label", "Mentor for all courses");
+    access.append(
+      node("span", "Mentor for all courses", "muted"),
+      mentorAll,
+      button("Apply", async () => {
+        await api("students/" + s.id + "/mentor", { mentor_id: mentorAll.value || null });
+        notice("Mentor updated on all of this student's courses.");
+        render();
+      }),
+      button(
+        s.active ? "Block sign-in" : "Allow sign-in",
+        async () => {
+          if (s.active && !confirm("Block this student? They are signed out everywhere.")) return;
+          await api("students/" + s.id + "/access", { active: !s.active });
+          notice(s.active ? "Sign-in blocked." : "Sign-in allowed.");
+          render();
+        },
+        s.active ? "danger" : "primary",
+      ),
+    );
+    out.push(node("h3", "Mentor and access"), access);
+    return out;
+  };
   search.oninput = draw;
   draw();
+}
+// ---------- Packages (owner/admin) ----------
+const FEATURE_LABELS = {
+  messaging: "Messaging with their mentor",
+  uploads: "File uploads",
+  reviews: "Reviews of their documents",
+  live: "Live sessions",
+};
+async function renderPackages(openId) {
+  const screen = $("screen");
+  const [{ items: packages }, { items: courses }] = await Promise.all([
+    api("packages"),
+    api("lms/courses"),
+  ]);
+  if (openId !== undefined)
+    return packageForm(
+      packages.find((p) => p.id === openId) || {
+        name: "",
+        price: "",
+        description: "",
+        includes: [],
+        features: {},
+        active: true,
+        position: (packages.length + 1) * 10,
+        course_ids: [],
+      },
+      courses,
+    );
+  const bar = node("div", undefined, "toolbar");
+  bar.append(
+    node("p", packages.length + " package" + (packages.length === 1 ? "" : "s"), "muted"),
+    button("+ New package", () => renderPackages(null), "primary"),
+  );
+  screen.append(bar);
+  if (!packages.length)
+    screen.append(
+      node(
+        "p",
+        "No packages yet. Create one, then assign it to students from the Students page.",
+        "empty",
+      ),
+    );
+  for (const p of packages) {
+    const row = node("div", undefined, "card row");
+    const info = node("div");
+    info.append(
+      node("span", p.name, "row-title"),
+      node(
+        "p",
+        [
+          p.price || "No price set",
+          p.course_ids.length + " course" + (p.course_ids.length === 1 ? "" : "s"),
+          p.students + " student" + (p.students === 1 ? "" : "s"),
+        ].join(" · "),
+        "muted",
+      ),
+    );
+    row.append(
+      info,
+      node("span", p.active ? "Active" : "Inactive", "badge"),
+      button("Edit", () => {
+        $("screen").replaceChildren();
+        renderPackages(p.id).catch(report);
+      }),
+    );
+    screen.append(row);
+  }
+}
+function packageForm(p, courses) {
+  const screen = $("screen");
+  screen.replaceChildren();
+  const form = node("form", undefined, "card");
+  form.append(
+    button("← Back", () => render()),
+    node("h2", p.id ? p.name : "New package"),
+  );
+  const [nl, name] = input("Name (e.g. Fall 2027 cohort)", p.name, "text", 160);
+  const [pl, price] = input("Price (as shown, e.g. ৳25,000)", p.price, "text", 80);
+  const [dl, description] = input("Description", p.description, "textarea", 5000);
+  const [il, includes] = input(
+    "What's included (one item per line)",
+    p.includes.join("\n"),
+    "textarea",
+    15000,
+  );
+  name.required = true;
+  form.append(nl, pl, dl, il);
+  const box = (text, checked, value) => {
+    const l = node("label", undefined, "check");
+    const c = node("input");
+    c.type = "checkbox";
+    c.checked = checked;
+    c.value = value;
+    l.append(c, document.createTextNode(" " + text));
+    return [l, c];
+  };
+  const features = node("fieldset", undefined, "checks");
+  features.append(node("legend", "Features this package turns on"));
+  const featureBoxes = Object.entries(FEATURE_LABELS).map(([key, text]) => {
+    const [l, c] = box(text, Boolean(p.features[key]), key);
+    features.append(l);
+    return c;
+  });
+  const courseSet = node("fieldset", undefined, "checks");
+  courseSet.append(node("legend", "Courses students get (they are enrolled automatically)"));
+  if (!courses.length)
+    courseSet.append(node("p", "No courses yet. Add them in Courses & videos.", "muted"));
+  const courseBoxes = courses.map((c) => {
+    const [l, el] = box(
+      c.title + (c.status === "draft" ? " (draft)" : ""),
+      p.course_ids.includes(c.id),
+      c.id,
+    );
+    courseSet.append(l);
+    return el;
+  });
+  const [al, active] = box("Active (can be assigned to students)", p.active, "1");
+  const [ol, position] = input("Order (lower numbers first)", String(p.position), "number", 6);
+  form.append(features, courseSet, al, ol);
+  const actions = node("div", undefined, "actions");
+  const save = node("button", p.id ? "Save package" : "Create package", "primary");
+  save.type = "submit";
+  actions.append(save);
+  if (p.id)
+    actions.append(
+      button(
+        "Delete package",
+        async () => {
+          if (!confirm('Delete "' + p.name + '"?')) return;
+          await api("packages/" + p.id + "/delete", {});
+          render();
+          notice("Package deleted.");
+        },
+        "danger",
+      ),
+    );
+  if (p.id && p.students)
+    actions.append(
+      node(
+        "span",
+        `Changing the courses updates all ${p.students} student(s) who have this package.`,
+        "muted",
+      ),
+    );
+  form.append(actions);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    save.disabled = true;
+    try {
+      await api(p.id ? "packages/" + p.id : "packages", {
+        name: name.value,
+        price: price.value,
+        description: description.value,
+        includes: includes.value
+          .split("\n")
+          .map((x) => x.trim())
+          .filter(Boolean),
+        features: Object.fromEntries(featureBoxes.map((c) => [c.value, c.checked])),
+        active: active.checked,
+        position: Number(position.value) || 0,
+        course_ids: courseBoxes.filter((c) => c.checked).map((c) => c.value),
+      });
+      render();
+      notice("Package saved.");
+    } catch (err) {
+      report(err);
+    } finally {
+      save.disabled = false;
+    }
+  };
+  screen.append(form);
 }
 // ---------- Student dashboard: student screens ----------
 async function renderMyCourses() {
@@ -1723,28 +2043,37 @@ try {
   $("login").hidden = true;
   $("workspace").hidden = false;
   $("identity").textContent = me.email + " · " + me.role;
+  // Sidebar: [group heading, sections]. Editors only see the website; mentors and students get short lists.
+  const website = [
+    "copy",
+    "sections",
+    "seo",
+    "hero",
+    "blogs",
+    "resources",
+    "courses",
+    "universities",
+    "team",
+    "feedback",
+    "faqs",
+    "countries",
+    "links",
+    "Media",
+  ];
   const navFor =
     me.role === "student"
-      ? ["My courses", "Messages", "Account"]
+      ? [["", ["My courses", "Messages", "Account"]]]
       : me.role === "mentor"
-        ? ["Leads", "Students", "Messages"]
+        ? [["", ["Leads", "Students", "Messages"]]]
         : [
-            "Overview",
-            "Media",
-            ...Object.keys(names),
+            ["", ["Overview"]],
+            ["Website", website],
             ...(me.role === "editor"
               ? []
               : [
-                  "Leads",
-                  "Students",
-                  "Student courses",
-                  "Messages",
-                  "Reviews",
-                  "Access",
-                  "Private feedback",
-                  "Newsletter",
-                  "Email delivery",
-                  "Activity",
+                  ["Students", ["Students", "Packages", "Student courses", "Messages", "Reviews"]],
+                  ["Inbox", ["Leads", "Private feedback", "Newsletter"]],
+                  ["Settings", ["Access", "Email delivery", "Activity"]],
                 ]),
           ];
   if (me.role === "mentor") section = "Leads";
@@ -1753,10 +2082,13 @@ try {
     document.querySelector("aside .eyebrow").textContent = "STUDENT DASHBOARD";
     document.querySelector("main header .eyebrow").textContent = "SCHOLARS CAFE / STUDENT";
   }
-  for (const key of navFor) {
-    const b = button(names[key] || key, () => navigate(key));
-    b.dataset.section = key;
-    $("nav").append(b);
+  for (const [group, keys] of navFor) {
+    if (group) $("nav").append(node("p", group, "nav-group"));
+    for (const key of keys) {
+      const b = button(label(key), () => navigate(key));
+      b.dataset.section = key;
+      $("nav").append(b);
+    }
   }
   if (me.role === "student")
     api("lms/my/unread")
