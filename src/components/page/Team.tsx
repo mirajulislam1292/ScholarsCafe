@@ -1,5 +1,5 @@
 import { SITE } from "@/lib/site-content";
-import { useCmsList } from "@/lib/cms";
+import { useCmsList, useCmsValue, useCmsAuto } from "@/lib/cms";
 import { Reveal } from "../scholars/Reveal";
 
 type Member = {
@@ -59,11 +59,12 @@ function Portrait({ m, index }: { m: Member; index: number }) {
 }
 
 function Group({ label, members }: { label: string; members: Member[] }) {
+  const t = useCmsAuto("Team.group");
   const shown = members.filter((m) => m.name?.trim());
   if (!shown.length) return null;
   return (
     <div className="grid gap-10 border-t border-neutral-900/[0.08] pt-10 lg:grid-cols-[1fr_3fr] lg:gap-16">
-      <h3 className="type-h3 text-neutral-500 lg:sticky lg:top-32 lg:self-start">{label}</h3>
+      <h3 className="type-h3 text-neutral-500 lg:sticky lg:top-32 lg:self-start">{t(label)}</h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-8 sm:gap-y-14 xl:grid-cols-3">
         {shown.map((m, i) => (
           <Portrait key={m.name} m={m} index={i} />
@@ -95,7 +96,7 @@ function byGroup(members: Member[]) {
 
 /** "Our Team": one section per group (founders, mentors, executive members, …). Edited in the admin under Our Team. */
 export function Team() {
-  const team = SITE.team;
+  const team = { ...SITE.team, heading: useCmsValue("site.team.heading", SITE.team.heading) };
   const members = useCmsList<Member>("team", DEFAULT_TEAM);
   return (
     <section id="team" className="bg-white py-[clamp(72px,13vw,200px)]">

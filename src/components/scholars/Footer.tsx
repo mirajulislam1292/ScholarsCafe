@@ -1,4 +1,4 @@
-import { useCmsLookup } from "@/lib/cms";
+import { useCmsLookup, useCmsAuto } from "@/lib/cms";
 import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import {
@@ -147,6 +147,7 @@ export function Footer() {
 }
 
 function Col({ title, links }: { title: string; links: LinkRef[] }) {
+  const t = useCmsAuto("Footer.link");
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
@@ -160,7 +161,7 @@ function Col({ title, links }: { title: string; links: LinkRef[] }) {
           <li key={l.label}>
             {l.route ? (
               <Link to={l.route} className="transition-colors hover:text-sky-light">
-                {l.label}
+                {t(l.label)}
               </Link>
             ) : (
               <a
@@ -169,7 +170,7 @@ function Col({ title, links }: { title: string; links: LinkRef[] }) {
                 rel={l.external ? "noopener noreferrer" : undefined}
                 className="transition-colors hover:text-sky-light"
               >
-                {l.label}
+                {t(l.label)}
               </a>
             )}
           </li>

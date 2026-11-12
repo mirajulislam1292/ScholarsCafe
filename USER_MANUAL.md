@@ -95,6 +95,17 @@ Students → **Student resources** → **+ New**:
   2. If the student ticked "may show on the website", click **Add to website testimonials**. This creates a draft under Website → Testimonials.
   3. Check it, then publish.
 
+## 8. Visual editor (Super Admin only)
+
+The easiest way to change any text on the website: Admin → Website → **Visual editor**. It only appears, and only works, for the Super Admin account (contact.scholarscafe@gmail.com); every other account is refused by the server.
+
+1. Pick a page (Home, Programs, Services, Resources, About, Contact, Link page…) and **Desktop** or **Phone**.
+2. Point at a text: editable ones get a blue dashed outline. Click it.
+3. Type the new text on the right. The preview changes as you type.
+4. **Save & publish**. It is live on scholarscafe.com within about a minute, with no deploy. An earlier version is kept (Version history in the old editors).
+
+If the same text appears in several places (e.g. a button used twice), the panel lists them; untick the ones you don't want to change. **Show what can't be edited** lists anything on the page not connected yet (only automatic numbers, initials and the year are left).
+
 ## 8. The website
 
 - **Text and images:** Website → **Website text & images** → Edit → **Save draft** → **Publish** (live within about a minute).

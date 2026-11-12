@@ -15,6 +15,7 @@ import { installResourceRoutes, streamAccess } from "./resources.js";
 import { installFileRoutes } from "./files.js";
 import { installDocumentRoutes } from "./documents.js";
 import { installFormAdminRoutes, installPublicFormRoutes } from "./forms.js";
+import { installVisualRoutes, isSuperAdmin } from "./visual.js";
 import {
   token,
   hash,
@@ -101,6 +102,8 @@ export function createApp(
           styleSrc: ["'self'"],
           imgSrc: ["'self'", "https:"],
           connectSrc: ["'self'"],
+          // The visual editor shows the public website in a frame.
+          frameSrc: [config.PUBLIC_ORIGIN].filter(Boolean),
           frameAncestors: ["'none'"],
           formAction: ["'self'"],
           objectSrc: ["'none'"],
@@ -484,7 +487,12 @@ export function createApp(
       /* renewal is best effort; the current session stays valid */
     }
     setSession(res, raw);
-    res.json(req.actor);
+    // The Super Admin also gets the visual editor (and the website address to show in it).
+    res.json(
+      isSuperAdmin(req.actor, config)
+        ? { ...req.actor, visual: true, public_origin: config.PUBLIC_ORIGIN }
+        : req.actor,
+    );
   });
   // Mentors only reach their own leads; every other admin API is closed to them.
   // Mentors reach their leads and the student dashboard API (/lms); students reach only /lms.
@@ -507,6 +515,7 @@ export function createApp(
   installFileRoutes(app, { store, fail, config });
   installDocumentRoutes(app, { store, fail });
   installFormAdminRoutes(app, { store, fail, canPublish });
+  installVisualRoutes(app, { store, fail, config });
   installMessageRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {

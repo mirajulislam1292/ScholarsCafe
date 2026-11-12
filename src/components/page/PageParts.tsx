@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
-import { useCmsValue } from "@/lib/cms";
+import { useCmsValue, useCmsAuto } from "@/lib/cms";
 import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
 import { Reveal } from "../scholars/Reveal";
 
@@ -119,6 +119,8 @@ export function Block({
   sticky?: boolean;
   id?: string;
 }) {
+  const tb = useCmsAuto("Block");
+  if (typeof title === "string") title = tb(title);
   const dark = tone === "dark";
   const heading = title && (
     <Reveal className={sticky ? "lg:sticky lg:top-32 lg:self-start" : "max-w-3xl"}>
@@ -158,6 +160,9 @@ export function CtaBand({
   title?: ReactNode;
   action?: ReactNode;
 }) {
+  const t = useCmsAuto("CtaBand");
+  if (typeof title === "string") title = t(title);
+  if (typeof action === "string") action = t(action);
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   return (
     <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(72px,12vw,176px)] text-white">

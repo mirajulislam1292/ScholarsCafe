@@ -25,7 +25,8 @@ function writeSecurityPolicy(clientDir, html) {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    // Only the admin may show the site in a frame (the Super Admin's visual editor); no other site can.
+    "frame-ancestors 'self' https://admin.scholarscafe.com",
     "upgrade-insecure-requests",
   ].join("; ");
   const file = join(clientDir, ".htaccess");
