@@ -12,7 +12,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { useEffect, useState, type ComponentType } from "react";
-import { CmsText, useCmsList, useCmsReady, useCmsValue } from "@/lib/cms";
+import { CmsText, useCmsList, useCmsReady, useCmsValue, useCmsAuto } from "@/lib/cms";
 import { EMAIL, STUDENT_PORTAL_URL, WA_LINK } from "@/lib/scholars-data";
 
 // Link-in-bio page (scholarscafe.com/links). Everything is edited in the admin under Website → Link page.
@@ -106,6 +106,7 @@ function track(item: Item) {
 }
 
 function LinksPage() {
+  const t = useCmsAuto("Links");
   const withIds = useCmsList<Item>("links", FALLBACK, (d, id) => ({
     ...(d as Omit<Item, "id">),
     id,
@@ -136,7 +137,7 @@ function LinksPage() {
           id: "site",
           type: "link" as const,
           platform: "website",
-          label: "Scholars Cafe website",
+          label: t("Scholars Cafe website"),
           url: "/",
         },
       ];
@@ -160,7 +161,9 @@ function LinksPage() {
           height={72}
           className="h-[72px] w-[72px]"
         />
-        <h1 className="type-h3 mt-5 text-center">Scholars Cafe</h1>
+        <h1 className="type-h3 mt-5 text-center">
+          <CmsText id="Links.heading">Scholars Cafe</CmsText>
+        </h1>
         <p className="type-body mt-2 max-w-[34ch] text-center text-ice-300/90">
           {tagline || (
             <CmsText id="Links.tagline">

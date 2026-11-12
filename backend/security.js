@@ -185,6 +185,12 @@ const fields = {
   }),
 };
 export const KINDS = Object.keys(fields);
+/** True when `data` is valid content for `kind` (same rules as saving in the admin). */
+export function contentValid(kind, data) {
+  const schema = fields[kind];
+  if (!schema) return false;
+  return (schema.strict ? schema.strict() : schema).safeParse(data).success;
+}
 export const recordInput = z
   .object({
     id: z

@@ -1,5 +1,4 @@
-import { useCmsLookup } from "@/lib/cms";
-import { CmsText } from "@/lib/cms";
+import { useCmsLookup, CmsText } from "@/lib/cms";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Reveal } from "./Reveal";
@@ -104,10 +103,12 @@ export function Newsletter() {
               <label className="mt-4 flex items-start gap-3 text-left text-sm text-white/90">
                 <input name="consent" type="checkbox" required className="mt-1" />
                 <span>
-                  I agree to receive scholarship news by email. I can ask to unsubscribe at any
-                  time.{" "}
+                  <CmsText id="Newsletter.consent">
+                    I agree to receive scholarship news by email. I can ask to unsubscribe at any
+                    time.
+                  </CmsText>{" "}
                   <a href="/privacy" className="underline">
-                    Privacy policy
+                    <CmsText id="Newsletter.privacy">Privacy policy</CmsText>
                   </a>
                 </span>
               </label>
@@ -142,7 +143,9 @@ export function Newsletter() {
           )}
 
           <div className="mt-6 text-[13px] text-white/80">
-            To unsubscribe, email contact@scholarscafe.com.
+            <CmsText id="Newsletter.unsubscribe">
+              To unsubscribe, email contact@scholarscafe.com.
+            </CmsText>
           </div>
         </Reveal>
       </div>

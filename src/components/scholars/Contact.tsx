@@ -133,7 +133,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
             <ContactItem
               icon={<MapPin className="h-5 w-5" />}
               title={cmsLabel("Contact.label.15b61974b270", "Location")}
-              value="Bangladesh"
+              value={cmsLabel("Contact.location", "Bangladesh")}
               sub={cmsLabel(
                 "Contact.label.5b9d8fb22df4",
                 "We serve students nationwide + internationally. All consultations online.",

@@ -3,7 +3,7 @@ import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { CmsText, useCmsValue } from "@/lib/cms";
+import { CmsText, useCmsValue, useCmsAuto } from "@/lib/cms";
 import {
   RESOURCES as CMS_DEFAULT_RESOURCES,
   RESOURCE_CATEGORIES as CMS_DEFAULT_RESOURCE_CATEGORIES,
@@ -31,6 +31,7 @@ export const Route = createFileRoute("/resources")({
 const clean = (s: string) => s.replace(/^[^\p{L}\p{N}]+/u, "").trim();
 
 function ResourcesPage() {
+  const t = useCmsAuto("Resources");
   const RESOURCES = useCmsValue("data.RESOURCES", CMS_DEFAULT_RESOURCES);
   const CATEGORIES = useCmsValue("data.RESOURCE_CATEGORIES", CMS_DEFAULT_RESOURCE_CATEGORIES);
   const [filter, setFilter] = useState<string>("All");
@@ -86,7 +87,7 @@ function ResourcesPage() {
                               </p>
                             </div>
                             <span className="type-button inline-flex items-center gap-2 text-ice-100">
-                              {r.readTime} · Get it by email
+                              {r.readTime} · {t("Get it by email")}
                               <ArrowUpRight
                                 aria-hidden
                                 className="h-4 w-4 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
@@ -110,7 +111,7 @@ function ResourcesPage() {
                   >
                     {["All", ...CATEGORIES.map((c) => c.id)].map((c) => {
                       const label =
-                        c === "All" ? "All" : (CATEGORIES.find((x) => x.id === c)?.label ?? c);
+                        c === "All" ? t("All") : (CATEGORIES.find((x) => x.id === c)?.label ?? c);
                       const active = filter === c;
                       return (
                         <button

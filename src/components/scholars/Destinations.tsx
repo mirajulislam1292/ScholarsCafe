@@ -7,7 +7,7 @@ import { Reveal } from "./Reveal";
 /** USA focus section: large imagery, very little text. Content: src/content/site.json > usa. */
 export function Destinations() {
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
-  const usa = SITE.usa;
+  const usa = useCmsValue("site.usa", SITE.usa);
 
   return (
     <section id="destinations" className="bg-white py-[clamp(72px,12vw,160px)]">

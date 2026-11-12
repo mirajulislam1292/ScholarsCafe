@@ -48,6 +48,8 @@ const ABOUT = {
   Messages: "Conversations between students and mentors.",
   Reviews: "Approve or reject student reviews.",
   Leads: "Enquiries from the website contact form and your forms.",
+  "Visual editor":
+    "Click any text on your website and change it. Only for the Super Admin account.",
   Forms: "Your own forms at scholarscafe.com/forms/…, replacing Google Forms. Answers go to Leads.",
   "Private feedback": "Private feedback sent from the website.",
   Newsletter: "Newsletter sign-ups.",
@@ -413,6 +415,12 @@ function render() {
   }
   if (section === "Resources") {
     renderMyResources().catch(report);
+    return;
+  }
+  if (section === "Visual editor") {
+    if (!me.visual)
+      return report(Error("The visual editor is only available to the Super Admin account."));
+    renderVisual();
     return;
   }
   if (section === "Forms") {
@@ -2460,6 +2468,211 @@ function formBuilder(f) {
   };
   screen.append(form);
 }
+// ---------- Visual editor (Super Admin only): click any text on the real website and change it ----------
+const VISUAL_PAGES = [
+  ["/", "Home"],
+  ["/programs", "Programs"],
+  ["/services", "Services"],
+  ["/resources", "Resources"],
+  ["/about", "About"],
+  ["/contact", "Contact"],
+  ["/links", "Link page"],
+  ["/privacy", "Privacy"],
+  ["/terms", "Terms"],
+  ["/cookies", "Cookies"],
+];
+let visualPage = "/";
+let visualWidth = "desktop";
+function renderVisual() {
+  const screen = $("screen");
+  const origin = me.public_origin;
+  // Unsaved changes shown in the preview; saved ones stay shown until the page reloads.
+  const preview = { copy: {}, entries: {} };
+  const bar = node("div", undefined, "toolbar visual-bar");
+  const [, page] = select("Page", VISUAL_PAGES, visualPage);
+  page.setAttribute("aria-label", "Page to edit");
+  const widths = node("div", undefined, "chips");
+  for (const [w, label] of [
+    ["desktop", "Desktop"],
+    ["mobile", "Phone"],
+  ]) {
+    const b = button(label, () => {
+      visualWidth = w;
+      frame.className = "visual-frame " + w;
+      for (const x of widths.children) x.setAttribute("aria-pressed", String(x === b));
+    });
+    b.setAttribute("aria-pressed", String(visualWidth === w));
+    widths.append(b);
+  }
+  const audit = button("Show what can't be edited", () =>
+    frame.contentWindow?.postMessage({ type: "sc-audit" }, origin),
+  );
+  const open = node("a", "Open page ↗", "button-link");
+  open.target = "_blank";
+  open.rel = "noopener noreferrer";
+  bar.append(page, widths, audit, open);
+  const layout = node("div", undefined, "visual-layout");
+  const stage = node("div", undefined, "visual-stage");
+  const frame = node("iframe");
+  frame.className = "visual-frame " + visualWidth;
+  frame.title = "Website preview";
+  stage.append(frame);
+  const panel = node("aside", undefined, "card visual-panel");
+  panel.setAttribute("aria-live", "polite");
+  const idle = () => {
+    panel.replaceChildren(
+      node("h2", "Click a text to change it"),
+      node(
+        "p",
+        "Texts you can change get a blue dashed outline when you point at them. Changes are saved and published straight away; the website updates within about a minute.",
+        "muted",
+      ),
+    );
+  };
+  const load = () => {
+    visualPage = page.value;
+    frame.src = origin + visualPage + "?sc-edit=1";
+    open.href = origin + visualPage;
+    idle();
+  };
+  page.onchange = load;
+  layout.append(stage, panel);
+  screen.append(bar, layout);
+  load();
+
+  const sendPreview = () =>
+    frame.contentWindow?.postMessage({ type: "sc-preview", ...preview }, origin);
+  const label = (t) =>
+    t.type === "copy"
+      ? "Website text · " + t.key
+      : (names[items.find((i) => i.id === t.id)?.kind] || "List item") + " · " + t.field;
+  // The full current text (with its line breaks) when the admin has it; the page shows it flattened.
+  const original = (t, shown) => {
+    const flat = (v) =>
+      String(v ?? "")
+        .replace(/\s+/g, " ")
+        .trim();
+    if (t.type === "entry") {
+      const [field, n] = t.field.split(".");
+      const raw = items.find((i) => i.id === t.id)?.data?.[field];
+      const v = n === undefined ? raw : Array.isArray(raw) ? raw[Number(n)] : undefined;
+      return typeof v === "string" && flat(v) === shown ? v : shown;
+    }
+    for (const i of items)
+      if (i.kind === "copy" && typeof i.data[t.key] === "string" && flat(i.data[t.key]) === shown)
+        return i.data[t.key];
+    return typeof catalog[t.key] === "string" && flat(catalog[t.key]) === shown
+      ? catalog[t.key]
+      : shown;
+  };
+  const setPending = (targets, value) => {
+    for (const t of targets)
+      if (t.type === "copy") preview.copy[t.key] = value;
+      else (preview.entries[t.id] ||= {})[t.field] = value;
+    sendPreview();
+  };
+  const clearPending = (targets) => {
+    for (const t of targets)
+      if (t.type === "copy") delete preview.copy[t.key];
+      else if (preview.entries[t.id]) delete preview.entries[t.id][t.field];
+    sendPreview();
+  };
+  const edit = (hit) => {
+    if (!hit.targets.length) {
+      panel.replaceChildren(
+        node("h2", "This text isn't connected yet"),
+        node("p", "“" + hit.text.slice(0, 300) + "”", "pre-line"),
+        node("p", "Tell your developer which text this is, and it will be made editable.", "muted"),
+        button("Back", idle),
+      );
+      return;
+    }
+    const form = node("form");
+    const before = original(hit.targets[0], hit.text);
+    const [tl, text] = input("Text", before, "textarea", 20000);
+    text.rows = Math.min(14, Math.max(3, Math.ceil(before.length / 40)));
+    const where = node("details", undefined, "muted");
+    where.append(
+      node(
+        "summary",
+        hit.targets.length > 1 ? `Used in ${hit.targets.length} places` : "Where this text lives",
+      ),
+    );
+    const boxes = hit.targets.map((t) => {
+      const l = node("label", undefined, "check");
+      const c = node("input");
+      c.type = "checkbox";
+      c.checked = true;
+      l.append(c, document.createTextNode(" " + label(t)));
+      where.append(l);
+      return c;
+    });
+    const chosen = () => hit.targets.filter((_, i) => boxes[i].checked);
+    text.oninput = () => setPending(chosen(), text.value);
+    const save = node("button", "Save & publish", "primary");
+    save.type = "submit";
+    const cancel = button("Cancel", () => {
+      clearPending(hit.targets);
+      idle();
+    });
+    const actions = node("div", undefined, "actions");
+    actions.append(save, cancel);
+    form.append(node("h2", "Edit text"), tl, where, actions);
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const targets = chosen();
+      if (!targets.length) return report(Error("Tick at least one place to change."));
+      save.disabled = true;
+      try {
+        for (const target of targets) await api("visual/edit", { target, value: text.value });
+        setPending(targets, text.value);
+        await refresh();
+        notice("Saved and published. The website shows it within about a minute.");
+        idle();
+      } catch (err) {
+        report(err);
+      } finally {
+        save.disabled = false;
+      }
+    };
+    panel.replaceChildren(form);
+    text.focus();
+  };
+  const message = (e) => {
+    if (!frame.isConnected) return window.removeEventListener("message", message);
+    if (
+      e.origin !== origin ||
+      e.source !== frame.contentWindow ||
+      !e.data ||
+      typeof e.data !== "object"
+    )
+      return;
+    if (e.data.type === "sc-ready") sendPreview();
+    if (
+      e.data.type === "sc-pick" &&
+      typeof e.data.text === "string" &&
+      Array.isArray(e.data.targets)
+    )
+      edit({
+        text: e.data.text,
+        targets: e.data.targets.filter((t) => t && (t.type === "copy" || t.type === "entry")),
+      });
+    if (e.data.type === "sc-audit" && Array.isArray(e.data.missing)) {
+      panel.replaceChildren(
+        node(
+          "h2",
+          e.data.missing.length
+            ? `${e.data.missing.length} texts not connected yet`
+            : "Everything here can be edited",
+        ),
+      );
+      const ul = node("ul", undefined, "audit-list");
+      for (const t of e.data.missing.slice(0, 200)) ul.append(node("li", String(t).slice(0, 160)));
+      panel.append(ul, button("Back", idle));
+    }
+  };
+  window.addEventListener("message", message);
+}
 // ---------- Student dashboard: student screens ----------
 async function renderMyCourses() {
   const screen = $("screen");
@@ -3540,7 +3753,7 @@ try {
         ? [["", ["Leads", "Students", "Documents", "Messages"]]]
         : [
             ["", ["Overview"]],
-            ["Website", website],
+            ["Website", me.visual ? ["Visual editor", ...website] : website],
             ...(me.role === "editor"
               ? []
               : [
