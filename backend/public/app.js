@@ -374,7 +374,7 @@ function render() {
   if (section === "Overview") {
     const grid = node("div", undefined, "grid");
     for (const [kind, label] of Object.entries(names)) {
-      const card = node("div", undefined, "card");
+      const card = node("div", undefined, "card stat");
       card.append(
         node("p", label),
         node("strong", String(items.filter((i) => i.kind === kind).length)),
@@ -588,6 +588,8 @@ async function move(list, index, dir) {
   notice("Order saved and published.");
 }
 function navigate(next) {
+  // Like an app: a new section opens at the top of the page.
+  if (next !== section) window.scrollTo({ top: 0 });
   section = next;
   notice("");
   render();
@@ -3977,6 +3979,8 @@ function buildTabbar(keys) {
     } else
       b.onclick = () => {
         setMenu(false);
+        // Tapping the tab you're on scrolls to the top and refreshes it, as in phone apps.
+        if (key === section) window.scrollTo({ top: 0, behavior: "smooth" });
         navigate(key);
       };
     bar.append(b);

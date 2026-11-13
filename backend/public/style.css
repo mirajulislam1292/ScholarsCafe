@@ -1191,3 +1191,194 @@ header {
 .cover-picker img[hidden] {
   display: none;
 }
+
+/* ---------- App polish (phones, and the admin opened from the home screen) ---------- */
+/* Overview tiles: label on top, number, then the button, all lined up across a row. */
+.card.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 0;
+}
+.card.stat p {
+  margin: 0;
+}
+.card.stat strong {
+  margin: 8px 0 16px;
+}
+.card.stat button {
+  margin-top: auto;
+}
+@media (max-width: 800px) {
+  /* No grey flash on tap; a small press effect instead. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:active,
+  a.button:active,
+  a.button-link:active,
+  summary:active {
+    transform: scale(0.97);
+    transition: transform 80ms ease-out;
+  }
+  header .eyebrow {
+    display: none;
+  }
+  header h1 {
+    font-size: 28px;
+    margin: 0 0 4px;
+  }
+  #identity {
+    font-size: 12px;
+    margin-bottom: 0;
+  }
+  header {
+    margin-bottom: 20px;
+  }
+  /* Overview tiles: compact, equal height, button pinned to the bottom. */
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+  }
+  .card.stat {
+    padding: 14px;
+  }
+  .card.stat p {
+    font-size: 13px;
+    line-height: 1.35;
+    min-height: 2.7em;
+  }
+  .card.stat strong {
+    font-size: 28px;
+    margin: 4px 0 12px;
+  }
+  .card.stat button {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  /* Toolbars: actions share the row evenly and wrap neatly. */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .toolbar > span,
+  .toolbar > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .toolbar > span > *,
+  .toolbar > div > * {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
+  }
+  .toolbar > p {
+    margin: 0;
+  }
+  /* List rows (forms, leads…): title on its own line, actions underneath, evenly spaced. */
+  .card.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .card.row > div:first-child {
+    flex: 1 0 100%;
+  }
+  .card.row > button,
+  .card.row > a {
+    flex: 1 1 auto;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .actions > * {
+    flex: 1 1 auto;
+  }
+  /* The "More" sheet: a handle, grouped sections and roomy rows like a phone settings screen. */
+  body.menu-open aside nav {
+    padding-top: 28px;
+    background: var(--ice-50, #f5f8fb);
+  }
+  body.menu-open aside nav::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 40px;
+    height: 5px;
+    margin-left: -20px;
+    border-radius: 999px;
+    background: var(--ice-200);
+  }
+  body.menu-open aside nav button {
+    background: var(--white);
+    border-radius: 12px;
+    margin-bottom: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  body.menu-open aside nav button::after {
+    content: "›";
+    color: var(--ice-700);
+    font-size: 20px;
+    line-height: 1;
+  }
+  body.menu-open aside nav button.active {
+    background: var(--ice-100);
+    color: var(--blue-700);
+  }
+  body.menu-open aside nav .nav-group {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+  /* Respect the notch and the home bar on the sides too. */
+  main {
+    padding-left: calc(16px + env(safe-area-inset-left));
+    padding-right: calc(16px + env(safe-area-inset-right));
+  }
+}
+/* Opened from the home screen: behave like an app, not a web page. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+  #tabbar,
+  aside nav,
+  .nav-group,
+  .eyebrow {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* The top bar sits under the status bar, so keep it clear of the clock and battery. */
+  aside {
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
+}
+/* The status line only takes space when it has something to say. */
+#notice:empty {
+  display: none;
+}
+/* Links styled as buttons (Export CSV, Download Excel…) look and line up like real buttons. */
+a.button,
+a.button:visited {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  color: var(--blue-700);
+}
+a.button.primary,
+a.button.primary:visited {
+  color: var(--white);
+}
