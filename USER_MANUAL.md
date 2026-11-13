@@ -11,9 +11,9 @@ A plain-language guide to running the website, the team admin and the student po
 | **student.scholarscafe.com** | Students          | Google, a 6-digit email code, or a password         |
 
 - Each site turns away the other's accounts.
-- Sessions last 2 hours on the admin and 12 hours on the student portal.
+- You stay signed in for 7 days after you last used the site (both sites). Signing out, or being removed, ends it at once.
 - Turn on Google 2-Step Verification for every team account.
-- **Install as an app:** on a phone, open the portal, then Share → **Add to Home Screen** (iPhone) or menu → **Install app** (Android).
+- **Install as an app:** works for both the admin and the student portal. On a phone, open admin.scholarscafe.com (or student.scholarscafe.com), then Share → **Add to Home Screen** (iPhone, Safari) or menu → **Install app** (Android). It opens full screen with its own icon ("SC Studio"), a bottom tab bar, and a **More** sheet for every other section; tap the tab you're on to jump back to the top. You stay signed in for 7 days of use.
 
 ## 2. Roles
 
