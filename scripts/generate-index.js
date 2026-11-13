@@ -105,6 +105,8 @@ async function generateIndexHtml() {
     "/terms",
     "/cookies",
     "/links",
+    // List of every live form (the forms themselves load in the browser).
+    "/forms",
     // Shell for every form: .htaccess serves it at /forms/<slug>; the form loads in the browser.
     "/forms/_",
   ];

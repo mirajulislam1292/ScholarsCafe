@@ -174,6 +174,8 @@ export const FORM_TEMPLATES = [
   {
     slug: "ed2-rd-bootcamp",
     title: "Scholars Cafe ED II & RD BootCamp Application",
+    summary:
+      "A one-week intensive bootcamp to review and strengthen your ED II and Regular Decision applications: Common App, essays, recommendations, college list and interviews.",
     intro: `Welcome to Scholars Cafe ☕🌍
 A Cafe to Ease Your Study Abroad Journey.
 
@@ -276,6 +278,8 @@ ${FOLLOW.replace("this cohort", "this BootCamp")}`,
   {
     slug: "premium-mentorship-fall27",
     title: "Scholars Cafe Premium Mentorship Program Interest Form - Fall'27",
+    summary:
+      "Interest form for our full one-to-one mentorship for Fall 2027, from profile building and applications through to your visa interview.",
     intro: `Welcome to Scholars Cafe ☕🌍
 A Cafe to Ease Your Study Abroad Journey.
 
@@ -379,6 +383,8 @@ ${FOLLOW}`,
   {
     slug: "f1-visa-mentorship",
     title: "Scholars Cafe USA F-1 Visa Processing Service",
+    summary:
+      "Help with your US F-1 student visa: DS-160 and CGI portal fill-up and review, document preparation, interview answers and mock interviews.",
     intro: `Welcome to Scholars Cafe ☕🌍
 A Cafe to Ease Your Study Abroad Journey.
 
@@ -486,6 +492,8 @@ ${FOLLOW.replace("this cohort", "USA F-1 Visa Processing services or want to lea
   {
     slug: "usa-cohort-fall27",
     title: "Scholars Cafe USA Cohort Interest Form - Fall'27",
+    summary:
+      "A selective group cohort (November to January) for Fall 2027 US applications: Common App and Scoir, essays, recommendation letters and a college list of up to 30.",
     intro: `Welcome to Scholars Cafe ☕🌍
 A Cafe to Ease Your Study Abroad Journey.
 
@@ -608,6 +616,8 @@ ${FOLLOW.replace("question regarding", "questions regarding").replace("E-mail us
   {
     slug: "individual-services",
     title: "Scholars Cafe USA College Admission Individual Services",
+    summary:
+      "Pick only the help you need for US college applications: Common App, essays, recommendation letters, college list, CSS Profile and more, priced per service.",
     intro: `Welcome to Scholars Cafe ☕🌍
 A Cafe to Ease Your Study Abroad Journey.
 

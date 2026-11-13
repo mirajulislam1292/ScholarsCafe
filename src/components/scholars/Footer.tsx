@@ -104,6 +104,7 @@ export function Footer() {
             title={cmsLabel("Footer.label.be91940b79f4", "Support")}
             links={[
               { label: "Student Login", href: STUDENT_PORTAL_URL },
+              { label: "Forms", href: "/forms" },
               { label: "WhatsApp Support", href: WA_LINK, external: true },
               { label: "Email Support", href: `mailto:${EMAIL}`, external: true },
               { label: "Contact Form", href: "/contact" },

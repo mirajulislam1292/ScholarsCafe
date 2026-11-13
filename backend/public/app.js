@@ -2462,6 +2462,13 @@ function formBuilder(f) {
     10000,
   );
   intro.rows = 6;
+  const [sml, summary] = input(
+    "Short description (shown under the title on scholarscafe.com/forms; one or two sentences)",
+    f.summary || "",
+    "textarea",
+    300,
+  );
+  summary.rows = 2;
   const [ml, success] = input("Message after sending", f.success, "text", 500);
   const flag = (text, value) => {
     const l = node("label", undefined, "check");
@@ -2534,7 +2541,7 @@ function formBuilder(f) {
     "Email people a copy of their answers (needs an Email question; sent from the website's address)",
     f.receipt !== false,
   );
-  form.append(tl, sl, il, ml, coverBox, pl, nl, rl2);
+  form.append(tl, sl, sml, il, ml, coverBox, pl, nl, rl2);
   if (f.id && f.published) {
     const a = node("a", "Open the live form ↗", "button-link");
     a.href = "https://scholarscafe.com/forms/" + f.slug;
@@ -2788,6 +2795,7 @@ function formBuilder(f) {
         slug: slug.value.trim(),
         title: title.value,
         intro: intro.value,
+        summary: summary.value,
         success: success.value,
         published: published.checked,
         notify: notify.checked,

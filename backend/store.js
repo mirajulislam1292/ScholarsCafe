@@ -123,6 +123,8 @@ export class Store {
     await add("forms", "cover", "cover VARCHAR(500) NULL");
     // Forms v2: a copy of their answers to the person who filled in the form (like Google Forms).
     await add("forms", "receipt", "receipt BOOLEAN NOT NULL DEFAULT TRUE");
+    // One or two sentences for the public list of forms (scholarscafe.com/forms).
+    await add("forms", "summary", "summary VARCHAR(300) NOT NULL DEFAULT ''");
     await add("mail_outbox", "to_email", "to_email VARCHAR(254) NULL");
   }
   async audit(actor, action, target, c = this.pool) {
