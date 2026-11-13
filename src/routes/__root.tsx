@@ -12,7 +12,13 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { ContentProvider, SeoOverride } from "@/lib/cms";
+import {
+  ContentProvider,
+  EmbeddedContent,
+  FRESH_CONTENT_SCRIPT,
+  FRESH_CONTENT_STYLE,
+  SeoOverride,
+} from "@/lib/cms";
 
 function NotFoundComponent() {
   return (
@@ -108,9 +114,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <base href="/" />
+        <style dangerouslySetInnerHTML={{ __html: FRESH_CONTENT_STYLE }} />
+        <script dangerouslySetInnerHTML={{ __html: FRESH_CONTENT_SCRIPT }} />
         <HeadContent />
       </head>
       <body className="overflow-x-hidden bg-background text-foreground">
+        <EmbeddedContent />
         {children}
         <Scripts />
       </body>
