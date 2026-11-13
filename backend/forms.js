@@ -310,6 +310,43 @@ export function summarize(definition, clean) {
 const json = (v) => (typeof v === "string" ? JSON.parse(v) : v);
 
 /** Admin routes. Install AFTER the /api session middleware (they need req.actor). */
+/**
+ * Put each built-in form on the live site once, published, so a fresh database has them without a manual
+ * step. A marker in settings means a form the team later edits, unpublishes or deletes is never re-added.
+ */
+export async function seedFormTemplates(store) {
+  const added = [];
+  for (const t of FORM_TEMPLATES) {
+    const marker = await store.query("INSERT IGNORE INTO settings (name,value) VALUES (?,?)", [
+      `form_seed:${t.slug}`,
+      "1",
+    ]);
+    if (!marker?.affectedRows) continue;
+    const [taken] = await store.query("SELECT id FROM forms WHERE slug=? AND deleted_at IS NULL", [
+      t.slug,
+    ]);
+    if (taken) continue;
+    const d = formInput.parse({ ...t, published: true });
+    await store.query(
+      "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,receipt,id) VALUES (?,?,?,?,?,?,?,?,?,?)",
+      [
+        d.slug,
+        d.title,
+        d.intro,
+        d.success,
+        d.published,
+        d.notify,
+        JSON.stringify(d.definition),
+        d.cover || null,
+        d.receipt,
+        randomUUID(),
+      ],
+    );
+    added.push(d.slug);
+  }
+  return added;
+}
+
 export function installFormAdminRoutes(app, { store, fail, canPublish, config }) {
   const q = (sql, args, c) => store.query(sql, args, c);
   const staffOnly = (req) => {

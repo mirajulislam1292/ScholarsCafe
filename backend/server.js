@@ -1,6 +1,7 @@
 import { Store } from "./store.js";
 import { createApp, portalConfig } from "./app.js";
 import { createMailer, deliverMail } from "./mail.js";
+import { seedFormTemplates } from "./forms.js";
 
 for (const key of [
   "DB_HOST",
@@ -34,6 +35,7 @@ for (const key of ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"])
 async function start() {
   const store = new Store(process.env);
   await store.initialize();
+  await seedFormTemplates(store);
   await store.clean();
   const cleanup = setInterval(
     () => store.clean().catch(() => console.error("Session cleanup failed")),

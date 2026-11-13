@@ -6,7 +6,13 @@ import { join } from "node:path";
 import { inflateRawSync } from "node:zlib";
 import request from "supertest";
 import { createApp } from "./app.js";
-import { definitionSchema, FORM_TEMPLATES, summarize, validateAnswers } from "./forms.js";
+import {
+  definitionSchema,
+  FORM_TEMPLATES,
+  seedFormTemplates,
+  summarize,
+  validateAnswers,
+} from "./forms.js";
 import { makeToken } from "./tokens.js";
 import { xlsx } from "./xlsx.js";
 
@@ -492,4 +498,39 @@ test("Mail delivery: receipts go to the person, notifications to the team inbox"
     );
     assert.equal(sent[0].to, to);
   }
+});
+
+test("built-in forms go live once and never come back after the team removes them", async () => {
+  const settings = new Set();
+  const forms = [];
+  const store = {
+    async query(sql, args) {
+      if (sql.startsWith("INSERT IGNORE INTO settings")) {
+        if (settings.has(args[0])) return { affectedRows: 0 };
+        settings.add(args[0]);
+        return { affectedRows: 1 };
+      }
+      if (sql.startsWith("SELECT id FROM forms"))
+        return forms.filter((f) => f.slug === args[0] && !f.deleted);
+      if (sql.startsWith("INSERT INTO forms")) {
+        forms.push({
+          slug: args[0],
+          published: args[4],
+          definition: JSON.parse(args[6]),
+          cover: args[7],
+        });
+        return { affectedRows: 1 };
+      }
+      throw new Error("unexpected " + sql);
+    },
+  };
+  const added = await seedFormTemplates(store);
+  assert.deepEqual(
+    added,
+    FORM_TEMPLATES.map((t) => t.slug),
+  );
+  assert.ok(forms.every((f) => f.published === true && f.cover?.startsWith("site:")));
+  forms[0].deleted = true;
+  assert.deepEqual(await seedFormTemplates(store), []);
+  assert.equal(forms.length, FORM_TEMPLATES.length);
 });
