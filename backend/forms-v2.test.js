@@ -413,3 +413,83 @@ test("schema.sql splits into valid statements (no ';' inside comments)", async (
     if (code) assert.match(code, /^(CREATE|ALTER|INSERT|DROP|SET)\b/i, code.slice(0, 80));
   }
 });
+
+test("Receipts: the person gets a copy of their answers, at most 3 a day per address, and it can be turned off", async () => {
+  const { receiptText } = await import("./forms.js");
+  const def3 = definitionSchema.parse({
+    steps: [
+      {
+        fields: [
+          { id: "name", label: "Name", type: "text", required: true, role: "name" },
+          { id: "email", label: "Email", type: "email", required: true, role: "email" },
+          { id: "plan", label: "Plan", type: "radio", options: ["A", "B"] },
+        ],
+      },
+    ],
+  });
+  let allowed = 3;
+  const run = async (formRow) => {
+    const sql = [];
+    const app = createApp(
+      {
+        query: async (q, a) => (
+          sql.push([q, a]),
+          q.includes("FROM forms WHERE slug=?") ? [formRow] : []
+        ),
+        transaction: (fn) => fn({}),
+        checkRateLimit: async (scope) => (scope === "form-receipt" ? allowed-- > 0 : true),
+      },
+      { ADMIN_ORIGIN: "https://a", PUBLIC_ORIGIN: PUBLIC, GOOGLE_CLIENT_ID: "t" },
+    );
+    await request(app)
+      .post("/public/forms/apply")
+      .set("Origin", PUBLIC)
+      .send({ answers: { name: "Rahim Uddin", email: "rahim@example.com", plan: "B" } })
+      .expect(201);
+    return sql.filter(([q]) => q.includes("to_email"));
+  };
+  const row = {
+    id: FORM_ID,
+    title: "Apply",
+    success: "Thanks",
+    notify: 0,
+    receipt: 1,
+    definition: JSON.stringify(def3),
+  };
+  const [r] = await run(row);
+  assert.equal(r[1][4], "rahim@example.com");
+  assert.equal(r[1][3], "contact@scholarscafe.com", "replies go to the team");
+  assert.match(r[1][2], /^Hi Rahim,/);
+  assert.match(r[1][2], /Plan: B/);
+  assert.equal((await run({ ...row, receipt: 0 })).length, 0, "switched off");
+  allowed = 0;
+  assert.equal((await run(row)).length, 0, "daily limit per address");
+  assert.match(receiptText("X", "(no name)", "a: b"), /^Hi,/);
+});
+
+test("Mail delivery: receipts go to the person, notifications to the team inbox", async () => {
+  const { deliverMail } = await import("./mail.js");
+  for (const [row, to] of [
+    [
+      {
+        id: "1",
+        subject: "s",
+        body: "b",
+        to_email: "rahim@example.com",
+        reply_to: "contact@scholarscafe.com",
+      },
+      "rahim@example.com",
+    ],
+    [
+      { id: "2", subject: "s", body: "b", to_email: null, reply_to: null },
+      "contact@scholarscafe.com",
+    ],
+  ]) {
+    const sent = [];
+    await deliverMail(
+      { transaction: (fn) => fn({}), query: async (q) => (q.startsWith("SELECT") ? [row] : {}) },
+      { sender: "no-reply@scholarscafe.com", sendMail: async (m) => sent.push(m) },
+    );
+    assert.equal(sent[0].to, to);
+  }
+});

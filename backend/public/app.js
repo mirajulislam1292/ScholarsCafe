@@ -2468,7 +2468,11 @@ function formBuilder(f) {
   drawCover();
   const [pl, published] = flag("Published (anyone with the link can fill it in)", f.published);
   const [nl, notify] = flag("Email me each new submission", f.notify);
-  form.append(tl, sl, il, ml, coverBox, pl, nl);
+  const [rl2, receipt] = flag(
+    "Email people a copy of their answers (needs an Email question; sent from the website's address)",
+    f.receipt !== false,
+  );
+  form.append(tl, sl, il, ml, coverBox, pl, nl, rl2);
   if (f.id && f.published) {
     const a = node("a", "Open the live form ↗", "button-link");
     a.href = "https://scholarscafe.com/forms/" + f.slug;
@@ -2725,6 +2729,7 @@ function formBuilder(f) {
         success: success.value,
         published: published.checked,
         notify: notify.checked,
+        receipt: receipt.checked,
         cover: coverValue,
         definition: def,
       });

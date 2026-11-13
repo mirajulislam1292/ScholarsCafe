@@ -117,6 +117,8 @@ const formInput = z
     success: z.string().max(500).default("Thank you! We'll get back to you within 24 hours."),
     published: z.boolean().default(false),
     notify: z.boolean().default(true),
+    // Email people a copy of their answers when the form has an email question.
+    receipt: z.boolean().default(true),
     // Header photo: one of the website's photos ("site:library") or an uploaded image link.
     cover: z
       .string()
@@ -271,6 +273,24 @@ export function validateAnswers(definition, raw, { formId } = {}) {
   return Object.keys(errors).length ? { errors } : { clean };
 }
 
+/** The email the person gets: thanks, and a copy of their answers. */
+export function receiptText(title, name, summary) {
+  const hi = name && name !== "(no name)" ? `Hi ${name.split(/\s+/)[0]},` : "Hi,";
+  return [
+    hi,
+    "",
+    `Thank you for filling in "${title}". We have received your response. Here is a copy of your answers:`,
+    "",
+    summary,
+    "",
+    "If anything needs to change, reply to this email or write to contact@scholarscafe.com.",
+    "",
+    "Scholars Cafe",
+    "https://scholarscafe.com",
+    "",
+    "You are getting this automatic email because this address was entered on a form at scholarscafe.com.",
+  ].join("\n");
+}
 /** One answer as plain text (lists joined, files by name). */
 export function answerText(v) {
   if (Array.isArray(v)) return v.join(", ");
@@ -309,6 +329,7 @@ export function installFormAdminRoutes(app, { store, fail, canPublish, config })
         ...f,
         published: Boolean(f.published),
         notify: Boolean(f.notify),
+        receipt: f.receipt === undefined || f.receipt === null ? true : Boolean(f.receipt),
         definition: json(f.definition),
         submissions: Number(f.submissions),
         unread: Number(f.unread),
@@ -466,17 +487,18 @@ export function installFormAdminRoutes(app, { store, fail, canPublish, config })
         d.notify,
         JSON.stringify(d.definition),
         d.cover || null,
+        d.receipt,
       ];
       if (existingId) {
         const r = await q(
-          "UPDATE forms SET slug=?,title=?,intro=?,success=?,published=?,notify=?,definition=?,cover=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
+          "UPDATE forms SET slug=?,title=?,intro=?,success=?,published=?,notify=?,definition=?,cover=?,receipt=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
           [...values, formId],
           c,
         );
         if (!r.affectedRows) throw fail(404, "Form not found.");
       } else
         await q(
-          "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,id) VALUES (?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,receipt,id) VALUES (?,?,?,?,?,?,?,?,?,?)",
           [...values, formId],
           c,
         );
@@ -657,7 +679,7 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
           return res.status(400).json({ error: "Please complete the verification and try again." });
       }
       const [form] = await q(
-        "SELECT id,title,success,notify,definition FROM forms WHERE slug=? AND published=1 AND deleted_at IS NULL",
+        "SELECT id,title,success,notify,receipt,definition FROM forms WHERE slug=? AND published=1 AND deleted_at IS NULL",
         [slugOf(req)],
       );
       if (!form) throw fail(404, "This form isn't available.");
@@ -675,6 +697,14 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
       const email = pick("email").slice(0, 254);
       const phone = pick("phone").slice(0, 80);
       const clean = result.clean;
+      // A copy to the person, like Google Forms. At most 3 a day to one address, so the form can't be
+      // used to flood someone else's inbox.
+      const sendReceipt =
+        Boolean(email) &&
+        form.receipt !== 0 &&
+        form.receipt !== false &&
+        (!store.checkRateLimit ||
+          (await store.checkRateLimit("form-receipt", email.toLowerCase(), 3, 86400)));
       const fileFields = Object.keys(clean).filter((k) => clean[k] && clean[k].upload);
       const inquiryId = randomUUID();
       await store.transaction(async (c) => {
@@ -702,6 +732,18 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
           await q(
             "INSERT INTO mail_outbox (id,subject,body,reply_to) VALUES (?,?,?,?)",
             [randomUUID(), "New form submission: " + form.title, message, email || null],
+            c,
+          );
+        if (sendReceipt)
+          await q(
+            "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email) VALUES (?,?,?,?,?)",
+            [
+              randomUUID(),
+              ("Your response: " + form.title).slice(0, 160),
+              receiptText(form.title, name, message),
+              "contact@scholarscafe.com",
+              email,
+            ],
             c,
           );
       });

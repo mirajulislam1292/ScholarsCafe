@@ -121,6 +121,9 @@ export class Store {
     await add("inquiries", "data", "data JSON NULL");
     // Forms v2: a header photo per form.
     await add("forms", "cover", "cover VARCHAR(500) NULL");
+    // Forms v2: a copy of their answers to the person who filled in the form (like Google Forms).
+    await add("forms", "receipt", "receipt BOOLEAN NOT NULL DEFAULT TRUE");
+    await add("mail_outbox", "to_email", "to_email VARCHAR(254) NULL");
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(

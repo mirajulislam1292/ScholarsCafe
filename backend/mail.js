@@ -33,8 +33,9 @@ export async function deliverMail(store, transport) {
     const row = rows[0];
     try {
       await transport.sendMail({
-        from: `Scholars Cafe Website <${transport.sender || "contact@scholarscafe.com"}>`,
-        to: "contact@scholarscafe.com",
+        from: `${row.to_email ? "Scholars Cafe" : "Scholars Cafe Website"} <${transport.sender || "contact@scholarscafe.com"}>`,
+        // Team notifications go to the inbox; a form receipt goes to the person who filled in the form.
+        to: row.to_email || "contact@scholarscafe.com",
         replyTo: row.reply_to || undefined,
         subject: row.subject,
         text: row.body,

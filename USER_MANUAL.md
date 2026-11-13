@@ -131,6 +131,8 @@ Inbox → **Forms**:
 - **Publishing:** tick **Published** and save. The form is live at `scholarscafe.com/forms/<address>`; share that link.
 - **Responses** (on each form): a table with one column per question, newest first. Click a file to download it. **Download Excel (.xlsx)** gives the same table as a spreadsheet; file cells link back to the download (sign in to the admin first).
 - **Old Google Forms responses:** in Google Forms open the form → Responses → ⋮ → **Download responses (.csv)**, unzip it, then on the form's **Responses** page use **Import old responses from Google Forms**. Questions are matched by title, the original dates are kept, files stay as Google Drive links, and importing the same file twice adds nothing twice.
+- **Where answers are saved:** in the website's own database (not Google). Uploaded files are kept privately on the server. See them under the form's **Responses**, or in **Leads**.
+- **A copy to the person:** like Google Forms, everyone who fills in a form with an Email question gets an automatic email with a copy of their answers. It comes from the website's sending address (`SMTP_USER`, e.g. no-reply@scholarscafe.com), and replies go to contact@scholarscafe.com. Untick "Email people a copy of their answers" to turn it off for a form. At most 3 a day go to the same address.
 - **Answers** also go to **Leads**, labelled with the form's name, for status, notes and mentor. Tick "Email me" to also get each one by email.
 
 ## 10. Leads
