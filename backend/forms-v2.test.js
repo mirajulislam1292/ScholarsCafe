@@ -401,3 +401,15 @@ test("Import route: owner/admin only, inserts once with the original time and no
     .send(csv)
     .expect(403);
 });
+
+test("schema.sql splits into valid statements (no ';' inside comments)", async () => {
+  const s = await readFile(new URL("./schema.sql", import.meta.url), "utf8");
+  for (const chunk of s.split(";").filter((x) => x.trim())) {
+    const code = chunk
+      .split("\n")
+      .filter((l) => !l.trim().startsWith("--"))
+      .join("\n")
+      .trim();
+    if (code) assert.match(code, /^(CREATE|ALTER|INSERT|DROP|SET)\b/i, code.slice(0, 80));
+  }
+});
