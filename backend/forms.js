@@ -347,6 +347,12 @@ export async function seedFormTemplates(store) {
   return added;
 }
 
+/** "gf_home_address" (an old Google Forms column) → "Home address". */
+export const extraLabel = (k) => {
+  const t = k.replace(/^gf_/, "").replace(/_/g, " ").trim();
+  return t ? t[0].toUpperCase() + t.slice(1) : k;
+};
+
 export function installFormAdminRoutes(app, { store, fail, canPublish, config }) {
   const q = (sql, args, c) => store.query(sql, args, c);
   const staffOnly = (req) => {
@@ -394,7 +400,8 @@ export function installFormAdminRoutes(app, { store, fail, canPublish, config })
     const known = new Set(columns.map((c) => c.id));
     for (const r of items)
       for (const k of Object.keys(r.data))
-        if (!known.has(k)) (known.add(k), columns.push({ id: k, label: k, type: "removed" }));
+        if (!known.has(k))
+          (known.add(k), columns.push({ id: k, label: extraLabel(k), type: "removed" }));
     return { form, columns, items };
   };
   app.get("/api/forms/:id/responses", async (req, res) => {

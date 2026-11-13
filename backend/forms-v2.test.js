@@ -534,3 +534,22 @@ test("built-in forms go live once and never come back after the team removes the
   assert.deepEqual(await seedFormTemplates(store), []);
   assert.equal(forms.length, FORM_TEMPLATES.length);
 });
+
+test("old Google columns match despite a doubled word, and leftover columns get readable titles", async () => {
+  const { mapResponses } = await import("./form-import.js");
+  const { extraLabel } = await import("./forms.js");
+  const def = {
+    steps: [{ fields: [{ id: "school", label: "Schools you have attended", type: "text" }] }],
+  };
+  const r = mapResponses(def, [
+    [
+      "Timestamp",
+      "Schools you have have attended",
+      "Tell us a story about your life in three lines",
+    ],
+    ["2026/08/01 10:00:00 AM GMT+6", "Dhaka College", "Once upon a time"],
+  ]);
+  assert.equal(r.items[0].data.school, "Dhaka College");
+  const extra = Object.keys(r.items[0].data).find((k) => k.startsWith("gf_"));
+  assert.equal(extraLabel(extra), "Tell us a story about your life in three lines");
+});

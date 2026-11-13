@@ -2191,10 +2191,7 @@ async function renderForms(openId) {
     );
   }
   const bar = node("div", undefined, "toolbar");
-  bar.append(
-    node("p", items.length + " form" + (items.length === 1 ? "" : "s"), "muted"),
-    node("span"),
-  );
+  bar.append(node("span"), node("span"));
   bar.lastChild.append(
     button("Start from the contact form", () => renderFormsOpen("template")),
     button("+ New form", () => renderFormsOpen(null), "primary"),
@@ -2208,27 +2205,47 @@ async function renderForms(openId) {
         "empty",
       ),
     );
-  for (const f of items) {
-    const row = node("div", undefined, "card row");
-    const info = node("div");
-    info.append(
-      node("span", f.title, "row-title"),
+  // Live forms first, then drafts. Each card: name, its own link (open or copy), responses, edit.
+  const sorted = [...items].sort((x, y) => Number(y.published) - Number(x.published));
+  const list = node("div", undefined, "form-cards");
+  for (const f of sorted) {
+    const url = "https://scholarscafe.com/forms/" + f.slug;
+    const card = node("div", undefined, "card form-card");
+    const top = node("div", undefined, "form-card-top");
+    top.append(
+      node("span", f.published ? "Live" : "Draft", "pill " + (f.published ? "live" : "draft")),
       node(
-        "p",
-        `scholarscafe.com/forms/${f.slug} · ${f.submissions} submission${f.submissions === 1 ? "" : "s"}${f.unread ? ` (${f.unread} new)` : ""}`,
+        "span",
+        f.submissions
+          ? `${f.submissions} response${f.submissions === 1 ? "" : "s"}${f.unread ? ` · ${f.unread} new` : ""}`
+          : "No responses yet",
         "muted",
       ),
     );
-    row.append(
-      info,
-      node("span", f.published ? "Published" : "Draft", "badge"),
-      button("Responses" + (f.submissions ? ` (${f.submissions})` : ""), () =>
-        renderResponses(f).catch(report),
-      ),
+    const title = node("h3", f.title.replace(/^Scholars Cafe\s+/i, ""));
+    const link = node("div", undefined, "form-link");
+    const a = node("a", "/forms/" + f.slug);
+    a.title = url;
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    const copy = button("Copy link", async () => {
+      await navigator.clipboard.writeText(url);
+      copy.textContent = "Copied";
+      setTimeout(() => (copy.textContent = "Copy link"), 1500);
+    });
+    link.append(a, copy);
+    if (!f.published)
+      link.append(node("span", "Not open to the public until you publish it.", "muted"));
+    const actions = node("div", undefined, "actions");
+    actions.append(
+      button("See responses", () => renderResponses(f).catch(report), "primary"),
       button("Edit", () => renderFormsOpen(f.id)),
     );
-    screen.append(row);
+    card.append(top, title, link, actions);
+    list.append(card);
   }
+  screen.append(list);
   // The forms that used to be Google Forms, ready to use (each opens as a draft to check, then publish).
   const used = new Set(items.map((f) => f.slug));
   const ready = templates.filter((t) => !used.has(t.slug));
@@ -2262,15 +2279,13 @@ async function renderResponses(f) {
   const screen = $("screen");
   const { columns, items } = await api("forms/" + f.id + "/responses");
   screen.replaceChildren();
-  const bar = node("div", undefined, "toolbar");
-  const xl = node("a", "Download Excel (.xlsx)", "button primary");
+  const bar = node("div", undefined, "form-back-bar");
+  const xl = node("a", "Download Excel", "button");
   xl.href = "/api/forms/" + f.id + "/responses.xlsx";
   xl.setAttribute("download", "");
   bar.append(
     button("← Forms", () => render()),
-    node("span"),
-  );
-  bar.lastChild.append(
+    node("span", undefined, "spacer"),
     button("Open in Leads", () => {
       leadsForm = f.id;
       navigate("Leads");
@@ -2279,20 +2294,98 @@ async function renderResponses(f) {
   );
   screen.append(
     bar,
-    node("h2", f.title),
+    node("h2", f.title.replace(/^Scholars Cafe\s+/i, "")),
     node(
       "p",
-      `${items.length} response${items.length === 1 ? "" : "s"}, newest first. Status, notes and mentor are set in Leads.`,
+      `${items.length} response${items.length === 1 ? "" : "s"}, newest first. Tap one to read all answers.`,
       "muted",
     ),
   );
-  // Bring in the answers people gave on the old Google Form.
-  const imp = node("details", undefined, "card");
+  const answer = (v) => {
+    if (v && typeof v === "object" && !Array.isArray(v) && v.file) {
+      const a = node("a", v.name || "file");
+      a.href = "/api/forms/uploads/" + v.file;
+      a.setAttribute("download", "");
+      return a;
+    }
+    if (typeof v === "string" && /^https:\/\/\S+$/.test(v)) {
+      // e.g. a Google Drive file from an imported Google Forms response
+      const a = node("a", v.includes("drive.google.com") ? "Google Drive file" : v);
+      a.href = v;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      return a;
+    }
+    return node("span", Array.isArray(v) ? v.join(", ") : v === true ? "Yes" : String(v ?? ""));
+  };
+  if (items.length) {
+    const search = node("input", undefined, "response-search");
+    search.type = "search";
+    search.placeholder = "Search by name, email or any answer";
+    search.setAttribute("aria-label", "Search responses");
+    const list = node("div", undefined, "responses-list");
+    for (const r of items) {
+      const d = node("details", undefined, "card response");
+      const sum = node("summary");
+      const who = node("span", undefined, "who");
+      who.append(
+        node("strong", r.name || "(no name)"),
+        node("span", [r.email, r.phone].filter(Boolean).join(" · "), "muted"),
+      );
+      const meta = node("span", undefined, "meta");
+      meta.append(
+        node(
+          "span",
+          new Date(r.created_at).toLocaleDateString(undefined, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+          "muted",
+        ),
+        node("span", r.status, "pill " + r.status),
+      );
+      sum.append(who, meta);
+      const dl = node("dl");
+      for (const c of columns) {
+        const v = r.data[c.id];
+        if (v === undefined || v === "" || (Array.isArray(v) && !v.length)) continue;
+        dl.append(node("dt", c.label.split("\n")[0]));
+        const dd = node("dd");
+        dd.append(answer(v));
+        dl.append(dd);
+      }
+      d.append(sum, dl);
+      d.dataset.text = (
+        [r.name, r.email, r.phone].join(" ") +
+        " " +
+        Object.values(r.data)
+          .map((v) => (typeof v === "object" && v && !Array.isArray(v) ? v.name : String(v)))
+          .join(" ")
+      ).toLowerCase();
+      list.append(d);
+    }
+    const none = node("p", "No response matches.", "empty");
+    none.hidden = true;
+    search.oninput = () => {
+      const q = search.value.trim().toLowerCase();
+      let shown = 0;
+      for (const d of list.children)
+        shown += (d.hidden = !!q && !d.dataset.text.includes(q)) ? 0 : 1;
+      none.hidden = shown > 0;
+    };
+    screen.append(search, list, none);
+  } else
+    screen.append(
+      node("p", "No responses yet. Share the form's link to start getting answers.", "empty"),
+    );
+  // Bring in the answers people gave on the old Google Form (tucked away: needed once).
+  const imp = node("details", undefined, "import-old");
   imp.append(node("summary", "Import old responses from Google Forms"));
   imp.append(
     node(
       "p",
-      "In Google Forms: open the form → Responses → ⋮ (three dots) → Download responses (.csv). Unzip it, then choose the .csv here. Questions are matched by their titles; importing the same file again adds nothing twice. Imported answers don't send emails.",
+      "In Google Forms: Responses → ⋮ → Download responses (.csv). Unzip it and choose the .csv here. Importing the same file twice adds nothing twice, and no emails are sent.",
       "muted",
     ),
   );
@@ -2329,7 +2422,6 @@ async function renderResponses(f) {
         notice(
           `Imported ${j.added} response${j.added === 1 ? "" : "s"}` +
             (j.skipped ? `, ${j.skipped} were already here` : "") +
-            (j.unmatched.length ? `. Kept as extra columns: ${j.unmatched.join(", ")}` : "") +
             ".",
         );
       } finally {
@@ -2340,38 +2432,6 @@ async function renderResponses(f) {
   );
   imp.append(isl, csvFile, impGo);
   screen.append(imp);
-  if (!items.length) return screen.append(node("p", "No responses yet.", "empty"));
-  const wrap = node("div", undefined, "card responses");
-  const table = node("table");
-  const head = node("tr");
-  for (const h of ["Submitted", "Status", ...columns.map((c) => c.label.split("\n")[0])])
-    head.append(node("th", h.length > 60 ? h.slice(0, 57) + "…" : h));
-  table.append(head);
-  for (const r of items) {
-    const tr = node("tr");
-    tr.append(node("td", new Date(r.created_at).toLocaleString()), node("td", r.status));
-    for (const c of columns) {
-      const v = r.data[c.id];
-      const td = node("td");
-      if (v && typeof v === "object" && !Array.isArray(v) && v.file) {
-        const a = node("a", v.name || "file");
-        a.href = "/api/forms/uploads/" + v.file;
-        a.setAttribute("download", "");
-        td.append(a);
-      } else if (typeof v === "string" && /^https:\/\/\S+$/.test(v)) {
-        // e.g. a Google Drive file from an imported Google Forms response
-        const a = node("a", v.includes("drive.google.com") ? "Google Drive file" : v);
-        a.href = v;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        td.append(a);
-      } else td.textContent = Array.isArray(v) ? v.join(", ") : v === true ? "Yes" : (v ?? "");
-      tr.append(td);
-    }
-    table.append(tr);
-  }
-  wrap.append(table);
-  screen.append(wrap);
 }
 const renderFormsOpen = (id) => {
   $("screen").replaceChildren();
