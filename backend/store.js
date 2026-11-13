@@ -119,6 +119,8 @@ export class Store {
     // Phase 5: form submissions live in the leads CRM.
     await add("inquiries", "form_id", "form_id CHAR(36) NULL");
     await add("inquiries", "data", "data JSON NULL");
+    // Forms v2: a header photo per form.
+    await add("forms", "cover", "cover VARCHAR(500) NULL");
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(

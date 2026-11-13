@@ -470,7 +470,8 @@ export function createApp(
         req.method === "POST" &&
         (req.path === "/media" ||
           req.path === "/lms/files" ||
-          /^\/videos\/[^/]+\/chunk$/.test(req.path));
+          /^\/videos\/[^/]+\/chunk$/.test(req.path) ||
+          (/^\/forms\/[0-9a-f-]{36}\/import$/.test(req.path) && req.is("text/csv")));
       if (!binary && !req.is("application/json")) throw fail(415, "JSON required.");
     }
     next();
@@ -514,7 +515,7 @@ export function createApp(
   installResourceRoutes(app, { store, fail });
   installFileRoutes(app, { store, fail, config });
   installDocumentRoutes(app, { store, fail });
-  installFormAdminRoutes(app, { store, fail, canPublish });
+  installFormAdminRoutes(app, { store, fail, canPublish, config });
   installVisualRoutes(app, { store, fail, config });
   installMessageRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
@@ -958,6 +959,7 @@ export function createApp(
           : error.name === "ZodError"
             ? "Please check the entry fields."
             : error.message,
+      ...(status < 500 && error.fields ? { fields: error.fields } : {}),
     });
   });
   return app;

@@ -309,10 +309,26 @@ CREATE TABLE IF NOT EXISTS forms (
   published BOOLEAN NOT NULL DEFAULT FALSE,
   notify BOOLEAN NOT NULL DEFAULT TRUE,
   definition JSON NOT NULL,
+  cover VARCHAR(500) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NULL,
   deleted_at DATETIME NULL,
   UNIQUE KEY slug (slug)
+);
+-- Files people attach to a form answer (resume, payment screenshot). Stored privately on disk like student
+-- files; inquiry_id is set when the form is sent, and unsent uploads are removed after a day.
+CREATE TABLE IF NOT EXISTS form_uploads (
+  id CHAR(36) PRIMARY KEY,
+  form_id CHAR(36) NOT NULL,
+  field_id VARCHAR(40) NOT NULL,
+  inquiry_id CHAR(36) NULL,
+  name VARCHAR(150) NOT NULL,
+  mime VARCHAR(100) NOT NULL,
+  size INT UNSIGNED NOT NULL,
+  sha256 CHAR(64) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX form (form_id),
+  INDEX inquiry (inquiry_id)
 );
 -- Clicks on the /links page, per link per day (no visitor data stored).
 CREATE TABLE IF NOT EXISTS link_clicks (

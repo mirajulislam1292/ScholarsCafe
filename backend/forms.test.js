@@ -65,7 +65,7 @@ test("Definitions: unique ids, conditions must point backwards, choices need opt
   );
   assert.equal(one([{ id: "a", label: "A", type: "select" }]), false);
   assert.equal(one([{ id: "Bad Id", label: "A", type: "text" }]), false);
-  assert.equal(one([{ id: "a", label: "A", type: "file" }]), false);
+  assert.equal(one([{ id: "a", label: "A", type: "video" }]), false);
 });
 
 test("Answers: required, types, choices; conditional fields only when shown and never stored when hidden", () => {

@@ -1146,3 +1146,48 @@ header {
     height: 70vh;
   }
 }
+
+/* Form builder: one button per question type. */
+.add-question {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 12px 0 4px;
+}
+.add-question button {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+/* Form responses: a wide table that scrolls inside its card. */
+.responses {
+  overflow-x: auto;
+  padding: 0;
+}
+.responses table {
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.85rem;
+}
+.responses td,
+.responses th {
+  min-width: 140px;
+  max-width: 320px;
+  text-align: left;
+  vertical-align: top;
+  white-space: pre-line;
+}
+
+/* Form header photo picker */
+.cover-picker img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 8px 0 4px;
+}
+.cover-picker img[hidden] {
+  display: none;
+}

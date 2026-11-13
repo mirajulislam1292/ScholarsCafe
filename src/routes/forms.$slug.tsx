@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { Turnstile, turnstileEnabled, resetTurnstile } from "@/components/scholars/Turnstile";
+import { FormRichText, plain } from "@/components/scholars/FormRichText";
 
 // Public form page: scholarscafe.com/forms/<slug>. The page is pre-rendered once as a shell (/forms/_) and
 // .htaccess serves it for every slug; the form itself loads from the admin API. Validation is repeated on the server.
@@ -20,14 +21,39 @@ type Field = {
   placeholder?: string;
   options?: string[];
   max_length?: number;
+  other?: boolean;
   show_if?: { field: string; equals: string } | null;
 };
 type Form = {
   title: string;
   intro: string;
+  cover?: string | null;
   definition: { steps: { title: string; fields: Field[] }[] };
 };
-type Answer = string | string[] | boolean;
+type Answer = string | string[] | boolean | Upload;
+type Upload = { ticket: string; name: string; size: number };
+const isUpload = (v: unknown): v is Upload => Boolean(v && typeof v === "object" && "ticket" in v);
+const isHeading = (o: string) => o.startsWith("# ");
+const FILE_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+  "image/png",
+  "image/jpeg",
+];
+const MAX_FILE = 10 * 1024 * 1024;
+
+/** The header photo: one of the website's photos ("site:library") or an uploaded image link. */
+function coverOf(cover?: string | null) {
+  if (!cover) return null;
+  const site = cover.match(/^site:([a-z0-9-]+)$/);
+  if (site)
+    return {
+      src: `/media/pages/${site[1]}.webp`,
+      srcSet: `/media/pages/${site[1]}-sm.webp 960w, /media/pages/${site[1]}.webp 1920w`,
+    };
+  return /^https:\/\//.test(cover) ? { src: cover, srcSet: undefined } : null;
+}
 const API = import.meta.env.VITE_CONTENT_API || "https://admin.scholarscafe.com";
 const INPUT =
   "w-full rounded-2xl border border-neutral-900/10 bg-white px-4 py-3 text-neutral-900 outline-none transition-[border-color,box-shadow] duration-300 focus:border-blue-700 focus:shadow-[0_0_0_4px_rgb(43_109_166/0.12)]";
@@ -40,8 +66,10 @@ const shown = (f: Field, a: Record<string, Answer>) => {
 function check(f: Field, v: Answer | undefined): string {
   const empty = v === undefined || v === "" || v === false || (Array.isArray(v) && !v.length);
   if (empty) return f.required ? "Required." : "";
+  if (Array.isArray(v) && v.some((x) => !x.trim())) return "Write your answer for “Other”.";
   if (typeof v !== "string") return "";
   const s = v.trim();
+  if (!s) return f.other ? "Write your answer for “Other”." : f.required ? "Required." : "";
   if (f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return "Enter a valid email.";
   if (f.type === "phone" && !/^[+0-9 ()-]{6,30}$/.test(s)) return "Enter a valid phone number.";
   if (f.type === "url" && !/^https:\/\//.test(s)) return "Enter an https:// link.";
@@ -75,6 +103,7 @@ function FormPage() {
   }, []);
 
   const steps = form?.definition.steps ?? [];
+  const cover = coverOf(form ? form.cover || "site:campus-early-fall" : null);
   const fields = (i: number) => steps[i]?.fields.filter((f) => shown(f, answers)) ?? [];
   const validate = (i: number) => {
     const e: Record<string, string> = {};
@@ -100,8 +129,11 @@ function FormPage() {
     const visible = Object.fromEntries(
       steps
         .flatMap((s) => s.fields)
-        .filter((f) => shown(f, answers) && f.id in answers)
-        .map((f) => [f.id, answers[f.id]]),
+        .filter((f) => f.type !== "info" && shown(f, answers) && f.id in answers)
+        .map((f) => {
+          const v = answers[f.id];
+          return [f.id, isUpload(v) ? v.ticket : v];
+        }),
     );
     const data = new FormData(event.currentTarget);
     setSending(true);
@@ -135,9 +167,24 @@ function FormPage() {
   return (
     <div className="min-h-screen bg-ice-50">
       <Navbar />
-      {/* Dark band behind the navbar (it is styled for the site's dark page headers). */}
-      <div aria-hidden className="h-[clamp(220px,26vw,300px)] bg-blue-950" />
-      <main className="relative mx-auto -mt-[clamp(110px,13vw,150px)] max-w-[680px] px-6 pb-24">
+      {/* Header photo under a dark wash (the navbar is styled for the site's dark page headers). */}
+      <div aria-hidden className="relative h-[clamp(330px,36vw,440px)] overflow-hidden bg-blue-950">
+        {cover && (
+          <img
+            src={cover.src}
+            srcSet={cover.srcSet}
+            sizes="100vw"
+            alt=""
+            ref={(el) => {
+              if (el?.complete) el.classList.remove("opacity-0");
+            }}
+            onLoad={(e) => e.currentTarget.classList.remove("opacity-0")}
+            className="absolute inset-0 size-full scale-105 object-cover opacity-0 transition-opacity duration-700"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/85 via-blue-950/45 to-blue-950/75" />
+      </div>
+      <main className="relative mx-auto -mt-[clamp(120px,16vw,210px)] max-w-[720px] px-4 pb-24 sm:px-6">
         {!form && !missing && (
           <p className="type-body rounded-3xl bg-white p-7 text-neutral-500 md:p-12">Loading…</p>
         )}
@@ -164,21 +211,36 @@ function FormPage() {
             noValidate
             className="rounded-3xl border border-neutral-900/[0.06] bg-white p-7 md:p-12"
           >
-            <h1 className="type-h2 text-neutral-900">{form.title}</h1>
-            {form.intro && (
-              <p className="type-body mt-4 whitespace-pre-line text-neutral-600">{form.intro}</p>
-            )}
+            <p className="type-caption font-semibold uppercase tracking-[0.14em] text-blue-700">
+              Scholars Cafe
+            </p>
+            <h1 className="type-h2 mt-3 text-balance text-neutral-900">
+              {plain(form.title).replace(/^Scholars Cafe\s+/i, "")}
+            </h1>
+            {form.intro && step === 0 && <Intro text={form.intro} />}
             {steps.length > 1 && (
-              <p className="type-caption mt-8 text-blue-700" aria-live="polite">
-                Step {step + 1} of {steps.length}
-                {steps[step].title ? " · " + steps[step].title : ""}
-              </p>
+              <div className="mt-8" aria-live="polite">
+                <p className="type-caption text-blue-700">
+                  Step {step + 1} of {steps.length}
+                  {steps[step].title ? " · " + steps[step].title : ""}
+                </p>
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ice-50">
+                  <div
+                    className="h-full rounded-full bg-blue-700 transition-[width] duration-500"
+                    style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
             )}
-            <div className="mt-8 grid gap-7">
+            <p className="type-caption mt-8 text-neutral-500">
+              <span className="text-blue-700">*</span> Required
+            </p>
+            <div className="mt-6 grid gap-7">
               {fields(step).map((f) => (
                 <FieldInput
                   key={f.id}
                   f={f}
+                  slug={slug}
                   value={answers[f.id]}
                   error={errors[f.id]}
                   onChange={(v) => set(f.id, v)}
@@ -226,18 +288,148 @@ function FormPage() {
   );
 }
 
+/** A long introduction folds after a few lines so the questions stay in view. */
+function Intro({ text }: { text: string }) {
+  const long = text.length > 600;
+  const [open, setOpen] = useState(!long);
+  return (
+    <div className="mt-4">
+      <div className={open ? "" : "relative max-h-80 overflow-hidden"}>
+        <FormRichText text={text} />
+        {!open && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white" />
+        )}
+      </div>
+      {long && (
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          className="type-button mt-3 text-blue-700"
+        >
+          {open ? "Show less" : "Read the full details"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FileInput({
+  f,
+  slug,
+  value,
+  onChange,
+  describedBy,
+  id,
+}: {
+  f: Field;
+  slug: string;
+  value: Answer | undefined;
+  onChange: (v: Answer) => void;
+  describedBy?: string;
+  id: string;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState("");
+  async function pick(file: File | undefined) {
+    setProblem("");
+    if (!file) return;
+    if (!FILE_TYPES.includes(file.type))
+      return setProblem("Use a PDF, Word (.docx), text, PNG or JPEG file.");
+    if (file.size > MAX_FILE) return setProblem("The file is larger than 10 MB.");
+    setBusy(true);
+    try {
+      const r = await fetch(`${API}/public/forms/${slug}/upload?field=${f.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": file.type,
+          "X-File-Name": file.name.replace(/[^\x20-\x7e]/g, "_"),
+        },
+        credentials: "omit",
+        body: file,
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || "The upload didn't work. Please try again.");
+      onChange({ ticket: j.ticket, name: j.name, size: j.size });
+    } catch (e) {
+      setProblem(e instanceof Error ? e.message : "The upload didn't work.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (isUpload(value))
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-blue-700 bg-ice-50 px-4 py-3">
+        <span className="type-body min-w-0 flex-1 truncate text-neutral-800">
+          ✓ {value.name}{" "}
+          <span className="text-neutral-500">
+            ({Math.max(1, Math.round(value.size / 1024))} KB)
+          </span>
+        </span>
+        <button type="button" onClick={() => onChange("")} className="type-caption text-blue-700">
+          Remove
+        </button>
+      </div>
+    );
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="flex cursor-pointer flex-col items-center gap-1 rounded-2xl border border-dashed border-neutral-900/20 px-4 py-6 text-center transition-colors hover:border-blue-700 hover:bg-ice-50"
+      >
+        <span className="type-body font-medium text-blue-700">
+          {busy ? "Uploading…" : "Choose a file"}
+        </span>
+        <span className="type-caption text-neutral-500">
+          PDF, Word, text, PNG or JPEG · up to 10 MB
+        </span>
+      </label>
+      <input
+        id={id}
+        type="file"
+        accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"
+        aria-describedby={describedBy}
+        disabled={busy}
+        onChange={(e) => {
+          pick(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+        className="sr-only"
+      />
+      {problem && (
+        <p role="alert" className="type-caption mt-2 text-red-700">
+          {problem}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function FieldInput({
   f,
+  slug,
   value,
   error,
   onChange,
 }: {
   f: Field;
+  slug: string;
   value: Answer | undefined;
   error?: string;
   onChange: (v: Answer) => void;
 }) {
   const id = "field-" + f.id;
+  if (f.type === "info")
+    return (
+      <div className="border-l-2 border-blue-700 pl-4">
+        <h2 className="type-h4 text-neutral-900">{f.label}</h2>
+        {f.help && (
+          <div className="mt-3">
+            <FormRichText text={f.help} />
+          </div>
+        )}
+      </div>
+    );
   const describedBy =
     [f.help ? id + "-help" : "", error ? id + "-error" : ""].filter(Boolean).join(" ") || undefined;
   const common = {
@@ -247,11 +439,16 @@ function FieldInput({
     required: f.required,
   };
   const label = (
-    <span className="type-body font-medium text-neutral-900">
+    <span className="type-body whitespace-pre-line font-medium text-neutral-900">
       {f.label}
       {f.required && <span className="text-blue-700"> *</span>}
     </span>
   );
+  const helpText = f.help ? (
+    <span id={id + "-help"} className="block">
+      <FormRichText text={f.help} compact />
+    </span>
+  ) : null;
   let control;
   if (f.type === "textarea")
     control = (
@@ -273,43 +470,94 @@ function FieldInput({
         className={INPUT}
       >
         <option value="">Choose…</option>
-        {f.options?.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
+        {f.options?.map((o) =>
+          isHeading(o) ? (
+            <option key={o} disabled>
+              {o.slice(2)}
+            </option>
+          ) : (
+            <option key={o}>{o}</option>
+          ),
+        )}
       </select>
     );
   else if (f.type === "radio" || f.type === "checkbox") {
     const many = f.type === "checkbox";
+    const opts = (f.options || []).filter((o) => !isHeading(o));
     const list = Array.isArray(value) ? value : [];
+    // The "Other" answer is whatever isn't one of the listed choices.
+    const otherValue = many
+      ? list.find((x) => !opts.includes(x))
+      : typeof value === "string" && value !== "" && !opts.includes(value)
+        ? value
+        : undefined;
+    const otherOn = otherValue !== undefined;
+    const OTHER_PENDING = " ";
+    const setOther = (text: string) => {
+      const t = text || OTHER_PENDING;
+      if (many) onChange([...list.filter((x) => opts.includes(x)), t]);
+      else onChange(t);
+    };
+    const box =
+      "flex cursor-pointer items-center gap-3 rounded-2xl border border-neutral-900/10 px-4 py-3 transition-colors hover:border-blue-700/40 has-[:checked]:border-blue-700 has-[:checked]:bg-ice-50";
     return (
       <fieldset aria-describedby={describedBy}>
         <legend>{label}</legend>
+        {helpText && <div className="mt-1">{helpText}</div>}
         <div className="mt-3 grid gap-2">
-          {f.options?.map((o) => (
-            <label
-              key={o}
-              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-neutral-900/10 px-4 py-3 has-[:checked]:border-blue-700 has-[:checked]:bg-ice-50"
-            >
+          {f.options?.map((o) =>
+            isHeading(o) ? (
+              <p
+                key={o}
+                className="type-caption mt-3 font-semibold uppercase tracking-wide text-blue-700"
+              >
+                {o.slice(2).replace(/:$/, "")}
+              </p>
+            ) : (
+              <label key={o} className={box}>
+                <input
+                  type={many ? "checkbox" : "radio"}
+                  name={f.id}
+                  checked={many ? list.includes(o) : value === o}
+                  onChange={() =>
+                    onChange(
+                      many ? (list.includes(o) ? list.filter((x) => x !== o) : [...list, o]) : o,
+                    )
+                  }
+                  className="accent-blue-700"
+                />
+                <span className="type-body text-neutral-800">{o}</span>
+              </label>
+            ),
+          )}
+          {f.other && (
+            <div className={box + " flex-wrap"}>
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type={many ? "checkbox" : "radio"}
+                  name={f.id}
+                  checked={otherOn}
+                  onChange={() =>
+                    many && otherOn
+                      ? onChange(list.filter((x) => opts.includes(x)))
+                      : setOther(otherValue?.trim() || "")
+                  }
+                  className="accent-blue-700"
+                />
+                <span className="type-body text-neutral-800">Other:</span>
+              </label>
               <input
-                type={many ? "checkbox" : "radio"}
-                name={f.id}
-                checked={many ? list.includes(o) : value === o}
-                onChange={() =>
-                  onChange(
-                    many ? (list.includes(o) ? list.filter((x) => x !== o) : [...list, o]) : o,
-                  )
-                }
-                className="accent-blue-700"
+                type="text"
+                aria-label={f.label + ": other"}
+                maxLength={300}
+                value={otherValue?.trim() ? otherValue : ""}
+                onFocus={() => !otherOn && setOther("")}
+                onChange={(e) => setOther(e.target.value)}
+                className="min-w-[10rem] flex-1 border-b border-neutral-900/20 bg-transparent py-1 outline-none focus:border-blue-700"
               />
-              <span className="type-body text-neutral-800">{o}</span>
-            </label>
-          ))}
+            </div>
+          )}
         </div>
-        {f.help && (
-          <p id={id + "-help"} className="type-caption mt-2 text-neutral-500">
-            {f.help}
-          </p>
-        )}
         {error && (
           <p id={id + "-error"} className="type-caption mt-2 text-red-700">
             {error}
@@ -337,13 +585,34 @@ function FieldInput({
         )}
       </div>
     );
+  else if (f.type === "file")
+    return (
+      <div className="grid gap-2">
+        <label htmlFor={id}>{label}</label>
+        {helpText}
+        <FileInput
+          f={f}
+          slug={slug}
+          value={value}
+          onChange={onChange}
+          describedBy={describedBy}
+          id={id}
+        />
+        {error && (
+          <span id={id + "-error"} className="type-caption text-red-700">
+            {error}
+          </span>
+        )}
+      </div>
+    );
   else
     control = (
       <input
         {...common}
         type={
-          { email: "email", phone: "tel", number: "text", date: "date", url: "url" }[f.type] ||
-          "text"
+          { email: "email", phone: "tel", number: "text", date: "date", url: "url", time: "time" }[
+            f.type
+          ] || "text"
         }
         inputMode={f.type === "number" ? "decimal" : undefined}
         autoComplete={{ email: "email", phone: "tel" }[f.type]}
@@ -357,12 +626,8 @@ function FieldInput({
   return (
     <label htmlFor={id} className="grid gap-2">
       {label}
+      {helpText}
       {control}
-      {f.help && (
-        <span id={id + "-help"} className="type-caption text-neutral-500">
-          {f.help}
-        </span>
-      )}
       {error && (
         <span id={id + "-error"} className="type-caption text-red-700">
           {error}
