@@ -518,8 +518,14 @@ test("built-in forms go live once and never come back after the team removes the
           published: args[4],
           definition: JSON.parse(args[6]),
           cover: args[7],
+          summary: args[9],
         });
         return { affectedRows: 1 };
+      }
+      if (sql.startsWith("UPDATE forms SET summary=")) {
+        const f = forms.find((x) => x.slug === args[1] && !x.deleted && !x.summary);
+        if (f) f.summary = args[0];
+        return { affectedRows: f ? 1 : 0 };
       }
       throw new Error("unexpected " + sql);
     },
@@ -530,6 +536,7 @@ test("built-in forms go live once and never come back after the team removes the
     FORM_TEMPLATES.map((t) => t.slug),
   );
   assert.ok(forms.every((f) => f.published === true && f.cover?.startsWith("site:")));
+  assert.ok(forms.every((f) => f.summary && f.summary.length <= 300));
   forms[0].deleted = true;
   assert.deepEqual(await seedFormTemplates(store), []);
   assert.equal(forms.length, FORM_TEMPLATES.length);
@@ -552,4 +559,18 @@ test("old Google columns match despite a doubled word, and leftover columns get 
   assert.equal(r.items[0].data.school, "Dhaka College");
   const extra = Object.keys(r.items[0].data).find((k) => k.startsWith("gf_"));
   assert.equal(extraLabel(extra), "Tell us a story about your life in three lines");
+});
+
+test("public forms list: a summary, or the first real line of the introduction", async () => {
+  const { summaryOf } = await import("./forms.js");
+  assert.equal(summaryOf({ summary: " Short. ", intro: "x" }), "Short.");
+  assert.equal(
+    summaryOf({
+      summary: "",
+      intro: "Welcome to Scholars Cafe ☕🌍\nA Cafe to Ease Your Study Abroad Journey.\n\n📢 Help with your US student visa interview.",
+    }),
+    "Help with your US student visa interview.",
+  );
+  assert.equal(summaryOf({ summary: "", intro: "" }), "");
+  assert.ok(summaryOf({ summary: "", intro: "word ".repeat(80) }).length <= 180);
 });

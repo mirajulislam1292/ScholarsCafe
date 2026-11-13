@@ -130,6 +130,7 @@ Inbox → **Forms**:
 - **+ Add a step** makes a multi-page form.
 - **Publishing:** tick **Published** and save. The form is live at `scholarscafe.com/forms/<address>`; share that link.
 - **Forms list:** each form is a card with its own link. Tap the link to open the form, or **Copy link** to share it. **Live** forms are open to the public; **Draft** ones are not.
+- **scholarscafe.com/forms** lists every Live form with its **Short description** (set it in the form's Edit screen), so people can pick the one they need. A form appears there as soon as it is published and disappears when it goes back to Draft.
 - **See responses** (on each form): one card per person, newest first. Tap a card to read all their answers; use the search box to find a name, email or any answer. Click a file to download it. **Download Excel** gives everything as a spreadsheet; file cells link back to the download (sign in to the admin first).
 - **Old Google Forms responses:** in Google Forms open the form → Responses → ⋮ → **Download responses (.csv)**, unzip it, then at the bottom of the form's responses page use **Import old responses from Google Forms**. Questions are matched by title, the original dates are kept, files stay as Google Drive links, and importing the same file twice adds nothing twice.
 - **Where answers are saved:** in the website's own database (not Google). Uploaded files are kept privately on the server. See them under the form's **Responses**, or in **Leads**.

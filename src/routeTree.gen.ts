@@ -20,6 +20,7 @@ import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +78,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FormsIndexRoute = FormsIndexRouteImport.update({
+  id: '/forms/',
+  path: '/forms/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FormsSlugRoute = FormsSlugRouteImport.update({
   id: '/forms/$slug',
   path: '/forms/$slug',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/forms/$slug': typeof FormsSlugRoute
+  '/forms/': typeof FormsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/forms/$slug': typeof FormsSlugRoute
+  '/forms': typeof FormsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/forms/$slug': typeof FormsSlugRoute
+  '/forms/': typeof FormsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms'
     | '/forms/$slug'
+    | '/forms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms'
     | '/forms/$slug'
+    | '/forms'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms'
     | '/forms/$slug'
+    | '/forms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   TermsRoute: typeof TermsRoute
   FormsSlugRoute: typeof FormsSlugRoute
+  FormsIndexRoute: typeof FormsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forms/': {
+      id: '/forms/'
+      path: '/forms'
+      fullPath: '/forms/'
+      preLoaderRoute: typeof FormsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/$slug': {
       id: '/forms/$slug'
       path: '/forms/$slug'
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   TermsRoute: TermsRoute,
   FormsSlugRoute: FormsSlugRoute,
+  FormsIndexRoute: FormsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

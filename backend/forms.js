@@ -114,6 +114,8 @@ const formInput = z
       .max(60),
     title: z.string().trim().min(1).max(200),
     intro: z.string().max(10000).default(""),
+    // Shown under the title in the public list of forms.
+    summary: z.string().trim().max(300).default(""),
     success: z.string().max(500).default("Thank you! We'll get back to you within 24 hours."),
     published: z.boolean().default(false),
     notify: z.boolean().default(true),
@@ -328,7 +330,7 @@ export async function seedFormTemplates(store) {
     if (taken) continue;
     const d = formInput.parse({ ...t, published: true });
     await store.query(
-      "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,receipt,id) VALUES (?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,receipt,summary,id) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
       [
         d.slug,
         d.title,
@@ -339,12 +341,37 @@ export async function seedFormTemplates(store) {
         JSON.stringify(d.definition),
         d.cover || null,
         d.receipt,
+        d.summary,
         randomUUID(),
       ],
     );
     added.push(d.slug);
   }
+  // Built-in forms added before summaries existed get theirs once (an empty one only; edits are kept).
+  for (const t of FORM_TEMPLATES) {
+    if (!t.summary) continue;
+    const marker = await store.query("INSERT IGNORE INTO settings (name,value) VALUES (?,?)", [
+      `form_summary:${t.slug}`,
+      "1",
+    ]);
+    if (marker?.affectedRows)
+      await store.query(
+        "UPDATE forms SET summary=? WHERE slug=? AND summary='' AND deleted_at IS NULL",
+        [t.summary, t.slug],
+      );
+  }
   return added;
+}
+
+/** A short line for a form without a summary: the first real sentence of its introduction. */
+export function summaryOf(f) {
+  if (f.summary && f.summary.trim()) return f.summary.trim();
+  const line = String(f.intro || "")
+    .split("\n")
+    .map((l) => l.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, "").trim())
+    .find((l) => l.length > 20 && !/^welcome to scholars cafe|^a cafe to ease/i.test(l));
+  if (!line) return "";
+  return line.length > 180 ? line.slice(0, 177).replace(/\s+\S*$/, "") + "…" : line;
 }
 
 /** "gf_home_address" (an old Google Forms column) → "Home address". */
@@ -532,17 +559,18 @@ export function installFormAdminRoutes(app, { store, fail, canPublish, config })
         JSON.stringify(d.definition),
         d.cover || null,
         d.receipt,
+        d.summary,
       ];
       if (existingId) {
         const r = await q(
-          "UPDATE forms SET slug=?,title=?,intro=?,success=?,published=?,notify=?,definition=?,cover=?,receipt=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
+          "UPDATE forms SET slug=?,title=?,intro=?,success=?,published=?,notify=?,definition=?,cover=?,receipt=?,summary=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
           [...values, formId],
           c,
         );
         if (!r.affectedRows) throw fail(404, "Form not found.");
       } else
         await q(
-          "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,receipt,id) VALUES (?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,receipt,summary,id) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
           [...values, formId],
           c,
         );
@@ -580,6 +608,16 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
       .string()
       .regex(/^[a-z0-9-]{1,60}$/)
       .parse(req.params.slug);
+  // Every live form, for the list at scholarscafe.com/forms.
+  app.get("/public/forms", async (req, res) => {
+    cors(req, res);
+    const rows = await q(
+      "SELECT slug,title,intro,summary FROM forms WHERE published=1 AND deleted_at IS NULL ORDER BY created_at",
+    );
+    res.json({
+      items: rows.map((f) => ({ slug: f.slug, title: f.title, summary: summaryOf(f) })),
+    });
+  });
   app.get("/public/forms/:slug", async (req, res) => {
     cors(req, res);
     const [f] = await q(
