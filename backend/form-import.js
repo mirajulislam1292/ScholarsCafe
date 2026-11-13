@@ -28,10 +28,12 @@ export function parseCsv(text) {
   return rows.filter((r) => r.some((x) => x.trim()));
 }
 
+// Titles are compared without case, spacing, punctuation or an accidentally doubled word ("have have").
 const norm = (s) =>
   String(s)
     .normalize("NFKC")
     .toLowerCase()
+    .replace(/\b(\p{L}+)(\s+\1\b)+/gu, "$1")
     .replace(/[^\p{L}\p{N}]+/gu, "");
 
 /**
@@ -95,7 +97,7 @@ export function mapResponses(definition, rows) {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "_")
     )
-      .slice(0, 40)
+      .slice(0, 120)
       .replace(/_+$/, "");
     return {
       kind: "extra",
