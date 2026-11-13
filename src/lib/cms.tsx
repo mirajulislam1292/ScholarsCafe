@@ -94,8 +94,52 @@ export function useCmsLookup() {
     return value;
   };
 }
+// ---------- No stale text on load ----------
+// Every page is pre-rendered with the admin's content as it was at build time (embedded as JSON so
+// the browser starts from the same text). A tiny script in <head> fetches the live content right
+// away and keeps the page invisible until it is known to be current: shown at once when nothing
+// changed since the build, after the update when something did, and after 2.5 s at the latest.
+const EMBED_ID = "sc-content";
+declare global {
+  var __SC_CONTENT__: Item[] | undefined;
+  interface Window {
+    __scLive?: Promise<Item[] | null>;
+  }
+}
+function initialContent(): Item[] | null {
+  if (typeof window === "undefined") return globalThis.__SC_CONTENT__ ?? null;
+  try {
+    const raw = document.getElementById(EMBED_ID)?.textContent;
+    const items = raw ? JSON.parse(raw) : null;
+    return Array.isArray(items) ? items : null;
+  } catch {
+    return null;
+  }
+}
+const safeJson = (v: unknown) =>
+  JSON.stringify(v)
+    .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+/** The build's content, so the pre-rendered page and the browser's first render agree. */
+export function EmbeddedContent() {
+  const [json] = useState(() => {
+    if (typeof window === "undefined")
+      return globalThis.__SC_CONTENT__ ? safeJson(globalThis.__SC_CONTENT__) : "";
+    return document.getElementById(EMBED_ID)?.textContent ?? "";
+  });
+  if (!json) return null;
+  return (
+    <script id={EMBED_ID} type="application/json" dangerouslySetInnerHTML={{ __html: json }} />
+  );
+}
+/** Runs in <head> before anything is painted (see above). Kept tiny and dependency-free. */
+export const FRESH_CONTENT_SCRIPT = `(function(){var d=document.documentElement;if(window.parent!==window&&/[?&]sc-edit(=|&|$)/.test(location.search))return;d.classList.add("sc-wait");var show=function(){d.classList.remove("sc-wait")};setTimeout(show,2500);window.__scLive=fetch(${JSON.stringify(ENDPOINT + "/public/content")},{credentials:"omit"}).then(function(r){return r.ok?r.json():null}).then(function(j){var items=j&&Array.isArray(j.items)?j.items:null;var same=function(){try{var e=document.getElementById("${EMBED_ID}");return!!(items&&e&&JSON.stringify(JSON.parse(e.textContent))===JSON.stringify(items))}catch(x){return false}};if(!items)show();else if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){if(same())show()});else if(same())show();return items}).catch(function(){show();return null})})();`;
+export const FRESH_CONTENT_STYLE = "html.sc-wait body{opacity:0}";
+
 export function ContentProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<Item[] | null>(null);
+  const [items, setItems] = useState<Item[] | null>(initialContent);
+  const [live, setLive] = useState(false);
   const [preview, setPreview] = useState<Preview>({ copy: {}, entries: {} });
   useEffect(() => {
     const endpoint = ENDPOINT;
@@ -109,18 +153,34 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         });
         if (!r.ok) return;
         const data = await r.json();
-        if (Array.isArray(data.items)) setItems(data.items);
+        if (Array.isArray(data.items)) {
+          setItems(data.items);
+          setLive(true);
+        }
       } catch {
         /* Keep the last successful content while offline. */
       }
     };
-    void load();
+    // First load: the request the <head> script already started (no second download).
+    const early = window.__scLive;
+    if (early)
+      void early.then((fetched) => {
+        if (fetched) {
+          setItems(fetched);
+          setLive(true);
+        } else void load();
+      });
+    else void load();
     const interval = window.setInterval(load, 60000);
     return () => {
       controller.abort();
       window.clearInterval(interval);
     };
   }, []);
+  // Once the live content is on screen, the page may be shown (see FRESH_CONTENT_SCRIPT).
+  useEffect(() => {
+    if (live) requestAnimationFrame(() => document.documentElement.classList.remove("sc-wait"));
+  }, [live]);
   return (
     <Content.Provider value={EDIT_MODE ? withPreview(items, preview) : items}>
       <BrandSettings />

@@ -6,7 +6,11 @@ import { fileURLToPath, pathToFileURL } from "url";
 // Static hosting cannot issue per-request nonces, so allow exactly the inline scripts in this
 // build by hash. Any injected or modified inline script is blocked by the browser.
 function writeSecurityPolicy(clientDir, html) {
-  const hashes = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)]
+  const hashes = [
+    ...html.matchAll(
+      /<script(?![^>]*\bsrc=)(?![^>]*type="application\/json")[^>]*>([\s\S]*?)<\/script>/g,
+    ),
+  ]
     .map((m) => m[1])
     .filter((body) => body.length > 0)
     .map((body) => `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`)
@@ -63,11 +67,31 @@ function writeSitemap(clientDir, pages) {
   console.log(`[OK] sitemap.xml written with ${urls.length} pages`);
 }
 
+// Pre-render with the admin's published content as it is right now, so the pages ship the current
+// text (not the built-in defaults that the live content would then replace on screen). If the admin
+// can't be reached the build still works: pages then wait briefly for the live content in the browser.
+async function bakeLiveContent() {
+  const endpoint = process.env.VITE_CONTENT_API || "https://admin.scholarscafe.com";
+  try {
+    const r = await fetch(endpoint + "/public/content", { signal: AbortSignal.timeout(15000) });
+    if (!r.ok) throw new Error(`status ${r.status}`);
+    const { items } = await r.json();
+    if (!Array.isArray(items)) throw new Error("no items");
+    globalThis.__SC_CONTENT__ = items;
+    console.log(`[OK] Baked ${items.length} live content items into the pages`);
+  } catch (error) {
+    console.warn(
+      `[WARN] Live content not baked in (${error.message}); pages use built-in text until it loads`,
+    );
+  }
+}
+
 async function generateIndexHtml() {
   const distDir = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
   const clientDir = join(distDir, "client");
   const serverEntryPath = join(distDir, "server", "index.js");
   const serverEntry = await import(pathToFileURL(serverEntryPath).href);
+  await bakeLiveContent();
   // Pre-render every page so each URL ships its own HTML (fast first paint, correct SEO).
   // Paths must match routes in src/routes. Each page goes to <path>/index.html.
   const pages = [
