@@ -123,11 +123,14 @@ Inbox → **Forms**:
 - **Add buttons**, one per question type: Short answer, Paragraph, Multiple choice, Checkboxes, Dropdown, **File upload**, Email, Phone, Number, Date, Time, Link, Consent, and **Text / heading** (a section title or a paragraph of information, no answer).
 - Each question can be **Required**, have a description (links become clickable) and a maximum length.
 - **Multiple choice and Checkboxes** can add an **"Other:"** choice with a text box. In a choice list, a line starting with `#` is a heading (e.g. `# Guidance Program:`), not something people pick.
+- **Header photo:** pick one of the website's photos or upload your own wide photo (under 5 MB).
+- **Introduction:** write it like a Google Form description. An emoji at the start of a line (✅ ⛔ 💰 📌 💳 📩 🔗…) shows as a matching icon; a line ending with ":" followed by lines makes a neat list (✅ gives ticks, ⛔ gives crosses); "Facebook: https://…" lines under a heading become buttons; other emojis are left out.
 - **File upload:** one PDF, Word (.docx), text, PNG or JPEG up to 10 MB per question (up to 5 per form). Files are private.
 - **Show only when:** a question can appear only for a certain earlier answer, for example "Which grade?" only when "Other" is chosen.
 - **+ Add a step** makes a multi-page form.
 - **Publishing:** tick **Published** and save. The form is live at `scholarscafe.com/forms/<address>`; share that link.
 - **Responses** (on each form): a table with one column per question, newest first. Click a file to download it. **Download Excel (.xlsx)** gives the same table as a spreadsheet; file cells link back to the download (sign in to the admin first).
+- **Old Google Forms responses:** in Google Forms open the form → Responses → ⋮ → **Download responses (.csv)**, unzip it, then on the form's **Responses** page use **Import old responses from Google Forms**. Questions are matched by title, the original dates are kept, files stay as Google Drive links, and importing the same file twice adds nothing twice.
 - **Answers** also go to **Leads**, labelled with the form's name, for status, notes and mentor. Tick "Email me" to also get each one by email.
 
 ## 10. Leads

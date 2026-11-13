@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { Turnstile, turnstileEnabled, resetTurnstile } from "@/components/scholars/Turnstile";
+import { FormRichText, plain } from "@/components/scholars/FormRichText";
 
 // Public form page: scholarscafe.com/forms/<slug>. The page is pre-rendered once as a shell (/forms/_) and
 // .htaccess serves it for every slug; the form itself loads from the admin API. Validation is repeated on the server.
@@ -26,6 +27,7 @@ type Field = {
 type Form = {
   title: string;
   intro: string;
+  cover?: string | null;
   definition: { steps: { title: string; fields: Field[] }[] };
 };
 type Answer = string | string[] | boolean | Upload;
@@ -41,28 +43,16 @@ const FILE_TYPES = [
 ];
 const MAX_FILE = 10 * 1024 * 1024;
 
-/** Text with line breaks kept and web links made clickable (nothing else is interpreted). */
-function RichText({ text, className }: { text: string; className?: string }) {
-  const parts = text.split(/(https:\/\/[^\s<>"')]+)/g);
-  return (
-    <p className={"whitespace-pre-line break-words " + (className || "")}>
-      {parts.map((part, i) =>
-        i % 2 ? (
-          <a
-            key={i}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-700 underline underline-offset-2"
-          >
-            {part.replace(/^https:\/\/(www\.)?/, "").replace(/\?.*$/, "")}
-          </a>
-        ) : (
-          part
-        ),
-      )}
-    </p>
-  );
+/** The header photo: one of the website's photos ("site:library") or an uploaded image link. */
+function coverOf(cover?: string | null) {
+  if (!cover) return null;
+  const site = cover.match(/^site:([a-z0-9-]+)$/);
+  if (site)
+    return {
+      src: `/media/pages/${site[1]}.webp`,
+      srcSet: `/media/pages/${site[1]}-sm.webp 960w, /media/pages/${site[1]}.webp 1920w`,
+    };
+  return /^https:\/\//.test(cover) ? { src: cover, srcSet: undefined } : null;
 }
 const API = import.meta.env.VITE_CONTENT_API || "https://admin.scholarscafe.com";
 const INPUT =
@@ -113,6 +103,7 @@ function FormPage() {
   }, []);
 
   const steps = form?.definition.steps ?? [];
+  const cover = coverOf(form ? form.cover || "site:campus-early-fall" : null);
   const fields = (i: number) => steps[i]?.fields.filter((f) => shown(f, answers)) ?? [];
   const validate = (i: number) => {
     const e: Record<string, string> = {};
@@ -176,9 +167,24 @@ function FormPage() {
   return (
     <div className="min-h-screen bg-ice-50">
       <Navbar />
-      {/* Dark band behind the navbar (it is styled for the site's dark page headers). */}
-      <div aria-hidden className="h-[clamp(220px,26vw,300px)] bg-blue-950" />
-      <main className="relative mx-auto -mt-[clamp(110px,13vw,150px)] max-w-[680px] px-6 pb-24">
+      {/* Header photo under a dark wash (the navbar is styled for the site's dark page headers). */}
+      <div aria-hidden className="relative h-[clamp(330px,36vw,440px)] overflow-hidden bg-blue-950">
+        {cover && (
+          <img
+            src={cover.src}
+            srcSet={cover.srcSet}
+            sizes="100vw"
+            alt=""
+            ref={(el) => {
+              if (el?.complete) el.classList.remove("opacity-0");
+            }}
+            onLoad={(e) => e.currentTarget.classList.remove("opacity-0")}
+            className="absolute inset-0 size-full scale-105 object-cover opacity-0 transition-opacity duration-700"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/85 via-blue-950/45 to-blue-950/75" />
+      </div>
+      <main className="relative mx-auto -mt-[clamp(120px,16vw,210px)] max-w-[720px] px-4 pb-24 sm:px-6">
         {!form && !missing && (
           <p className="type-body rounded-3xl bg-white p-7 text-neutral-500 md:p-12">Loading…</p>
         )}
@@ -205,7 +211,12 @@ function FormPage() {
             noValidate
             className="rounded-3xl border border-neutral-900/[0.06] bg-white p-7 md:p-12"
           >
-            <h1 className="type-h2 text-neutral-900">{form.title}</h1>
+            <p className="type-caption font-semibold uppercase tracking-[0.14em] text-blue-700">
+              Scholars Cafe
+            </p>
+            <h1 className="type-h2 mt-3 text-balance text-neutral-900">
+              {plain(form.title).replace(/^Scholars Cafe\s+/i, "")}
+            </h1>
             {form.intro && step === 0 && <Intro text={form.intro} />}
             {steps.length > 1 && (
               <div className="mt-8" aria-live="polite">
@@ -283,8 +294,8 @@ function Intro({ text }: { text: string }) {
   const [open, setOpen] = useState(!long);
   return (
     <div className="mt-4">
-      <div className={open ? "" : "relative max-h-48 overflow-hidden"}>
-        <RichText text={text} className="type-body text-neutral-600" />
+      <div className={open ? "" : "relative max-h-80 overflow-hidden"}>
+        <FormRichText text={text} />
         {!open && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white" />
         )}
@@ -412,7 +423,11 @@ function FieldInput({
     return (
       <div className="border-l-2 border-blue-700 pl-4">
         <h2 className="type-h4 text-neutral-900">{f.label}</h2>
-        {f.help && <RichText text={f.help} className="type-body mt-2 text-neutral-600" />}
+        {f.help && (
+          <div className="mt-3">
+            <FormRichText text={f.help} />
+          </div>
+        )}
       </div>
     );
   const describedBy =
@@ -431,7 +446,7 @@ function FieldInput({
   );
   const helpText = f.help ? (
     <span id={id + "-help"} className="block">
-      <RichText text={f.help} className="type-caption text-neutral-500" />
+      <FormRichText text={f.help} compact />
     </span>
   ) : null;
   let control;

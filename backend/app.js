@@ -470,7 +470,8 @@ export function createApp(
         req.method === "POST" &&
         (req.path === "/media" ||
           req.path === "/lms/files" ||
-          /^\/videos\/[^/]+\/chunk$/.test(req.path));
+          /^\/videos\/[^/]+\/chunk$/.test(req.path) ||
+          (/^\/forms\/[0-9a-f-]{36}\/import$/.test(req.path) && req.is("text/csv")));
       if (!binary && !req.is("application/json")) throw fail(415, "JSON required.");
     }
     next();

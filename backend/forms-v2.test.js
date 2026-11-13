@@ -143,7 +143,8 @@ function fakeStore(extra = {}) {
       sql.push([q, a]);
       if (
         q.includes("FROM forms WHERE slug=?") ||
-        q.startsWith("SELECT id,slug,title,definition FROM forms")
+        q.startsWith("SELECT id,slug,title,definition FROM forms") ||
+        q.startsWith("SELECT id,definition FROM forms WHERE id=?")
       )
         return [form];
       if (q.startsWith("SELECT COALESCE(SUM(size),0)")) return [{ used: 0 }];
@@ -171,6 +172,7 @@ function fakeStore(extra = {}) {
       if (q.startsWith("SELECT id,name,mime FROM form_uploads"))
         return uploads.filter((u) => u.id === a[0] && u.inquiry_id);
       if (q.startsWith("SELECT id,created_at,status")) return extra.responses || [];
+      if (q.startsWith("INSERT IGNORE INTO inquiries")) return { affectedRows: 1 };
       return [];
     },
     transaction: (fn) => fn({}),
@@ -328,4 +330,74 @@ test("xlsx writer: valid zip, escaped text, header row", () => {
   const files = unzip(xlsx({ header: ["A & B"], rows: [["<x>"], [3], [null]] }));
   assert.ok(files["[Content_Types].xml"] && files["xl/workbook.xml"] && files["xl/styles.xml"]);
   assert.match(files["xl/worksheets/sheet1.xml"], /A &amp; B.*&lt;x&gt;.*<v>3<\/v>/s);
+});
+
+test("Google Forms CSV import: titles matched, commas inside choices kept, Other kept, times read", async () => {
+  const { parseCsv, mapResponses, parseTimestamp, importId } = await import("./form-import.js");
+  const t = FORM_TEMPLATES.find((x) => x.slug === "individual-services");
+  const def2 = definitionSchema.parse(t.definition);
+  const csv =
+    '﻿Timestamp,Name,Email,WhatsApp Number,"Which Services do you want to purchase?\n(You can purchase multiple services at a time)",Amount you have Paid,Transaction ID,Screenshot/Picture of the Payment,Score\r\n' +
+    '2025/11/12 10:30:45 PM GMT+6,Rahim,r@x.com,017,"CSS Fillup (one-on-one): 2,500 Taka, 2 Supplemental Essay : 1,000 Taka, Visa help, please",2500,TX1,https://drive.google.com/open?id=abc,\r\n';
+  const { items, matched, unmatched } = mapResponses(def2, parseCsv(csv));
+  assert.equal(items.length, 1);
+  assert.deepEqual(items[0].data.services, [
+    "CSS Fillup (one-on-one): 2,500 Taka",
+    "2 Supplemental Essay : 1,000 Taka",
+    "Visa help, please",
+  ]);
+  assert.equal(items[0].data.full_name, "Rahim");
+  assert.equal(items[0].data.payment_screenshot, "https://drive.google.com/open?id=abc");
+  assert.equal(items[0].createdAt.toISOString(), "2025-11-12T16:30:45.000Z");
+  assert.ok(matched.length >= 7);
+  assert.deepEqual(unmatched, ["Score"]);
+  assert.equal(parseTimestamp("11/12/2025 22:30:45").toISOString(), "2025-11-12T16:30:45.000Z");
+  assert.equal(importId("f", items[0]), importId("f", items[0]), "re-imports are skipped");
+
+  // The BootCamp's long question (paragraph + question in one Google title) still matches.
+  const boot = definitionSchema.parse(FORM_TEMPLATES[0].definition);
+  const m = mapResponses(boot, [
+    [
+      "Please fill out this form carefully, as seats are strictly limited. Our team will reach out...\nAre you interested in submitting supporting materials (such as your resume, extracurricular list, or honors profile) to help us evaluate your profile for selection?  ",
+    ],
+    ["Yes"],
+  ]);
+  assert.equal(m.items[0].data.supporting_materials, "Yes");
+});
+
+test("Import route: owner/admin only, inserts once with the original time and no emails", async () => {
+  const store = fakeStore();
+  const app = createApp(store, {
+    ADMIN_ORIGIN: "https://a",
+    PUBLIC_ORIGIN: PUBLIC,
+    GOOGLE_CLIENT_ID: "t",
+  });
+  const csv = "Timestamp,Name,Year\n2025/01/02 9:00:00 AM GMT+6,Rahim,2027\n";
+  const r = await request(app)
+    .post(`/api/forms/${FORM_ID}/import?status=closed`)
+    .set("Cookie", "__Host-sc_session=" + "a".repeat(64))
+    .set("Origin", "https://a")
+    .set("X-CSRF-Token", "c")
+    .set("Content-Type", "text/csv")
+    .send(csv)
+    .expect(200);
+  assert.deepEqual(r.body.matched, ["Name", "Year"]);
+  const ins = store.sql.find(([q]) => q.startsWith("INSERT IGNORE INTO inquiries"));
+  assert.equal(ins[1][1], "Rahim");
+  assert.equal(ins[1][7], "closed");
+  assert.equal(ins[1][8].toISOString(), "2025-01-02T03:00:00.000Z");
+  assert.ok(!store.sql.some(([q]) => q.includes("mail_outbox")));
+  const ed = createApp(fakeStore({ role: "editor" }), {
+    ADMIN_ORIGIN: "https://a",
+    PUBLIC_ORIGIN: PUBLIC,
+    GOOGLE_CLIENT_ID: "t",
+  });
+  await request(ed)
+    .post(`/api/forms/${FORM_ID}/import`)
+    .set("Cookie", "__Host-sc_session=" + "a".repeat(64))
+    .set("Origin", "https://a")
+    .set("X-CSRF-Token", "c")
+    .set("Content-Type", "text/csv")
+    .send(csv)
+    .expect(403);
 });

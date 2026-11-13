@@ -2170,6 +2170,7 @@ async function renderForms(openId) {
       success: "Thank you! We'll get back to you within 24 hours.",
       published: false,
       notify: true,
+      cover: "site:campus-early-fall",
       definition: {
         steps: [
           {
@@ -2283,6 +2284,60 @@ async function renderResponses(f) {
       "muted",
     ),
   );
+  // Bring in the answers people gave on the old Google Form.
+  const imp = node("details", undefined, "card");
+  imp.append(node("summary", "Import old responses from Google Forms"));
+  imp.append(
+    node(
+      "p",
+      "In Google Forms: open the form → Responses → ⋮ (three dots) → Download responses (.csv). Unzip it, then choose the .csv here. Questions are matched by their titles; importing the same file again adds nothing twice. Imported answers don't send emails.",
+      "muted",
+    ),
+  );
+  const [isl, impStatus] = select(
+    "Status for the imported responses in Leads",
+    [
+      ["contacted", "Contacted"],
+      ["closed", "Closed"],
+      ["enrolled", "Enrolled"],
+      ["new", "New"],
+    ],
+    "contacted",
+  );
+  const csvFile = node("input");
+  csvFile.type = "file";
+  csvFile.accept = ".csv,text/csv";
+  csvFile.setAttribute("aria-label", "Google Forms responses CSV");
+  const impGo = button(
+    "Import",
+    async () => {
+      const file = csvFile.files[0];
+      if (!file) throw Error("Choose the .csv file first.");
+      if (file.size > 8 * 1024 * 1024) throw Error("That file is larger than 8 MB.");
+      impGo.disabled = true;
+      try {
+        const r = await fetch(`/api/forms/${f.id}/import?status=${impStatus.value}`, {
+          method: "POST",
+          headers: { "Content-Type": "text/csv", "X-CSRF-Token": me.csrf },
+          body: await file.text(),
+        });
+        const j = await r.json();
+        if (!r.ok) throw Error(j.error || "Import failed.");
+        await renderResponses(f);
+        notice(
+          `Imported ${j.added} response${j.added === 1 ? "" : "s"}` +
+            (j.skipped ? `, ${j.skipped} were already here` : "") +
+            (j.unmatched.length ? `. Kept as extra columns: ${j.unmatched.join(", ")}` : "") +
+            ".",
+        );
+      } finally {
+        impGo.disabled = false;
+      }
+    },
+    "primary",
+  );
+  imp.append(isl, csvFile, impGo);
+  screen.append(imp);
   if (!items.length) return screen.append(node("p", "No responses yet.", "empty"));
   const wrap = node("div", undefined, "card responses");
   const table = node("table");
@@ -2300,6 +2355,13 @@ async function renderResponses(f) {
         const a = node("a", v.name || "file");
         a.href = "/api/forms/uploads/" + v.file;
         a.setAttribute("download", "");
+        td.append(a);
+      } else if (typeof v === "string" && /^https:\/\/\S+$/.test(v)) {
+        // e.g. a Google Drive file from an imported Google Forms response
+        const a = node("a", v.includes("drive.google.com") ? "Google Drive file" : v);
+        a.href = v;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
         td.append(a);
       } else td.textContent = Array.isArray(v) ? v.join(", ") : v === true ? "Yes" : (v ?? "");
       tr.append(td);
@@ -2347,9 +2409,66 @@ function formBuilder(f) {
     l.append(c, document.createTextNode(" " + text));
     return [l, c];
   };
+  // Header photo: one of the website's photos, or an image uploaded here.
+  const COVER_CHOICES = [
+    ["site:campus-early-fall", "Campus in early fall"],
+    ["site:library", "Library"],
+    ["site:students-walking", "Students walking"],
+    ["site:oklahoma-autumn", "Campus in autumn"],
+    ["", "No photo (dark blue)"],
+  ];
+  let coverValue = f.cover || "";
+  const coverBox = node("div", undefined, "cover-picker");
+  const coverPreview = node("img");
+  coverPreview.alt = "";
+  const [cpl, coverPick] = select(
+    "Header photo",
+    [
+      ...COVER_CHOICES,
+      ...(coverValue.startsWith("https://") ? [[coverValue, "Your uploaded image"]] : []),
+    ],
+    coverValue,
+  );
+  const drawCover = () => {
+    const site = coverValue.match(/^site:(.+)$/);
+    coverPreview.hidden = !coverValue;
+    coverPreview.src = site
+      ? `https://scholarscafe.com/media/pages/${site[1]}-sm.webp`
+      : coverValue || "";
+  };
+  coverPick.onchange = () => {
+    coverValue = coverPick.value;
+    drawCover();
+  };
+  const coverFile = node("input");
+  coverFile.type = "file";
+  coverFile.accept = "image/png,image/jpeg,image/webp";
+  coverFile.setAttribute("aria-label", "Upload your own header photo");
+  coverFile.onchange = async () => {
+    if (!coverFile.files[0]) return;
+    coverFile.disabled = true;
+    try {
+      coverValue = (await upload(coverFile.files[0])).url;
+      const o = node("option", "Your uploaded image");
+      o.value = coverValue;
+      coverPick.append(o);
+      coverPick.value = coverValue;
+      drawCover();
+      notice("Photo uploaded. Save the form to use it.");
+    } catch (err) {
+      report(err);
+    } finally {
+      coverFile.disabled = false;
+      coverFile.value = "";
+    }
+  };
+  const coverUp = node("label", "…or upload your own (wide photo, under 5 MB): ");
+  coverUp.append(coverFile);
+  coverBox.append(cpl, coverUp, coverPreview);
+  drawCover();
   const [pl, published] = flag("Published (anyone with the link can fill it in)", f.published);
   const [nl, notify] = flag("Email me each new submission", f.notify);
-  form.append(tl, sl, il, ml, pl, nl);
+  form.append(tl, sl, il, ml, coverBox, pl, nl);
   if (f.id && f.published) {
     const a = node("a", "Open the live form ↗", "button-link");
     a.href = "https://scholarscafe.com/forms/" + f.slug;
@@ -2606,6 +2725,7 @@ function formBuilder(f) {
         success: success.value,
         published: published.checked,
         notify: notify.checked,
+        cover: coverValue,
         definition: def,
       });
       notice(

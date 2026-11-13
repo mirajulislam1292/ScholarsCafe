@@ -14,12 +14,14 @@ import { makeToken, readToken } from "./tokens.js";
 import { checkFile, FILE_TYPES, MAX_FILE } from "./files.js";
 import { FORM_TEMPLATES } from "./form-templates.js";
 import { xlsx } from "./xlsx.js";
+import { importId, mapResponses, parseCsv, pickRole } from "./form-import.js";
 
 export { FORM_TEMPLATES };
 // Form attachments live next to student files, outside the web root, under a random id.
 const uploadDir = (config) =>
   join(config.FILE_DIR || join(homedir(), "sc-private", "files"), "forms");
 const uploadPath = (config, id) => join(uploadDir(config), id);
+export const COVERS = ["campus-early-fall", "library", "students-walking", "oklahoma-autumn"];
 const UPLOAD_TICKET_SECONDS = 6 * 60 * 60;
 const UPLOADS_TOTAL = 3 * 1024 * 1024 * 1024; // all form attachments together
 const FILE_HELP = "PDF, Word (.docx), text, PNG or JPEG, up to 10 MB.";
@@ -115,6 +117,15 @@ const formInput = z
     success: z.string().max(500).default("Thank you! We'll get back to you within 24 hours."),
     published: z.boolean().default(false),
     notify: z.boolean().default(true),
+    // Header photo: one of the website's photos ("site:library") or an uploaded image link.
+    cover: z
+      .string()
+      .max(500)
+      .regex(
+        new RegExp(`^(site:(${COVERS.join("|")})|https://[^\\s"'<>\\\\]+)?$`),
+        "Pick one of the photos or upload an image.",
+      )
+      .default(""),
     definition: definitionSchema,
   })
   .strict();
@@ -366,6 +377,53 @@ export function installFormAdminRoutes(app, { store, fail, canPublish, config })
       .set("Cache-Control", "private, no-store")
       .send(body);
   });
+  // Old responses from Google Forms (CSV). Owner/admin only; rows already imported are skipped.
+  app.post(
+    "/api/forms/:id/import",
+    express.text({ type: ["text/csv", "text/plain"], limit: "8mb" }),
+    async (req, res) => {
+      staffOnly(req);
+      const formId = z.string().uuid().parse(req.params.id);
+      const status = z
+        .enum(["new", "contacted", "enrolled", "closed"])
+        .default("contacted")
+        .parse(req.query.status || undefined);
+      if (typeof req.body !== "string" || !req.body.trim())
+        throw fail(400, "Choose the CSV file you downloaded from Google Forms.");
+      const [form] = await q("SELECT id,definition FROM forms WHERE id=? AND deleted_at IS NULL", [
+        formId,
+      ]);
+      if (!form) throw fail(404, "Form not found.");
+      const def = json(form.definition);
+      const { items, matched, unmatched } = mapResponses(def, parseCsv(req.body));
+      if (!matched.length)
+        throw fail(400, "None of the columns match this form's questions. Is it the right file?");
+      if (items.length > 5000) throw fail(413, "Import at most 5,000 responses at a time.");
+      let added = 0;
+      await store.transaction(async (c) => {
+        for (const item of items) {
+          const r = await q(
+            "INSERT IGNORE INTO inquiries (id,name,email,phone,message,form_id,data,status,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+            [
+              importId(formId, item),
+              pickRole(def, item.data, "name").slice(0, 160) || "(no name)",
+              pickRole(def, item.data, "email").slice(0, 254),
+              pickRole(def, item.data, "phone").slice(0, 80),
+              summarize(def, item.data).slice(0, 20000),
+              formId,
+              JSON.stringify(item.data),
+              status,
+              item.createdAt || new Date(),
+            ],
+            c,
+          );
+          added += r?.affectedRows ? 1 : 0;
+        }
+        await store.audit(req.actor.id, "form_import", `${formId}:${added}`, c);
+      });
+      res.json({ added, skipped: items.length - added, matched, unmatched });
+    },
+  );
   app.get("/api/forms/uploads/:id", async (req, res) => {
     staffOnly(req);
     const [f] = await q(
@@ -407,17 +465,18 @@ export function installFormAdminRoutes(app, { store, fail, canPublish, config })
         d.published,
         d.notify,
         JSON.stringify(d.definition),
+        d.cover || null,
       ];
       if (existingId) {
         const r = await q(
-          "UPDATE forms SET slug=?,title=?,intro=?,success=?,published=?,notify=?,definition=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
+          "UPDATE forms SET slug=?,title=?,intro=?,success=?,published=?,notify=?,definition=?,cover=?,updated_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
           [...values, formId],
           c,
         );
         if (!r.affectedRows) throw fail(404, "Form not found.");
       } else
         await q(
-          "INSERT INTO forms (slug,title,intro,success,published,notify,definition,id) VALUES (?,?,?,?,?,?,?,?)",
+          "INSERT INTO forms (slug,title,intro,success,published,notify,definition,cover,id) VALUES (?,?,?,?,?,?,?,?,?)",
           [...values, formId],
           c,
         );
@@ -458,7 +517,7 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
   app.get("/public/forms/:slug", async (req, res) => {
     cors(req, res);
     const [f] = await q(
-      "SELECT slug,title,intro,definition FROM forms WHERE slug=? AND published=1 AND deleted_at IS NULL",
+      "SELECT slug,title,intro,cover,definition FROM forms WHERE slug=? AND published=1 AND deleted_at IS NULL",
       [slugOf(req)],
     );
     if (!f) throw fail(404, "This form isn't available.");

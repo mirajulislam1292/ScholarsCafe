@@ -2,6 +2,9 @@
 // Titles, introductions, questions, choices and required flags are copied from the originals (November 2026);
 // only the layout changed: Google's two-line question titles became a question plus help text, and the
 // group headings inside the services list are marked with "# " so they show as headings, not choices.
+// Light copyedits: the tagline moved to its own line (no dashes), and obvious typos were fixed
+// ("Guranteed", "Statment", "Account Namer", "have have", a repeated list line). Prices, dates, payment
+// details and policies are unchanged. Emojis at the start of a line show as matching icons on the page.
 const DONE = "Thank you! Your response has been recorded.";
 
 const FOLLOW = `📩If you have any question regarding this cohort, feel free to reach out to our FACEBOOK PAGE or E-mail us at: contact.scholarscafe@gmail.com
@@ -171,12 +174,14 @@ export const FORM_TEMPLATES = [
   {
     slug: "ed2-rd-bootcamp",
     title: "Scholars Cafe ED II & RD BootCamp Application",
-    intro: `Welcome to ScholarsCafe — A Cafe to Ease your Study Abroad Journey.☕🌍
+    intro: `Welcome to Scholars Cafe ☕🌍
+A Cafe to Ease Your Study Abroad Journey.
+
 The Early Decision deadline is the most important date on your calendar. You have already missed it.
 No worries, still there is a hope. You have still time for ED II and RD Application. Is your application strong enough to stand out at top-tier universities and elite Liberal Arts Colleges? Are you ready for ED II & RD applications? If not, then don't worry.
 
 Scholars Cafe is opening its doors for an intensive "ED II & RD Application Bootcamp" to transform your profile from "good" to "unforgettable".
-🚩Note: You don't need to pay any penny to fill up this form. This is an interest form where we will get you know better and we will inform you via email if you are selected with the further information regarding payment within 48 hours. Please keep an eye in your email after filling out this form.
+🚩Note: You don't need to pay any penny to fill up this form. This is an interest form where we will get to know you better and we will inform you via email if you are selected with the further information regarding payment within 48 hours. Please keep an eye in your email after filling out this form.
 
 📢 BootCamp Start Date: January 1, 2026
 💡 BootCamp End Date: January 7, 2026
@@ -216,6 +221,7 @@ ${FOLLOW.replace("this cohort", "this BootCamp")}`,
     success: DONE,
     published: false,
     notify: true,
+    cover: "site:library",
     definition: {
       steps: [
         {
@@ -270,9 +276,11 @@ ${FOLLOW.replace("this cohort", "this BootCamp")}`,
   {
     slug: "premium-mentorship-fall27",
     title: "Scholars Cafe Premium Mentorship Program Interest Form - Fall'27",
-    intro: `Welcome to Scholars Cafe - A Cafe to Ease your Study Abroad Journey.☕🌍
+    intro: `Welcome to Scholars Cafe ☕🌍
+A Cafe to Ease Your Study Abroad Journey.
+
 Just like a perfect cup of coffee starts with the right beans, your dream of studying abroad begins with the right guidance. At Scholars Cafe, we blend personalized mentorship, expert consulting, and global opportunities into empowering experience. This is Cafe to make your dream worked over a coffee conversation.
-📌Note: You don't need to pay anything to fill out this form. This is an interest form where we will get you know better.
+📌Note: You don't need to pay anything to fill out this form. This is an interest form where we will get to know you better.
 
 
 💡Program Timeline: September -  till Visa Interview of that Intake
@@ -297,7 +305,6 @@ Bank Statement/Solvency Guideline
 Post-Admission Support (Including Help with Negotiation for Scholarships/Financial Aid)
 Full Visa Processing (DS160, CGI, Interview Preparation)
 Visa Answer Crafting with Unlimited Mock Interview
-Bank Statement/Solvency Guideline
 Weekly 2 Live Classes
 Recordings of Live Classes
 ALL Online Resources + Materials
@@ -329,6 +336,7 @@ ${FOLLOW}`,
     success: DONE,
     published: false,
     notify: true,
+    cover: "site:campus-early-fall",
     definition: {
       steps: [
         {
@@ -339,8 +347,7 @@ ${FOLLOW}`,
             institution,
             {
               id: "grade9_10_institutions",
-              label:
-                "Mention Any Different Institutions You have have attended in your 9th-10th grade",
+              label: "Mention Any Different Institutions You have attended in your 9th-10th grade",
               type: "textarea",
               required: false,
             },
@@ -372,7 +379,9 @@ ${FOLLOW}`,
   {
     slug: "f1-visa-mentorship",
     title: "Scholars Cafe USA F-1 Visa Processing Service",
-    intro: `Welcome to Scholars Cafe — A Cafe to Ease your Study Abroad Journey.☕🌍
+    intro: `Welcome to Scholars Cafe ☕🌍
+A Cafe to Ease Your Study Abroad Journey.
+
 Just like a perfect cup of coffee starts with the right beans, your dream of studying abroad begins with the right guidance. Pull up a chair, pour a cup of ambition, and let’s start crafting your visa application because success, like great coffee, starts with the right guidance.🎓🛫
 
 📢USA F-1 Visa Mentorship Package (this includes DS-160 Form Fill-up & Review, CGI Portal Fill-up & Review. Proper Documents Organize, Visa Interview Answer Craft, Mock Interviews, Last Minute Guidance,  Interview Day To-do List and A Complete Framework of Visa Application)
@@ -395,15 +404,15 @@ Just like a perfect cup of coffee starts with the right beans, your dream of stu
 (These are customizable based on your urgency and need)
 
 ⛔What not to Expect:
-Guranteed Visa
+Guaranteed Visa
 Visa Appointment Date Taken
-Bank Statment Help (suggestions will be given)
+Bank Statement Help (suggestions will be given)
 Others not mentioned in (what we offer)
 💡After purchasing the service, you will get a confirmation email to your email address within 48 hours. You will also find a WhatsApp Group link where your processing will be conducted.
 
 💳Payment Gateway:
 Bank Details:
-Account Namer: Md Shahnoor Mridul
+Account Name: Md Shahnoor Mridul
 Account no-1059166460001
 Brac Bank
 Mitford branch
@@ -416,6 +425,7 @@ ${FOLLOW.replace("this cohort", "USA F-1 Visa Processing services or want to lea
     success: DONE,
     published: false,
     notify: true,
+    cover: "site:oklahoma-autumn",
     definition: {
       steps: [
         {
@@ -476,7 +486,8 @@ ${FOLLOW.replace("this cohort", "USA F-1 Visa Processing services or want to lea
   {
     slug: "usa-cohort-fall27",
     title: "Scholars Cafe USA Cohort Interest Form - Fall'27",
-    intro: `Welcome to Scholars Cafe - A Cafe to Ease Your Study Abroad Journey.☕🌍
+    intro: `Welcome to Scholars Cafe ☕🌍
+A Cafe to Ease Your Study Abroad Journey.
 
 Just like a perfect cup of coffee starts with the right beans, your dream of studying abroad begins with the right guidance. At Scholars Cafe, we blend personalized mentorship, expert consulting, and global opportunities into an empowering experience. We help you brew a future full of promise one sip at a time. This is a cafe where your dream comes true through a coffee conversation.☕🎯
 
@@ -546,6 +557,7 @@ ${FOLLOW.replace("question regarding", "questions regarding").replace("E-mail us
     success: DONE,
     published: false,
     notify: true,
+    cover: "site:students-walking",
     definition: {
       steps: [
         {
@@ -556,8 +568,7 @@ ${FOLLOW.replace("question regarding", "questions regarding").replace("E-mail us
             institution,
             {
               id: "grade9_10_institutions",
-              label:
-                "Mention Any Different Institutions You have have attended in your 9th-10th grade",
+              label: "Mention Any Different Institutions You have attended in your 9th-10th grade",
               type: "text",
               required: false,
             },
@@ -597,11 +608,12 @@ ${FOLLOW.replace("question regarding", "questions regarding").replace("E-mail us
   {
     slug: "individual-services",
     title: "Scholars Cafe USA College Admission Individual Services",
-    intro: `Welcome to Scholars Cafe — A Cafe to Ease Your Study Abroad Journey.☕🌍
+    intro: `Welcome to Scholars Cafe ☕🌍
+A Cafe to Ease Your Study Abroad Journey.
 
-Just like a perfect cup of coffee starts with the right beans, your dream of studying abroad begins with the right guidance. At ScholarsCafe, we blend personalized mentorship, expert consulting, and global opportunities into an empowering experience. Whether you're craving the academic buzz of the top colleges of the USA or the cultural aroma of European campuses, we help you brew a future full of promise — one sip at a time. This is Cafe to make your dream work with a coffee conversation.☕🎯
+Just like a perfect cup of coffee starts with the right beans, your dream of studying abroad begins with the right guidance. At Scholars Cafe, we blend personalized mentorship, expert consulting, and global opportunities into an empowering experience. Whether you're craving the academic buzz of the top colleges of the USA or the cultural aroma of European campuses, we help you brew a future full of promise, one sip at a time. This is Cafe to make your dream work with a coffee conversation.☕🎯
 
-Pull up a chair, pour a cup of ambition, and let’s start crafting your global education journey — because success, like great coffee, starts with the right preparation.🎓🛫
+Pull up a chair, pour a cup of ambition, and let’s start crafting your global education journey, because success, like great coffee, starts with the right preparation.🎓🛫
 Congratulations, champ!🤸‍♀️
 
 -Why?
@@ -651,6 +663,7 @@ ${FOLLOW.replace("question regarding this cohort", "questions regarding any indi
     success: DONE,
     published: false,
     notify: true,
+    cover: "site:library",
     definition: {
       steps: [
         {

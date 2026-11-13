@@ -1177,3 +1177,17 @@ header {
   vertical-align: top;
   white-space: pre-line;
 }
+
+/* Form header photo picker */
+.cover-picker img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 8px 0 4px;
+}
+.cover-picker img[hidden] {
+  display: none;
+}
