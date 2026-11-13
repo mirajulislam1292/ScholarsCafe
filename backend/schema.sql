@@ -316,7 +316,7 @@ CREATE TABLE IF NOT EXISTS forms (
   UNIQUE KEY slug (slug)
 );
 -- Files people attach to a form answer (resume, payment screenshot). Stored privately on disk like student
--- files; inquiry_id is set when the form is sent, and unsent uploads are removed after a day.
+-- files. inquiry_id is set when the form is sent, and unsent uploads are removed after a day.
 CREATE TABLE IF NOT EXISTS form_uploads (
   id CHAR(36) PRIMARY KEY,
   form_id CHAR(36) NOT NULL,
