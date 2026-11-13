@@ -2123,9 +2123,29 @@ const FIELD_TYPES = {
   url: "Link (https)",
   select: "Dropdown",
   radio: "Single choice",
-  checkbox: "Multiple choice",
+  checkbox: "Checkboxes (pick several)",
   consent: "Consent checkbox",
+  time: "Time",
+  file: "File upload",
+  info: "Text block / section heading",
 };
+// The "add a question" buttons, in the order people reach for them (like Google Forms).
+const ADD_BUTTONS = [
+  ["text", "Short answer"],
+  ["textarea", "Paragraph"],
+  ["radio", "Multiple choice"],
+  ["checkbox", "Checkboxes"],
+  ["select", "Dropdown"],
+  ["file", "File upload"],
+  ["email", "Email"],
+  ["phone", "Phone"],
+  ["number", "Number"],
+  ["date", "Date"],
+  ["time", "Time"],
+  ["url", "Link"],
+  ["consent", "Consent"],
+  ["info", "Text / heading"],
+];
 const CHOICE_TYPES = ["select", "radio", "checkbox"];
 const slugify = (s, max = 40) =>
   s
@@ -2137,7 +2157,11 @@ const slugify = (s, max = 40) =>
     .slice(0, max) || "field";
 async function renderForms(openId) {
   const screen = $("screen");
-  const { items, template } = await api("forms");
+  const { items, template, templates = [] } = await api("forms");
+  if (typeof openId === "string" && openId.startsWith("tpl:")) {
+    const t = templates.find((x) => "tpl:" + x.slug === openId);
+    if (t) return formBuilder(structuredClone(t));
+  }
   if (openId !== undefined) {
     const blank = {
       slug: "",
@@ -2195,14 +2219,95 @@ async function renderForms(openId) {
     row.append(
       info,
       node("span", f.published ? "Published" : "Draft", "badge"),
-      button("Submissions", () => {
-        leadsForm = f.id;
-        navigate("Leads");
-      }),
+      button("Responses" + (f.submissions ? ` (${f.submissions})` : ""), () =>
+        renderResponses(f).catch(report),
+      ),
       button("Edit", () => renderFormsOpen(f.id)),
     );
     screen.append(row);
   }
+  // The forms that used to be Google Forms, ready to use (each opens as a draft to check, then publish).
+  const used = new Set(items.map((f) => f.slug));
+  const ready = templates.filter((t) => !used.has(t.slug));
+  if (ready.length) {
+    screen.append(
+      node("h3", "Ready-made forms (from your Google Forms)"),
+      node(
+        "p",
+        "Same questions, choices and introductions as the Google Forms. Open one, check it, tick Published and save.",
+        "muted",
+      ),
+    );
+    for (const t of ready) {
+      const row = node("div", undefined, "card row");
+      const info = node("div");
+      const count = t.definition.steps.flatMap((s) => s.fields).filter((x) => x.type !== "info");
+      info.append(
+        node("span", t.title, "row-title"),
+        node("p", `scholarscafe.com/forms/${t.slug} · ${count.length} questions`, "muted"),
+      );
+      row.append(
+        info,
+        button("Use this form", () => renderFormsOpen("tpl:" + t.slug), "primary"),
+      );
+      screen.append(row);
+    }
+  }
+}
+// ---------- Form responses: a table like Google Forms' responses tab, with an Excel download ----------
+async function renderResponses(f) {
+  const screen = $("screen");
+  const { columns, items } = await api("forms/" + f.id + "/responses");
+  screen.replaceChildren();
+  const bar = node("div", undefined, "toolbar");
+  const xl = node("a", "Download Excel (.xlsx)", "button primary");
+  xl.href = "/api/forms/" + f.id + "/responses.xlsx";
+  xl.setAttribute("download", "");
+  bar.append(
+    button("← Forms", () => render()),
+    node("span"),
+  );
+  bar.lastChild.append(
+    button("Open in Leads", () => {
+      leadsForm = f.id;
+      navigate("Leads");
+    }),
+    xl,
+  );
+  screen.append(
+    bar,
+    node("h2", f.title),
+    node(
+      "p",
+      `${items.length} response${items.length === 1 ? "" : "s"}, newest first. Status, notes and mentor are set in Leads.`,
+      "muted",
+    ),
+  );
+  if (!items.length) return screen.append(node("p", "No responses yet.", "empty"));
+  const wrap = node("div", undefined, "card responses");
+  const table = node("table");
+  const head = node("tr");
+  for (const h of ["Submitted", "Status", ...columns.map((c) => c.label.split("\n")[0])])
+    head.append(node("th", h.length > 60 ? h.slice(0, 57) + "…" : h));
+  table.append(head);
+  for (const r of items) {
+    const tr = node("tr");
+    tr.append(node("td", new Date(r.created_at).toLocaleString()), node("td", r.status));
+    for (const c of columns) {
+      const v = r.data[c.id];
+      const td = node("td");
+      if (v && typeof v === "object" && !Array.isArray(v) && v.file) {
+        const a = node("a", v.name || "file");
+        a.href = "/api/forms/uploads/" + v.file;
+        a.setAttribute("download", "");
+        td.append(a);
+      } else td.textContent = Array.isArray(v) ? v.join(", ") : v === true ? "Yes" : (v ?? "");
+      tr.append(td);
+    }
+    table.append(tr);
+  }
+  wrap.append(table);
+  screen.append(wrap);
 }
 const renderFormsOpen = (id) => {
   $("screen").replaceChildren();
@@ -2226,7 +2331,13 @@ function formBuilder(f) {
     if (!f.id && !slug.dataset.touched) slug.value = slugify(title.value, 60).replace(/_/g, "-");
   };
   slug.oninput = () => (slug.dataset.touched = "1");
-  const [il, intro] = input("Short introduction (optional)", f.intro, "textarea", 2000);
+  const [il, intro] = input(
+    "Introduction (optional; line breaks are kept and https:// links become clickable)",
+    f.intro,
+    "textarea",
+    10000,
+  );
+  intro.rows = 6;
   const [ml, success] = input("Message after sending", f.success, "text", 500);
   const flag = (text, value) => {
     const l = node("label", undefined, "check");
@@ -2261,14 +2372,24 @@ function formBuilder(f) {
       }
       step.fields.forEach((field, fi) => box.append(fieldEditor(step, field, fi, si)));
       const tools = node("div", undefined, "toolbar");
-      tools.append(
-        button("+ Question", () => {
-          let id = "question_" + (allFields().length + 1);
-          while (allFields().some((x) => x.id === id)) id += "_";
-          step.fields.push({ id, label: "New question", type: "text", required: false });
-          drawSteps();
-        }),
-      );
+      const adds = node("div", undefined, "add-question");
+      adds.append(node("span", "Add:", "muted"));
+      for (const [type, text] of ADD_BUTTONS)
+        adds.append(
+          button("+ " + text, () => {
+            let id = "question_" + (allFields().length + 1);
+            while (allFields().some((x) => x.id === id)) id += "_";
+            step.fields.push({
+              id,
+              label: type === "info" ? "Section heading" : "New question",
+              type,
+              required: false,
+              ...(CHOICE_TYPES.includes(type) ? { options: ["Option 1", "Option 2"] } : {}),
+            });
+            drawSteps();
+          }),
+        );
+      box.append(adds);
       if (def.steps.length > 1)
         tools.append(
           button(
@@ -2303,36 +2424,59 @@ function formBuilder(f) {
   };
   const fieldEditor = (step, field, fi, si) => {
     const card = node("details", undefined, "card builder-field");
-    card.open = !f.id && fi === step.fields.length - 1 && field.label === "New question";
+    card.open =
+      fi === step.fields.length - 1 &&
+      (field.label === "New question" || field.label === "Section heading");
+    const info = field.type === "info";
     const summary = node(
       "summary",
-      `${field.label}${field.required ? " *" : ""} · ${FIELD_TYPES[field.type]}${field.show_if ? " · conditional" : ""}`,
+      `${field.label.split("\n")[0].slice(0, 90)}${field.label.length > 90 ? "…" : ""}${field.required ? " *" : ""} · ${FIELD_TYPES[field.type]}${field.show_if ? " · conditional" : ""}`,
     );
     card.append(summary);
-    const [ll, labelIn] = input("Question", field.label, "text", 300);
+    const [ll, labelIn] = input(info ? "Heading" : "Question", field.label, "textarea", 1000);
+    labelIn.rows = 2;
     labelIn.oninput = () => (field.label = labelIn.value);
-    const [yl, type] = select("Answer type", Object.entries(FIELD_TYPES), field.type);
+    const [yl, type] = select("Type", Object.entries(FIELD_TYPES), field.type);
     type.onchange = () => {
       field.type = type.value;
+      if (CHOICE_TYPES.includes(field.type) && !field.options?.length)
+        field.options = ["Option 1", "Option 2"];
       drawSteps();
     };
-    const [rl, req] = flag("Required", Boolean(field.required));
-    req.onchange = () => (field.required = req.checked);
-    card.append(ll, yl, rl);
+    card.append(ll, yl);
+    if (!info) {
+      const [rl, req] = flag("Required", Boolean(field.required));
+      req.onchange = () => (field.required = req.checked);
+      card.append(rl);
+    } else field.required = false;
     if (CHOICE_TYPES.includes(field.type)) {
       const [ol, opts] = input(
-        "Choices (one per line)",
+        "Choices (one per line; start a line with # to make it a heading inside the list)",
         (field.options || []).join("\n"),
         "textarea",
-        6000,
+        12000,
       );
+      opts.rows = Math.min(14, Math.max(4, (field.options || []).length + 1));
       opts.oninput = () =>
         (field.options = opts.value
           .split("\n")
           .map((x) => x.trim())
           .filter(Boolean));
       card.append(ol);
+      if (field.type !== "select") {
+        const [otl, other] = flag('Add an "Other:" choice with a text box', Boolean(field.other));
+        other.onchange = () => (field.other = other.checked);
+        card.append(otl);
+      }
     }
+    if (field.type === "file")
+      card.append(
+        node(
+          "p",
+          "People can attach one PDF, Word (.docx), text, PNG or JPEG file up to 10 MB. Files are private: download them from Responses.",
+          "muted",
+        ),
+      );
     if (["text", "email", "phone"].includes(field.type)) {
       const [rol, role] = select(
         "Use in Leads as",
@@ -2359,7 +2503,13 @@ function formBuilder(f) {
       max.oninput = () => (field.max_length = Number(max.value) || undefined);
       card.append(xl);
     }
-    const [hl, help] = input("Help text (optional)", field.help || "", "text", 300);
+    const [hl, help] = input(
+      info ? "Text (links become clickable)" : "Description / help text (optional)",
+      field.help || "",
+      "textarea",
+      3000,
+    );
+    help.rows = info ? 5 : 2;
     help.oninput = () => (field.help = help.value);
     card.append(hl);
     // Conditional: show only when an earlier choice question has a given answer.
@@ -2378,7 +2528,7 @@ function formBuilder(f) {
       if (source) {
         const [vl, eq] = select(
           "is",
-          source.options.map((o) => [o, o]),
+          source.options.filter((o) => !o.startsWith("# ")).map((o) => [o, o]),
           field.show_if.equals,
         );
         eq.onchange = () => (field.show_if = { field: source.id, equals: eq.value });
@@ -2404,6 +2554,7 @@ function formBuilder(f) {
         "Delete question",
         () => {
           if (step.fields.length === 1) return report(Error("A step needs at least one question."));
+          if (!confirm("Delete this " + (info ? "text block?" : "question?"))) return;
           step.fields.splice(fi, 1);
           drawSteps();
         },
@@ -2443,6 +2594,8 @@ function formBuilder(f) {
         while (used.has(fld.id)) fld.id = (fld.id + "_2").slice(0, 40);
         used.add(fld.id);
         if (!CHOICE_TYPES.includes(fld.type)) delete fld.options;
+        if (!["radio", "checkbox"].includes(fld.type)) delete fld.other;
+        if (fld.type === "info") fld.required = false;
         if (!["text", "email", "phone"].includes(fld.type)) fld.role = null;
         if (!["text", "textarea"].includes(fld.type)) delete fld.max_length;
       }

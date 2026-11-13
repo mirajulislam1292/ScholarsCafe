@@ -118,12 +118,17 @@ If the same text appears in several places (e.g. a button used twice), the panel
 
 Inbox → **Forms**:
 
+- **Ready-made forms:** your five Google Forms (ED II & RD BootCamp, Premium Mentorship, F-1 Visa, USA Cohort, Individual Services) are rebuilt with the same questions, choices and introductions. Click **Use this form**, check it, tick **Published** and save.
 - **Start from the contact form**, or **+ New form**.
-- **Questions:** short or long text, email, phone, number, date, link, dropdown, single or multiple choice, consent. Each can be **Required**, and have help text and a maximum length.
+- **Add buttons**, one per question type: Short answer, Paragraph, Multiple choice, Checkboxes, Dropdown, **File upload**, Email, Phone, Number, Date, Time, Link, Consent, and **Text / heading** (a section title or a paragraph of information, no answer).
+- Each question can be **Required**, have a description (links become clickable) and a maximum length.
+- **Multiple choice and Checkboxes** can add an **"Other:"** choice with a text box. In a choice list, a line starting with `#` is a heading (e.g. `# Guidance Program:`), not something people pick.
+- **File upload:** one PDF, Word (.docx), text, PNG or JPEG up to 10 MB per question (up to 5 per form). Files are private.
 - **Show only when:** a question can appear only for a certain earlier answer, for example "Which grade?" only when "Other" is chosen.
 - **+ Add a step** makes a multi-page form.
 - **Publishing:** tick **Published** and save. The form is live at `scholarscafe.com/forms/<address>`; share that link.
-- **Answers** go to **Leads**, labelled with the form's name. Tick "Email me" to also get each one by email.
+- **Responses** (on each form): a table with one column per question, newest first. Click a file to download it. **Download Excel (.xlsx)** gives the same table as a spreadsheet; file cells link back to the download (sign in to the admin first).
+- **Answers** also go to **Leads**, labelled with the form's name, for status, notes and mentor. Tick "Email me" to also get each one by email.
 
 ## 10. Leads
 
