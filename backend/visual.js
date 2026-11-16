@@ -2,14 +2,9 @@
 // Each change is saved AND published at once (live in about a minute, no deploy), with a revision kept
 // for undo. Only the one Super Admin account may use it: role owner AND the configured SUPER_ADMIN_EMAIL.
 import { z } from "zod";
-import { contentValid, KINDS } from "./security.js";
+import { contentValid, KINDS, isSuperAdmin, superAdminEmail } from "./security.js";
 
-export const superAdminEmail = (config) =>
-  (config.SUPER_ADMIN_EMAIL || config.OWNER_EMAIL || "contact.scholarscafe@gmail.com")
-    .trim()
-    .toLowerCase();
-export const isSuperAdmin = (actor, config) =>
-  actor?.role === "owner" && String(actor.email || "").toLowerCase() === superAdminEmail(config);
+export { isSuperAdmin, superAdminEmail };
 
 const key = z.string().regex(/^[A-Za-z0-9_.~-]{1,200}$/);
 const editInput = z
