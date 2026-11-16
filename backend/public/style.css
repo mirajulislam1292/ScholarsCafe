@@ -1567,3 +1567,23 @@ a.button.primary:visited {
 .form-back-bar .spacer {
   flex: 1;
 }
+/* Bookings */
+.booking-topic {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.booking-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.booking-add input {
+  width: auto;
+  flex: 1 1 160px;
+}
+.booking-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

@@ -340,3 +340,27 @@ CREATE TABLE IF NOT EXISTS link_clicks (
   clicks INT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (link_id, day)
 );
+-- 1-on-1 mentor session bookings (scholarscafe.com/book). One booking per Bangladesh date: day is UNIQUE and
+-- set to NULL when a booking is cancelled, which frees the day. Times are UTC.
+CREATE TABLE IF NOT EXISTS bookings (
+  id CHAR(36) PRIMARY KEY,
+  day DATE NULL,
+  starts_at DATETIME NOT NULL,
+  ends_at DATETIME NOT NULL,
+  name VARCHAR(160) NOT NULL,
+  email VARCHAR(254) NOT NULL,
+  phone VARCHAR(30) NOT NULL DEFAULT '',
+  topic TEXT NOT NULL,
+  status ENUM('booked','cancelled') NOT NULL DEFAULT 'booked',
+  reminded_at DATETIME NULL,
+  cancelled_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY one_per_day (day),
+  INDEX starts (status, starts_at)
+);
+-- Booking availability (open weekdays, time windows, slot length, days ahead, blocked dates, meeting link).
+CREATE TABLE IF NOT EXISTS booking_settings (
+  id TINYINT PRIMARY KEY,
+  data JSON NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

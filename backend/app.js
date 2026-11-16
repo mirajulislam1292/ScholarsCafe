@@ -16,6 +16,7 @@ import { installFileRoutes } from "./files.js";
 import { installDocumentRoutes } from "./documents.js";
 import { installFormAdminRoutes, installPublicFormRoutes } from "./forms.js";
 import { installVisualRoutes, isSuperAdmin } from "./visual.js";
+import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
 import {
   token,
   hash,
@@ -316,6 +317,7 @@ export function createApp(
     });
   }
   installPublicFormRoutes(app, { store, fail, config, sharedLimit });
+  installPublicBookingRoutes(app, { store, fail, config, sharedLimit });
   // /links page click counts: one counter per link per day, nothing about the visitor is stored.
   app.post(
     "/public/links/:id/click",
@@ -516,6 +518,7 @@ export function createApp(
   installFileRoutes(app, { store, fail, config });
   installDocumentRoutes(app, { store, fail });
   installFormAdminRoutes(app, { store, fail, canPublish, config });
+  installBookingAdminRoutes(app, { store, fail, canPublish });
   installVisualRoutes(app, { store, fail, config });
   installMessageRoutes(app, { store, fail });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.

@@ -126,6 +126,9 @@ export class Store {
     // One or two sentences for the public list of forms (scholarscafe.com/forms).
     await add("forms", "summary", "summary VARCHAR(300) NOT NULL DEFAULT ''");
     await add("mail_outbox", "to_email", "to_email VARCHAR(254) NULL");
+    // Bookings: the bookings and booking_settings tables are created by schema.sql (CREATE TABLE IF NOT
+    // EXISTS) on every start. Columns added to them later go here.
+    await add("bookings", "reminded_at", "reminded_at DATETIME NULL");
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(

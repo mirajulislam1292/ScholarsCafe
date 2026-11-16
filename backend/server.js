@@ -2,6 +2,7 @@ import { Store } from "./store.js";
 import { createApp, portalConfig } from "./app.js";
 import { createMailer, deliverMail } from "./mail.js";
 import { seedFormTemplates } from "./forms.js";
+import { queueBookingReminders } from "./booking.js";
 
 for (const key of [
   "DB_HOST",
@@ -57,6 +58,20 @@ async function start() {
     }
   }, 15000);
   mailTimer.unref();
+  // Booking reminders (60–90 minutes before a session), queued once each into the mail outbox. Admin only.
+  let reminding = false;
+  const reminderTimer = setInterval(async () => {
+    if (reminding || process.env.PORTAL === "student") return;
+    reminding = true;
+    try {
+      await queueBookingReminders(store);
+    } catch {
+      console.error("Booking reminder check failed");
+    } finally {
+      reminding = false;
+    }
+  }, 60000);
+  reminderTimer.unref();
   const server = createApp(store, portalConfig(process.env), undefined, mailer).listen(
     Number(process.env.PORT || 3000),
     "0.0.0.0",
