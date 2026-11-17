@@ -98,6 +98,8 @@ const HELP = {
   highlight:
     "Featured: the button gets a light outline so it stands out. Order is set by position.",
   date: "Publish date, YYYY-MM-DD. The home page shows the five newest.",
+  linkedin: "Optional. Full LinkedIn profile link (https://…). Leave empty to hide the icon.",
+  instagram: "Optional. Full Instagram profile link (https://…). Leave empty to hide the icon.",
 };
 // Free-text fields with suggestions (pick one or type a new value).
 const SUGGEST = {
@@ -134,6 +136,8 @@ const defaults = {
     title: "",
     line: "",
     photo: "",
+    linkedin: "",
+    instagram: "",
     position: 0,
   },
   faqs: { q: "", a: "", position: 0 },
@@ -284,7 +288,7 @@ function field(form, key, value) {
     input.checked = value;
   } else input.value = Array.isArray(value) ? value.join("\n") : value;
   if (key === "body") input.className = "body-field";
-  if (["photo", "image"].includes(key)) input.type = "url";
+  if (["photo", "image", "linkedin", "instagram"].includes(key)) input.type = "url";
   if (key === "email") input.type = "email";
   input.id = "field-" + key;
   label.htmlFor = input.id;
@@ -614,7 +618,9 @@ function edit(item) {
   );
   const getters = {};
   const title = field(form, "Entry name", item.title);
-  for (const [key, value] of Object.entries(item.data)) getters[key] = field(form, key, value);
+  // Team entries saved before the LinkedIn/Instagram fields existed still get those (empty) fields.
+  const data = item.kind === "team" ? { ...defaults.team, ...item.data } : item.data;
+  for (const [key, value] of Object.entries(data)) getters[key] = field(form, key, value);
   const actions = node("div", undefined, "actions");
   const save = node("button", "Save draft", "primary");
   save.type = "submit";

@@ -88,7 +88,7 @@
     "defaultCountry": "USA"
   },
   "team": {
-    "_readme": "Our Team. Entries with an empty name are hidden. photo: path or https link (portrait, at least 800px tall); without one, initials on a brand gradient are shown. Will become editable in the admin (Phase 3).",
+    "_readme": "Our Team. Entries with an empty name are hidden. photo: path or https link (portrait, at least 800px tall); without one, initials on a brand gradient are shown. linkedin / instagram (optional): full https profile links; each icon shows only when its link is set. Will become editable in the admin (Phase 3).",
     "heading": "Our Team",
     "founders": [
       {

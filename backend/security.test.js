@@ -319,6 +319,12 @@ test("Content schemas reject unsafe values in new collections", () => {
     assert.equal(ok("team", { ...member, group }), true, group);
   assert.equal(ok("team", { ...member, group: "  " }), false);
   assert.equal(ok("team", { ...member, group: "x".repeat(61) }), false);
+  // Optional LinkedIn/Instagram links: empty or HTTPS only.
+  const links = { ...member, group: "Founders", linkedin: "", instagram: "" };
+  assert.equal(ok("team", links), true);
+  assert.equal(ok("team", { ...links, linkedin: "https://www.linkedin.com/in/x" }), true);
+  assert.equal(ok("team", { ...links, instagram: "javascript:alert(1)" }), false);
+  assert.equal(ok("team", { ...links, linkedin: "http://linkedin.com/in/x" }), false);
   assert.equal(ok("sections", { page: "/", order: "hero,names", hidden: "names" }), true);
   assert.equal(ok("sections", { page: "/", order: "hero;drop table", hidden: "" }), false);
   assert.equal(ok("universities", { name: "X", position: 10, extra: 1 }), false);
