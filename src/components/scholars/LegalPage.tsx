@@ -28,7 +28,7 @@ export function LegalPage({
           </>
         }
       />
-      <section className="bg-white py-[clamp(72px,12vw,160px)]">
+      <section className="bg-white py-[clamp(56px,8vw,112px)]">
         <article
           className="prose mx-auto max-w-[720px] px-6 md:px-0
             prose-headings:font-heading prose-headings:font-light prose-headings:tracking-[-0.02em] prose-headings:text-neutral-900
@@ -42,7 +42,7 @@ export function LegalPage({
           {children}
         </article>
       </section>
-      <CtaBand title="Questions about your data? Just ask." action="Contact us" />
+      <CtaBand title="Questions about your data? Just ask." action="Contact us" href="/contact" />
     </main>
   );
 }

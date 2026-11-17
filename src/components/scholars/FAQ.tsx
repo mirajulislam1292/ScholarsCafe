@@ -5,10 +5,9 @@ import { useState } from "react";
 import { Reveal } from "./Reveal";
 import {
   FAQS as CMS_DEFAULT_FAQS,
-  BOOK_LINK,
   EMAIL as CMS_DEFAULT_EMAIL,
 } from "@/lib/scholars-data";
-import { Plus, Mail, CalendarDays } from "lucide-react";
+import { Plus, Mail, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export function FAQ() {
@@ -17,7 +16,7 @@ export function FAQ() {
 
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section id="faq" className="bg-white py-[clamp(72px,13vw,200px)]">
+    <section id="faq" className="bg-white py-[clamp(56px,8vw,112px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="max-w-2xl md:mx-auto md:text-center">
           <span className="hidden">
@@ -81,11 +80,11 @@ export function FAQ() {
             <CmsText id="FAQ.d9172c43bec6">Email us</CmsText>
           </a>
           <a
-            href={BOOK_LINK}
+            href="/contact"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-5 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800"
           >
-            <CalendarDays className="h-4 w-4" aria-hidden />
-            <CmsText id="FAQ.bookmentor">Talk to a mentor</CmsText>
+            <MessageCircle className="h-4 w-4" aria-hidden />
+            <CmsText id="FAQ.contact">Contact us</CmsText>
           </a>
         </Reveal>
       </div>
