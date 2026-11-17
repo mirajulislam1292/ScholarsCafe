@@ -1926,3 +1926,10 @@ fieldset.assignees label.check {
     width: 100%;
   }
 }
+
+/* ECA alerts unsubscribe page (served by the backend, no scripts). */
+.unsubscribe {
+  max-width: 480px;
+  width: calc(100% - 32px);
+  margin: 48px auto;
+}

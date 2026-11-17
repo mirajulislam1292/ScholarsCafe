@@ -10,19 +10,28 @@ type Blog = {
   image: string;
   date?: string;
 };
-export function BlogPosts() {
+/** Home: the latest five posts. Resources → Blog: every post (`limit` unset), with an empty state. */
+export function BlogPosts({
+  limit = 5,
+  heading = "From our journal",
+  empty = null,
+}: {
+  limit?: number;
+  heading?: string | null;
+  empty?: React.ReactNode;
+}) {
   const cmsLabel = useCmsLookup();
 
-  // Latest five: newest date first (posts without a date go last).
+  // Newest date first (posts without a date go last).
   const posts = useCmsCollection<Blog>("blogs", [], (data, id) => ({ ...data, id }) as Blog)
     .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
-    .slice(0, 5);
+    .slice(0, limit);
   const [selected, setSelected] = useState<string | null>(null);
-  if (!posts.length) return null;
+  if (!posts.length) return <>{empty}</>;
   return (
     <section id="blog" className="mx-auto max-w-[1280px] px-5 py-20">
-      <h2 className="font-heading text-3xl font-light">From our journal</h2>
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
+      {heading && <h2 className="font-heading text-3xl font-light">{heading}</h2>}
+      <div className={`${heading ? "mt-8 " : ""}grid gap-6 md:grid-cols-2`}>
         {posts.map((post) => (
           <article
             key={post.id}

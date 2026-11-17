@@ -127,7 +127,17 @@ const fields = {
   // Public resources (guides, templates, live links). Package-only student material is private (Phase 3).
   resources: z.object({
     title: short,
-    category: z.enum(["guide", "video", "live", "course", "template", "other"]),
+    // webinar/live/video show on scholarscafe.com/resources/webinars; broadcast on /resources/broadcast.
+    category: z.enum([
+      "guide",
+      "video",
+      "live",
+      "webinar",
+      "broadcast",
+      "course",
+      "template",
+      "other",
+    ]),
     country: short,
     url: safeUrlOrPath,
     description: text,

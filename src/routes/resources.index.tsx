@@ -15,14 +15,15 @@ import { UniversityExplorer } from "@/components/scholars/UniversityExplorer";
 import { FAQ } from "@/components/scholars/FAQ";
 import { Newsletter } from "@/components/scholars/Newsletter";
 import { Block, CtaBand, PageHero } from "@/components/page/PageParts";
+import { ResourcesHubCards } from "@/components/scholars/ResourcesNav";
 
-export const Route = createFileRoute("/resources")({
+export const Route = createFileRoute("/resources/")({
   head: () =>
     seo({
       path: "/resources",
       title: "Free Guides to Study in the USA from Bangladesh",
       description:
-        "Free guides for Bangladeshi students applying to US universities: essays, scholarships, financial aid, tests and visas, plus a university explorer and FAQs.",
+        "Free resources for Bangladeshi students applying to US universities: blog, ECA alerts, webinars, announcements and guides on essays, scholarships, aid, tests and visas.",
     }),
   component: ResourcesPage,
 });
@@ -68,6 +69,8 @@ function ResourcesPage() {
                 />
               </>
             ),
+            // Blog, ECA Notification, Webinar and Broadcast.
+            hub: <ResourcesHubCards />,
             featured: (
               <>
                 {featured.length > 0 && (

@@ -53,6 +53,8 @@ const ABOUT = {
   Forms: "Your own forms at scholarscafe.com/forms/…, replacing Google Forms. Answers go to Leads.",
   "Private feedback": "Private feedback sent from the website.",
   Newsletter: "Newsletter sign-ups.",
+  "ECA alerts":
+    "People who asked to hear about new ECAs. Write one email and it goes to all of them.",
   Access: "Who can sign in to this workspace, and with which role.",
   "Email delivery": "Outgoing notification emails and their status.",
   Activity: "Every change, who made it and when. Only the Super Admin sees this.",
@@ -71,7 +73,7 @@ const label = (key) => names[key] || LABELS[key] || key;
 const canPublishRole = (role) => role === "owner" || role === "admin";
 const ENUMS = {
   device: ["desktop", "mobile"],
-  category: ["guide", "video", "live", "course", "template", "other"],
+  category: ["guide", "video", "live", "webinar", "broadcast", "course", "template", "other"],
   type: ["link", "social", "youtube"],
   platform: [
     "instagram",
@@ -97,7 +99,9 @@ const HELP = {
     "Category on the About page. Choose one, or pick “+ New category…” to add your own (e.g. Advisors). People in the same category appear together.",
   highlight:
     "Featured: the button gets a light outline so it stands out. Order is set by position.",
-  date: "Publish date, YYYY-MM-DD. The home page shows the five newest.",
+  date: "Publish date, YYYY-MM-DD. The home page shows the five newest; Resources → Blog shows all.",
+  category:
+    "webinar, live or video = shown on Resources → Webinars. broadcast = shown on Resources → Broadcast (announcements and updates).",
 };
 // Free-text fields with suggestions (pick one or type a new value).
 const SUGGEST = {
@@ -470,6 +474,10 @@ function render() {
   }
   if (section === "Email delivery") {
     renderMail().catch(report);
+    return;
+  }
+  if (section === "ECA alerts") {
+    renderEcaAlerts().catch(report);
     return;
   }
   const bar = node("div", undefined, "toolbar");
@@ -3794,6 +3802,82 @@ async function renderSubmissions() {
   }
   if (!rows.length) $("screen").append(node("p", "No entries yet.", "empty"));
 }
+// ECA alerts: compose one email, it is queued once per subscriber (with their own unsubscribe link).
+async function renderEcaAlerts() {
+  const data = await api("eca/subscribers");
+  const screen = $("screen");
+  const summary = node("article", undefined, "card");
+  summary.append(
+    node("p", "Active subscribers", "muted"),
+    node("strong", String(data.active)),
+    node(
+      "p",
+      `Emails go from ${data.from}, one every ${data.gapSeconds} seconds, so the mailbox isn't overloaded. Each email has a one-click unsubscribe link.` +
+        (data.mailConnected
+          ? ""
+          : " Mail delivery is not connected yet: emails wait in the queue."),
+      "muted",
+    ),
+  );
+  screen.append(summary);
+
+  const form = node("form", undefined, "card");
+  const [sl, subject] = input("Subject", "", "text", 150);
+  subject.required = true;
+  subject.placeholder = "New ECA open: …";
+  const [bl, body] = input("Message", "", "textarea", 20000);
+  body.required = true;
+  body.rows = 8;
+  body.placeholder = "What it is, who can join, deadline, and the link to apply.";
+  const send = node("button", "Send to all subscribers", "primary");
+  send.type = "submit";
+  form.append(node("h2", "Send an ECA alert"), sl, bl, send);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (!data.active) return report(Error("Nobody has signed up for ECA alerts yet."));
+    if (
+      !confirm(
+        `Send "${subject.value.trim()}" to ${data.active} subscriber${data.active === 1 ? "" : "s"}? This can't be undone.`,
+      )
+    )
+      return;
+    send.disabled = true;
+    try {
+      const r = await api("eca/broadcast", { subject: subject.value, body: body.value });
+      notice(
+        `Queued for ${r.queued} subscriber${r.queued === 1 ? "" : "s"}.` +
+          (r.minutes ? ` All will be sent within about ${r.minutes} minutes.` : ""),
+      );
+      render();
+    } catch (err) {
+      send.disabled = false;
+      report(err);
+    }
+  };
+  screen.append(form);
+
+  screen.append(node("h2", "Subscribers"));
+  for (const row of data.items) {
+    const card = node("div", undefined, "card row");
+    card.append(
+      node("span", row.email),
+      node(
+        "span",
+        row.unsubscribed_at
+          ? "Unsubscribed"
+          : "Since " + new Date(row.consent_at || row.created_at).toLocaleDateString(),
+        "badge",
+      ),
+      button("Remove", async () => {
+        if (!confirm(`Remove ${row.email} from ECA alerts?`)) return;
+        await api("eca/subscribers/" + row.id + "/remove", {});
+        render();
+      }),
+    );
+    screen.append(card);
+  }
+  if (!data.items.length) screen.append(node("p", "No sign-ups yet.", "empty"));
+}
 async function renderMail() {
   const result = await api("mail-status");
   $("screen").append(
@@ -4675,7 +4759,7 @@ try {
                       "Reviews",
                     ],
                   ],
-                  ["Inbox", ["Leads", "Forms", "Private feedback", "Newsletter"]],
+                  ["Inbox", ["Leads", "Forms", "Private feedback", "Newsletter", "ECA alerts"]],
                   // The audit log is for the Super Admin only.
                   [
                     "Settings",
