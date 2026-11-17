@@ -2,7 +2,7 @@ import { useRef, type ReactNode } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { useCmsValue, useCmsAuto } from "@/lib/cms";
-import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import { BOOK_LINK } from "@/lib/scholars-data";
 import { Reveal } from "../scholars/Reveal";
 
 /* Shared building blocks for inner pages: hero → intro → content → proof → CTA. */
@@ -163,7 +163,6 @@ export function CtaBand({
   const t = useCmsAuto("CtaBand");
   if (typeof title === "string") title = t(title);
   if (typeof action === "string") action = t(action);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   return (
     <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(72px,12vw,176px)] text-white">
       <div
@@ -177,9 +176,7 @@ export function CtaBand({
         </Reveal>
         <Reveal>
           <a
-            href={WA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={BOOK_LINK}
             className="type-button group inline-flex h-12 items-center gap-2 rounded-full bg-ice-100 px-6 text-blue-950 transition-[background-color,box-shadow] duration-500 ease-premium hover:bg-white hover:shadow-[0_16px_40px_rgb(0_0_0/0.35)]"
           >
             {action}

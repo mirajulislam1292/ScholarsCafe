@@ -5,15 +5,14 @@ import { useState } from "react";
 import { Reveal } from "./Reveal";
 import {
   FAQS as CMS_DEFAULT_FAQS,
-  WA_LINK as CMS_DEFAULT_WA_LINK,
+  BOOK_LINK,
   EMAIL as CMS_DEFAULT_EMAIL,
 } from "@/lib/scholars-data";
-import { Plus, Mail, MessageCircle } from "lucide-react";
+import { Plus, Mail, CalendarDays } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export function FAQ() {
   const FAQS = useCmsList("faqs", CMS_DEFAULT_FAQS);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
 
   const [open, setOpen] = useState<number | null>(0);
@@ -82,13 +81,11 @@ export function FAQ() {
             <CmsText id="FAQ.d9172c43bec6">Email us</CmsText>
           </a>
           <a
-            href={WA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={BOOK_LINK}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-5 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800"
           >
-            <MessageCircle className="h-4 w-4" aria-hidden />
-            <CmsText id="FAQ.13cd408610e3">WhatsApp us</CmsText>
+            <CalendarDays className="h-4 w-4" aria-hidden />
+            <CmsText id="FAQ.bookmentor">Talk to a mentor</CmsText>
           </a>
         </Reveal>
       </div>
@@ -97,5 +94,4 @@ export function FAQ() {
 }
 
 const FAQS = CMS_DEFAULT_FAQS;
-const WA_LINK = CMS_DEFAULT_WA_LINK;
 const EMAIL = CMS_DEFAULT_EMAIL;
