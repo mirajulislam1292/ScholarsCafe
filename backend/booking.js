@@ -12,6 +12,8 @@ const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
 /** A slot must start at least this long from now, so the reminder (60–90 min before) always goes out. */
 export const MIN_NOTICE_MINUTES = 120;
+/** Successful bookings from one network (IP) per day; the calendar takes only one booking a day. */
+export const BOOKINGS_PER_IP_DAY = 2;
 export const WEEKDAYS = [
   "Sunday",
   "Monday",
@@ -200,7 +202,14 @@ const teamText = (b) =>
 const outbox = (store, c, { subject, body, replyTo, to }) =>
   store.query(
     "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email) VALUES (?,?,?,?,?)",
-    [randomUUID(), subject.slice(0, 160), body, replyTo || null, to || null],
+    // Subjects can carry a visitor's name: no line breaks or control characters in a mail header.
+    [
+      randomUUID(),
+      subject.replace(/[\x00-\x1f\x7f]+/g, " ").slice(0, 160),
+      body,
+      replyTo || null,
+      to || null,
+    ],
     c,
   );
 
@@ -339,6 +348,17 @@ export function installPublicBookingRoutes(app, { store, fail, config, sharedLim
         return res.status(409).json({
           error: "Sorry, that time is no longer available. Please pick another day.",
         });
+      // Only one booking fits a day, so one visitor must not be able to take every open day with made-up
+      // emails. Counted only for bookings that reach this point (a valid, open slot).
+      if (
+        store.checkRateLimit &&
+        !(await store.checkRateLimit("booking-ip-day", req.ip || "?", BOOKINGS_PER_IP_DAY, 86400))
+      )
+        return res
+          .status(429)
+          .json({
+            error: "Too many bookings from this network today. Please write to us instead.",
+          });
       const b = {
         id: randomUUID(),
         day,

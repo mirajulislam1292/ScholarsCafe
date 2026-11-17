@@ -6,6 +6,7 @@ import { createApp } from "./app.js";
 import {
   BOOKING_DEFAULTS,
   MIN_NOTICE_MINUTES,
+  BOOKINGS_PER_IP_DAY,
   dhakaDay,
   dhakaLabel,
   openSlots,
@@ -363,4 +364,33 @@ test("Schema has the one-per-day key, and dates read well", async () => {
     dhakaLabel("2026-11-18T14:00:00Z", "2026-11-18T14:45:00Z"),
     "Wednesday, 18 November 2026, 8:00 PM – 8:45 PM (Bangladesh time, GMT+6)",
   );
+});
+
+test("One network can't take every open day; mail subjects carry no line breaks", async () => {
+  const store = fakeStore();
+  const app = createApp(store, config);
+  const { body } = await request(app).get("/public/booking/slots").expect(200);
+  const [first, second] = body.days;
+  const seen = [];
+  store.checkRateLimit = async (scope, _id, limit, seconds) => {
+    seen.push([scope, limit, seconds]);
+    return scope !== "booking-ip-day";
+  };
+  const res = await book(app, { start: first.slots[0].start, email: "a@x.com" }).expect(429);
+  assert.match(res.body.error, /this network today/);
+  assert.equal(store.bookings.length, 0);
+  assert.equal(store.outbox.length, 0);
+  assert.ok(
+    seen.some(
+      ([s, l, sec]) => s === "booking-ip-day" && l === BOOKINGS_PER_IP_DAY && sec === 86400,
+    ),
+  );
+  // A taken or invalid slot is refused before the daily count, so it doesn't use it up.
+  seen.length = 0;
+  await book(app, { start: "2020-01-01T14:00:00.000Z" }).expect(409);
+  assert.ok(!seen.some(([s]) => s === "booking-ip-day"));
+  store.checkRateLimit = async () => true;
+  await book(app, { start: second.slots[0].start, name: "Evil\r\nBcc: x@y.z" }).expect(201);
+  const team = store.outbox.find((m) => m.to_email === null);
+  assert.ok(!/[\r\n]/.test(team.subject), "no line breaks in the subject");
 });

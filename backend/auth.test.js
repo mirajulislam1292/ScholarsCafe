@@ -2,7 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import request from "supertest";
 import { createApp } from "./app.js";
-import { hashPassword, verifyPassword, newCode, CODE_MINUTES, CODE_ATTEMPTS } from "./auth.js";
+import {
+  hashPassword,
+  verifyPassword,
+  newCode,
+  CODE_MINUTES,
+  CODE_ATTEMPTS,
+  CODES_PER_DAY,
+} from "./auth.js";
 import { hash } from "./security.js";
 
 // Email code and password sign-in live on the student portal (its origin is passed as ADMIN_ORIGIN).
@@ -267,4 +274,26 @@ test("Forgot password: emailed code sets a new password once and signs out every
     password: "a brand new passphrase",
   }).expect(401);
   assert.match(unknown.body.error, /wrong or has expired/);
+});
+
+test("Email codes: a daily cap per address bounds guessing across new codes", async () => {
+  const { store, state } = fakeStore();
+  const seen = [];
+  store.checkRateLimit = async (scope, id, limit, seconds) => {
+    seen.push([scope, id, limit, seconds]);
+    return scope !== "email-code-day";
+  };
+  const app = createApp(store, config, undefined, mailer(state));
+  const res = await post(app, "/auth/email/start", { email: USER.email }).expect(429);
+  assert.match(res.body.error, /today/);
+  assert.ok(
+    seen.some(
+      ([s, id, limit, sec]) =>
+        s === "email-code-day" && id === USER.email && limit === CODES_PER_DAY && sec === 86400,
+    ),
+  );
+  assert.equal(state.code, null, "no code issued over the cap");
+  // Sign-up goes through the same limit.
+  await post(app, "/auth/signup", { email: "new@example.com", name: "New" }).expect(429);
+  assert.equal(state.created.length, 0);
 });

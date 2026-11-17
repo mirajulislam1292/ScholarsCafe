@@ -9,6 +9,7 @@ import { createApp } from "./app.js";
 import {
   definitionSchema,
   FORM_TEMPLATES,
+  RECEIPTS_PER_DAY,
   seedFormTemplates,
   summarize,
   validateAnswers,
@@ -567,10 +568,54 @@ test("public forms list: a summary, or the first real line of the introduction",
   assert.equal(
     summaryOf({
       summary: "",
-      intro: "Welcome to Scholars Cafe ☕🌍\nA Cafe to Ease Your Study Abroad Journey.\n\n📢 Help with your US student visa interview.",
+      intro:
+        "Welcome to Scholars Cafe ☕🌍\nA Cafe to Ease Your Study Abroad Journey.\n\n📢 Help with your US student visa interview.",
     }),
     "Help with your US student visa interview.",
   );
   assert.equal(summaryOf({ summary: "", intro: "" }), "");
   assert.ok(summaryOf({ summary: "", intro: "word ".repeat(80) }).length <= 180);
+});
+
+test("Receipts: a site-wide daily cap; over it the response is still saved and the team notified", async () => {
+  const def4 = definitionSchema.parse({
+    steps: [
+      {
+        fields: [
+          { id: "name", label: "Name", type: "text", required: true, role: "name" },
+          { id: "email", label: "Email", type: "email", required: true, role: "email" },
+        ],
+      },
+    ],
+  });
+  const row = {
+    id: FORM_ID,
+    title: "Apply",
+    success: "Thanks",
+    notify: 1,
+    receipt: 1,
+    definition: JSON.stringify(def4),
+  };
+  const sql = [];
+  const seen = [];
+  const app = createApp(
+    {
+      query: async (q, a) => (sql.push([q, a]), q.includes("FROM forms WHERE slug=?") ? [row] : []),
+      transaction: (fn) => fn({}),
+      checkRateLimit: async (scope, id, limit) => {
+        seen.push([scope, id, limit]);
+        return scope !== "form-receipt-all";
+      },
+    },
+    { ADMIN_ORIGIN: "https://a", PUBLIC_ORIGIN: PUBLIC, GOOGLE_CLIENT_ID: "t" },
+  );
+  await request(app)
+    .post("/public/forms/apply")
+    .set("Origin", PUBLIC)
+    .send({ answers: { name: "Rahim", email: "someone@example.com" } })
+    .expect(201);
+  assert.ok(seen.some(([s, , l]) => s === "form-receipt-all" && l === RECEIPTS_PER_DAY));
+  assert.equal(sql.filter(([q]) => q.includes("to_email")).length, 0, "no receipt over the cap");
+  assert.equal(sql.filter(([q]) => q.startsWith("INSERT INTO inquiries")).length, 1);
+  assert.equal(sql.filter(([q]) => q.startsWith("INSERT INTO mail_outbox")).length, 1, "team note");
 });

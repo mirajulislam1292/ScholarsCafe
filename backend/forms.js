@@ -25,6 +25,8 @@ export const COVERS = ["campus-early-fall", "library", "students-walking", "okla
 const UPLOAD_TICKET_SECONDS = 6 * 60 * 60;
 const UPLOADS_TOTAL = 3 * 1024 * 1024 * 1024; // all form attachments together
 const FILE_HELP = "PDF, Word (.docx), text, PNG or JPEG, up to 10 MB.";
+/** Receipt emails to visitors, all forms together, per day. */
+export const RECEIPTS_PER_DAY = 100;
 
 export const FIELD_TYPES = [
   "text",
@@ -780,13 +782,16 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
       const phone = pick("phone").slice(0, 80);
       const clean = result.clean;
       // A copy to the person, like Google Forms. At most 3 a day to one address, so the form can't be
-      // used to flood someone else's inbox.
+      // used to flood someone else's inbox, and a site-wide daily cap, so it can't be used to send
+      // visitor-written text from our mailbox to many addresses. Over the cap the submission is still
+      // saved and the team is still notified; only the copy is skipped.
       const sendReceipt =
         Boolean(email) &&
         form.receipt !== 0 &&
         form.receipt !== false &&
         (!store.checkRateLimit ||
-          (await store.checkRateLimit("form-receipt", email.toLowerCase(), 3, 86400)));
+          ((await store.checkRateLimit("form-receipt", email.toLowerCase(), 3, 86400)) &&
+            (await store.checkRateLimit("form-receipt-all", "site", RECEIPTS_PER_DAY, 86400))));
       const fileFields = Object.keys(clean).filter((k) => clean[k] && clean[k].upload);
       const inquiryId = randomUUID();
       await store.transaction(async (c) => {
