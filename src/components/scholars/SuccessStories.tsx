@@ -2,7 +2,7 @@ import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import { TESTIMONIALS as DEFAULT_TESTIMONIALS, BOOK_LINK } from "@/lib/scholars-data";
+import { TESTIMONIALS as DEFAULT_TESTIMONIALS } from "@/lib/scholars-data";
 import { useCmsCollection } from "@/lib/cms";
 import { Star } from "lucide-react";
 import { motion } from "motion/react";
@@ -28,20 +28,8 @@ export function SuccessStories() {
   }, [TESTIMONIALS.length]);
 
   const total = TESTIMONIALS.length;
-  if (!total)
-    return (
-      <section id="success" className="bg-ice-50 px-5 py-20 text-center">
-        <h2 className="font-heading text-3xl font-light text-neutral-900">
-          <CmsText id="SuccessStories.empty.title">Your story starts with a conversation.</CmsText>
-        </h2>
-        <a
-          href={BOOK_LINK}
-          className="mt-7 inline-flex rounded-full bg-blue-700 px-7 py-4 font-medium text-white"
-        >
-          <CmsText id="SuccessStories.empty.cta">Talk to a mentor</CmsText>
-        </a>
-      </section>
-    );
+  // No stories yet: render nothing rather than a second "book a call" band (the page already ends with one).
+  if (!total) return null;
   const leftIndex = (activeIndex - 1 + total) % total;
   const rightIndex = (activeIndex + 1) % total;
 
@@ -52,7 +40,7 @@ export function SuccessStories() {
   ];
 
   return (
-    <section id="success" className="bg-ice-50 py-[clamp(72px,13vw,200px)] ">
+    <section id="success" className="bg-ice-50 py-[clamp(56px,8vw,112px)] ">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="hidden">
@@ -123,17 +111,6 @@ export function SuccessStories() {
           })}
         </div>
 
-        <Reveal className="mt-12 text-center">
-          <p className="text-neutral-600 ">
-            <CmsText id="SuccessStories.b9a500e1344f">Your success story is next.</CmsText>
-          </p>
-          <a
-            href={BOOK_LINK}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-700 px-7 py-3.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800 "
-          >
-            <CmsText id="SuccessStories.fc4e64953206">Book a Free Consultation →</CmsText>
-          </a>
-        </Reveal>
       </div>
     </section>
   );

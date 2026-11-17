@@ -121,6 +121,9 @@ const fields = {
     title: short,
     line: short,
     photo: safeUrlOrPath,
+    // Optional profile links (HTTPS). The icon is shown only when a link is set.
+    linkedin: safeUrl.optional(),
+    instagram: safeUrl.optional(),
     position,
   }),
   faqs: z.object({ q: short, a: text, position }),
