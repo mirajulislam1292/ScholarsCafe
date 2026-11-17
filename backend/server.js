@@ -2,6 +2,7 @@ import { Store } from "./store.js";
 import { createApp, portalConfig } from "./app.js";
 import { createMailer, deliverMail } from "./mail.js";
 import { seedFormTemplates } from "./forms.js";
+import { queueTaskReminders } from "./workspace.js";
 
 for (const key of [
   "DB_HOST",
@@ -57,6 +58,20 @@ async function start() {
     }
   }, 15000);
   mailTimer.unref();
+  // Task deadline reminders (24h and 2h before), queued into the outbox by the admin deployment only.
+  let reminding = false;
+  const reminderTimer = setInterval(async () => {
+    if (reminding || process.env.PORTAL === "student") return;
+    reminding = true;
+    try {
+      await queueTaskReminders(store, process.env);
+    } catch {
+      console.error("Task reminder check failed");
+    } finally {
+      reminding = false;
+    }
+  }, 300000);
+  reminderTimer.unref();
   const server = createApp(store, portalConfig(process.env), undefined, mailer).listen(
     Number(process.env.PORT || 3000),
     "0.0.0.0",
