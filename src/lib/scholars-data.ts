@@ -1,6 +1,8 @@
 import type { ScholarIconName } from "./scholar-icon-types";
 
 export const WA_LINK = "https://wa.me/8801560001325";
+/** Where "Book a call" buttons go: the 1-on-1 mentor booking calendar. WhatsApp stays on the Contact page. */
+export const BOOK_LINK = "/book";
 export const EMAIL = "contact@scholarscafe.com";
 export const PHONE = "+880 1560-001325";
 

@@ -15,7 +15,7 @@ export function ResourcesPreview() {
   ].slice(0, 3);
   if (!picks.length) return null;
   return (
-    <section className="bg-ice-50 py-[clamp(72px,12vw,160px)]">
+    <section className="bg-ice-50 py-[clamp(56px,8vw,112px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <h2 className="type-h2 max-w-[18ch] text-neutral-900">

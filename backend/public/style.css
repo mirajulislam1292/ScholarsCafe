@@ -1567,6 +1567,26 @@ a.button.primary:visited {
 .form-back-bar .spacer {
   flex: 1;
 }
+/* Bookings */
+.booking-topic {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.booking-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.booking-add input {
+  width: auto;
+  flex: 1 1 160px;
+}
+.booking-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 
 /* ---------- Team workspace: staff chat, tasks, progress ---------- */
 .pin-bar {
@@ -1924,5 +1944,44 @@ fieldset.assignees label.check {
   }
   .task-bar > .primary {
     width: 100%;
+  }
+}
+/* Sidebar "More": daily screens on top, the rest folded underneath (desktop). */
+nav .nav-more {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  border-top: 1px solid var(--ice-200);
+  border-radius: 0;
+  padding-top: 14px;
+}
+nav .nav-more::after {
+  content: "▾";
+  font-size: 12px;
+  transition: transform 200ms ease;
+}
+nav .nav-more[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+.nav-more-list {
+  display: none;
+  gap: 6px;
+}
+.nav-more-list.open {
+  display: grid;
+}
+@media (max-width: 800px) {
+  /* Phones: the bottom bar holds the daily screens; the "More" sheet lists everything else. */
+  body.menu-open aside nav .nav-more,
+  body.menu-open aside nav .in-tabbar {
+    display: none;
+  }
+  body.menu-open aside nav .nav-more-list {
+    display: grid;
+    gap: 2px;
+  }
+  body.menu-open aside nav .nav-more-list > .nav-group:first-child {
+    margin-top: 0;
   }
 }

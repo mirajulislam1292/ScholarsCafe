@@ -2,7 +2,7 @@ import { useCmsLookup, useCmsValue, CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { WA_LINK as CMS_DEFAULT_WA_LINK, STUDENT_PORTAL_URL } from "@/lib/scholars-data";
+import { BOOK_LINK, STUDENT_PORTAL_URL } from "@/lib/scholars-data";
 
 const DEFAULT_NAV = [
   { label: "Home", href: "/" },
@@ -18,7 +18,6 @@ const ease = [0.22, 1, 0.36, 1] as const;
 export function Navbar() {
   const cmsLabel = useCmsLookup();
   const NAV = useCmsValue("local.NAV", DEFAULT_NAV);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -91,9 +90,7 @@ export function Navbar() {
               <CmsText id="Navbar.studentlogin">Student login</CmsText>
             </a>
             <a
-              href={WA_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={BOOK_LINK}
               className={`hidden h-10 items-center rounded-full px-5 type-button transition-colors duration-500 ease-premium md:inline-flex ${
                 solid
                   ? "bg-blue-700 text-white hover:bg-blue-800"
@@ -165,9 +162,7 @@ export function Navbar() {
               <CmsText id="Navbar.studentlogin.mobile">Student login</CmsText>
             </a>
             <a
-              href={WA_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={BOOK_LINK}
               className="mt-3 inline-flex h-12 items-center justify-center rounded-full bg-ice-100 type-button text-blue-950"
             >
               <CmsText id="Navbar.b2151df99763">Book Call</CmsText>

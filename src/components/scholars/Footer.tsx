@@ -1,11 +1,7 @@
 import { useCmsLookup, useCmsAuto } from "@/lib/cms";
 import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
-import {
-  EMAIL as CMS_DEFAULT_EMAIL,
-  WA_LINK as CMS_DEFAULT_WA_LINK,
-  STUDENT_PORTAL_URL,
-} from "@/lib/scholars-data";
+import { EMAIL as CMS_DEFAULT_EMAIL, BOOK_LINK, STUDENT_PORTAL_URL } from "@/lib/scholars-data";
 import { Facebook, Instagram, Linkedin, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEnabledCountries } from "@/lib/site-content";
@@ -22,7 +18,6 @@ export function Footer() {
   const cmsLabel = useCmsLookup();
 
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
     <footer className="border-t border-white/8 bg-navy-deep text-white">
@@ -54,11 +49,6 @@ export function Footer() {
               </FootIcon>
               <FootIcon label="LinkedIn" href="https://www.linkedin.com/company/scholars-cafe09/">
                 <Linkedin className="h-4 w-4" />
-              </FootIcon>
-              <FootIcon label="WhatsApp" href={WA_LINK}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487 2.981 1.287 2.981.858 3.518.804.537-.054 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413" />
-                </svg>
               </FootIcon>
               <a
                 href={`mailto:${EMAIL}`}
@@ -105,7 +95,7 @@ export function Footer() {
             links={[
               { label: "Student Login", href: STUDENT_PORTAL_URL },
               { label: "Forms", href: "/forms" },
-              { label: "WhatsApp Support", href: WA_LINK, external: true },
+              { label: "Book a mentor session", href: BOOK_LINK },
               { label: "Email Support", href: `mailto:${EMAIL}`, external: true },
               { label: "Contact Form", href: "/contact" },
             ]}
@@ -150,7 +140,6 @@ export function Footer() {
 function Col({ title, links }: { title: string; links: LinkRef[] }) {
   const t = useCmsAuto("Footer.link");
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
     <div>
@@ -191,7 +180,6 @@ function FootIcon({
   children: React.ReactNode;
 }) {
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
     <a
@@ -207,4 +195,3 @@ function FootIcon({
 }
 
 const EMAIL = CMS_DEFAULT_EMAIL;
-const WA_LINK = CMS_DEFAULT_WA_LINK;

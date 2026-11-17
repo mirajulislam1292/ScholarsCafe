@@ -2,7 +2,7 @@ import { useRef, type ReactNode } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { useCmsValue, useCmsAuto } from "@/lib/cms";
-import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import { BOOK_LINK } from "@/lib/scholars-data";
 import { Reveal } from "../scholars/Reveal";
 
 /* Shared building blocks for inner pages: hero → intro → content → proof → CTA. */
@@ -133,7 +133,7 @@ export function Block({
     </Reveal>
   );
   return (
-    <section id={id} className={`${toneClass[tone]} py-[clamp(72px,13vw,200px)]`}>
+    <section id={id} className={`${toneClass[tone]} py-[clamp(56px,8vw,112px)]`}>
       {dark && <div aria-hidden className={GRAIN} />}
       <div className="relative mx-auto max-w-[1200px] px-6 md:px-12">
         {sticky ? (
@@ -144,7 +144,7 @@ export function Block({
         ) : (
           <>
             {heading}
-            {children && <div className={title ? "mt-16 md:mt-20" : ""}>{children}</div>}
+            {children && <div className={title ? "mt-10 md:mt-14" : ""}>{children}</div>}
           </>
         )}
       </div>
@@ -156,16 +156,17 @@ export function Block({
 export function CtaBand({
   title = "Start with one honest conversation.",
   action = "Book a free strategy call",
+  href = BOOK_LINK,
 }: {
   title?: ReactNode;
   action?: ReactNode;
+  href?: string;
 }) {
   const t = useCmsAuto("CtaBand");
   if (typeof title === "string") title = t(title);
   if (typeof action === "string") action = t(action);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   return (
-    <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(72px,12vw,176px)] text-white">
+    <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(64px,9vw,128px)] text-white">
       <div
         aria-hidden
         className="absolute inset-0 -z-10 bg-[radial-gradient(70%_90%_at_10%_100%,rgb(43_109_166/0.4)_0%,transparent_60%)]"
@@ -177,9 +178,7 @@ export function CtaBand({
         </Reveal>
         <Reveal>
           <a
-            href={WA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={href}
             className="type-button group inline-flex h-12 items-center gap-2 rounded-full bg-ice-100 px-6 text-blue-950 transition-[background-color,box-shadow] duration-500 ease-premium hover:bg-white hover:shadow-[0_16px_40px_rgb(0_0_0/0.35)]"
           >
             {action}

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ComponentType } from "react";
 import { CmsText, useCmsList, useCmsReady, useCmsValue, useCmsAuto } from "@/lib/cms";
-import { EMAIL, STUDENT_PORTAL_URL, WA_LINK } from "@/lib/scholars-data";
+import { EMAIL, STUDENT_PORTAL_URL, BOOK_LINK } from "@/lib/scholars-data";
 
 // Link-in-bio page (scholarscafe.com/links). Everything is edited in the admin under Website → Link page.
 export const Route = createFileRoute("/links")({
@@ -79,7 +79,7 @@ const FALLBACK: Item[] = [
     url: "https://www.linkedin.com/company/scholars-cafe09/",
   },
   { id: "em", type: "social", platform: "email", label: "Email", url: "mailto:" + EMAIL },
-  { id: "call", type: "link", label: "Book a free strategy call", url: WA_LINK, highlight: true },
+  { id: "call", type: "link", label: "Book a free strategy call", url: BOOK_LINK, highlight: true },
   { id: "res", type: "link", label: "Free guides", url: "/resources" },
   { id: "portal", type: "link", label: "Student portal", url: STUDENT_PORTAL_URL },
   { id: "site", type: "link", label: "Our website", url: "/" },

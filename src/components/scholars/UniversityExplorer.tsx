@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { Reveal } from "./Reveal";
 import {
   UNIVERSITIES as CMS_DEFAULT_UNIVERSITIES,
-  WA_LINK as CMS_DEFAULT_WA_LINK,
   type University,
 } from "@/lib/scholars-data";
 import { Search, X, ArrowRight } from "lucide-react";
@@ -29,7 +28,6 @@ export function UniversityExplorer() {
   const cmsLabel = useCmsLookup();
 
   const UNIVERSITIES = useCmsValue("data.UNIVERSITIES", CMS_DEFAULT_UNIVERSITIES);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   const [country, setCountry] = useState("All");
   const [scholarship, setScholarship] = useState("All");
@@ -67,7 +65,7 @@ export function UniversityExplorer() {
   if (tuition !== "All") activeTags.push({ label: tuition, onRemove: () => setTuition("All") });
 
   return (
-    <section id="universities" className="bg-white py-[clamp(72px,13vw,200px)]">
+    <section id="universities" className="bg-white py-[clamp(56px,8vw,112px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="max-w-2xl md:mx-auto md:text-center">
           <span className="hidden">
@@ -255,9 +253,7 @@ export function UniversityExplorer() {
               </CmsText>
             </p>
             <a
-              href={WA_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/forms"
               className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-700 px-6 py-3.5 text-sm font-medium text-white transition-all hover:bg-blue-800"
             >
               <CmsText id="UniversityExplorer.cdb1b2633afe">Apply with Scholars Cafe </CmsText>
@@ -282,7 +278,6 @@ function Select({
   options: string[];
 }) {
   const UNIVERSITIES = useCmsValue("data.UNIVERSITIES", CMS_DEFAULT_UNIVERSITIES);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
     <div>
@@ -306,7 +301,6 @@ function Select({
 
 function Fact({ label, value }: { label: string; value: string }) {
   const UNIVERSITIES = useCmsValue("data.UNIVERSITIES", CMS_DEFAULT_UNIVERSITIES);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
     <div className="rounded-xl bg-ice-50 p-3">
@@ -319,4 +313,3 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 
 const UNIVERSITIES = CMS_DEFAULT_UNIVERSITIES;
-const WA_LINK = CMS_DEFAULT_WA_LINK;

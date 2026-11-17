@@ -2,6 +2,10 @@ let me,
   items = [],
   section = "Overview";
 let catalog = {};
+// Old website text the public site no longer shows (see cms-retired-keys.json). Hidden in the editor;
+// saved values are kept untouched in the database.
+let retired = new Set();
+const isRetired = (key) => retired.has(key);
 const $ = (id) => document.getElementById(id);
 const names = {
   copy: "Website text & images",
@@ -51,6 +55,8 @@ const ABOUT = {
   "Visual editor":
     "Click any text on your website and change it. Only for the Super Admin account.",
   Forms: "Your own forms at scholarscafe.com/forms/…, replacing Google Forms. Answers go to Leads.",
+  Bookings:
+    "1-on-1 mentor sessions booked at scholarscafe.com/book (one per day), and when people can book.",
   "Private feedback": "Private feedback sent from the website.",
   Newsletter: "Newsletter sign-ups.",
   Access: "Who can sign in to this workspace, and with which role.",
@@ -365,6 +371,7 @@ function render() {
   screen.replaceChildren();
   for (const b of document.querySelectorAll("#nav button, #tabbar button"))
     b.classList.toggle("active", b.dataset.section === section);
+  if ($("nav-more-list")?.querySelector("button.active")) setMoreOpen(true, false);
   // Gentle fade-in between screens (skipped when reduced motion is preferred, see style.css).
   screen.classList.remove("enter");
   void screen.offsetWidth;
@@ -440,6 +447,10 @@ function render() {
     renderForms().catch(report);
     return;
   }
+  if (section === "Bookings") {
+    renderBookings().catch(report);
+    return;
+  }
   if (section === "Documents") {
     renderDocuments().catch(report);
     return;
@@ -498,7 +509,9 @@ function render() {
     const existingKeys = new Set(
       items.filter((i) => i.kind === "copy").flatMap((i) => Object.keys(i.data)),
     );
-    const missing = Object.entries(catalog).filter(([key]) => !existingKeys.has(key));
+    const missing = Object.entries(catalog).filter(
+      ([key]) => !existingKeys.has(key) && !isRetired(key),
+    );
     const groups = [...new Set(missing.map(([key]) => key.split(".")[0]))];
     for (const group of groups)
       screen.append(
@@ -523,6 +536,8 @@ function render() {
   const pos = (i) => (typeof i.data.position === "number" ? i.data.position : 1e9);
   const list = items
     .filter((i) => i.kind === section)
+    // A text entry whose every field is retired has nothing left that shows on the website.
+    .filter((i) => i.kind !== "copy" || Object.keys(i.data).some((k) => !isRetired(k)))
     .sort((a, b) => pos(a) - pos(b) || a.title.localeCompare(b.title));
   const orderable =
     list.length > 1 && "position" in (defaults[section] || {}) && canPublishRole(me.role);
@@ -620,7 +635,11 @@ function edit(item) {
   const title = field(form, "Entry name", item.title);
   // Team entries saved before the LinkedIn/Instagram fields existed still get those (empty) fields.
   const data = item.kind === "team" ? { ...defaults.team, ...item.data } : item.data;
-  for (const [key, value] of Object.entries(data)) getters[key] = field(form, key, value);
+  // Retired website text is not shown, but saving keeps its stored value as it was.
+  const kept = {};
+  for (const [key, value] of Object.entries(data))
+    if (item.kind === "copy" && isRetired(key)) kept[key] = value;
+    else getters[key] = field(form, key, value);
   const actions = node("div", undefined, "actions");
   const save = node("button", "Save draft", "primary");
   save.type = "submit";
@@ -701,7 +720,10 @@ function edit(item) {
         id: item.id,
         kind: item.kind,
         title: title(),
-        data: Object.fromEntries(Object.entries(getters).map(([k, get]) => [k, get()])),
+        data: {
+          ...kept,
+          ...Object.fromEntries(Object.entries(getters).map(([k, get]) => [k, get()])),
+        },
         version: item.version,
       });
       await refresh();
@@ -2288,6 +2310,196 @@ async function renderForms(openId) {
       screen.append(row);
     }
   }
+}
+// ---------- Bookings: 1-on-1 mentor sessions (scholarscafe.com/book), one per day ----------
+const BOOKING_WEEKDAYS = [
+  [6, "Saturday"],
+  [0, "Sunday"],
+  [1, "Monday"],
+  [2, "Tuesday"],
+  [3, "Wednesday"],
+  [4, "Thursday"],
+  [5, "Friday"],
+];
+async function renderBookings() {
+  const screen = $("screen");
+  const { items, settings } = await api("booking");
+  const upcoming = items.filter((b) => b.upcoming);
+  const bar = node("div", undefined, "toolbar");
+  const link = node("a", "scholarscafe.com/book");
+  link.href = "https://scholarscafe.com/book";
+  link.target = "_blank";
+  link.rel = "noopener";
+  const lead = node(
+    "p",
+    upcoming.length ? `${upcoming.length} upcoming · ` : "No upcoming sessions · ",
+  );
+  lead.append(link);
+  bar.append(lead);
+  screen.append(bar);
+  if (!settings.link)
+    screen.append(
+      node(
+        "p",
+        "No meeting link yet. Add your Google Meet link under “When people can book” so it goes into every confirmation.",
+        "card",
+      ),
+    );
+  const list = node("div", undefined, "form-cards");
+  for (const b of items) {
+    const card = node("div", undefined, "card form-card");
+    const top = node("div", undefined, "form-card-top");
+    const state = b.upcoming ? "Upcoming" : b.status === "cancelled" ? "Cancelled" : "Past";
+    top.append(
+      node(
+        "span",
+        state,
+        "pill " + (b.upcoming ? "live" : b.status === "cancelled" ? "closed" : "draft"),
+      ),
+      node("span", b.reminded_at ? "Reminder sent" : "", "muted"),
+    );
+    const email = node("a", b.email);
+    email.href = "mailto:" + b.email;
+    const who = node("p");
+    who.append(
+      document.createTextNode(b.name + " · "),
+      email,
+      document.createTextNode(b.phone ? " · " + b.phone : ""),
+    );
+    card.append(top, node("h3", b.when), who, node("p", b.topic, "muted booking-topic"));
+    if (b.upcoming) {
+      const actions = node("div", undefined, "actions");
+      actions.append(
+        button(
+          "Cancel booking",
+          async () => {
+            if (
+              !confirm(
+                `Cancel ${b.name}'s session on ${b.when}? They will get an email, and the day opens again.`,
+              )
+            )
+              return;
+            await api("booking/" + b.id + "/cancel", {});
+            render();
+            notice("Booking cancelled. " + b.name + " will get an email.");
+          },
+          "danger",
+        ),
+      );
+      card.append(actions);
+    }
+    list.append(card);
+  }
+  if (!items.length) screen.append(node("p", "No bookings yet.", "empty"));
+  screen.append(list, bookingSettingsForm(settings));
+}
+function bookingSettingsForm(s) {
+  const wrap = node("details", undefined, "card");
+  wrap.open = !s.link;
+  wrap.append(node("summary", "When people can book"));
+  const form = node("form");
+  form.append(
+    node(
+      "p",
+      "All times are Bangladesh time. Only one session can be booked per day; once a day is booked it disappears from the website.",
+      "muted",
+    ),
+  );
+  const days = node("fieldset", undefined, "checks");
+  days.append(node("legend", "Open days"));
+  const dayBoxes = BOOKING_WEEKDAYS.map(([n, name]) => {
+    const l = node("label", undefined, "check");
+    const c = node("input");
+    c.type = "checkbox";
+    c.value = String(n);
+    c.checked = s.days.includes(n);
+    l.append(c, document.createTextNode(" " + name));
+    days.append(l);
+    return c;
+  });
+  const [wl, windows] = input(
+    "Hours (e.g. 20:00-23:00; add more with commas: 10:00-12:00, 20:00-23:00)",
+    s.windows.map((w) => w.start + "-" + w.end).join(", "),
+    "text",
+    120,
+  );
+  const [sl, slot] = input("Session length (minutes)", String(s.slot), "number", 3);
+  const [al, ahead] = input("How many days ahead people can book", String(s.ahead), "number", 3);
+  const [ll, link] = input(
+    "Meeting link (Google Meet), sent in every confirmation",
+    s.link,
+    "url",
+    300,
+  );
+  link.placeholder = "https://meet.google.com/…";
+  // Closed dates: pick a date and add it; tap one to remove it.
+  const today = () => new Date(Date.now() + 6 * 3600000).toISOString().slice(0, 10);
+  const blocked = new Set(s.blocked);
+  const blockedSet = node("fieldset", undefined, "checks");
+  blockedSet.append(node("legend", "Closed dates (holidays, travel)"));
+  const chips = node("div", undefined, "booking-chips");
+  const drawChips = () => {
+    chips.replaceChildren();
+    for (const d of [...blocked].sort()) {
+      if (d < today()) continue;
+      const chip = button(d + " ×", () => {
+        blocked.delete(d);
+        drawChips();
+      });
+      chip.setAttribute("aria-label", "Open " + d + " again");
+      chips.append(chip);
+    }
+    if (!chips.children.length) chips.append(node("span", "None", "muted"));
+  };
+  const picker = node("input");
+  picker.type = "date";
+  picker.setAttribute("aria-label", "Date to close");
+  const addRow = node("div", undefined, "booking-add");
+  addRow.append(
+    picker,
+    button("Close this date", () => {
+      if (!picker.value) return;
+      blocked.add(picker.value);
+      picker.value = "";
+      drawChips();
+    }),
+  );
+  blockedSet.append(addRow, chips);
+  drawChips();
+  const actions = node("div", undefined, "actions");
+  const save = node("button", "Save", "primary");
+  save.type = "submit";
+  actions.append(save);
+  form.append(days, wl, sl, al, ll, blockedSet, actions);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const parsed = windows.value
+        .split(",")
+        .map((w) => w.trim())
+        .filter(Boolean)
+        .map((w) => {
+          const m = w.match(/^(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})$/);
+          if (!m) throw Error(`“${w}” isn't a time range. Write it like 20:00-23:00.`);
+          const t = (h, mm) => h.padStart(2, "0") + ":" + mm;
+          return { start: t(m[1], m[2]), end: t(m[3], m[4]) };
+        });
+      await api("booking/settings", {
+        days: dayBoxes.filter((c) => c.checked).map((c) => Number(c.value)),
+        windows: parsed,
+        slot: Number(slot.value),
+        ahead: Number(ahead.value),
+        blocked: [...blocked].filter((d) => d >= today()),
+        link: link.value.trim(),
+      });
+      render();
+      notice("Saved. The website shows the new times right away.");
+    } catch (err) {
+      report(err);
+    }
+  };
+  wrap.append(form);
+  return wrap;
 }
 // ---------- Form responses: a table like Google Forms' responses tab, with an Excel download ----------
 async function renderResponses(f) {
@@ -4563,6 +4775,9 @@ const TAB_ICONS = {
   "Team chat":
     "M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-4-.9L3 20l1.1-4A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z",
   Tasks: "M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9",
+  Progress: "M3 3v18h18M7 15l4-4 3 3 6-6",
+  Bookings:
+    "M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
 };
 const TAB_LABELS = {
   "My courses": "Courses",
@@ -4587,7 +4802,7 @@ function buildTabbar(keys) {
   const priority = {
     student: ["Home", "My courses", "Resources", "Messages", "Documents", "Account"],
     mentor: ["Leads", "Students", "Documents", "Messages"],
-  }[me.role] || ["Overview", "Leads", "Students", "Messages", "Tasks", "Team chat"];
+  }[me.role] || ["Team chat", "Tasks", "Progress", "Leads", "Bookings", "Overview"];
   const tabs =
     keys.length <= 5 ? keys : [...priority.filter((k) => keys.includes(k)).slice(0, 4), "More"];
   const bar = node("nav", undefined, "tabbar");
@@ -4614,12 +4829,24 @@ function buildTabbar(keys) {
   const backdrop = node("div", undefined, "menu-backdrop");
   backdrop.onclick = () => setMenu(false);
   document.body.append(backdrop, bar);
+  return tabs.filter((k) => k !== "More");
+}
+// Desktop sidebar: show or fold the rarely used screens. Phones always list them in the "More" sheet.
+function setMoreOpen(open, remember = true) {
+  $("nav").querySelector(".nav-more")?.setAttribute("aria-expanded", String(open));
+  $("nav-more-list")?.classList.toggle("open", open);
+  if (remember)
+    try {
+      localStorage.setItem("nav-more", open ? "open" : "closed");
+    } catch {}
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 try {
   me = await api("me");
   const catalogResponse = await fetch("/cms-copy-catalog.json");
   if (catalogResponse.ok) catalog = await catalogResponse.json();
+  const retiredResponse = await fetch("/cms-retired-keys.json").catch(() => null);
+  if (retiredResponse?.ok) retired = new Set(await retiredResponse.json());
   if (!["mentor", "student"].includes(me.role)) await refresh();
   if (me.role === "student") myFeatures = await api("lms/my/features").catch(() => ({}));
   $("login").hidden = true;
@@ -4638,7 +4865,7 @@ try {
     "team",
     "feedback",
     "faqs",
-    "countries",
+    // "countries" is hidden: the site is USA-only now. Its rows stay in the database.
     "links",
     "Media",
   ];
@@ -4663,9 +4890,20 @@ try {
             ["Team", ["Team chat", "Tasks", "Progress"]],
           ]
         : [
-            ["", ["Overview"]],
-            ["Team", ["Team chat", "Tasks", "Progress"]],
-            ["Website", me.visual ? ["Visual editor", ...website] : website],
+            // Daily screens first; everything else sits under "More" (see DAILY below).
+            [
+              "",
+              [
+                "Team chat",
+                "Tasks",
+                "Progress",
+                ...(me.role === "editor" ? [] : ["Leads", "Bookings"]),
+              ],
+            ],
+            [
+              "Website",
+              me.visual ? ["Overview", "Visual editor", ...website] : ["Overview", ...website],
+            ],
             ...(me.role === "editor"
               ? []
               : [
@@ -4681,7 +4919,7 @@ try {
                       "Reviews",
                     ],
                   ],
-                  ["Inbox", ["Leads", "Forms", "Private feedback", "Newsletter"]],
+                  ["Inbox", ["Forms", "Private feedback", "Newsletter"]],
                   // The audit log is for the Super Admin only.
                   [
                     "Settings",
@@ -4689,24 +4927,52 @@ try {
                   ],
                 ]),
           ];
+  if (!["mentor", "student"].includes(me.role)) section = "Team chat";
   if (me.role === "mentor") section = "Leads";
   if (me.role === "student") section = "Home";
   if (me.role === "student") {
     document.querySelector("aside .eyebrow").textContent = "STUDENT DASHBOARD";
     document.querySelector("main header .eyebrow").textContent = "SCHOLARS CAFE / STUDENT";
   }
-  for (const [group, keys] of navFor) {
-    if (group) $("nav").append(node("p", group, "nav-group"));
+  // Staff: the first (unnamed) group is the daily list; the rest folds under a "More" toggle on desktop.
+  const staffNav = !["mentor", "student"].includes(me.role);
+  const tabKeys = buildTabbar(navFor.flatMap(([, keys]) => keys));
+  let target = $("nav");
+  navFor.forEach(([group, keys], index) => {
+    if (staffNav && index === 1) {
+      const toggle = node("button", "More", "nav-more");
+      toggle.type = "button";
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-controls", "nav-more-list");
+      toggle.onclick = () => setMoreOpen(toggle.getAttribute("aria-expanded") !== "true");
+      target = node("div", undefined, "nav-more-list");
+      target.id = "nav-more-list";
+      $("nav").append(toggle, target);
+    }
+    // On phones, the "More" sheet skips what the bottom bar already shows.
+    const groupInTabbar = keys.every((k) => tabKeys.includes(k));
+    if (group) {
+      const heading = node("p", group, "nav-group");
+      if (groupInTabbar) heading.classList.add("in-tabbar");
+      target.append(heading);
+    }
     for (const key of keys) {
       const b = button(label(key), () => {
         setMenu(false);
         navigate(key);
       });
       b.dataset.section = key;
-      $("nav").append(b);
+      if (tabKeys.includes(key)) b.classList.add("in-tabbar");
+      target.append(b);
     }
+  });
+  if (staffNav) {
+    let saved = null;
+    try {
+      saved = localStorage.getItem("nav-more");
+    } catch {}
+    setMoreOpen(saved === "open");
   }
-  buildTabbar(navFor.flatMap(([, keys]) => keys));
   if (me.role === "student")
     api("lms/my/unread")
       .then(({ unread }) => {
