@@ -10,6 +10,7 @@ import {
   EMAIL as CMS_DEFAULT_EMAIL,
   PHONE as CMS_DEFAULT_PHONE,
   WA_LINK as CMS_DEFAULT_WA_LINK,
+  BOOK_LINK,
 } from "@/lib/scholars-data";
 import {
   Mail,
@@ -20,6 +21,7 @@ import {
   Instagram,
   Linkedin,
   Phone,
+  CalendarDays,
 } from "lucide-react";
 
 const INTERESTS = [
@@ -198,13 +200,11 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
                 </CmsText>
               </p>
               <a
-                href={WA_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={BOOK_LINK}
                 className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-6 py-3 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800 "
               >
-                <MessageCircle className="h-4 w-4" aria-hidden />
-                <CmsText id="Contact.6262cd58b9d5">WhatsApp us now →</CmsText>
+                <CalendarDays className="h-4 w-4" aria-hidden />
+                <CmsText id="Contact.bookslot">Pick a time →</CmsText>
               </a>
             </div>
           </Reveal>

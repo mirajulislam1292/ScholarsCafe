@@ -1,12 +1,11 @@
 import { useCmsValue } from "@/lib/cms";
 import { ArrowUpRight } from "lucide-react";
-import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import { BOOK_LINK } from "@/lib/scholars-data";
 import { SITE } from "@/lib/site-content";
 import { Reveal } from "./Reveal";
 
 /** USA focus section: large imagery, very little text. Content: src/content/site.json > usa. */
 export function Destinations() {
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   const usa = useCmsValue("site.usa", SITE.usa);
 
   return (
@@ -18,9 +17,7 @@ export function Destinations() {
             {usa.lead && <p className="mt-5 max-w-md type-body text-neutral-600">{usa.lead}</p>}
           </div>
           <a
-            href={WA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={BOOK_LINK}
             className="group inline-flex items-center gap-1.5 self-start type-button text-blue-700 md:self-auto"
           >
             {usa.cta}

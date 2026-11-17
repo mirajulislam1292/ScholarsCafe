@@ -6,7 +6,7 @@ import { CmsText, useCmsCollection, useCmsValue } from "@/lib/cms";
 import {
   PROGRAMS as DEFAULT_PROGRAMS,
   PROCESS as CMS_DEFAULT_PROCESS,
-  WA_LINK as CMS_DEFAULT_WA_LINK,
+  BOOK_LINK,
 } from "@/lib/scholars-data";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
@@ -34,7 +34,6 @@ function ProgramsPage() {
     (data, id) => ({ ...data, id, icon: "graduation-cap" }) as Program,
   );
   const PROCESS = useCmsValue("data.PROCESS", CMS_DEFAULT_PROCESS);
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   return (
     <div className="min-h-screen bg-white">
@@ -66,7 +65,7 @@ function ProgramsPage() {
                   <div className="grid gap-6">
                     {PROGRAMS.map((p, i) => (
                       <Reveal key={p.id} delay={i * 0.05}>
-                        <ProgramRow p={p} waLink={WA_LINK} />
+                        <ProgramRow p={p} />
                       </Reveal>
                     ))}
                   </div>
@@ -143,7 +142,7 @@ function ProgramsPage() {
   );
 }
 
-function ProgramRow({ p, waLink }: { p: Program; waLink: string }) {
+function ProgramRow({ p }: { p: Program }) {
   const featured = Boolean(p.featured);
   return (
     <article
@@ -172,9 +171,7 @@ function ProgramRow({ p, waLink }: { p: Program; waLink: string }) {
           )}
         </div>
         <a
-          href={waLink}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={BOOK_LINK}
           className={`type-button inline-flex h-12 w-fit items-center gap-2 rounded-full px-6 transition-colors duration-500 ease-premium ${
             featured
               ? "bg-ice-100 text-blue-950 hover:bg-white"

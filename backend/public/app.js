@@ -51,6 +51,8 @@ const ABOUT = {
   "Visual editor":
     "Click any text on your website and change it. Only for the Super Admin account.",
   Forms: "Your own forms at scholarscafe.com/forms/…, replacing Google Forms. Answers go to Leads.",
+  Bookings:
+    "1-on-1 mentor sessions booked at scholarscafe.com/book (one per day), and when people can book.",
   "Private feedback": "Private feedback sent from the website.",
   Newsletter: "Newsletter sign-ups.",
   Access: "Who can sign in to this workspace, and with which role.",
@@ -434,6 +436,10 @@ function render() {
   }
   if (section === "Forms") {
     renderForms().catch(report);
+    return;
+  }
+  if (section === "Bookings") {
+    renderBookings().catch(report);
     return;
   }
   if (section === "Documents") {
@@ -2282,6 +2288,196 @@ async function renderForms(openId) {
       screen.append(row);
     }
   }
+}
+// ---------- Bookings: 1-on-1 mentor sessions (scholarscafe.com/book), one per day ----------
+const BOOKING_WEEKDAYS = [
+  [6, "Saturday"],
+  [0, "Sunday"],
+  [1, "Monday"],
+  [2, "Tuesday"],
+  [3, "Wednesday"],
+  [4, "Thursday"],
+  [5, "Friday"],
+];
+async function renderBookings() {
+  const screen = $("screen");
+  const { items, settings } = await api("booking");
+  const upcoming = items.filter((b) => b.upcoming);
+  const bar = node("div", undefined, "toolbar");
+  const link = node("a", "scholarscafe.com/book");
+  link.href = "https://scholarscafe.com/book";
+  link.target = "_blank";
+  link.rel = "noopener";
+  const lead = node(
+    "p",
+    upcoming.length ? `${upcoming.length} upcoming · ` : "No upcoming sessions · ",
+  );
+  lead.append(link);
+  bar.append(lead);
+  screen.append(bar);
+  if (!settings.link)
+    screen.append(
+      node(
+        "p",
+        "No meeting link yet. Add your Google Meet link under “When people can book” so it goes into every confirmation.",
+        "card",
+      ),
+    );
+  const list = node("div", undefined, "form-cards");
+  for (const b of items) {
+    const card = node("div", undefined, "card form-card");
+    const top = node("div", undefined, "form-card-top");
+    const state = b.upcoming ? "Upcoming" : b.status === "cancelled" ? "Cancelled" : "Past";
+    top.append(
+      node(
+        "span",
+        state,
+        "pill " + (b.upcoming ? "live" : b.status === "cancelled" ? "closed" : "draft"),
+      ),
+      node("span", b.reminded_at ? "Reminder sent" : "", "muted"),
+    );
+    const email = node("a", b.email);
+    email.href = "mailto:" + b.email;
+    const who = node("p");
+    who.append(
+      document.createTextNode(b.name + " · "),
+      email,
+      document.createTextNode(b.phone ? " · " + b.phone : ""),
+    );
+    card.append(top, node("h3", b.when), who, node("p", b.topic, "muted booking-topic"));
+    if (b.upcoming) {
+      const actions = node("div", undefined, "actions");
+      actions.append(
+        button(
+          "Cancel booking",
+          async () => {
+            if (
+              !confirm(
+                `Cancel ${b.name}'s session on ${b.when}? They will get an email, and the day opens again.`,
+              )
+            )
+              return;
+            await api("booking/" + b.id + "/cancel", {});
+            render();
+            notice("Booking cancelled. " + b.name + " will get an email.");
+          },
+          "danger",
+        ),
+      );
+      card.append(actions);
+    }
+    list.append(card);
+  }
+  if (!items.length) screen.append(node("p", "No bookings yet.", "empty"));
+  screen.append(list, bookingSettingsForm(settings));
+}
+function bookingSettingsForm(s) {
+  const wrap = node("details", undefined, "card");
+  wrap.open = !s.link;
+  wrap.append(node("summary", "When people can book"));
+  const form = node("form");
+  form.append(
+    node(
+      "p",
+      "All times are Bangladesh time. Only one session can be booked per day; once a day is booked it disappears from the website.",
+      "muted",
+    ),
+  );
+  const days = node("fieldset", undefined, "checks");
+  days.append(node("legend", "Open days"));
+  const dayBoxes = BOOKING_WEEKDAYS.map(([n, name]) => {
+    const l = node("label", undefined, "check");
+    const c = node("input");
+    c.type = "checkbox";
+    c.value = String(n);
+    c.checked = s.days.includes(n);
+    l.append(c, document.createTextNode(" " + name));
+    days.append(l);
+    return c;
+  });
+  const [wl, windows] = input(
+    "Hours (e.g. 20:00-23:00; add more with commas: 10:00-12:00, 20:00-23:00)",
+    s.windows.map((w) => w.start + "-" + w.end).join(", "),
+    "text",
+    120,
+  );
+  const [sl, slot] = input("Session length (minutes)", String(s.slot), "number", 3);
+  const [al, ahead] = input("How many days ahead people can book", String(s.ahead), "number", 3);
+  const [ll, link] = input(
+    "Meeting link (Google Meet), sent in every confirmation",
+    s.link,
+    "url",
+    300,
+  );
+  link.placeholder = "https://meet.google.com/…";
+  // Closed dates: pick a date and add it; tap one to remove it.
+  const today = () => new Date(Date.now() + 6 * 3600000).toISOString().slice(0, 10);
+  const blocked = new Set(s.blocked);
+  const blockedSet = node("fieldset", undefined, "checks");
+  blockedSet.append(node("legend", "Closed dates (holidays, travel)"));
+  const chips = node("div", undefined, "booking-chips");
+  const drawChips = () => {
+    chips.replaceChildren();
+    for (const d of [...blocked].sort()) {
+      if (d < today()) continue;
+      const chip = button(d + " ×", () => {
+        blocked.delete(d);
+        drawChips();
+      });
+      chip.setAttribute("aria-label", "Open " + d + " again");
+      chips.append(chip);
+    }
+    if (!chips.children.length) chips.append(node("span", "None", "muted"));
+  };
+  const picker = node("input");
+  picker.type = "date";
+  picker.setAttribute("aria-label", "Date to close");
+  const addRow = node("div", undefined, "booking-add");
+  addRow.append(
+    picker,
+    button("Close this date", () => {
+      if (!picker.value) return;
+      blocked.add(picker.value);
+      picker.value = "";
+      drawChips();
+    }),
+  );
+  blockedSet.append(addRow, chips);
+  drawChips();
+  const actions = node("div", undefined, "actions");
+  const save = node("button", "Save", "primary");
+  save.type = "submit";
+  actions.append(save);
+  form.append(days, wl, sl, al, ll, blockedSet, actions);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const parsed = windows.value
+        .split(",")
+        .map((w) => w.trim())
+        .filter(Boolean)
+        .map((w) => {
+          const m = w.match(/^(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})$/);
+          if (!m) throw Error(`“${w}” isn't a time range. Write it like 20:00-23:00.`);
+          const t = (h, mm) => h.padStart(2, "0") + ":" + mm;
+          return { start: t(m[1], m[2]), end: t(m[3], m[4]) };
+        });
+      await api("booking/settings", {
+        days: dayBoxes.filter((c) => c.checked).map((c) => Number(c.value)),
+        windows: parsed,
+        slot: Number(slot.value),
+        ahead: Number(ahead.value),
+        blocked: [...blocked].filter((d) => d >= today()),
+        link: link.value.trim(),
+      });
+      render();
+      notice("Saved. The website shows the new times right away.");
+    } catch (err) {
+      report(err);
+    }
+  };
+  wrap.append(form);
+  return wrap;
 }
 // ---------- Form responses: a table like Google Forms' responses tab, with an Excel download ----------
 async function renderResponses(f) {
@@ -4675,7 +4871,7 @@ try {
                       "Reviews",
                     ],
                   ],
-                  ["Inbox", ["Leads", "Forms", "Private feedback", "Newsletter"]],
+                  ["Inbox", ["Leads", "Forms", "Bookings", "Private feedback", "Newsletter"]],
                   // The audit log is for the Super Admin only.
                   [
                     "Settings",
