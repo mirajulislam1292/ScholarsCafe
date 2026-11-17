@@ -108,7 +108,7 @@ Students → **Student resources** → **+ New**:
 ## ৮. ওয়েবসাইট
 
 - **লেখা ও ছবি:** Website → **Website text & images** → Edit → **Save draft** → **Publish** (প্রায় ১ মিনিটে লাইভ)।
-- **তালিকা:** Blog (তারিখ দিন; হোমপেজে নতুন ৫টি দেখায়), Resources, Courses & pricing, Universities, Our Team, Testimonials, FAQs, Countries, Hero videos। **+ Add entry**, **Edit**, ক্রম বদলাতে **↑ ↓**, লুকাতে **Unpublish**।
+- **তালিকা:** Blog (তারিখ দিন; হোমপেজে নতুন ৫টি দেখায়), Resources (category `webinar`/`live`/`video` হলে Resources → Webinar এ, `broadcast` হলে Resources → Broadcast এ দেখায়), Courses & pricing, Universities, Our Team, Testimonials, FAQs, Countries, Hero videos। **+ Add entry**, **Edit**, ক্রম বদলাতে **↑ ↓**, লুকাতে **Unpublish**।
 - **Page sections:** অংশের ক্রম বা লুকানো, যেমন হোমপেজ: `hero,names,usa,pages,stories,journal,resources,portal,cta`।
 - **SEO titles:** প্রতিটি পাতার Google শিরোনাম ও বিবরণ।
 - **ভুল ফেরাতে:** এন্ট্রি খুলে **Version history** → **Restore as draft** → Publish।
@@ -173,7 +173,30 @@ Website → **Link page** → **+ Add entry**:
 - **Progress:** আপনার স্ট্রিক (টানা কত দিন ড্যাশবোর্ড ব্যবহার করেছেন), আজ ও এই সপ্তাহের ঘণ্টা, আর শেষ করা কাজ। ঘণ্টা আনুমানিক: ড্যাশবোর্ড খোলা ও ব্যবহার হলেই শুধু গোনা হয়। সুপার অ্যাডমিন পুরো টিম দেখেন: কে কোন দিন ছিল, স্ট্রিক, ঘণ্টা ও কাজ।
 - **Audit log** (Settings → **Activity**) এখন শুধু সুপার অ্যাডমিনের জন্য।
 
-## ১৪. সমস্যা ও সমাধান
+## ১৪. রিসোর্স ও ECA অ্যালার্ট
+
+**scholarscafe.com/resources** এ চারটি পাতা আছে (সাইটের উপরের **Resources** মেনুতেও):
+
+- **Blog** (`/resources/blog`): Website → **Blog** এর সব পোস্ট, নতুনগুলো আগে।
+- **ECA Notification** (`/resources/eca`): নতুন ECA এর খবর পেতে মানুষ এখানে ইমেইল দেয়।
+- **Webinar** (`/resources/webinars`): Website → **Resources** এর যেসব এন্ট্রির category `webinar`, `live` বা `video`।
+- **Broadcast** (`/resources/broadcast`): Website → **Resources** এর যেসব এন্ট্রির category `broadcast` (ঘোষণা ও আপডেট)।
+
+কোনো পাতায় এখনো কিছু প্রকাশ না হলে সেটা সরাসরি বলে দেয় (যেমন "No webinars scheduled right now")।
+
+**ECA অ্যালার্ট পাঠানো** (মালিক ও অ্যাডমিন): Inbox → **ECA alerts**।
+
+১. **Active subscribers** এর সংখ্যা দেখুন।
+২. **Subject** (যেমন "New ECA open: Debate club") ও **Message** লিখুন: কী, কারা যোগ দিতে পারবে, ডেডলাইন আর লিংক।
+৩. **Send to all subscribers** চেপে নিশ্চিত করুন। এটা আর ফেরানো যায় না।
+
+- প্রত্যেক সাবস্ক্রাইবার আলাদা ইমেইল পান, নিচে এক ক্লিকে **unsubscribe** লিংক থাকে। Gmail সহ মেইল অ্যাপগুলোও নিজেদের Unsubscribe বোতাম দেখায়।
+- ইমেইলগুলো লাইনে রাখা হয় আর প্রতি ৩০ সেকেন্ডে একটা করে যায় (ঘণ্টায় প্রায় ১২০টা), যাতে মেইলবক্সের লিমিট না ছাড়ায়। ৩০০ জন সাবস্ক্রাইবার থাকলে শেষজন প্রায় আড়াই ঘণ্টা পরে পান। এর মাঝেও টিমের নোটিফিকেশন যেতে থাকে।
+- রিপ্লাই যায় contact@scholarscafe.com এ।
+- **কোন ঠিকানা থেকে যায়:** ওয়েবসাইটের পাঠানোর মেইলবক্স থেকে (`SMTP_USER`; স্ক্রিনে কোনটা তা দেখায়)। noreply@scholarscafe.com থেকে পাঠাতে চাইলে Hostinger এ ওই মেইলবক্স তৈরি করুন, তারপর অ্যাডমিন অ্যাপের environment variables এ `SMTP_USER=noreply@scholarscafe.com` আর `SMTP_PASSWORD` (ওই মেইলবক্সের পাসওয়ার্ড) দিন। এতে শুধু অ্যালার্ট নয়, ওয়েবসাইটের সব ইমেইলের প্রেরক বদলাবে।
+- **Remove** চাপলে কেউ তালিকা থেকে বাদ যায় (তার জন্য অপেক্ষমাণ অ্যালার্টও বাদ যায়)। প্রতিটি পাঠানো ও বাদ দেওয়া audit log এ থাকে।
+
+## ১৫. সমস্যা ও সমাধান
 
 | সমস্যা                                     | কী করবেন                                                                                                                                        |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |

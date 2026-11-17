@@ -40,6 +40,15 @@ export async function deliverMail(store, transport) {
         subject: row.subject,
         text: row.body,
         messageId: `<${row.id}@scholarscafe.com>`,
+        // Alert emails (ECA list): the mail app's own "Unsubscribe" button, one click (RFC 8058).
+        ...(row.unsubscribe_url
+          ? {
+              headers: {
+                "List-Unsubscribe": `<${row.unsubscribe_url}>`,
+                "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+              },
+            }
+          : {}),
       });
       await store.query(
         "UPDATE mail_outbox SET sent_at=UTC_TIMESTAMP(),attempts=attempts+1 WHERE id=?",

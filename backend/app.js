@@ -17,6 +17,7 @@ import { installDocumentRoutes } from "./documents.js";
 import { installFormAdminRoutes, installPublicFormRoutes } from "./forms.js";
 import { installVisualRoutes } from "./visual.js";
 import { installWorkspaceRoutes } from "./workspace.js";
+import { installEcaAdminRoutes, installEcaPublicRoutes } from "./eca.js";
 import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
 import {
   token,
@@ -201,7 +202,7 @@ export function createApp(
   // The website's content and forms are served by the admin deployment only.
   if (portal === "student") app.use("/public", (_req, _res, next) => next(fail(404, "Not found.")));
   app.use(
-    ["/public/inquiries", "/public/feedback", "/public/newsletter"],
+    ["/public/inquiries", "/public/feedback", "/public/newsletter", "/public/eca-alerts"],
     rateLimit({
       windowMs: 60 * 60 * 1000,
       limit: 10,
@@ -209,24 +210,27 @@ export function createApp(
       legacyHeaders: false,
     }),
   );
-  app.use(["/public/inquiries", "/public/feedback", "/public/newsletter"], (req, res, next) => {
-    if (req.headers.origin !== config.PUBLIC_ORIGIN)
-      return res.status(403).json({ error: "Website origin required." });
-    res.set("Access-Control-Allow-Origin", config.PUBLIC_ORIGIN);
-    res.vary("Origin");
-    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type");
-    if (req.method === "OPTIONS") return res.sendStatus(204);
-    if (!req.is("application/json")) return res.status(415).json({ error: "JSON required." });
-    next();
-  });
   app.use(
-    ["/public/inquiries", "/public/feedback", "/public/newsletter"],
+    ["/public/inquiries", "/public/feedback", "/public/newsletter", "/public/eca-alerts"],
+    (req, res, next) => {
+      if (req.headers.origin !== config.PUBLIC_ORIGIN)
+        return res.status(403).json({ error: "Website origin required." });
+      res.set("Access-Control-Allow-Origin", config.PUBLIC_ORIGIN);
+      res.vary("Origin");
+      res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+      if (req.method === "OPTIONS") return res.sendStatus(204);
+      if (!req.is("application/json")) return res.status(415).json({ error: "JSON required." });
+      next();
+    },
+  );
+  app.use(
+    ["/public/inquiries", "/public/feedback", "/public/newsletter", "/public/eca-alerts"],
     sharedLimit("submissions", 20, 3600),
   );
   // Optional Cloudflare Turnstile bot check. Active only when TURNSTILE_SECRET_KEY is set.
   app.use(
-    ["/public/inquiries", "/public/feedback", "/public/newsletter"],
+    ["/public/inquiries", "/public/feedback", "/public/newsletter", "/public/eca-alerts"],
     async (req, res, next) => {
       const tokenValue = req.body?.turnstileToken;
       if (req.body && typeof req.body === "object") delete req.body.turnstileToken;
@@ -319,6 +323,8 @@ export function createApp(
     });
   }
   installPublicFormRoutes(app, { store, fail, config, sharedLimit });
+  // ECA alerts sign-up and its unsubscribe link (the student portal 404s every /public route above).
+  installEcaPublicRoutes(app, { store, sharedLimit, config });
   installPublicBookingRoutes(app, { store, fail, config, sharedLimit });
   // /links page click counts: one counter per link per day, nothing about the visitor is stored.
   app.post(
@@ -528,6 +534,8 @@ export function createApp(
   installMessageRoutes(app, { store, fail });
   // Team workspace (staff chat, tasks, activity). Admin portal only; never mounted on the student portal.
   if (portal === "admin") installWorkspaceRoutes(app, { store, fail, config });
+  // ECA alerts list and "send to everyone" (owners and admins, team admin only).
+  if (portal === "admin") installEcaAdminRoutes(app, { store, fail, canPublish, config });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
     if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");

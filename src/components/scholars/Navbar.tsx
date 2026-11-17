@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { BOOK_LINK, STUDENT_PORTAL_URL } from "@/lib/scholars-data";
+import { RESOURCE_PAGES } from "./ResourcesNav";
 
 const DEFAULT_NAV = [
   { label: "Home", href: "/" },
@@ -63,19 +64,42 @@ export function Navbar() {
           </a>
 
           <nav aria-label="Main" className="hidden items-center gap-9 lg:flex">
-            {NAV.filter((i) => i.href !== "/" && i.href !== "#top").map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`type-nav transition-colors duration-500 ease-premium ${
-                  solid
-                    ? "text-neutral-600 hover:text-neutral-900"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                {item.label}
-              </a>
-            ))}
+            {NAV.filter((i) => i.href !== "/" && i.href !== "#top").map((item) => {
+              const link = (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className={`type-nav transition-colors duration-500 ease-premium ${
+                    solid
+                      ? "text-neutral-600 hover:text-neutral-900"
+                      : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              );
+              if (item.href !== "/resources") return link;
+              // Resources: its four sub-pages open below on hover or keyboard focus.
+              return (
+                <div key={item.href} className="group relative">
+                  {link}
+                  <div className="invisible absolute left-1/2 top-full z-10 w-60 -translate-x-1/2 pt-4 opacity-0 transition-opacity duration-300 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                    <ul className="rounded-2xl border border-neutral-900/[0.08] bg-white p-2 shadow-[0_24px_60px_rgb(15_40_70/0.12)]">
+                      {RESOURCE_PAGES.map((p) => (
+                        <li key={p.href}>
+                          <a
+                            href={p.href}
+                            className="type-nav block rounded-xl px-4 py-2.5 text-neutral-700 hover:bg-ice-50 hover:text-neutral-900"
+                          >
+                            {cmsLabel("ResourcesHub." + p.id, p.label)}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -127,7 +151,7 @@ export function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease }}
-            className="fixed inset-0 z-[2000] flex flex-col bg-blue-950 px-6 pb-10 pt-4 text-white lg:hidden"
+            className="fixed inset-0 z-[2000] flex flex-col overflow-y-auto bg-blue-950 px-6 pb-10 pt-4 text-white lg:hidden"
           >
             <div className="flex h-14 items-center justify-between">
               <span aria-hidden className="brand-mark h-8! w-9! bg-ice-100!" />
@@ -142,17 +166,34 @@ export function Navbar() {
             </div>
             <nav aria-label="Mobile" className="mt-14 flex flex-col">
               {NAV.map((item, i) => (
-                <motion.a
+                <motion.div
                   key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 * i, duration: 0.6, ease }}
-                  className="py-3 font-heading text-[2rem] font-light tracking-[-0.02em] text-white/90 hover:text-white"
                 >
-                  {item.label}
-                </motion.a>
+                  <a
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="block py-3 font-heading text-[2rem] font-light tracking-[-0.02em] text-white/90 hover:text-white"
+                  >
+                    {item.label}
+                  </a>
+                  {item.href === "/resources" && (
+                    <div className="-mt-1 mb-2 flex flex-wrap gap-x-5 gap-y-1 pl-1">
+                      {RESOURCE_PAGES.map((p) => (
+                        <a
+                          key={p.href}
+                          href={p.href}
+                          onClick={() => setOpen(false)}
+                          className="type-nav py-1.5 text-ice-300 hover:text-white"
+                        >
+                          {cmsLabel("ResourcesHub." + p.id, p.label)}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
               ))}
             </nav>
             <a

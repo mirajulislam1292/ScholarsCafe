@@ -109,7 +109,7 @@ If the same text appears in several places (e.g. a button used twice), the panel
 ## 8. The website
 
 - **Text and images:** Website → **Website text & images** → Edit → **Save draft** → **Publish** (live within about a minute).
-- **Lists:** Blog (set a date; the home page shows the 5 newest), Resources, Courses & pricing, Universities, Our Team, Testimonials, FAQs, Countries, Hero videos. **+ Add entry**, **Edit**, **↑ ↓** to reorder, **Unpublish** to hide.
+- **Lists:** Blog (set a date; the home page shows the 5 newest), Resources (category `webinar`/`live`/`video` shows on Resources → Webinar, `broadcast` on Resources → Broadcast), Courses & pricing, Universities, Our Team, Testimonials, FAQs, Countries, Hero videos. **+ Add entry**, **Edit**, **↑ ↓** to reorder, **Unpublish** to hide.
 - **Page sections:** order or hide sections, e.g. home: `hero,names,usa,pages,stories,journal,resources,portal,cta`.
 - **SEO titles:** the Google title and description for each page.
 - **Undo:** open an entry → **Version history** → **Restore as draft** → Publish.
@@ -174,7 +174,30 @@ The **Team** menu is for owners, admins, editors and mentors. Students never see
 - **Progress:** your streak (days in a row you used the dashboard), today's and this week's hours, and tasks done. Hours are approximate: they count only while the dashboard is open and being used. The Super Admin also sees the whole team: who was in on each day, streaks, hours and tasks.
 - **Audit log** (Settings → **Activity**) is now for the Super Admin only.
 
-## 14. Troubleshooting
+## 14. Resources and ECA alerts
+
+**scholarscafe.com/resources** has four pages (also in the **Resources** menu at the top of the site):
+
+- **Blog** (`/resources/blog`): every post from Website → **Blog**, newest first.
+- **ECA Notification** (`/resources/eca`): people leave their email to hear about new ECAs.
+- **Webinar** (`/resources/webinars`): entries from Website → **Resources** with category `webinar`, `live` or `video`.
+- **Broadcast** (`/resources/broadcast`): entries from Website → **Resources** with category `broadcast` (announcements and updates).
+
+A page with nothing published yet says so ("No webinars scheduled right now", and so on).
+
+**Send an ECA alert** (owners and admins): Inbox → **ECA alerts**.
+
+1. Check the number of **Active subscribers**.
+2. Write a **Subject** (e.g. "New ECA open: Debate club") and a **Message**: what it is, who can join, the deadline and the link.
+3. Tap **Send to all subscribers** and confirm. It can't be undone.
+
+- Each subscriber gets their own email with a one-click **unsubscribe** link at the bottom. Gmail and other mail apps also show their own Unsubscribe button.
+- Emails are queued and sent one every 30 seconds (about 120 an hour), so the mailbox isn't overloaded. With 300 subscribers, the last one gets it about 2½ hours later. Team notifications still go out in between.
+- Replies go to contact@scholarscafe.com.
+- **From address:** alerts are sent from the website's sending mailbox (`SMTP_USER`; the screen shows which one). To send from noreply@scholarscafe.com, create that mailbox in Hostinger, then set `SMTP_USER=noreply@scholarscafe.com` and `SMTP_PASSWORD` (that mailbox's password) in the admin app's environment variables. This changes the sender of all website emails, not only alerts.
+- **Remove** takes someone off the list (and drops any alert still waiting for them). Every send and removal is in the audit log.
+
+## 15. Troubleshooting
 
 | Problem                                    | What to do                                                                                                                                      |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
