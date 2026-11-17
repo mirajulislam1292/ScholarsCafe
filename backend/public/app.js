@@ -57,7 +57,10 @@ const ABOUT = {
   Newsletter: "Newsletter sign-ups.",
   Access: "Who can sign in to this workspace, and with which role.",
   "Email delivery": "Outgoing notification emails and their status.",
-  Activity: "Every change, who made it and when.",
+  Activity: "Every change, who made it and when. Only the Super Admin sees this.",
+  "Team chat": "One group chat for the whole team. Pin important messages.",
+  Tasks: "Team to-dos with deadlines. People get an email when assigned and before the deadline.",
+  Progress: "Your streak, approximate hours and tasks done.",
   Account: "Your password and sign-in details.",
   "My courses": "Your courses and lessons.",
   Home: "",
@@ -399,7 +402,13 @@ function render() {
     return;
   }
   if (section === "Activity") {
+    if (!me.super_admin)
+      return report(Error("The audit log is only available to the Super Admin."));
     renderAudit().catch(report);
+    return;
+  }
+  if (WORKSPACE[section]) {
+    WORKSPACE[section]().catch(report);
     return;
   }
   if (section === "Leads") {
@@ -4191,6 +4200,541 @@ function renderAccount() {
   };
   $("screen").append(card);
 }
+// ---------- Team workspace: staff chat, tasks, progress (staff only; see backend/workspace.js) ----------
+const STAFF = ["owner", "admin", "editor", "mentor"];
+const WORKSPACE = {
+  "Team chat": () => renderTeamChat(),
+  Tasks: () => renderTasks(),
+  Progress: () => renderProgress(),
+};
+const DHAKA = "Asia/Dhaka";
+const dhakaTime = (t, opts) => new Date(t).toLocaleString("en-GB", { timeZone: DHAKA, ...opts });
+const dhakaDayOf = (t) => new Date(new Date(t).getTime() + 6 * 3600000).toISOString().slice(0, 10);
+// A deadline as the "YYYY-MM-DDTHH:mm" a date+time picker shows (Bangladesh time).
+const dhakaInput = (t) =>
+  t ? new Date(new Date(t).getTime() + 6 * 3600000).toISOString().slice(0, 16) : "";
+const dueText = (t) =>
+  dhakaTime(t, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+const hours = (minutes) =>
+  minutes < 60 ? `~${minutes}m` : `~${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+
+async function renderTeamChat() {
+  const screen = $("screen");
+  const pins = node("div", undefined, "pin-bar");
+  pins.hidden = true;
+  const list = node("div", undefined, "team-chat");
+  list.setAttribute("aria-live", "polite");
+  const form = node("form", undefined, "chat-composer");
+  const text = node("textarea");
+  text.maxLength = 2000;
+  text.rows = 1;
+  text.placeholder = "Message the team";
+  text.setAttribute("aria-label", "Message the team");
+  const send = node("button", "Send", "primary");
+  send.type = "submit";
+  form.append(text, send);
+  screen.append(pins, list, form);
+  let shown = "";
+  let pinsOpen = false;
+  let data = { items: [], pinned: [] };
+  const jump = (id) => {
+    const el = document.getElementById("msg-" + id);
+    if (!el) return notice("That message is older than the latest 150.");
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("flash");
+    setTimeout(() => el.classList.remove("flash"), 1600);
+  };
+  const pin = async (m, pinned) => {
+    await api(`workspace/chat/${m.id}/pin`, { pinned });
+    shown = "";
+    await draw();
+  };
+  const drawPins = () => {
+    // On phones the header sticks to the top; keep the pinned bar just below it.
+    const header = document.querySelector("aside");
+    pins.style.top =
+      header && getComputedStyle(header).position === "sticky" ? header.offsetHeight + "px" : "0";
+    pins.replaceChildren();
+    pins.hidden = !data.pinned.length;
+    if (!data.pinned.length) return;
+    const top = data.pinned[0];
+    const head = node("button", undefined, "pin-head");
+    head.type = "button";
+    head.setAttribute("aria-expanded", String(pinsOpen));
+    head.append(
+      node(
+        "span",
+        data.pinned.length > 1 ? `Pinned · ${data.pinned.length}` : "Pinned",
+        "pin-label",
+      ),
+      node("span", top.body, "pin-text"),
+      node("span", pinsOpen ? "Hide" : data.pinned.length > 1 ? "All" : "Open", "pin-more"),
+    );
+    head.onclick = () => {
+      if (data.pinned.length === 1 && !pinsOpen) return jump(top.id);
+      pinsOpen = !pinsOpen;
+      drawPins();
+    };
+    pins.append(head);
+    if (!pinsOpen) return;
+    for (const m of data.pinned) {
+      const row = node("div", undefined, "pin-row");
+      const go = node("button", undefined, "pin-jump");
+      go.type = "button";
+      go.append(
+        node("span", `${m.sender} · ${dueText(m.created_at)}`, "muted"),
+        node("span", m.body),
+      );
+      go.onclick = () => jump(m.id);
+      row.append(
+        go,
+        button("Unpin", () => pin(m, false), "small"),
+      );
+      pins.append(row);
+    }
+  };
+  const draw = async () => {
+    data = await api("workspace/chat");
+    const key = JSON.stringify([
+      data.items.map((m) => [m.id, m.pinned]),
+      data.pinned.map((m) => m.id),
+    ]);
+    if (key === shown) return;
+    const first = !shown;
+    shown = key;
+    const atBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 160;
+    drawPins();
+    list.replaceChildren();
+    if (!data.items.length)
+      list.append(node("p", "No messages yet. Say hello to the team.", "empty"));
+    let lastDay = "";
+    const today = dhakaDayOf(Date.now());
+    const yesterday = dhakaDayOf(Date.now() - 86400000);
+    for (const m of data.items) {
+      const day = dhakaDayOf(m.created_at);
+      if (day !== lastDay) {
+        lastDay = day;
+        list.append(
+          node(
+            "p",
+            day === today
+              ? "Today"
+              : day === yesterday
+                ? "Yesterday"
+                : dhakaTime(m.created_at, { weekday: "short", day: "numeric", month: "short" }),
+            "chat-day",
+          ),
+        );
+      }
+      const bubble = node("article", undefined, "chat-msg" + (m.mine ? " mine" : ""));
+      bubble.id = "msg-" + m.id;
+      const meta = node("p", undefined, "chat-meta");
+      meta.append(
+        node("strong", m.mine ? "You" : m.sender),
+        document.createTextNode(
+          " · " + dhakaTime(m.created_at, { hour: "numeric", minute: "2-digit", hour12: true }),
+        ),
+      );
+      if (m.pinned) meta.append(node("span", "Pinned", "badge"));
+      const tools = node("div", undefined, "chat-tools");
+      tools.append(button(m.pinned ? "Unpin" : "Pin", () => pin(m, !m.pinned), "link"));
+      if (m.can_delete)
+        tools.append(
+          button(
+            "Delete",
+            async () => {
+              if (!confirm("Delete this message for everyone?")) return;
+              await api(`workspace/chat/${m.id}/delete`, {});
+              shown = "";
+              await draw();
+            },
+            "link danger-link",
+          ),
+        );
+      bubble.append(meta, node("p", m.body, "chat-body"), tools);
+      list.append(bubble);
+    }
+    if (first || atBottom) window.scrollTo(0, document.body.scrollHeight);
+  };
+  const grow = () => {
+    text.style.height = "auto";
+    text.style.height = Math.min(text.scrollHeight, 160) + "px";
+  };
+  text.oninput = grow;
+  // Enter sends on a keyboard; Shift+Enter (and Enter on phones) adds a new line.
+  text.onkeydown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !matchMedia("(pointer: coarse)").matches) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  };
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const body = text.value.trim();
+    if (!body) return;
+    try {
+      send.disabled = true;
+      await api("workspace/chat", { body });
+      text.value = "";
+      grow();
+      await draw();
+      window.scrollTo(0, document.body.scrollHeight);
+    } catch (err) {
+      report(err);
+    } finally {
+      send.disabled = false;
+    }
+  };
+  await draw();
+  // Near-real-time: check for new messages every 4 seconds while the chat is open and visible.
+  const timer = setInterval(() => {
+    if (!list.isConnected) return clearInterval(timer);
+    if (!document.hidden) draw().catch(() => {});
+  }, 4000);
+}
+
+let taskView = "Mine";
+async function renderTasks() {
+  const screen = $("screen");
+  const admin = canPublishRole(me.role);
+  const [{ items, now, week_start }, staff] = await Promise.all([
+    api("workspace/tasks"),
+    admin ? api("workspace/staff") : { items: [] },
+  ]);
+  const nowMs = new Date(now).getTime();
+  const weekFrom = Date.parse(week_start + "T00:00:00Z") - 6 * 3600000;
+  const weekTo = weekFrom + 7 * 86400000;
+  const overdue = (t) => t.status !== "done" && t.due_at && new Date(t.due_at).getTime() < nowMs;
+  const mine = (t) => t.assignees.some((a) => a.id === me.id);
+  const views = {
+    Mine: { label: "My tasks", pick: mine },
+    Week: {
+      label: "This week",
+      pick: (t) =>
+        t.due_at &&
+        new Date(t.due_at).getTime() >= weekFrom &&
+        new Date(t.due_at).getTime() < weekTo,
+    },
+    Overdue: { label: "Overdue", pick: overdue },
+    ...(admin ? { All: { label: "All", pick: () => true } } : {}),
+  };
+  if (!views[taskView]) taskView = "Mine";
+  const bar = node("div", undefined, "task-bar");
+  const chips = node("div", undefined, "chips");
+  chips.setAttribute("role", "group");
+  chips.setAttribute("aria-label", "Show tasks");
+  for (const [key, v] of Object.entries(views)) {
+    const open = items.filter(
+      (t) => v.pick(t) && (key === "Overdue" || t.status !== "done"),
+    ).length;
+    const b = button(`${v.label}${open ? " " + open : ""}`, () => {
+      taskView = key;
+      navigate("Tasks");
+    });
+    b.setAttribute("aria-pressed", String(key === taskView));
+    if (key === "Overdue" && open) b.classList.add("warn");
+    chips.append(b);
+  }
+  bar.append(chips);
+  if (admin) bar.append(button("+ New task", () => taskForm(null, staff.items), "primary"));
+  screen.append(bar);
+  const shown = items.filter(views[taskView].pick);
+  const open = shown.filter((t) => t.status !== "done");
+  const done = shown.filter((t) => t.status === "done");
+  if (!open.length)
+    screen.append(
+      node(
+        "p",
+        taskView === "Overdue"
+          ? "Nothing overdue. Nice work."
+          : taskView === "Mine"
+            ? "No open tasks for you right now."
+            : "No open tasks here.",
+        "empty",
+      ),
+    );
+  const listEl = node("div", undefined, "task-list");
+  for (const t of open)
+    listEl.append(taskCard(t, { admin, overdue: overdue(t), staff: staff.items }));
+  screen.append(listEl);
+  if (done.length) {
+    const d = node("details", undefined, "task-done");
+    d.append(node("summary", `Done (${done.length})`));
+    const doneList = node("div", undefined, "task-list");
+    for (const t of done) doneList.append(taskCard(t, { admin, staff: staff.items }));
+    d.append(doneList);
+    screen.append(d);
+  }
+}
+function taskCard(t, { admin, overdue, staff }) {
+  const card = node("article", undefined, "card task" + (t.status === "done" ? " is-done" : ""));
+  const top = node("div", undefined, "task-top");
+  top.append(node("h3", t.title));
+  const canChange = admin || t.assignees.some((a) => a.id === me.id);
+  if (canChange) {
+    const [, status] = select(
+      "",
+      [
+        ["todo", "To do"],
+        ["doing", "Doing"],
+        ["done", "Done"],
+      ],
+      t.status,
+    );
+    status.className = "task-status s-" + t.status;
+    status.setAttribute("aria-label", "Status of " + t.title);
+    status.onchange = async () => {
+      try {
+        await api("workspace/tasks/" + t.id, { status: status.value });
+        if (status.value === "done") notice("Marked done.");
+        navigate("Tasks");
+      } catch (e) {
+        report(e);
+      }
+    };
+    top.append(status);
+  } else
+    top.append(node("span", { todo: "To do", doing: "Doing", done: "Done" }[t.status], "badge"));
+  card.append(top);
+  const meta = node("p", undefined, "task-meta");
+  if (t.due_at) {
+    meta.append(node("span", "Due " + dueText(t.due_at), overdue ? "due overdue" : "due"));
+    if (overdue) meta.append(node("span", "Overdue", "badge badge-danger"));
+  } else meta.append(node("span", "No deadline", "muted"));
+  if (t.assignees.length)
+    meta.append(
+      node(
+        "span",
+        "For " + t.assignees.map((a) => (a.id === me.id ? "you" : a.name)).join(", "),
+        "muted",
+      ),
+    );
+  card.append(meta);
+  if (t.details) card.append(node("p", t.details, "task-details"));
+  if (admin) {
+    const actions = node("div", undefined, "task-actions");
+    actions.append(
+      button("Edit", () => taskForm(t, staff), "small"),
+      button(
+        "Delete",
+        async () => {
+          if (!confirm(`Delete the task "${t.title}"?`)) return;
+          await api(`workspace/tasks/${t.id}/delete`, {});
+          navigate("Tasks");
+        },
+        "small danger",
+      ),
+    );
+    card.append(actions);
+  }
+  return card;
+}
+function taskForm(task, staff) {
+  const screen = $("screen");
+  screen.replaceChildren();
+  $("heading").textContent = task ? "Edit task" : "New task";
+  const form = node("form", undefined, "card task-form");
+  const [tl, title] = input("Task", task?.title, "text", 200);
+  title.required = true;
+  const [dl, details] = input("Details (optional)", task?.details || "", "textarea", 4000);
+  details.rows = 3;
+  const [wl, due] = input(
+    "Deadline (Bangladesh time, optional)",
+    dhakaInput(task?.due_at),
+    "datetime-local",
+  );
+  const who = node("fieldset", undefined, "assignees");
+  who.append(node("legend", "Assign to"));
+  const picked = new Set((task?.assignees || []).map((a) => a.id));
+  const boxes = [];
+  for (const s of staff) {
+    const l = node("label", undefined, "check");
+    const box = node("input");
+    box.type = "checkbox";
+    box.value = s.id;
+    box.checked = picked.has(s.id);
+    boxes.push(box);
+    l.append(box, document.createTextNode(`${s.name} (${s.role})`));
+    who.append(l);
+  }
+  form.append(tl, dl, wl, who);
+  let status;
+  if (task) {
+    const [sl, s] = select(
+      "Status",
+      [
+        ["todo", "To do"],
+        ["doing", "Doing"],
+        ["done", "Done"],
+      ],
+      task.status,
+    );
+    status = s;
+    form.append(sl);
+  }
+  form.append(
+    node(
+      "p",
+      "People you add get an email, and a reminder 24 hours and 2 hours before the deadline.",
+      "muted",
+    ),
+  );
+  const actions = node("div", undefined, "actions");
+  const save = node("button", task ? "Save" : "Create task", "primary");
+  save.type = "submit";
+  actions.append(
+    save,
+    button("Cancel", () => navigate("Tasks")),
+  );
+  form.append(actions);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const body = {
+      title: title.value,
+      details: details.value,
+      due: due.value || null,
+      assignees: boxes.filter((b) => b.checked).map((b) => b.value),
+      ...(status ? { status: status.value } : {}),
+    };
+    try {
+      save.disabled = true;
+      await api(task ? "workspace/tasks/" + task.id : "workspace/tasks", body);
+      navigate("Tasks");
+      notice(task ? "Task saved." : "Task created.");
+    } catch (err) {
+      report(err);
+      save.disabled = false;
+    }
+  };
+  screen.append(form);
+  title.focus();
+}
+
+function dayStrip(days, today, count) {
+  const strip = node("div", undefined, "day-strip");
+  for (let i = count - 1; i >= 0; i--) {
+    const day = new Date(Date.parse(today + "T00:00:00Z") - i * 86400000)
+      .toISOString()
+      .slice(0, 10);
+    const m = days[day] || 0;
+    const cell = node("span", undefined, "day-cell");
+    cell.dataset.level = m ? (m < 30 ? "1" : m < 120 ? "2" : "3") : "0";
+    const label = `${new Date(day + "T00:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" })}: ${m ? hours(m) : "not in"}`;
+    cell.title = label;
+    cell.setAttribute("aria-label", label);
+    cell.setAttribute("role", "img");
+    if (day === today) cell.classList.add("today");
+    strip.append(cell);
+  }
+  return strip;
+}
+function statTile(label, value, sub) {
+  const tile = node("div", undefined, "ws-stat");
+  tile.append(node("span", label, "ws-stat-label"), node("strong", value));
+  if (sub) tile.append(node("span", sub, "muted"));
+  return tile;
+}
+let teamDays = 14;
+async function renderProgress() {
+  const screen = $("screen");
+  const { me: s, today } = await api("workspace/progress");
+  const tiles = node("div", undefined, "ws-stats");
+  tiles.append(
+    statTile(
+      "Streak",
+      `${s.streak} ${s.streak === 1 ? "day" : "days"}`,
+      s.today_minutes ? "In today" : s.streak ? "Open the dashboard today to keep it" : "",
+    ),
+    statTile("Today", hours(s.today_minutes)),
+    statTile("This week", hours(s.week_minutes)),
+    statTile("Tasks done", String(s.tasks_done_week), "this week"),
+  );
+  const mine = node("section", undefined, "card");
+  mine.append(
+    node("h2", "Your last 2 weeks"),
+    dayStrip(s.days, today, 14),
+    node(
+      "p",
+      "Hours are approximate: they count while this dashboard is open and being used. Weeks start on Sunday.",
+      "muted",
+    ),
+  );
+  if (s.tasks_open)
+    mine.append(
+      button(
+        `${s.tasks_open} open ${s.tasks_open === 1 ? "task" : "tasks"}${s.tasks_overdue ? `, ${s.tasks_overdue} overdue` : ""} →`,
+        () => {
+          taskView = s.tasks_overdue ? "Overdue" : "Mine";
+          navigate("Tasks");
+        },
+        "small",
+      ),
+    );
+  screen.append(tiles, mine);
+  if (!me.super_admin) return;
+  const team = await api("workspace/team?days=" + teamDays);
+  const section = node("section", undefined, "team-progress");
+  const head = node("div", undefined, "task-bar");
+  head.append(node("h2", "Team"));
+  const chips = node("div", undefined, "chips");
+  for (const n of [14, 28]) {
+    const b = button(`${n} days`, () => {
+      teamDays = n;
+      navigate("Progress");
+    });
+    b.setAttribute("aria-pressed", String(n === teamDays));
+    chips.append(b);
+  }
+  head.append(chips);
+  const inToday = team.items.filter((u) => u.today_minutes).map((u) => u.name);
+  section.append(
+    head,
+    node(
+      "p",
+      (inToday.length ? "In today: " + inToday.join(", ") : "Nobody has been in yet today") +
+        ". Each square is a day, today on the right; darker means more time.",
+      "muted",
+    ),
+  );
+  for (const u of team.items) {
+    const card = node("article", undefined, "card person");
+    const top = node("div", undefined, "task-top");
+    top.append(node("h3", u.name), node("span", u.role, "badge"));
+    card.append(
+      top,
+      node(
+        "p",
+        `Streak ${u.streak} · This week ${hours(u.week_minutes)} · Tasks done ${u.tasks_done}/${u.tasks_assigned}` +
+          (u.tasks_overdue ? ` · ${u.tasks_overdue} overdue` : ""),
+        "task-meta",
+      ),
+      dayStrip(u.days, team.today, team.days),
+    );
+    section.append(card);
+  }
+  screen.append(section);
+}
+// Approximate active time: about once a minute, while this tab is visible AND was used in the last minute.
+function startHeartbeat() {
+  if (!STAFF.includes(me.role)) return;
+  let lastInput = Date.now();
+  const mark = () => (lastInput = Date.now());
+  for (const type of ["pointerdown", "keydown", "wheel", "touchstart", "scroll"])
+    addEventListener(type, mark, { passive: true, capture: true });
+  const beat = () => {
+    if (document.hidden || Date.now() - lastInput > 60000) return;
+    api("workspace/ping", {}).catch(() => {});
+  };
+  beat();
+  setInterval(beat, 60000);
+}
 // ---------- Mobile: bottom tab bar (up to 5 tabs) and a "More" sheet with the full menu ----------
 const TAB_ICONS = {
   Home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
@@ -4206,8 +4750,16 @@ const TAB_ICONS = {
   Students:
     "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
   More: "M4 6h16M4 12h16M4 18h16",
+  "Team chat":
+    "M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-4-.9L3 20l1.1-4A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z",
+  Tasks: "M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9",
 };
-const TAB_LABELS = { "My courses": "Courses", Account: "Profile", Overview: "Website" };
+const TAB_LABELS = {
+  "My courses": "Courses",
+  Account: "Profile",
+  Overview: "Website",
+  "Team chat": "Chat",
+};
 function icon(path) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
@@ -4225,7 +4777,7 @@ function buildTabbar(keys) {
   const priority = {
     student: ["Home", "My courses", "Resources", "Messages", "Documents", "Account"],
     mentor: ["Leads", "Students", "Documents", "Messages"],
-  }[me.role] || ["Overview", "Leads", "Students", "Messages"];
+  }[me.role] || ["Overview", "Leads", "Students", "Messages", "Tasks", "Team chat"];
   const tabs =
     keys.length <= 5 ? keys : [...priority.filter((k) => keys.includes(k)).slice(0, 4), "More"];
   const bar = node("nav", undefined, "tabbar");
@@ -4296,9 +4848,13 @@ try {
           ],
         ]
       : me.role === "mentor"
-        ? [["", ["Leads", "Students", "Documents", "Messages"]]]
+        ? [
+            ["", ["Leads", "Students", "Documents", "Messages"]],
+            ["Team", ["Team chat", "Tasks", "Progress"]],
+          ]
         : [
             ["", ["Overview"]],
+            ["Team", ["Team chat", "Tasks", "Progress"]],
             ["Website", me.visual ? ["Visual editor", ...website] : website],
             ...(me.role === "editor"
               ? []
@@ -4316,7 +4872,11 @@ try {
                     ],
                   ],
                   ["Inbox", ["Leads", "Forms", "Bookings", "Private feedback", "Newsletter"]],
-                  ["Settings", ["Access", "Email delivery", "Activity"]],
+                  // The audit log is for the Super Admin only.
+                  [
+                    "Settings",
+                    ["Access", "Email delivery", ...(me.super_admin ? ["Activity"] : [])],
+                  ],
                 ]),
           ];
   if (me.role === "mentor") section = "Leads";
@@ -4355,6 +4915,7 @@ try {
     }
   };
   render();
+  startHeartbeat();
 } catch (e) {
   if (!e.message.includes("sign in")) report(e);
 }

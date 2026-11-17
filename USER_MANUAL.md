@@ -165,7 +165,16 @@ Website → **Link page** → **+ Add entry**:
 
 Click counts (last 30 days and all time) appear next to each link. Put `scholarscafe.com/links` in your Instagram, TikTok and Facebook bios.
 
-## 13. Troubleshooting
+## 13. Team workspace (staff only)
+
+The **Team** menu is for owners, admins, editors and mentors. Students never see it.
+
+- **Team chat:** one group chat for all staff. New messages appear within a few seconds. Tap **Pin** to keep a message in the bar at the top; tap the bar to see all pinned messages. You can delete your own messages; the Super Admin can delete any.
+- **Tasks:** owners and admins tap **+ New task**, add details, a deadline (Bangladesh time) and the people doing it. Each person gets an email when assigned, and reminders about 24 hours and 2 hours before the deadline. Anyone assigned can change the status (to do → doing → done). Use **My tasks**, **This week** (Sunday to Saturday) and **Overdue** to filter.
+- **Progress:** your streak (days in a row you used the dashboard), today's and this week's hours, and tasks done. Hours are approximate: they count only while the dashboard is open and being used. The Super Admin also sees the whole team: who was in on each day, streaks, hours and tasks.
+- **Audit log** (Settings → **Activity**) is now for the Super Admin only.
+
+## 14. Troubleshooting
 
 | Problem                                    | What to do                                                                                                                                      |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |

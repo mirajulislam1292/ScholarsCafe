@@ -3,6 +3,7 @@ import { createApp, portalConfig } from "./app.js";
 import { createMailer, deliverMail } from "./mail.js";
 import { seedFormTemplates } from "./forms.js";
 import { queueBookingReminders } from "./booking.js";
+import { queueTaskReminders } from "./workspace.js";
 
 for (const key of [
   "DB_HOST",
@@ -58,20 +59,34 @@ async function start() {
     }
   }, 15000);
   mailTimer.unref();
-  // Booking reminders (60–90 minutes before a session), queued once each into the mail outbox. Admin only.
+  // Task deadline reminders (24h and 2h before), queued into the outbox by the admin deployment only.
   let reminding = false;
   const reminderTimer = setInterval(async () => {
     if (reminding || process.env.PORTAL === "student") return;
     reminding = true;
     try {
+      await queueTaskReminders(store, process.env);
+    } catch {
+      console.error("Task reminder check failed");
+    } finally {
+      reminding = false;
+    }
+  }, 300000);
+  reminderTimer.unref();
+  // Booking reminders (60–90 minutes before a session), queued once each into the mail outbox. Admin only.
+  let bookingReminding = false;
+  const bookingTimer = setInterval(async () => {
+    if (bookingReminding || process.env.PORTAL === "student") return;
+    bookingReminding = true;
+    try {
       await queueBookingReminders(store);
     } catch {
       console.error("Booking reminder check failed");
     } finally {
-      reminding = false;
+      bookingReminding = false;
     }
   }, 60000);
-  reminderTimer.unref();
+  bookingTimer.unref();
   const server = createApp(store, portalConfig(process.env), undefined, mailer).listen(
     Number(process.env.PORT || 3000),
     "0.0.0.0",

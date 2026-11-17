@@ -21,6 +21,14 @@ export function canManage(actor, targetRole, newRole) {
 }
 export const canEditContent = (role) => role === "owner" || role === "admin" || role === "editor";
 export const canPublish = (role) => role === "owner" || role === "admin";
+// The single Super Admin: role owner AND the configured SUPER_ADMIN_EMAIL (fallback OWNER_EMAIL).
+// Used for the visual editor and the audit log; other owners and admins are refused.
+export const superAdminEmail = (config) =>
+  (config.SUPER_ADMIN_EMAIL || config.OWNER_EMAIL || "contact.scholarscafe@gmail.com")
+    .trim()
+    .toLowerCase();
+export const isSuperAdmin = (actor, config) =>
+  actor?.role === "owner" && String(actor.email || "").toLowerCase() === superAdminEmail(config);
 export function trustedGoogleIdentity(payload, nonce) {
   return (
     !!payload &&

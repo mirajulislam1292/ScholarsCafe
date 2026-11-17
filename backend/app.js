@@ -15,7 +15,8 @@ import { installResourceRoutes, streamAccess } from "./resources.js";
 import { installFileRoutes } from "./files.js";
 import { installDocumentRoutes } from "./documents.js";
 import { installFormAdminRoutes, installPublicFormRoutes } from "./forms.js";
-import { installVisualRoutes, isSuperAdmin } from "./visual.js";
+import { installVisualRoutes } from "./visual.js";
+import { installWorkspaceRoutes } from "./workspace.js";
 import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
 import {
   token,
@@ -31,6 +32,7 @@ import {
   userInput,
   recordInput,
   verifyTurnstile,
+  isSuperAdmin,
 } from "./security.js";
 
 const fail = (status, message) => Object.assign(new Error(message), { status });
@@ -493,7 +495,7 @@ export function createApp(
     // The Super Admin also gets the visual editor (and the website address to show in it).
     res.json(
       isSuperAdmin(req.actor, config)
-        ? { ...req.actor, visual: true, public_origin: config.PUBLIC_ORIGIN }
+        ? { ...req.actor, visual: true, super_admin: true, public_origin: config.PUBLIC_ORIGIN }
         : req.actor,
     );
   });
@@ -502,7 +504,10 @@ export function createApp(
   // Every other admin API is closed to them. Row-level rules for /lms live in access.js.
   app.use("/api", (req, _res, next) => {
     const own = ["/me", "/logout", "/password"].includes(req.path) || req.path.startsWith("/lms/");
-    if (req.actor.role === "mentor" && (own || req.path.startsWith("/leads"))) return next();
+    // Mentors are staff too: they share the team workspace (chat, tasks, progress). Students never do.
+    const team = portal === "admin" && req.path.startsWith("/workspace/");
+    if (req.actor.role === "mentor" && (own || team || req.path.startsWith("/leads")))
+      return next();
     if (req.actor.role === "student" && own) return next();
     if (req.actor.role === "mentor") throw fail(403, "Mentors can only open their assigned leads.");
     if (req.actor.role === "student") throw fail(403, "This area is for staff only.");
@@ -521,6 +526,8 @@ export function createApp(
   installBookingAdminRoutes(app, { store, fail, canPublish });
   installVisualRoutes(app, { store, fail, config });
   installMessageRoutes(app, { store, fail });
+  // Team workspace (staff chat, tasks, activity). Admin portal only; never mounted on the student portal.
+  if (portal === "admin") installWorkspaceRoutes(app, { store, fail, config });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
     if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");
@@ -936,8 +943,10 @@ export function createApp(
       ),
     });
   });
+  // The audit log is for the single Super Admin only (not other owners or admins).
   app.get("/api/audit", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Audit log is restricted.");
+    if (!isSuperAdmin(req.actor, config))
+      throw fail(403, "The audit log is only available to the Super Admin account.");
     res.json({
       items: await store.query(
         "SELECT a.action,a.target,a.created_at,u.email FROM audit a LEFT JOIN users u ON u.id=a.actor_id ORDER BY a.id DESC LIMIT 200",

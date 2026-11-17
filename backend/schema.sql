@@ -364,3 +364,49 @@ CREATE TABLE IF NOT EXISTS booking_settings (
   data JSON NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+-- Team workspace (admin dashboard, staff only): one staff group chat, a shared to-do list and activity streaks.
+CREATE TABLE IF NOT EXISTS staff_messages (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  sender_id CHAR(36) NOT NULL,
+  body TEXT NOT NULL,
+  pinned_at DATETIME NULL,
+  pinned_by CHAR(36) NULL,
+  deleted_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX pinned (pinned_at),
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS staff_tasks (
+  id CHAR(36) PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  details TEXT NULL,
+  status ENUM('todo','doing','done') NOT NULL DEFAULT 'todo',
+  due_at DATETIME NULL,
+  created_by CHAR(36) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  completed_at DATETIME NULL,
+  deleted_at DATETIME NULL,
+  INDEX due (due_at)
+);
+-- One row per person on a task. The reminder columns make each reminder email go out once.
+CREATE TABLE IF NOT EXISTS staff_task_assignees (
+  task_id CHAR(36) NOT NULL,
+  user_id CHAR(36) NOT NULL,
+  reminded_24h_at DATETIME NULL,
+  reminded_2h_at DATETIME NULL,
+  PRIMARY KEY (task_id, user_id),
+  INDEX assignee (user_id),
+  FOREIGN KEY (task_id) REFERENCES staff_tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-- Approximate active minutes per staff member per Bangladesh calendar day (from the dashboard heartbeat).
+CREATE TABLE IF NOT EXISTS staff_activity (
+  user_id CHAR(36) NOT NULL,
+  day DATE NOT NULL,
+  minutes INT UNSIGNED NOT NULL DEFAULT 0,
+  first_at DATETIME NOT NULL,
+  last_at DATETIME NOT NULL,
+  PRIMARY KEY (user_id, day),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
