@@ -41,7 +41,7 @@ const ENTRIES: Entry[] = [
 export function PageIndex() {
   const t = useCmsAuto("PageIndex");
   return (
-    <section className="bg-neutral-50 py-[clamp(72px,13vw,200px)]">
+    <section className="bg-neutral-50 py-[clamp(56px,8vw,112px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <ul className="border-t border-neutral-900/[0.08]">
           {ENTRIES.map((e, i) => (

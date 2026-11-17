@@ -88,7 +88,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
     }
   }
   return (
-    <section id="contact" className="bg-white py-[clamp(72px,13vw,200px)]">
+    <section id="contact" className="bg-white py-[clamp(56px,8vw,112px)]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         {showHeader && (
           <Reveal className="max-w-2xl md:mx-auto md:text-center">

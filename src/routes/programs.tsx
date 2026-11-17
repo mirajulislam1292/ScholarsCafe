@@ -6,7 +6,6 @@ import { CmsText, useCmsCollection, useCmsValue } from "@/lib/cms";
 import {
   PROGRAMS as DEFAULT_PROGRAMS,
   PROCESS as CMS_DEFAULT_PROCESS,
-  BOOK_LINK,
 } from "@/lib/scholars-data";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
@@ -74,7 +73,7 @@ function ProgramsPage() {
             ),
             process: (
               <>
-                <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(72px,13vw,200px)] text-white">
+                <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(56px,8vw,112px)] text-white">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"
@@ -171,7 +170,7 @@ function ProgramRow({ p }: { p: Program }) {
           )}
         </div>
         <a
-          href={BOOK_LINK}
+          href="/forms"
           className={`type-button inline-flex h-12 w-fit items-center gap-2 rounded-full px-6 transition-colors duration-500 ease-premium ${
             featured
               ? "bg-ice-100 text-blue-950 hover:bg-white"

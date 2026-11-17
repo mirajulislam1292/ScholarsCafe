@@ -103,7 +103,12 @@ function ServicesPage() {
             ),
             cta: (
               <>
-                <CtaBand />
+                {/* This page already has the booking calendar, so the closing band points to the program forms. */}
+                <CtaBand
+                  title="Want a mentor through every step?"
+                  action="Apply to a program"
+                  href="/forms"
+                />
               </>
             ),
           }}
