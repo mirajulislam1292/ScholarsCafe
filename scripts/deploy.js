@@ -62,12 +62,23 @@ if (!REMOTE_DIR) {
   process.exit(1);
 }
 
+// FTPS (explicit TLS) by default, so the FTP password and the site files never cross the internet in
+// plain text. The server certificate is verified. If FTP_HOST is an IP address the certificate name won't
+// match: use the FTP hostname from hPanel instead, or set FTP_TLS_SERVERNAME to the name on the certificate.
+// FTP_SECURE=false turns TLS off (not recommended; only as a temporary way back).
+const FTP_SECURE = String(process.env.FTP_SECURE || "true").toLowerCase() !== "false";
 const FTP_CONFIG = {
   host: FTP_HOST,
   user: FTP_USER,
   password: FTP_PASS,
   port: FTP_PORT,
+  secure: FTP_SECURE,
+  secureOptions: {
+    minVersion: "TLSv1.2",
+    ...(process.env.FTP_TLS_SERVERNAME ? { servername: process.env.FTP_TLS_SERVERNAME } : {}),
+  },
 };
+if (!FTP_SECURE) console.warn("[WARN] FTP_SECURE=false: deploying over plain FTP (unencrypted).");
 
 async function generateIndexHtml(clientDir) {
   const serverEntryPath = join(

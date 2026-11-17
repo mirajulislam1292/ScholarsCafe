@@ -14,6 +14,7 @@ const COST = { N: 32768, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 export const CODE_MINUTES = 10; // one-time code and magic link lifetime
 export const CODE_ATTEMPTS = 5; // wrong codes before the code is destroyed
 export const PASSWORD_FAILURES = 5; // wrong passwords before a 15-minute lock
+export const CODES_PER_DAY = 10; // email codes per address per day (at most 50 guesses a day)
 const LOCK_MINUTES = 15;
 
 export async function hashPassword(password) {
@@ -136,9 +137,15 @@ export function installAuthRoutes(app, { store, config, mailer, fail, startSessi
   });
 
   // Per-address limit applies whether or not the account exists, so it reveals nothing.
+  // The daily cap bounds guessing across re-issued codes (each code allows CODE_ATTEMPTS tries).
   const limitCodes = async (address) => {
     if (store.checkRateLimit && !(await store.checkRateLimit("email-code", address, 3, 900)))
       throw fail(429, "Too many codes requested for this email. Wait 15 minutes.");
+    if (
+      store.checkRateLimit &&
+      !(await store.checkRateLimit("email-code-day", address, CODES_PER_DAY, 86400))
+    )
+      throw fail(429, "Too many codes requested for this email today. Try again tomorrow.");
     if (!mailer && !devLog) throw fail(503, "Email sign-in is not set up yet. Use Google.");
   };
   // Stores a fresh code + link for an active student and emails it (not awaited, so timing is equal).
