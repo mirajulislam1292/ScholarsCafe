@@ -137,7 +137,18 @@ Inbox → **Forms**:
 - **A copy to the person:** like Google Forms, everyone who fills in a form with an Email question gets an automatic email with a copy of their answers. It comes from the website's sending address (`SMTP_USER`, e.g. no-reply@scholarscafe.com), and replies go to contact@scholarscafe.com. Untick "Email people a copy of their answers" to turn it off for a form. At most 3 a day go to the same address.
 - **Answers** also go to **Leads**, labelled with the form's name, for status, notes and mentor. Tick "Email me" to also get each one by email.
 
-## 10. Leads
+## 10. Bookings (1-on-1 mentor sessions)
+
+People book a 1-on-1 mentor session at **scholarscafe.com/book** (also on the Services page). They pick an open day and time, then give their name, email, topic and (optionally) phone.
+
+- **One session per day.** Once a day is booked it disappears from the website. Two people can't get the same day, even at the same moment.
+- Inbox → **Bookings** lists upcoming sessions first, then past and cancelled ones.
+- **Cancel booking** frees the day again and emails the person that it was cancelled.
+- **When people can book** (at the bottom of the Bookings screen): open days, hours (e.g. `20:00-23:00`; more than one with commas), session length, how many days ahead, **closed dates** (holidays, travel) and the **meeting link** (your Google Meet link). Save, and the website shows the new times right away. Default: Saturday–Thursday, 8–11 pm, 45 minutes, 30 days ahead.
+- All times are **Bangladesh time** (GMT+6). A time must be at least 2 hours away to be booked.
+- **Emails** (from the website's sending address, replies to contact@scholarscafe.com): a confirmation with the date, time, topic and meeting link right after booking; a copy to contact@scholarscafe.com; and a reminder about an hour before (sent once). Add the meeting link before sharing the page, so it's in every confirmation.
+
+## 11. Leads
 
 Inbox → **Leads**: every contact-form and form submission.
 
@@ -145,7 +156,7 @@ Inbox → **Leads**: every contact-form and form submission.
 - **Filter:** by text, status, mentor or **source** (which form).
 - **Export CSV** downloads the filtered list.
 
-## 11. Link page (scholarscafe.com/links)
+## 12. Link page (scholarscafe.com/links)
 
 Website → **Link page** → **+ Add entry**:
 
@@ -154,7 +165,7 @@ Website → **Link page** → **+ Add entry**:
 
 Click counts (last 30 days and all time) appear next to each link. Put `scholarscafe.com/links` in your Instagram, TikTok and Facebook bios.
 
-## 12. Team workspace (staff only)
+## 13. Team workspace (staff only)
 
 The **Team** menu is for owners, admins, editors and mentors. Students never see it.
 
@@ -163,7 +174,7 @@ The **Team** menu is for owners, admins, editors and mentors. Students never see
 - **Progress:** your streak (days in a row you used the dashboard), today's and this week's hours, and tasks done. Hours are approximate: they count only while the dashboard is open and being used. The Super Admin also sees the whole team: who was in on each day, streaks, hours and tasks.
 - **Audit log** (Settings → **Activity**) is now for the Super Admin only.
 
-## 13. Resources and ECA alerts
+## 14. Resources and ECA alerts
 
 **scholarscafe.com/resources** has four pages (also in the **Resources** menu at the top of the site):
 
@@ -186,7 +197,7 @@ A page with nothing published yet says so ("No webinars scheduled right now", an
 - **From address:** alerts are sent from the website's sending mailbox (`SMTP_USER`; the screen shows which one). To send from noreply@scholarscafe.com, create that mailbox in Hostinger, then set `SMTP_USER=noreply@scholarscafe.com` and `SMTP_PASSWORD` (that mailbox's password) in the admin app's environment variables. This changes the sender of all website emails, not only alerts.
 - **Remove** takes someone off the list (and drops any alert still waiting for them). Every send and removal is in the audit log.
 
-## 14. Troubleshooting
+## 15. Troubleshooting
 
 | Problem                                    | What to do                                                                                                                                      |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |

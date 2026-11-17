@@ -129,6 +129,9 @@ export class Store {
     // ECA alerts: the one-click unsubscribe link, sent as the List-Unsubscribe header. The eca_subscribers
     // table itself is a CREATE TABLE IF NOT EXISTS in schema.sql.
     await add("mail_outbox", "unsubscribe_url", "unsubscribe_url VARCHAR(400) NULL");
+    // Bookings: the bookings and booking_settings tables are created by schema.sql (CREATE TABLE IF NOT
+    // EXISTS) on every start. Columns added to them later go here.
+    await add("bookings", "reminded_at", "reminded_at DATETIME NULL");
     // Team workspace tables (staff_messages, staff_tasks, staff_task_assignees, staff_activity) are new
     // CREATE TABLE IF NOT EXISTS statements in schema.sql, which initialize() runs on every start.
   }

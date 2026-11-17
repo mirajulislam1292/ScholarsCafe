@@ -1,7 +1,7 @@
 import { useCmsValue, CmsText } from "@/lib/cms";
 import { Fragment, useState, type CSSProperties } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { WA_LINK as CMS_DEFAULT_WA_LINK } from "@/lib/scholars-data";
+import { BOOK_LINK } from "@/lib/scholars-data";
 import { HeroVideo } from "./HeroVideo";
 import { useMagnetic } from "@/hooks/use-magnetic";
 import type { HeroClip } from "@/lib/hero-media";
@@ -11,7 +11,6 @@ const RISE = "motion-safe:animate-rise";
 const delay = (ms: number): CSSProperties => ({ animationDelay: `${ms}ms` });
 
 export function Hero() {
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
   const headline = useCmsValue("local.headline", ["Where", "ambition", "meets"]);
   const [clip, setClip] = useState<HeroClip | null>(null);
   const magnetic = useMagnetic<HTMLAnchorElement>();
@@ -56,9 +55,7 @@ export function Hero() {
         <div style={delay(700)} className={`${RISE} mt-12 flex flex-wrap items-center gap-3`}>
           <a
             ref={magnetic}
-            href={WA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={BOOK_LINK}
             className="group inline-flex h-12 items-center gap-2 rounded-full bg-ice-100 px-6 type-button text-blue-950 transition-[background-color,box-shadow] duration-500 ease-premium hover:bg-white hover:shadow-[0_16px_40px_rgb(0_0_0/0.35)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ice-300"
           >
             <CmsText id="Hero.009fe0d39178">Book a free strategy call</CmsText>

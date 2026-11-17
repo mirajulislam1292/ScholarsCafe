@@ -18,6 +18,7 @@ import { installFormAdminRoutes, installPublicFormRoutes } from "./forms.js";
 import { installVisualRoutes } from "./visual.js";
 import { installWorkspaceRoutes } from "./workspace.js";
 import { installEcaAdminRoutes, installEcaPublicRoutes } from "./eca.js";
+import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
 import {
   token,
   hash,
@@ -324,6 +325,7 @@ export function createApp(
   installPublicFormRoutes(app, { store, fail, config, sharedLimit });
   // ECA alerts sign-up and its unsubscribe link (the student portal 404s every /public route above).
   installEcaPublicRoutes(app, { store, sharedLimit, config });
+  installPublicBookingRoutes(app, { store, fail, config, sharedLimit });
   // /links page click counts: one counter per link per day, nothing about the visitor is stored.
   app.post(
     "/public/links/:id/click",
@@ -527,6 +529,7 @@ export function createApp(
   installFileRoutes(app, { store, fail, config });
   installDocumentRoutes(app, { store, fail });
   installFormAdminRoutes(app, { store, fail, canPublish, config });
+  installBookingAdminRoutes(app, { store, fail, canPublish });
   installVisualRoutes(app, { store, fail, config });
   installMessageRoutes(app, { store, fail });
   // Team workspace (staff chat, tasks, activity). Admin portal only; never mounted on the student portal.

@@ -2,10 +2,7 @@ import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { useEffect, useState } from "react";
 import { Reveal, RevealStagger, StaggerItem } from "./Reveal";
-import {
-  TESTIMONIALS as DEFAULT_TESTIMONIALS,
-  WA_LINK as CMS_DEFAULT_WA_LINK,
-} from "@/lib/scholars-data";
+import { TESTIMONIALS as DEFAULT_TESTIMONIALS, BOOK_LINK } from "@/lib/scholars-data";
 import { useCmsCollection } from "@/lib/cms";
 import { Star } from "lucide-react";
 import { motion } from "motion/react";
@@ -19,7 +16,6 @@ export function SuccessStories() {
     (data) =>
       ({ ...data, color: "from-blue-600 to-blue-900" }) as (typeof DEFAULT_TESTIMONIALS)[number],
   );
-  const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -39,9 +35,7 @@ export function SuccessStories() {
           <CmsText id="SuccessStories.empty.title">Your story starts with a conversation.</CmsText>
         </h2>
         <a
-          href={WA_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={BOOK_LINK}
           className="mt-7 inline-flex rounded-full bg-blue-700 px-7 py-4 font-medium text-white"
         >
           <CmsText id="SuccessStories.empty.cta">Talk to a mentor</CmsText>
@@ -134,9 +128,7 @@ export function SuccessStories() {
             <CmsText id="SuccessStories.b9a500e1344f">Your success story is next.</CmsText>
           </p>
           <a
-            href={WA_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={BOOK_LINK}
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-700 px-7 py-3.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-blue-800 "
           >
             <CmsText id="SuccessStories.fc4e64953206">Book a Free Consultation →</CmsText>
@@ -146,5 +138,3 @@ export function SuccessStories() {
     </section>
   );
 }
-
-const WA_LINK = CMS_DEFAULT_WA_LINK;

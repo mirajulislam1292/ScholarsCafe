@@ -6,6 +6,7 @@ import { SERVICES as CMS_DEFAULT_SERVICES } from "@/lib/scholars-data";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { NameMarquee } from "@/components/scholars/NameMarquee";
+import { Booking } from "@/components/scholars/Booking";
 import { Reveal } from "@/components/scholars/Reveal";
 import { Block, CtaBand, PageHero, ParallaxImage } from "@/components/page/PageParts";
 
@@ -69,6 +70,19 @@ function ServicesPage() {
                       </Reveal>
                     ))}
                   </ol>
+                </Block>
+              </>
+            ),
+            booking: (
+              <>
+                <Block
+                  id="book"
+                  title="1-on-1 mentor session"
+                  intro="Pick an open day and time, tell us what you'd like to talk about, and we'll email you the meeting link."
+                >
+                  <div className="max-w-[720px]">
+                    <Booking />
+                  </div>
                 </Block>
               </>
             ),
