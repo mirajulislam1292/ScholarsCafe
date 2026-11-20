@@ -116,6 +116,15 @@ async function generateIndexHtml() {
     // Shell for every form: .htaccess serves it at /forms/<slug>; the form loads in the browser.
     "/forms/_",
   ];
+  // One international-student brief per US state (src/data/state-universities.ts).
+  const stateData = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "..", "src/data/state-universities.ts"),
+    "utf8",
+  );
+  const stateSlugs = [...stateData.matchAll(/^\s*"?slug"?: "([a-z-]+)",$/gm)].map((m) => m[1]);
+  if (stateSlugs.length !== 50)
+    throw new Error(`Expected 50 state pages, found ${stateSlugs.length}`);
+  pages.push(...stateSlugs.map((slug) => `/universities/${slug}`));
   const rendered = [];
   for (const path of pages) {
     const response = await serverEntry.default.fetch(new Request("https://example.com" + path));
