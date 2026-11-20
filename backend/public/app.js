@@ -4877,33 +4877,18 @@ addEventListener("appinstalled", () => {
   $("install-hint")?.remove();
 });
 /** A small "Install the app" card: the browser's own prompt where supported, steps on iPhone. */
-function installCard(always = false) {
-  if (standalone()) return null;
-  if (!always) {
-    try {
-      if (localStorage.getItem("install-hint") === "dismissed") return null;
-    } catch {}
-  }
-  if (!installPrompt && !isIos) return null;
-  const card = node("aside", undefined, "card install-hint");
-  card.append(node("strong", "Install the app"));
+/** The full "Install the app" card for Settings → Notifications (the browser's prompt, or iPhone steps). */
+function installCard() {
+  if (standalone() || (!installPrompt && !isIos)) return null;
+  const card = node("div", undefined, "card install-card");
+  card.append(node("h2", "Install the app"));
   if (installPrompt)
     card.append(
       node(
         "p",
         "Add Scholars Cafe Studio to this device: it opens like an app and can show notifications.",
       ),
-      button(
-        "Install",
-        async () => {
-          const p = installPrompt;
-          installPrompt = null;
-          await p.prompt();
-          await p.userChoice.catch(() => {});
-          card.remove();
-        },
-        "primary",
-      ),
+      button("Install", () => promptInstall(card), "primary"),
     );
   else
     card.append(
@@ -4913,23 +4898,58 @@ function installCard(always = false) {
       ),
       node("p", IOS_PUSH_NOTE, "muted"),
     );
-  if (!always)
-    card.append(
-      button("Not now", () => {
-        try {
-          localStorage.setItem("install-hint", "dismissed");
-        } catch {}
-        card.remove();
-      }),
-    );
   return card;
 }
+async function promptInstall(el) {
+  const p = installPrompt;
+  if (!p) return;
+  installPrompt = null;
+  await p.prompt();
+  await p.userChoice.catch(() => {});
+  el?.remove();
+  $("install-hint")?.remove();
+}
+const phoneLike = () => isIos || matchMedia("(max-width: 800px), (pointer: coarse)").matches;
+/**
+ * A one-line, dismissible banner above the screen, on phones and tablets only (on desktop the option
+ * lives in Settings → Notifications). Part of the page flow, never on top of content. × remembers it.
+ */
 function showInstallHint() {
   if (!me || me.role === "student" || $("install-hint") || $("workspace").hidden) return;
-  const card = installCard();
-  if (!card) return;
-  card.id = "install-hint";
-  $("screen").before(card);
+  if (standalone() || !phoneLike() || (!installPrompt && !isIos)) return;
+  try {
+    if (localStorage.getItem("install-hint") === "dismissed") return;
+  } catch {}
+  const bar = node("div", undefined, "install-hint");
+  bar.id = "install-hint";
+  bar.setAttribute("role", "region");
+  bar.setAttribute("aria-label", "Install the app");
+  bar.append(
+    node(
+      "p",
+      installPrompt
+        ? "Install SC Studio for quick access and notifications."
+        : "Add SC Studio to your Home Screen to get notifications.",
+    ),
+  );
+  bar.append(
+    installPrompt
+      ? button("Install", () => promptInstall(), "primary")
+      : button("How", () => navigate("Notifications")),
+  );
+  const close = button(
+    "×",
+    () => {
+      try {
+        localStorage.setItem("install-hint", "dismissed");
+      } catch {}
+      bar.remove();
+    },
+    "install-close",
+  );
+  close.setAttribute("aria-label", "Dismiss");
+  bar.append(close);
+  $("notice").before(bar);
 }
 
 // In-app alert while the app is open: a short bundled sound and a badge on the menu item.
@@ -5132,7 +5152,7 @@ async function renderNotifications() {
   );
   screen.append(what);
 
-  const install = installCard(true);
+  const install = installCard();
   if (install) screen.append(install);
 
   screen.append(node("h2", "Your devices"));
