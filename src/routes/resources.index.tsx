@@ -80,7 +80,7 @@ function ResourcesPage() {
                         <Reveal key={r.title} delay={i * 0.06}>
                           <a
                             href="#newsletter"
-                            className="group flex h-full flex-col justify-between gap-16 rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] md:p-12"
+                            className="group flex h-full flex-col justify-between gap-8 rounded-3xl border border-white/10 bg-white/[0.03] p-7 md:p-8 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] md:p-12"
                           >
                             <div>
                               <p className="type-caption text-ice-400">{clean(r.tag)}</p>

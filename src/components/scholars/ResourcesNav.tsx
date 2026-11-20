@@ -42,12 +42,12 @@ export function ResourcesHubCards() {
         <h2 className="type-h2 text-neutral-900">
           <CmsText id="ResourcesHub.title">Explore resources</CmsText>
         </h2>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="section-body grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {RESOURCE_PAGES.map((p, i) => (
             <Reveal key={p.href} delay={i * 0.05}>
               <a
                 href={p.href}
-                className="group flex h-full flex-col justify-between gap-8 rounded-3xl border border-neutral-900/[0.08] bg-ice-50 p-7 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
+                className="group flex h-full flex-col justify-between gap-6 rounded-3xl border border-neutral-900/[0.08] bg-ice-50 p-7 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
               >
                 <div>
                   <h3 className="type-h3 text-neutral-900 group-hover:text-blue-800">
