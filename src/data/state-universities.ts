@@ -25,6 +25,8 @@ export type StateUniversity = {
     licence: string;
     licenceUrl: string | null;
   } | null;
+  /** CSS object-position for the landing card photo (default "center 30%"), set so the landmark sits above the text overlay. */
+  imagePosition?: string;
   gpa: Sourced<string>;
   test: Sourced<TestPolicy> & { note: string | null };
   english: {
@@ -85,6 +87,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "Public domain",
       licenceUrl: null,
     },
+    imagePosition: "30% 30%",
     gpa: {
       value: "Middle 50% (Fall 2025 enrolled, resident and non-resident): 3.87-4.33",
       source: "https://www.auburn.edu/admissions/prospective-students/freshmen/index.php",
@@ -141,6 +144,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: "2.5 minimum cumulative GPA (bachelor's admission)",
       source: "https://www.uaf.edu/admissions/apply/ug.php",
@@ -197,6 +201,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "65% 30%",
     gpa: {
       value: "3.00 minimum (B or better) from secondary school",
       source: "https://admission.asu.edu/apply/international/first-year",
@@ -253,6 +258,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "90% 30%",
     gpa: {
       value: null,
       source: null,
@@ -310,6 +316,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -370,6 +377,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by/2.0",
     },
+    imagePosition: "35% 30%",
     gpa: {
       value: null,
       source: null,
@@ -427,6 +435,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "25% 30%",
     gpa: {
       value: null,
       source: null,
@@ -483,6 +492,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "http://creativecommons.org/licenses/by-sa/3.0/",
     },
+    imagePosition: "60% 30%",
     gpa: {
       value: null,
       source: null,
@@ -541,6 +551,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by/2.0",
     },
+    imagePosition: "45% 30%",
     gpa: {
       value: null,
       source: null,
@@ -597,6 +608,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -654,6 +666,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "70% 30%",
     gpa: {
       value: "3.0 minimum (secondary school GPA comparable to a U.S. B, 3.00 on 4.00 scale)",
       source: "https://manoa.hawaii.edu/admissions/international/index.html",
@@ -709,6 +722,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "85% 30%",
     gpa: {
       value: "2.5 minimum on a 4.0 scale (international first-year, secondary school GPA)",
       source: "https://www.uidaho.edu/international/admissions",
@@ -765,6 +779,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -823,6 +838,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -883,6 +899,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by/2.0",
     },
+    imagePosition: "100% 30%",
     gpa: {
       value: "3.0 minimum on academic courses (applicants from high schools outside the U.S.)",
       source: "https://admissions.uiowa.edu/international-first-year-admission-requirements",
@@ -938,6 +955,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC0",
       licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value:
         "2.5 minimum on a 4.0 scale (international freshman); 3.25 for assured admission to the College of Liberal Arts & Sciences",
@@ -994,6 +1012,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC0",
       licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1051,6 +1070,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by/4.0",
     },
+    imagePosition: "5% 30%",
     gpa: {
       value: "Average 3.67 (recalculated, unweighted), Class of 2029 enrolled",
       source: "https://admission.tulane.edu/apply/getting-into-tulane/new-class-profile",
@@ -1106,6 +1126,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1163,6 +1184,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "Public domain",
       licenceUrl: null,
     },
+    imagePosition: "15% 30%",
     gpa: {
       value: "Average unweighted GPA 3.95 (Homewood Class of 2030)",
       source: "https://apply.jhu.edu/fast-facts/",
@@ -1221,6 +1243,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "55% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1278,6 +1301,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: "Average 3.9; 93.9% had 3.75 or higher (CDS 2025-26)",
       source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
@@ -1336,6 +1360,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1398,6 +1423,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
     },
+    imagePosition: "0% 30%",
     gpa: {
       value:
         "3.0 minimum (US scale) for admission without SAT/ACT; 2.0-2.99 admissible with qualifying SAT/ACT",
@@ -1460,6 +1486,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "Public domain",
       licenceUrl: null,
     },
+    imagePosition: "55% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1516,6 +1543,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: "2.5 minimum (4.0 US scale)",
       source: "https://www.montana.edu/international/admissions/quickfacts.html",
@@ -1571,6 +1599,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by/2.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: "Average 3.898 (CDS 2023-24)",
       source:
@@ -1628,6 +1657,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: "3.0 minimum academic GPA (4.0 scale)",
       source: "https://www.unr.edu/admissions/international/undergraduate",
@@ -1684,6 +1714,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1742,6 +1773,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC0",
       licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: "Average 3.96; 72% had a 4.0 (CDS 2025-26)",
       source:
@@ -1798,6 +1830,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: "2.5 minimum (U.S.-equivalent, 4.0 scale) for international freshmen",
       source: "https://geo.unm.edu/admission/undergraduate/requirements/academic.html",
@@ -1854,6 +1887,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1911,6 +1945,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "10% 30%",
     gpa: {
       value: null,
       source: null,
@@ -1966,6 +2001,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: "2.75 cumulative (4.0 scale) recommended",
       source: "https://und.edu/admissions/international/requirements-application.html",
@@ -2023,6 +2059,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "Public domain",
       licenceUrl: null,
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2078,6 +2115,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by/3.0",
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: "3.0 minimum (U.S. unweighted 4.0 scale)",
       source: "https://ou.edu/admissions/apply/international/undergraduate-admission",
@@ -2134,6 +2172,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
     },
+    imagePosition: "60% 30%",
     gpa: {
       value: "3.00 (B) average expected",
       source:
@@ -2195,6 +2234,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
     },
+    imagePosition: "35% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2252,6 +2292,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2307,6 +2348,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 2.5",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/2.5",
     },
+    imagePosition: "70% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2366,6 +2408,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 15%",
     gpa: {
       value: null,
       source: null,
@@ -2427,6 +2470,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by/4.0",
     },
+    imagePosition: "100% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2483,6 +2527,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "Public domain",
       licenceUrl: null,
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2538,6 +2583,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "40% 30%",
     gpa: {
       value: "Middle 50% of admitted (spring/summer/fall 2026): 3.86-4.00",
       source: "https://enrollment.byu.edu/admissions/entrance-stats",
@@ -2594,6 +2640,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC0",
       licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     },
+    imagePosition: "35% 30%",
     gpa: {
       value: "3.5-3.8 (4.0 scale), Class of 2030 entering profile",
       source:
@@ -2652,6 +2699,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY 2.0",
       licenceUrl: "https://creativecommons.org/licenses/by/2.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2707,6 +2755,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
     },
+    imagePosition: "30% 30%",
     gpa: {
       value: "Middle 50% of admitted (autumn 2025): 3.75-3.98 (4.0 scale)",
       source: "https://admit.washington.edu/apply/freshman/by-the-numbers",
@@ -2763,6 +2812,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "0% 30%",
     gpa: {
       value: "2.5 minimum (converted, 4.0 scale) for first-year admission",
       source:
@@ -2822,6 +2872,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 4.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: null,
       source: null,
@@ -2877,6 +2928,7 @@ export const STATE_UNIVERSITIES: StateUniversity[] = [
       licence: "CC BY-SA 3.0",
       licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
     },
+    imagePosition: "50% 30%",
     gpa: {
       value: "2.5 minimum (International Direct first-year admission)",
       source: "https://international.uwyo.edu/undergraduate-admissions/",
