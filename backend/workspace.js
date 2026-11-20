@@ -4,6 +4,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { canPublish, isSuperAdmin } from "./security.js";
+import { queuePush, staffIds } from "./push.js";
 
 export const STAFF_ROLES = ["owner", "admin", "editor", "mentor"];
 export const TASK_STATUSES = ["todo", "doing", "done"];
@@ -139,6 +140,12 @@ export async function queueTaskReminders(store, config, now = new Date()) {
             : "Reminder: this task is due in about 24 hours.",
         ),
       );
+      await queuePush(store, c, [r.user_id], {
+        title: kind === "2h" ? "Due in about 2 hours" : "Due tomorrow",
+        body: r.title,
+        open: "Tasks",
+        tag: "task-" + r.task_id,
+      });
       queued++;
     });
   }
@@ -193,7 +200,16 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
       .strict()
       .parse(req.body);
     await limited(req, "staff_chat", 20, 60);
-    await q("INSERT INTO staff_messages (sender_id,body) VALUES (?,?)", [req.actor.id, body]);
+    await store.transaction(async (c) => {
+      await q("INSERT INTO staff_messages (sender_id,body) VALUES (?,?)", [req.actor.id, body], c);
+      // Everyone else in the team chat gets a short preview.
+      await queuePush(store, c, await staffIds(store, c, req.actor.id), {
+        title: "Team chat",
+        body: `${nameOf(req.actor.email)}: ${body}`,
+        open: "Team chat",
+        tag: "chat",
+      });
+    });
     res.status(201).json({ ok: true });
   });
   const messageId = (req) => {
@@ -208,6 +224,16 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
       [pinned ? new Date() : null, pinned ? req.actor.id : null, messageId(req)],
     );
     if (result.affectedRows !== 1) throw fail(404, "Message not found.");
+    if (pinned) {
+      // A pinned message is marked as such in the notification.
+      const [m] = await q("SELECT body FROM staff_messages WHERE id=?", [messageId(req)]);
+      await queuePush(store, undefined, await staffIds(store, undefined, req.actor.id), {
+        title: "📌 Pinned in team chat",
+        body: `${nameOf(req.actor.email)} pinned: ${m?.body || ""}`,
+        open: "Team chat",
+        tag: "chat-pin",
+      });
+    }
     res.json({ ok: true });
   });
   app.post("/api/workspace/chat/:id/delete", async (req, res) => {
@@ -306,6 +332,17 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
           "New task for you: " + task.title,
           taskMail(config, task, `${nameOf(actor.email)} assigned you a task.`),
         );
+    await queuePush(
+      store,
+      c,
+      people.filter((p) => p.id !== actor.id).map((p) => p.id),
+      {
+        title: "New task for you",
+        body: `${nameOf(actor.email)}: ${task.title}`,
+        open: "Tasks",
+        tag: "task",
+      },
+    );
   };
   app.post("/api/workspace/tasks", async (req, res) => {
     if (!canPublish(req.actor.role)) throw fail(403, "Only owners and admins can create tasks.");

@@ -49,3 +49,14 @@ test("Offline page and icons are static files", async () => {
       .expect(200)
       .expect("Content-Type", /png/);
 });
+
+test("Service worker: shows pushed notifications and opens the right screen", async () => {
+  const res = await request(createApp({}, base)).get("/sw.js").expect(200);
+  assert.match(res.text, /addEventListener\("push"/);
+  assert.match(res.text, /showNotification\(/);
+  assert.match(res.text, /addEventListener\("notificationclick"/);
+  assert.match(res.text, /"\?open=" \+ encodeURIComponent\(open\)/);
+  // Push handling never adds to the cache.
+  const push = res.text.slice(res.text.indexOf('addEventListener("push"'));
+  assert.doesNotMatch(push, /caches\./);
+});

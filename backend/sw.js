@@ -56,3 +56,37 @@ self.addEventListener("fetch", (event) => {
         .catch(() => caches.match(url.pathname).then((r) => r || Response.error())),
     );
 });
+
+// ---------- Push notifications (staff devices that turned them on; see backend/push.js) ----------
+// The payload is only a title, a short preview and which screen to open. Nothing is cached.
+self.addEventListener("push", (event) => {
+  let d = {};
+  try {
+    d = event.data ? event.data.json() : {};
+  } catch {}
+  event.waitUntil(
+    self.registration.showNotification(d.title || "Scholars Cafe Studio", {
+      body: d.body || "",
+      icon: "/icons/icon-192.png",
+      tag: d.tag || undefined,
+      renotify: Boolean(d.tag),
+      data: { open: typeof d.open === "string" ? d.open : "" },
+    }),
+  );
+});
+// Clicking a notification opens the right screen: an open app window switches to it, else a new one opens.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const open = event.notification.data?.open || "";
+  const url = "/" + (open ? "?open=" + encodeURIComponent(open) : "");
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const c of list)
+        if (new URL(c.url).origin === self.location.origin && "focus" in c) {
+          c.postMessage({ open });
+          return c.focus();
+        }
+      return self.clients.openWindow(url);
+    }),
+  );
+});

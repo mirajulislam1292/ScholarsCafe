@@ -99,7 +99,9 @@ test("Mail stays disabled without credentials; configured delivery has a fixed r
     sendMail: async (mail) => {
       assert.equal(mail.to, "contact@scholarscafe.com");
       assert.equal(mail.replyTo, "student@example.com");
-      assert.equal(mail.html, undefined);
+      // Shared template: the body is escaped into HTML, never trusted as markup.
+      assert.match(mail.html, /Hello/);
+      assert.match(mail.text, /^Hello\n/);
     },
   });
   assert.ok(queries.some((sql) => sql.includes("sent_at=UTC_TIMESTAMP()")));

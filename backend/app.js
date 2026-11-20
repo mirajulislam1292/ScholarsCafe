@@ -19,6 +19,8 @@ import { installVisualRoutes } from "./visual.js";
 import { installWorkspaceRoutes } from "./workspace.js";
 import { installEcaAdminRoutes, installEcaPublicRoutes } from "./eca.js";
 import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
+import { installPushRoutes } from "./push.js";
+import { installInboxRoutes } from "./inbox.js";
 import {
   token,
   hash,
@@ -106,8 +108,9 @@ export function createApp(
           styleSrc: ["'self'"],
           imgSrc: ["'self'", "https:"],
           connectSrc: ["'self'"],
-          // The visual editor shows the public website in a frame.
-          frameSrc: [config.PUBLIC_ORIGIN].filter(Boolean),
+          // The visual editor shows the public website in a frame; the Mail screen shows a message body
+          // from /api/inbox/:id/view in a sandboxed same-origin frame.
+          frameSrc: ["'self'", config.PUBLIC_ORIGIN].filter(Boolean),
           frameAncestors: ["'none'"],
           formAction: ["'self'"],
           objectSrc: ["'none'"],
@@ -511,7 +514,8 @@ export function createApp(
   app.use("/api", (req, _res, next) => {
     const own = ["/me", "/logout", "/password"].includes(req.path) || req.path.startsWith("/lms/");
     // Mentors are staff too: they share the team workspace (chat, tasks, progress). Students never do.
-    const team = portal === "admin" && req.path.startsWith("/workspace/");
+    const team =
+      portal === "admin" && (req.path.startsWith("/workspace/") || /^\/push(\/|$)/.test(req.path));
     if (req.actor.role === "mentor" && (own || team || req.path.startsWith("/leads")))
       return next();
     if (req.actor.role === "student" && own) return next();
@@ -536,6 +540,10 @@ export function createApp(
   if (portal === "admin") installWorkspaceRoutes(app, { store, fail, config });
   // ECA alerts list and "send to everyone" (owners and admins, team admin only).
   if (portal === "admin") installEcaAdminRoutes(app, { store, fail, canPublish, config });
+  // Push notifications for staff devices, and the contact@ mailbox (owners and admins). Team admin only.
+  if (portal === "admin") installPushRoutes(app, { store, fail, config });
+  if (portal === "admin")
+    installInboxRoutes(app, { store, fail, config, connect: config.imapConnect });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
     if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");

@@ -69,6 +69,9 @@ CREATE TABLE IF NOT EXISTS mail_outbox (
   reply_to VARCHAR(254) NULL,
   to_email VARCHAR(254) NULL,
   unsubscribe_url VARCHAR(400) NULL,
+  from_contact BOOLEAN NOT NULL DEFAULT FALSE,
+  in_reply_to VARCHAR(255) NULL,
+  references_hdr TEXT NULL,
   attempts INT NOT NULL DEFAULT 0,
   sent_at DATETIME NULL,
   next_attempt_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -418,4 +421,55 @@ CREATE TABLE IF NOT EXISTS staff_activity (
   last_at DATETIME NOT NULL,
   PRIMARY KEY (user_id, day),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-- Web Push (installable admin app): one row per signed-in staff device that turned notifications on.
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  endpoint_hash CHAR(64) NOT NULL UNIQUE,
+  endpoint VARCHAR(1000) NOT NULL,
+  p256dh VARCHAR(200) NOT NULL,
+  auth VARCHAR(100) NOT NULL,
+  device VARCHAR(120) NOT NULL DEFAULT '',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_ok_at DATETIME NULL,
+  INDEX push_user (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-- Notifications waiting to be pushed (queued in the same transaction as the event, sent by the admin app).
+CREATE TABLE IF NOT EXISTS push_outbox (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  payload VARCHAR(1000) NOT NULL,
+  attempts INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX push_pending (attempts, id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-- The contact@scholarscafe.com mailbox, read over IMAP by the admin app. Bodies are stored sanitised.
+CREATE TABLE IF NOT EXISTS contact_mail (
+  id CHAR(36) PRIMARY KEY,
+  direction ENUM('in','out') NOT NULL DEFAULT 'in',
+  uidvalidity BIGINT UNSIGNED NULL,
+  uid INT UNSIGNED NULL,
+  message_id VARCHAR(255) NULL,
+  in_reply_to VARCHAR(255) NULL,
+  references_hdr TEXT NULL,
+  from_name VARCHAR(200) NOT NULL DEFAULT '',
+  from_email VARCHAR(254) NOT NULL DEFAULT '',
+  to_text VARCHAR(500) NOT NULL DEFAULT '',
+  subject VARCHAR(300) NOT NULL DEFAULT '',
+  snippet VARCHAR(300) NOT NULL DEFAULT '',
+  body_text MEDIUMTEXT NULL,
+  body_html MEDIUMTEXT NULL,
+  has_remote_images BOOLEAN NOT NULL DEFAULT FALSE,
+  attachments JSON NULL,
+  received_at DATETIME NOT NULL,
+  read_at DATETIME NULL,
+  replied_at DATETIME NULL,
+  sent_by CHAR(36) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY imap_uid (uidvalidity, uid),
+  INDEX mail_received (received_at),
+  INDEX mail_message (message_id)
 );

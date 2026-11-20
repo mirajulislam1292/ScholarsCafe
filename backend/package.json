@@ -15,9 +15,13 @@
     "express-rate-limit": "^8.1.0",
     "google-auth-library": "^10.3.0",
     "helmet": "^8.1.0",
+    "imapflow": "^2.12.1",
+    "mailparser": "^3.14.5",
     "mysql2": "^3.15.0",
     "nodemailer": "^10.0.10",
+    "sanitize-html": "^2.18.2",
     "sharp": "^0.35.4",
+    "web-push": "^4.0.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
