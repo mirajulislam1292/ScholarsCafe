@@ -395,7 +395,7 @@ function DesignSystem() {
           <div className="ds-card" style={{ display: "grid", gap: 24 }}>
             <span className="ds-label">On light</span>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-              <button className="ds-btn">Book a strategy call</button>
+              <button className="ds-btn">Book a Meeting</button>
               <button className="ds-btn ds-btn--secondary">View programs</button>
               <button className="ds-btn ds-btn--quiet">Read more →</button>
             </div>
@@ -427,7 +427,7 @@ function DesignSystem() {
               On dark
             </span>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-              <button className="ds-btn">Book a strategy call</button>
+              <button className="ds-btn">Book a Meeting</button>
               <button className="ds-btn ds-btn--secondary">View programs</button>
             </div>
           </div>

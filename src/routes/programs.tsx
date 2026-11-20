@@ -9,6 +9,7 @@ import { Footer } from "@/components/scholars/Footer";
 import { NameMarquee } from "@/components/scholars/NameMarquee";
 import { Reveal } from "@/components/scholars/Reveal";
 import { Block, CtaBand, PageHero, ParallaxImage } from "@/components/page/PageParts";
+import { ProcessMarquee } from "@/components/page/ProcessMarquee";
 
 export const Route = createFileRoute("/programs")({
   head: () =>
@@ -90,23 +91,7 @@ function ProgramsPage() {
                       </p>
                     </Reveal>
                   </div>
-                  <ol
-                    aria-label="Our process"
-                    className="section-body mx-auto flex max-w-[1200px] snap-x snap-mandatory scroll-pl-6 gap-5 overflow-x-auto px-6 pb-4 md:scroll-pl-12 [scrollbar-width:thin] md:px-12"
-                  >
-                    {PROCESS.map((step) => (
-                      <li
-                        key={step.n}
-                        className="group w-[78%] shrink-0 snap-start rounded-3xl border border-white/10 bg-white/[0.03] p-7 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] sm:w-[46%] lg:w-[31%] md:p-8"
-                      >
-                        <span className="font-heading text-[3.5rem] font-light leading-none text-ice-500 transition-colors duration-700 group-hover:text-ice-200">
-                          {String(step.n).padStart(2, "0")}
-                        </span>
-                        <h3 className="type-h3 mt-8 text-white">{step.title}</h3>
-                        <p className="type-body mt-3 text-ice-300/80">{step.desc}</p>
-                      </li>
-                    ))}
-                  </ol>
+                  <ProcessMarquee steps={PROCESS} />
                 </section>
               </>
             ),

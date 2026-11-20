@@ -325,9 +325,17 @@ export function usePageSections(page: string, defaults: string[]): string[] {
       : [];
   const order = split(entry.data.order).filter((id) => defaults.includes(id));
   const hidden = new Set(split(entry.data.hidden));
-  return [...order, ...defaults.filter((id) => !order.includes(id))].filter(
-    (id) => !hidden.has(id),
-  );
+  // Blocks missing from the saved order (added to the page later) go right after the block that
+  // precedes them in the default order, not at the very end (where they would land after the CTA).
+  for (const [i, id] of defaults.entries()) {
+    if (order.includes(id)) continue;
+    const before = defaults
+      .slice(0, i)
+      .reverse()
+      .find((d) => order.includes(d));
+    order.splice(before ? order.indexOf(before) + 1 : 0, 0, id);
+  }
+  return order.filter((id) => !hidden.has(id));
 }
 
 /** Applies the admin's SEO title/description for the current page (client side, no redeploy). */

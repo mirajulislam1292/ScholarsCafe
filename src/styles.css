@@ -987,6 +987,24 @@ main
 main .bg-blue-950.page-hero + .bg-blue-950.section-y {
   padding-top: 0;
 }
+/* Hero image straight into a dark band (Resources → "Start here"): the hero's bottom fades to
+   solid navy and the band drops its top glow, so the two meet flush with no visible seam. */
+main .page-hero:has(+ .bg-blue-950.section-y)::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: 120px;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--color-blue-950));
+}
+main .bg-blue-950.page-hero + .bg-blue-950.navy-glow {
+  background-image: radial-gradient(
+    70% 90% at 10% 100%,
+    rgb(43 109 166 / 0.38) 0%,
+    transparent 60%
+  );
+}
 /* Two dark bands in a row keep their own padding and get a hairline between them. */
 main .bg-blue-950.section-y + .bg-blue-950.section-y {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);

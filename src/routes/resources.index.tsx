@@ -23,7 +23,7 @@ export const Route = createFileRoute("/resources/")({
       path: "/resources",
       title: "Free Guides to Study in the USA from Bangladesh",
       description:
-        "Free resources for Bangladeshi students applying to US universities: blog, ECA alerts, webinars, announcements and guides on essays, scholarships, aid, tests and visas.",
+        "Free resources for Bangladeshi students applying to US universities: blog, ECA alerts, webinars, podcast episodes and guides on essays, scholarships, aid, tests and visas.",
     }),
   component: ResourcesPage,
 });
@@ -45,6 +45,8 @@ function ResourcesPage() {
       <main>
         <Sections
           page="/resources"
+          // Fixed order: hero, Start here, Explore resources, newsletter … closing CTA.
+          first={["hero", "featured", "hub", "newsletter"]}
           blocks={{
             hero: (
               <>
@@ -69,7 +71,7 @@ function ResourcesPage() {
                 />
               </>
             ),
-            // Blog, ECA Notification, Webinar and Broadcast.
+            // Blog, ECA Notification, Webinar and Podcast.
             hub: <ResourcesHubCards />,
             featured: (
               <>

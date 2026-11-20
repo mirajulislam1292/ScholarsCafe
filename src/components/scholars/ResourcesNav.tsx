@@ -26,10 +26,10 @@ export const RESOURCE_PAGES = [
     desc: "Live sessions and recordings you can join for free.",
   },
   {
-    id: "broadcast",
-    href: "/resources/broadcast",
-    label: "Broadcast",
-    desc: "Announcements and updates from the Scholars Cafe team.",
+    id: "podcast",
+    href: "/resources/podcast",
+    label: "Podcast",
+    desc: "Episodes, announcements and updates from the Scholars Cafe team.",
   },
 ] as const;
 

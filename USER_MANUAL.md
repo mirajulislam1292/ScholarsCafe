@@ -181,7 +181,7 @@ The **Team** menu is for owners, admins, editors and mentors. Students never see
 - **Blog** (`/resources/blog`): every post from Website → **Blog**, newest first.
 - **ECA Notification** (`/resources/eca`): people leave their email to hear about new ECAs.
 - **Webinar** (`/resources/webinars`): entries from Website → **Resources** with category `webinar`, `live` or `video`.
-- **Broadcast** (`/resources/broadcast`): entries from Website → **Resources** with category `broadcast` (announcements and updates).
+- **Podcast** (`/resources/podcast`): entries from Website → **Resources** with category `podcast` (episodes, announcements and updates). Older entries with category `broadcast` also show here, and `/resources/broadcast` redirects to `/resources/podcast`.
 
 A page with nothing published yet says so ("No webinars scheduled right now", and so on).
 

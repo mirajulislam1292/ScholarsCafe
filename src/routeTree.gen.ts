@@ -24,8 +24,8 @@ import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 import { Route as ResourcesIndexRouteImport } from './routes/resources.index'
 import { Route as ResourcesBlogRouteImport } from './routes/resources.blog'
-import { Route as ResourcesBroadcastRouteImport } from './routes/resources.broadcast'
 import { Route as ResourcesEcaRouteImport } from './routes/resources.eca'
+import { Route as ResourcesPodcastRouteImport } from './routes/resources.podcast'
 import { Route as ResourcesWebinarsRouteImport } from './routes/resources.webinars'
 
 const IndexRoute = IndexRouteImport.update({
@@ -103,14 +103,14 @@ const ResourcesBlogRoute = ResourcesBlogRouteImport.update({
   path: '/resources/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResourcesBroadcastRoute = ResourcesBroadcastRouteImport.update({
-  id: '/resources/broadcast',
-  path: '/resources/broadcast',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ResourcesEcaRoute = ResourcesEcaRouteImport.update({
   id: '/resources/eca',
   path: '/resources/eca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesPodcastRoute = ResourcesPodcastRouteImport.update({
+  id: '/resources/podcast',
+  path: '/resources/podcast',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResourcesWebinarsRoute = ResourcesWebinarsRouteImport.update({
@@ -133,8 +133,8 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/resources/blog': typeof ResourcesBlogRoute
-  '/resources/broadcast': typeof ResourcesBroadcastRoute
   '/resources/eca': typeof ResourcesEcaRoute
+  '/resources/podcast': typeof ResourcesPodcastRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/forms/': typeof FormsIndexRoute
   '/resources/': typeof ResourcesIndexRoute
@@ -153,8 +153,8 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/resources/blog': typeof ResourcesBlogRoute
-  '/resources/broadcast': typeof ResourcesBroadcastRoute
   '/resources/eca': typeof ResourcesEcaRoute
+  '/resources/podcast': typeof ResourcesPodcastRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/forms': typeof FormsIndexRoute
   '/resources': typeof ResourcesIndexRoute
@@ -174,8 +174,8 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/resources/blog': typeof ResourcesBlogRoute
-  '/resources/broadcast': typeof ResourcesBroadcastRoute
   '/resources/eca': typeof ResourcesEcaRoute
+  '/resources/podcast': typeof ResourcesPodcastRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/forms/': typeof FormsIndexRoute
   '/resources/': typeof ResourcesIndexRoute
@@ -196,8 +196,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/forms/$slug'
     | '/resources/blog'
-    | '/resources/broadcast'
     | '/resources/eca'
+    | '/resources/podcast'
     | '/resources/webinars'
     | '/forms/'
     | '/resources/'
@@ -216,8 +216,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/forms/$slug'
     | '/resources/blog'
-    | '/resources/broadcast'
     | '/resources/eca'
+    | '/resources/podcast'
     | '/resources/webinars'
     | '/forms'
     | '/resources'
@@ -236,8 +236,8 @@ export interface FileRouteTypes {
     | '/terms'
     | '/forms/$slug'
     | '/resources/blog'
-    | '/resources/broadcast'
     | '/resources/eca'
+    | '/resources/podcast'
     | '/resources/webinars'
     | '/forms/'
     | '/resources/'
@@ -257,8 +257,8 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   FormsSlugRoute: typeof FormsSlugRoute
   ResourcesBlogRoute: typeof ResourcesBlogRoute
-  ResourcesBroadcastRoute: typeof ResourcesBroadcastRoute
   ResourcesEcaRoute: typeof ResourcesEcaRoute
+  ResourcesPodcastRoute: typeof ResourcesPodcastRoute
   ResourcesWebinarsRoute: typeof ResourcesWebinarsRoute
   FormsIndexRoute: typeof FormsIndexRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
@@ -371,18 +371,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesBlogRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/resources/broadcast': {
-      id: '/resources/broadcast'
-      path: '/resources/broadcast'
-      fullPath: '/resources/broadcast'
-      preLoaderRoute: typeof ResourcesBroadcastRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/resources/eca': {
       id: '/resources/eca'
       path: '/resources/eca'
       fullPath: '/resources/eca'
       preLoaderRoute: typeof ResourcesEcaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources/podcast': {
+      id: '/resources/podcast'
+      path: '/resources/podcast'
+      fullPath: '/resources/podcast'
+      preLoaderRoute: typeof ResourcesPodcastRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resources/webinars': {
@@ -409,8 +409,8 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   FormsSlugRoute: FormsSlugRoute,
   ResourcesBlogRoute: ResourcesBlogRoute,
-  ResourcesBroadcastRoute: ResourcesBroadcastRoute,
   ResourcesEcaRoute: ResourcesEcaRoute,
+  ResourcesPodcastRoute: ResourcesPodcastRoute,
   ResourcesWebinarsRoute: ResourcesWebinarsRoute,
   FormsIndexRoute: FormsIndexRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
