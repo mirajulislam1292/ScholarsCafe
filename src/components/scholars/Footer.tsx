@@ -21,8 +21,8 @@ export function Footer() {
 
   return (
     <footer className="border-t border-white/8 bg-navy-deep text-white">
-      <div className="mx-auto max-w-[1280px] px-6 py-16 md:px-8">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+      <div className="mx-auto max-w-[1200px] px-6 py-12 md:px-12 md:py-16">
+        <div className="grid grid-cols-2 gap-x-10 gap-y-8 md:grid-cols-4">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2">
               <span className="brand-mark" aria-hidden="true" />
@@ -72,7 +72,7 @@ export function Footer() {
           />
         </div>
 
-        <div className="mt-12 grid grid-cols-2 gap-10 border-t border-white/7 pt-10 md:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-x-10 gap-y-8 border-t border-white/7 pt-8 md:grid-cols-4">
           <Col
             title={cmsLabel("Footer.label.de4743c87973", "Company")}
             links={[
@@ -112,7 +112,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-white/7">
-        <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-3 px-6 py-7 text-[13px] text-white/40 md:flex-row md:px-8">
+        <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-3 px-6 py-6 text-[13px] text-white/40 md:flex-row md:px-12">
           <div className="flex items-center gap-1.5 text-[13px] text-white/40">
             <span>
               <CmsText id="Footer.0a79b0ca699d">© </CmsText>
