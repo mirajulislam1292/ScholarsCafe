@@ -1,3 +1,4 @@
+import { createApi } from "./net.js";
 let me,
   items = [],
   section = "Overview";
@@ -205,25 +206,18 @@ function notice(text) {
   $("notice").textContent = text;
   $("notice").className = "";
 }
-async function api(path, body) {
-  const r = await fetch("/api/" + path, {
-    method: body === undefined ? "GET" : "POST",
-    headers:
-      body === undefined
-        ? {}
-        : { "Content-Type": "application/json", "X-CSRF-Token": me?.csrf || "" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const j = await r.json();
-  if (!r.ok) {
-    if (r.status === 401) {
-      $("workspace").hidden = true;
-      $("login").hidden = false;
-    }
-    throw Error(j.error);
-  }
-  return j;
+function showLogin() {
+  $("boot").hidden = true;
+  $("workspace").hidden = true;
+  $("login").hidden = false;
 }
+const { api, whoAmI } = createApi({
+  csrf: () => me?.csrf || "",
+  onSignedOut: showLogin,
+  onWaiting: () =>
+    ($("boot").textContent =
+      "Can't reach Scholars Cafe right now (the server may be restarting). Retrying…"),
+});
 async function refresh() {
   items = (await api("content")).items;
 }
@@ -4512,7 +4506,7 @@ async function renderTasks() {
   const admin = canPublishRole(me.role);
   const [{ items, now, week_start }, staff] = await Promise.all([
     api("workspace/tasks"),
-    admin ? api("workspace/staff") : { items: [] },
+    api("workspace/staff"),
   ]);
   const nowMs = new Date(now).getTime();
   const weekFrom = Date.parse(week_start + "T00:00:00Z") - 6 * 3600000;
@@ -4529,7 +4523,7 @@ async function renderTasks() {
         new Date(t.due_at).getTime() < weekTo,
     },
     Overdue: { label: "Overdue", pick: overdue },
-    ...(admin ? { All: { label: "All", pick: () => true } } : {}),
+    All: { label: "Everyone", pick: () => true },
   };
   if (!views[taskView]) taskView = "Mine";
   const bar = node("div", undefined, "task-bar");
@@ -4583,7 +4577,7 @@ function taskCard(t, { admin, overdue, staff }) {
   const card = node("article", undefined, "card task" + (t.status === "done" ? " is-done" : ""));
   const top = node("div", undefined, "task-top");
   top.append(node("h3", t.title));
-  const canChange = admin || t.assignees.some((a) => a.id === me.id);
+  const canChange = t.can_status ?? (admin || t.assignees.some((a) => a.id === me.id));
   if (canChange) {
     const [, status] = select(
       "",
@@ -4622,9 +4616,13 @@ function taskCard(t, { admin, overdue, staff }) {
         "muted",
       ),
     );
+  if (t.assigned_by)
+    meta.append(
+      node("span", "From " + (t.created_by === me.id ? "you" : t.assigned_by), "muted"),
+    );
   card.append(meta);
   if (t.details) card.append(node("p", t.details, "task-details"));
-  if (admin) {
+  if (t.can_edit ?? admin) {
     const actions = node("div", undefined, "task-actions");
     actions.append(
       button("Edit", () => taskForm(t, staff), "small"),
@@ -4784,7 +4782,6 @@ async function renderProgress() {
       ),
     );
   screen.append(tiles, mine);
-  if (!me.super_admin) return;
   const team = await api("workspace/team?days=" + teamDays);
   const section = node("section", undefined, "team-progress");
   const head = node("div", undefined, "task-bar");
@@ -4817,7 +4814,7 @@ async function renderProgress() {
       top,
       node(
         "p",
-        `Streak ${u.streak} · This week ${hours(u.week_minutes)} · Tasks done ${u.tasks_done}/${u.tasks_assigned}` +
+        `Streak ${u.streak} · Today ${hours(u.today_minutes)} · This week ${hours(u.week_minutes)} · Tasks done ${u.tasks_done}/${u.tasks_assigned}` +
           (u.tasks_overdue ? ` · ${u.tasks_overdue} overdue` : ""),
         "task-meta",
       ),
@@ -4926,13 +4923,15 @@ function setMoreOpen(open, remember = true) {
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 try {
-  me = await api("me");
+  me = await whoAmI();
+  if (!me) throw Object.assign(Error("Please sign in."), { signedOut: true });
   const catalogResponse = await fetch("/cms-copy-catalog.json");
   if (catalogResponse.ok) catalog = await catalogResponse.json();
   const retiredResponse = await fetch("/cms-retired-keys.json").catch(() => null);
   if (retiredResponse?.ok) retired = new Set(await retiredResponse.json());
   if (!["mentor", "student"].includes(me.role)) await refresh();
   if (me.role === "student") myFeatures = await api("lms/my/features").catch(() => ({}));
+  $("boot").hidden = true;
   $("login").hidden = true;
   $("workspace").hidden = false;
   $("identity").textContent = me.email + " · " + me.role;
@@ -5077,5 +5076,11 @@ try {
   render();
   startHeartbeat();
 } catch (e) {
-  if (!e.message.includes("sign in")) report(e);
+  if (e.signedOut) showLogin();
+  else {
+    // Signed in, but the screen failed to load: say so and offer a reload (never the sign-in screen).
+    $("boot").hidden = false;
+    $("boot").textContent = "Couldn't open the dashboard: " + e.message + " ";
+    $("boot").append(button("Reload", () => location.reload()));
+  }
 }

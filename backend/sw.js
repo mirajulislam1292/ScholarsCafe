@@ -10,6 +10,7 @@ const SHELL = [
   "/offline.html",
   "/style.css",
   "/app.js",
+  "/net.js",
   "/brand-mark.png",
   "/icons/icon-192.png",
   "/fonts/FunnelDisplay-Variable-latin.woff2",
@@ -33,7 +34,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 const PRIVATE = /^\/(api|auth|public)(\/|$)/;
-const ASSET = /^\/(app\.js|style\.css|brand-mark\.png|icons\/|fonts\/)/;
+const ASSET = /^\/(app\.js|net\.js|style\.css|brand-mark\.png|icons\/|fonts\/)/;
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);

@@ -144,7 +144,7 @@ export class Store {
   }
   async session(hash) {
     const rows = await this.query(
-      "SELECT u.id,u.email,u.role,s.csrf,(u.password_hash IS NOT NULL) AS has_password FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP() AND u.active=1",
+      "SELECT u.id,u.email,u.role,s.csrf,s.expires_at,(u.password_hash IS NOT NULL) AS has_password FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP() AND u.active=1",
       [hash],
     );
     return rows[0];
