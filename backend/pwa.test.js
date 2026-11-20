@@ -60,3 +60,18 @@ test("Service worker: shows pushed notifications and opens the right screen", as
   const push = res.text.slice(res.text.indexOf('addEventListener("push"'));
   assert.doesNotMatch(push, /caches\./);
 });
+
+test("Push is iPhone-first: audible, tagged, renotifies, badges; app has a bundled sound", async () => {
+  const app = createApp({}, base);
+  const sw = (await request(app).get("/sw.js").expect(200)).text;
+  assert.doesNotMatch(sw, /silent:\s*true/);
+  assert.match(sw, /silent: false/);
+  assert.match(sw, /renotify: true/);
+  assert.match(sw, /tag,/);
+  assert.match(sw, /setAppBadge\(shown\.length\)/);
+  assert.match(sw, /postMessage\(\{ type: "push", open \}\)/);
+  const wav = await request(app).get("/sounds/notify.wav").buffer(true).expect(200);
+  assert.match(wav.headers["content-type"], /audio\/(wav|x-wav|wave)/);
+  assert.ok(wav.body.length > 1000 && wav.body.length < 64 * 1024, "small file");
+  assert.equal(wav.body.subarray(0, 4).toString(), "RIFF");
+});

@@ -184,7 +184,7 @@ export function cancelText(b) {
     ...footer,
   ].join("\n");
 }
-const teamText = (b) =>
+export const teamText = (b) =>
   [
     "New 1-on-1 mentor session booking",
     "",
@@ -354,11 +354,9 @@ export function installPublicBookingRoutes(app, { store, fail, config, sharedLim
         store.checkRateLimit &&
         !(await store.checkRateLimit("booking-ip-day", req.ip || "?", BOOKINGS_PER_IP_DAY, 86400))
       )
-        return res
-          .status(429)
-          .json({
-            error: "Too many bookings from this network today. Please write to us instead.",
-          });
+        return res.status(429).json({
+          error: "Too many bookings from this network today. Please write to us instead.",
+        });
       const b = {
         id: randomUUID(),
         day,

@@ -1,5 +1,26 @@
 import nodemailer from "nodemailer";
-import { renderEmail, CONTACT } from "./email-template.js";
+import { renderEmail, actionFor, CONTACT, DEFAULT_TAGLINE } from "./email-template.js";
+
+// The signature tagline comes from the website CMS (Links.tagline) when it has been edited there.
+let tagline = { value: DEFAULT_TAGLINE, at: 0 };
+export async function emailTagline(store, now = Date.now()) {
+  if (now - tagline.at < 10 * 60 * 1000) return tagline.value;
+  let value = DEFAULT_TAGLINE;
+  try {
+    const rows = await store.query(
+      "SELECT published FROM content WHERE kind='copy' AND published IS NOT NULL AND deleted_at IS NULL",
+    );
+    for (const r of rows) {
+      const data = typeof r.published === "string" ? JSON.parse(r.published) : r.published;
+      const v = data?.["Links.tagline"] ?? data?.["links.tagline"];
+      if (typeof v === "string" && v.trim()) value = v.trim().slice(0, 160);
+    }
+  } catch {
+    /* keep the default */
+  }
+  tagline = { value, at: now };
+  return value;
+}
 
 // The mailbox that sends (and signs in to SMTP). Set SMTP_USER=no-reply@scholarscafe.com once that mailbox exists.
 export const sender = (config) => (config.SMTP_USER || CONTACT).trim().toLowerCase();
@@ -19,6 +40,7 @@ export function createMailer(config) {
   if (!config.SMTP_PASSWORD) return null;
   const transport = smtp(sender(config), config.SMTP_PASSWORD);
   transport.sender = sender(config);
+  transport.adminOrigin = config.ADMIN_ORIGIN || "";
   // Replies from the dashboard's Mail screen go out as contact@ itself. If the main sender already is
   // contact@, reuse it; otherwise sign in with the contact@ mailbox (the same password IMAP uses).
   const contactUser = (config.CONTACT_IMAP_USER || CONTACT).trim().toLowerCase();
@@ -32,13 +54,21 @@ export function createMailer(config) {
 }
 
 /** The nodemailer message for one outbox row: shared HTML template + plain-text alternative. */
-export function outboxMessage(row, transport) {
+export function outboxMessage(row, transport, line = tagline.value) {
   const fromContact = Boolean(row.from_contact);
   const from = fromContact ? transport.contact?.sender || CONTACT : transport.sender || CONTACT;
   const { html, text } = renderEmail({
     subject: row.subject,
     text: row.body,
     unsubscribeUrl: row.unsubscribe_url || null,
+    // Replies typed in the dashboard get the signature only; automatic mails also get one main button.
+    action: fromContact
+      ? null
+      : actionFor(
+          { subject: row.subject, text: row.body, toTeam: !row.to_email },
+          transport.adminOrigin,
+        ),
+    tagline: line,
   });
   return {
     from: `Scholars Cafe <${from}>`,
@@ -75,10 +105,11 @@ export async function deliverMail(store, transport) {
     );
     if (!rows.length) return;
     const row = rows[0];
+    const line = await emailTagline(store);
     try {
       const via = row.from_contact ? transport.contact : transport;
       if (!via) throw new Error("contact mailbox not configured");
-      await via.sendMail(outboxMessage(row, transport));
+      await via.sendMail(outboxMessage(row, transport, line));
       await store.query(
         "UPDATE mail_outbox SET sent_at=UTC_TIMESTAMP(),attempts=attempts+1 WHERE id=?",
         [row.id],
@@ -99,9 +130,12 @@ export async function deliverMail(store, transport) {
 /** Sign-in code + magic link (sent straight to the account's own address, not via the outbox). */
 export function loginEmail(transport, to, code, url, minutes) {
   const subject = "Your Scholars Cafe sign-in code";
+  const body = `Your sign-in code is ${code}\n\nOr open this link to sign in:\n${url}\n\nThe code and link expire in ${minutes} minutes and work once. If you did not ask for this, ignore this email; nobody can sign in without the code.`;
   const { html, text } = renderEmail({
     subject,
-    text: `Your sign-in code is ${code}\n\nOr open this link to sign in:\n${url}\n\nThe code and link expire in ${minutes} minutes and work once. If you did not ask for this, ignore this email; nobody can sign in without the code.`,
+    text: body,
+    action: actionFor({ subject, text: body }),
+    tagline: tagline.value,
   });
   const from = transport.sender || CONTACT;
   return {

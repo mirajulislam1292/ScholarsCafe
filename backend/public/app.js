@@ -65,6 +65,8 @@ const ABOUT = {
   Access: "Who can sign in to this workspace, and with which role.",
   "Email delivery": "Outgoing notification emails and their status.",
   Mail: "The contact@scholarscafe.com inbox: read, search and reply.",
+  "Preview emails":
+    "Every automatic email and a contact@ reply, with sample data. Nothing is sent.",
   Notifications: "Get notified on your phone or computer, and install the app.",
   Activity: "Every change, who made it and when. Only the Super Admin sees this.",
   "Team chat": "One group chat for the whole team. Pin important messages.",
@@ -427,6 +429,10 @@ function render() {
     renderContactMail().catch(report);
     return;
   }
+  if (section === "Preview emails") {
+    renderEmailPreviews().catch(report);
+    return;
+  }
   if (section === "Notifications") {
     renderNotifications().catch(report);
     return;
@@ -638,6 +644,7 @@ function navigate(next) {
   // Like an app: a new section opens at the top of the page.
   if (next !== section) window.scrollTo({ top: 0 });
   section = next;
+  clearSectionBadge(next);
   notice("");
   render();
 }
@@ -4930,6 +4937,69 @@ function showInstallHint() {
   $("screen").before(card);
 }
 
+// In-app alert while the app is open: a short bundled sound and a badge on the menu item.
+// Browsers (iOS Safari above all) only allow sound after the person has tapped the page once, so the
+// first tap "unlocks" the audio element silently.
+const chime = new Audio("/sounds/notify.wav");
+chime.preload = "auto";
+let soundReady = false;
+addEventListener(
+  "pointerdown",
+  () => {
+    if (soundReady) return;
+    chime.muted = true;
+    chime
+      .play()
+      .then(() => {
+        chime.pause();
+        chime.currentTime = 0;
+        chime.muted = false;
+        soundReady = true;
+      })
+      .catch(() => {});
+  },
+  true,
+);
+const newBySection = {};
+function markSection(key) {
+  const count = newBySection[key] || 0;
+  const text = count > 9 ? "9+" : String(count);
+  const tab = $("tabbar")?.querySelector(`[data-section="${CSS.escape(key)}"]`);
+  const more = $("tabbar")?.querySelector('[data-section="More"]');
+  for (const b of [tab, $("nav")?.querySelector(`[data-section="${CSS.escape(key)}"]`)])
+    if (b && key !== "Mail") count ? (b.dataset.badge = text) : delete b.dataset.badge;
+  // Screens without their own tab show the dot on "More".
+  if (!tab && more) {
+    const hidden = Object.entries(newBySection)
+      .filter(([k]) => !$("tabbar").querySelector(`[data-section="${CSS.escape(k)}"]`))
+      .reduce((n, [, v]) => n + v, 0);
+    hidden ? (more.dataset.badge = hidden > 9 ? "9+" : String(hidden)) : delete more.dataset.badge;
+  }
+}
+function inAppAlert(open) {
+  if (document.visibilityState === "visible" && soundReady) {
+    chime.currentTime = 0;
+    chime.play().catch(() => {});
+  }
+  if (open && open !== section) {
+    newBySection[open] = (newBySection[open] || 0) + 1;
+    markSection(open);
+  }
+  if (open === "Mail")
+    api("inbox")
+      .then((r) => setMailBadge(r.unread))
+      .catch(() => {});
+}
+function clearSectionBadge(key) {
+  if (!newBySection[key]) return;
+  delete newBySection[key];
+  markSection(key);
+}
+// Opening the app clears the icon badge (Badging API; iOS 16.4+ Home Screen apps, Chrome, Edge).
+const clearAppBadge = () => navigator.clearAppBadge?.().catch(() => {});
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") clearAppBadge();
+});
 const b64url = (s) =>
   Uint8Array.from(
     atob(
@@ -5059,6 +5129,11 @@ async function renderNotifications() {
       "Notifications show only a short preview. Tap one to open the right screen.",
       "muted",
     ),
+    node(
+      "p",
+      "Each one plays your device's notification sound. iPhone: if you hear nothing, open Settings → Notifications → SC Studio and turn on Sounds (and check the silent switch). While the app is open it plays a short sound too, after your first tap.",
+      "muted",
+    ),
   );
   screen.append(what);
 
@@ -5087,6 +5162,61 @@ async function sha16(text) {
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("")
     .slice(0, 16);
+}
+
+const previewState = { id: null, phone: false, text: false };
+async function renderEmailPreviews() {
+  const screen = $("screen");
+  const { items } = await api("email-previews");
+  const current = items.find((p) => p.id === previewState.id) || items[0];
+  previewState.id = current.id;
+  const bar = node("div", undefined, "mail-bar");
+  const [, pick] = select(
+    "Email",
+    items.map((p) => [p.id, p.label]),
+    current.id,
+  );
+  pick.setAttribute("aria-label", "Choose an email");
+  pick.onchange = () => {
+    previewState.id = pick.value;
+    render();
+  };
+  const toggle = (labelText, key) => {
+    const b = button(labelText, () => {
+      previewState[key] = !previewState[key];
+      render();
+    });
+    b.setAttribute("aria-pressed", String(previewState[key]));
+    return b;
+  };
+  bar.append(pick, toggle("Phone width", "phone"), toggle("Plain text", "text"));
+  screen.append(bar);
+  const meta = node("div", undefined, "card preview-meta");
+  for (const [k, v] of [
+    ["Subject", current.subject],
+    ["From", current.from],
+    ["To", current.to],
+    ["Reply-To", current.replyTo || "—"],
+  ]) {
+    const line = node("p");
+    line.append(node("b", k + ": "), document.createTextNode(v));
+    meta.append(line);
+  }
+  screen.append(meta);
+  if (previewState.text) {
+    screen.append(node("pre", current.text, "card preview-text"));
+    return;
+  }
+  const frame = node(
+    "iframe",
+    undefined,
+    "mail-body preview-frame" + (previewState.phone ? " phone" : ""),
+  );
+  frame.setAttribute("sandbox", "allow-popups allow-popups-to-escape-sandbox");
+  frame.setAttribute("referrerpolicy", "no-referrer");
+  frame.title = "Email preview";
+  frame.src = "/api/email-previews/" + encodeURIComponent(current.id);
+  screen.append(frame);
 }
 
 const mailState = { q: "", unread: false, open: null, images: false };
@@ -5450,6 +5580,7 @@ try {
                     [
                       "Access",
                       "Email delivery",
+                      "Preview emails",
                       "Notifications",
                       ...(me.super_admin ? ["Activity"] : []),
                     ],
@@ -5526,8 +5657,10 @@ try {
   if (canOpen(wanted)) section = wanted;
   if (wanted) history.replaceState(null, "", "/");
   navigator.serviceWorker?.addEventListener("message", (e) => {
+    if (e.data?.type === "push") return inAppAlert(canOpen(e.data.open) ? e.data.open : "");
     if (canOpen(e.data?.open)) navigate(e.data.open);
   });
+  clearAppBadge();
   if (me.role !== "student") {
     syncPush().catch(() => {});
     showInstallHint();

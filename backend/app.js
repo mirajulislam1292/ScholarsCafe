@@ -21,6 +21,7 @@ import { installEcaAdminRoutes, installEcaPublicRoutes } from "./eca.js";
 import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
 import { installPushRoutes } from "./push.js";
 import { installInboxRoutes } from "./inbox.js";
+import { installEmailPreviewRoutes } from "./email-previews.js";
 import {
   token,
   hash,
@@ -544,6 +545,7 @@ export function createApp(
   if (portal === "admin") installPushRoutes(app, { store, fail, config });
   if (portal === "admin")
     installInboxRoutes(app, { store, fail, config, connect: config.imapConnect });
+  if (portal === "admin") installEmailPreviewRoutes(app, { store, fail, config });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
     if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");

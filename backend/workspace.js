@@ -83,7 +83,7 @@ async function queueMail(store, c, to, subject, body) {
     c,
   );
 }
-const taskMail = (config, task, intro) =>
+export const taskMail = (config, task, intro) =>
   [
     intro,
     "",

@@ -2166,3 +2166,41 @@ nav .nav-more[aria-expanded="true"]::after {
     height: 65vh;
   }
 }
+/* New-activity count on a sidebar item (desktop), set when a notification arrives while the app is open. */
+#nav button[data-badge]::after {
+  content: attr(data-badge);
+  display: inline-block;
+  margin-left: 8px;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--blue-700);
+  color: var(--white);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+.preview-meta p {
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+.preview-frame {
+  height: 75vh;
+  margin: 0 auto;
+}
+.preview-frame.phone {
+  max-width: 375px;
+}
+.preview-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    13px/1.55 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.mail-bar select {
+  flex: 1 1 220px;
+  min-width: 0;
+}
