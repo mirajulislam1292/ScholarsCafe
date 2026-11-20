@@ -1,6 +1,6 @@
 import express from "express";
 import helmet from "helmet";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 import { OAuth2Client } from "google-auth-library";
 import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
@@ -73,9 +73,17 @@ export function createApp(
 ) {
   const app = express();
   const portal = portalOf(config);
-  // Sessions last 7 days and are renewed whenever the app is opened (see /api/me), so people stay signed in
-  // while they use it and are asked again only after a week away, after Sign out, or when access changes.
-  const sessionHours = 7 * 24;
+  // Sessions last 30 days and slide: opening the app (/api/me) renews them, and so does any signed-in request
+  // once a day (see the /api check below), so a tab or installed app left open for weeks stays signed in.
+  // People are asked again only after 30 days away, after Sign out, or when their access changes.
+  const sessionHours = 30 * 24;
+  const renewSession = async (raw, res) => {
+    await store.query(
+      `UPDATE sessions SET expires_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL ${sessionHours} HOUR) WHERE token_hash=?`,
+      [hash(raw)],
+    );
+    setSession(res, raw);
+  };
   // Every sign-in method ends here: replace any previous session, create a new one, audit it.
   const startSession = async (c, user, req, method) => {
     const session = token();
@@ -153,6 +161,12 @@ export function createApp(
       limit: 180,
       standardHeaders: "draft-8",
       legacyHeaders: false,
+      // Per person, not per address: staff in one office share one public IP, and a busy team (chat open in
+      // several tabs) must not run each other into "Too many requests".
+      keyGenerator: (req) => {
+        const raw = cookie(req, sessionCookie);
+        return raw && raw.length === 64 ? "s:" + hash(raw) : ipKeyGenerator(req.ip || "");
+      },
     }),
   );
   app.get("/health", (_req, res) => res.json({ status: "ok" }));
@@ -474,6 +488,15 @@ export function createApp(
     req.actor = await store.session(hash(raw));
     if (!req.actor) throw fail(401, "Your session has expired or access was removed.");
     if (!roleFits(portal, req.actor.role)) throw fail(401, "Please sign in on the right page.");
+    // Slide the 30-day window at most once a day per session (cheap), without waiting for a page reload.
+    const { expires_at: expires, ...actor } = req.actor;
+    req.actor = actor;
+    if (
+      expires &&
+      !["/me", "/logout"].includes(req.path) &&
+      new Date(expires).getTime() - Date.now() < (sessionHours - 24) * 3600 * 1000
+    )
+      await renewSession(raw, res).catch(() => {});
     if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
       if (
         req.headers.origin !== config.ADMIN_ORIGIN ||
@@ -490,18 +513,10 @@ export function createApp(
     }
     next();
   });
-  // Opening the app renews the session (sliding 7 days); signing out or a role change still ends it at once.
+  // Opening the app renews the session (sliding 30 days); signing out or a role change still ends it at once.
   app.get("/api/me", async (req, res) => {
-    const raw = cookie(req, sessionCookie);
-    try {
-      await store.query(
-        `UPDATE sessions SET expires_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL ${sessionHours} HOUR) WHERE token_hash=?`,
-        [hash(raw)],
-      );
-    } catch {
-      /* renewal is best effort; the current session stays valid */
-    }
-    setSession(res, raw);
+    // Renewal is best effort; the current session stays valid either way.
+    await renewSession(cookie(req, sessionCookie), res).catch(() => {});
     // The Super Admin also gets the visual editor (and the website address to show in it).
     res.json(
       isSuperAdmin(req.actor, config)

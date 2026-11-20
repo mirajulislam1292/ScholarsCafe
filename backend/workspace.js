@@ -268,8 +268,8 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
   });
   const loadTasks = async (where, args) => {
     const tasks = await q(
-      `SELECT t.id,t.title,t.details,t.status,t.due_at,t.created_at,t.completed_at,t.created_by
-         FROM staff_tasks t WHERE t.deleted_at IS NULL AND ${where}
+      `SELECT t.id,t.title,t.details,t.status,t.due_at,t.created_at,t.completed_at,t.created_by,u.email AS creator_email
+         FROM staff_tasks t LEFT JOIN users u ON u.id=t.created_by WHERE t.deleted_at IS NULL AND ${where}
         ORDER BY t.status='done', t.due_at IS NULL, t.due_at, t.created_at DESC LIMIT 300`,
       args,
     );
@@ -279,22 +279,28 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
         WHERE a.task_id IN (${tasks.map(() => "?").join(",")}) ORDER BY u.email`,
       tasks.map((t) => t.id),
     );
-    return tasks.map((t) => ({
+    return tasks.map(({ creator_email, ...t }) => ({
       ...t,
+      assigned_by: creator_email ? nameOf(creator_email) : null,
       assignees: people
         .filter((p) => p.task_id === t.id)
         .map((p) => ({ id: p.id, name: nameOf(p.email) })),
     }));
   };
   app.get("/api/workspace/tasks", async (req, res) => {
-    // Owners and admins see every task; everyone else sees the tasks assigned to them.
-    const items = canPublish(req.actor.role)
-      ? await loadTasks("1=1", [])
-      : await loadTasks("t.id IN (SELECT task_id FROM staff_task_assignees WHERE user_id=?)", [
-          req.actor.id,
-        ]);
+    // Every staff member sees every task (who it's for, the deadline, the status). Editing is limited:
+    // owners/admins and whoever assigned it may change anything; an assignee may change the status.
+    const items = (await loadTasks("1=1", [])).map((t) => {
+      const can_edit = canEditTask(req.actor, t);
+      return {
+        ...t,
+        can_edit,
+        can_status: can_edit || t.assignees.some((a) => a.id === req.actor.id),
+      };
+    });
     res.json({ items, now: new Date(), week_start: weekStart(dhakaDay()) });
   });
+  const canEditTask = (actor, task) => canPublish(actor.role) || task.created_by === actor.id;
   /** Sets the assignee list; returns the people newly assigned (they get an email). */
   const setAssignees = async (c, taskId, ids) => {
     const wanted = [...new Set(ids)];
@@ -369,7 +375,6 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
   });
   app.post("/api/workspace/tasks/:id", async (req, res) => {
     const id = uuid.parse(req.params.id);
-    const admin = canPublish(req.actor.role);
     await store.transaction(async (c) => {
       const [current] = await q(
         "SELECT * FROM staff_tasks WHERE id=? AND deleted_at IS NULL FOR UPDATE",
@@ -377,7 +382,7 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
         c,
       );
       if (!current) throw fail(404, "Task not found.");
-      if (!admin) {
+      if (!canEditTask(req.actor, current)) {
         // Anyone assigned may move their task between to do, doing and done.
         const { status } = z
           .object({ status: z.enum(TASK_STATUSES) })
@@ -388,7 +393,11 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
           [id, req.actor.id],
           c,
         );
-        if (!mine) throw fail(403, "You can only update tasks assigned to you.");
+        if (!mine)
+          throw fail(
+            403,
+            "Only the person who assigned it, its assignees or an admin can change it.",
+          );
         await q(
           "UPDATE staff_tasks SET status=?,completed_at=?,updated_at=UTC_TIMESTAMP() WHERE id=?",
           [status, status === "done" ? current.completed_at || new Date() : null, id],
@@ -430,10 +439,17 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     res.json({ ok: true });
   });
   app.post("/api/workspace/tasks/:id/delete", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Only owners and admins can delete tasks.");
+    const id = uuid.parse(req.params.id);
+    const [task] = await q(
+      "SELECT id,created_by FROM staff_tasks WHERE id=? AND deleted_at IS NULL",
+      [id],
+    );
+    if (!task) throw fail(404, "Task not found.");
+    if (!canEditTask(req.actor, task))
+      throw fail(403, "Only the person who assigned it or an admin can delete a task.");
     const result = await q(
       "UPDATE staff_tasks SET deleted_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
-      [uuid.parse(req.params.id)],
+      [id],
     );
     if (result.affectedRows !== 1) throw fail(404, "Task not found.");
     res.json({ ok: true });
@@ -513,9 +529,9 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     const [me] = await statsFor([req.actor], 14);
     res.json({ me, today: dhakaDay(), week_start: weekStart(dhakaDay()) });
   });
+  // Everyone's streak, days in and approximate time, for every staff member (the audit log stays Super
+  // Admin only). Staff only: the /api/workspace guard above refuses students and the public.
   app.get("/api/workspace/team", async (req, res) => {
-    if (!isSuperAdmin(req.actor, config))
-      throw fail(403, "Team activity is only available to the Super Admin account.");
     const days = req.query.days === "28" ? 28 : 14;
     const users = await q(
       "SELECT id,email,role FROM users WHERE active=1 AND role IN ('owner','admin','editor','mentor') ORDER BY email",

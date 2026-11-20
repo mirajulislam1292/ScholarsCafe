@@ -127,6 +127,16 @@ h2 {
   font-size: 15px;
   letter-spacing: -0.02em;
 }
+.boot {
+  max-width: 630px;
+  margin: 20vh auto 0;
+  padding: 0 20px;
+  text-align: center;
+  color: var(--ice-700);
+}
+.boot button {
+  margin-left: 6px;
+}
 .login {
   max-width: 630px;
   margin: 12vh auto;

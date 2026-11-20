@@ -69,6 +69,8 @@ function fakeStore(actor) {
           .reverse();
         return rows;
       }
+      if (q.startsWith("SELECT id,email,role FROM users WHERE active=1"))
+        return users.filter((u) => u.role !== "student");
       if (q.startsWith("SELECT id,email FROM users WHERE active=1"))
         return users.filter((u) => a.includes(u.id) && u.role !== "student");
       if (q.startsWith("SELECT id,email FROM users WHERE id IN"))
@@ -84,11 +86,27 @@ function fakeStore(actor) {
         return { affectedRows: 1 };
       }
       if (q.startsWith("INSERT INTO staff_tasks")) {
-        const [id, title, details, status, due_at] = a;
-        db.tasks.push({ id, title, details, status, due_at });
+        const [id, title, details, status, due_at, created_by] = a;
+        db.tasks.push({ id, title, details, status, due_at, created_by });
         return { affectedRows: 1 };
       }
-      if (q.startsWith("SELECT * FROM staff_tasks")) return db.tasks.filter((t) => t.id === a[0]);
+      if (
+        q.startsWith("SELECT * FROM staff_tasks") ||
+        q.startsWith("SELECT id,created_by FROM staff_tasks")
+      )
+        return db.tasks.filter((t) => t.id === a[0] && !t.deleted_at);
+      if (q.includes("FROM staff_tasks t LEFT JOIN users u"))
+        return db.tasks
+          .filter((t) => !t.deleted_at)
+          .map((t) => ({ ...t, creator_email: users.find((u) => u.id === t.created_by)?.email }));
+      if (q.startsWith("SELECT a.task_id,u.id,u.email FROM staff_task_assignees"))
+        return db.assignees
+          .filter((x) => a.includes(x.task_id))
+          .map((x) => ({ task_id: x.task_id, ...users.find((u) => u.id === x.user_id) }));
+      if (q.startsWith("UPDATE staff_tasks SET deleted_at")) {
+        db.tasks.find((t) => t.id === a[0]).deleted_at = new Date();
+        return { affectedRows: 1 };
+      }
       if (q.startsWith("SELECT 1 AS ok FROM staff_task_assignees"))
         return db.assignees
           .filter((x) => x.task_id === a[0] && x.user_id === a[1])
@@ -329,9 +347,80 @@ test("Activity ping counts at most one minute per ~minute and is staff only", as
   assert.equal(args[0], people.editor.id);
   assert.equal(args[1], dhakaDay());
   await t.post("/workspace/ping", { minutes: 50 }).expect(400);
-  // Team view: Super Admin only.
-  await client(people.admin).get("/workspace/team").expect(403);
-  await client(people.super).get("/workspace/team").expect(200);
+  // Team view: every staff member (not students), with each person's streak, days in and time.
+  for (const who of ["admin", "editor", "mentor", "super"]) {
+    const team = await client(people[who]).get("/workspace/team").expect(200);
+    const first = team.body.items[0];
+    for (const key of ["streak", "today_minutes", "week_minutes", "days"]) assert.ok(key in first);
+  }
+  await client(people.student).get("/workspace/team").expect(401);
   const mine = await client(people.mentor).get("/workspace/progress").expect(200);
   assert.equal(mine.body.me.streak, 0);
+});
+
+test("Tasks: every staff member sees all tasks; only the assigner, an assignee or an admin can change them", async () => {
+  // One store shared by several people, so they all see the same tasks.
+  const store = fakeStore(people.admin);
+  let actor = people.admin;
+  store.session = async () => ({ ...actor, csrf: "c" });
+  const app = createApp(store, config);
+  const as = (who) => {
+    actor = people[who];
+    return {
+      get: (p) =>
+        request(app)
+          .get("/api" + p)
+          .set("Cookie", cookie),
+      post: (p, body = {}) =>
+        request(app)
+          .post("/api" + p)
+          .set("Cookie", cookie)
+          .set("Origin", ADMIN)
+          .set("X-CSRF-Token", "c")
+          .send(body),
+    };
+  };
+  const created = await as("admin")
+    .post("/workspace/tasks", {
+      title: "Write the FAQ",
+      assignees: [people.mentor.id],
+      due: "2026-12-01T18:00",
+    })
+    .expect(201);
+  const id = created.body.id;
+  // An editor who has nothing to do with it still sees it, with who it's for, the deadline and the status.
+  const seen = (await as("editor").get("/workspace/tasks").expect(200)).body.items;
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].title, "Write the FAQ");
+  assert.deepEqual(seen[0].assignees, [{ id: people.mentor.id, name: "mentor" }]);
+  assert.equal(seen[0].assigned_by, "admin");
+  assert.ok(seen[0].due_at);
+  assert.equal(seen[0].status, "todo");
+  assert.equal(seen[0].can_edit, false);
+  assert.equal(seen[0].can_status, false);
+  // ...but can't change or delete it.
+  await as("editor")
+    .post("/workspace/tasks/" + id, { status: "done" })
+    .expect(403);
+  await as("editor").post(`/workspace/tasks/${id}/delete`).expect(403);
+  // The assignee may move it along (status only).
+  const forMentor = (await as("mentor").get("/workspace/tasks").expect(200)).body.items[0];
+  assert.equal(forMentor.can_status, true);
+  assert.equal(forMentor.can_edit, false);
+  await as("mentor")
+    .post("/workspace/tasks/" + id, { status: "doing" })
+    .expect(200);
+  await as("mentor")
+    .post("/workspace/tasks/" + id, { title: "Renamed" })
+    .expect(400);
+  // Whoever assigned it may edit it fully, even without the admin role.
+  store.db.tasks[0].created_by = people.editor.id;
+  assert.equal((await as("editor").get("/workspace/tasks")).body.items[0].can_edit, true);
+  await as("editor")
+    .post("/workspace/tasks/" + id, { title: "Write the FAQ page" })
+    .expect(200);
+  assert.equal(store.db.tasks[0].title, "Write the FAQ page");
+  await as("editor").post(`/workspace/tasks/${id}/delete`).expect(200);
+  // Students never reach the team's tasks (the admin portal refuses their session outright).
+  await as("student").get("/workspace/tasks").expect(401);
 });
