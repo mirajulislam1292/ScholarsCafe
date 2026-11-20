@@ -34,7 +34,7 @@ export function PortalCta() {
             />
           </a>
         </Reveal>
-        <ul className="grid gap-px overflow-hidden rounded-3xl border border-neutral-900/[0.06] bg-neutral-900/[0.06] sm:grid-cols-2">
+        <ul className="grid gap-px overflow-hidden rounded-3xl border border-neutral-900/[0.07] bg-neutral-900/[0.06] shadow-[0_1px_2px_rgb(4_28_49/0.04),0_14px_32px_-16px_rgb(4_28_49/0.14)] sm:grid-cols-2">
           {benefits.map(({ icon: Icon, id, text }, i) => (
             <Reveal key={id} delay={i * 0.05} className="bg-white">
               <li className="flex h-full items-center gap-4 p-7">

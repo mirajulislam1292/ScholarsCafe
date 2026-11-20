@@ -137,7 +137,7 @@ export function Team() {
   const team = { ...SITE.team, heading: useCmsValue("site.team.heading", SITE.team.heading) };
   const members = useCmsList<Member>("team", DEFAULT_TEAM);
   return (
-    <section id="team" className="bg-white section-y">
+    <section id="team" className="tone-tint section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal>
           <h2 className="type-h2 text-neutral-900">{team.heading}</h2>

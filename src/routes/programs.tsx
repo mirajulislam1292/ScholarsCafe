@@ -70,7 +70,7 @@ function ProgramsPage() {
             ),
             process: (
               <>
-                <section className="relative isolate overflow-hidden bg-blue-950 section-y text-white">
+                <section className="relative isolate overflow-hidden bg-blue-950 navy-glow section-y text-white">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"
@@ -145,7 +145,7 @@ function ProgramRow({ p }: { p: Program }) {
       className={`group relative isolate grid gap-8 overflow-hidden rounded-3xl p-7 transition-shadow duration-700 ease-premium md:grid-cols-[5fr_7fr] md:gap-12 md:p-12 ${
         featured
           ? "bg-blue-950 text-ice-200/85 hover:shadow-[0_40px_80px_rgb(4_28_49/0.25)]"
-          : "border border-neutral-900/[0.08] bg-white hover:shadow-[0_40px_80px_rgb(4_28_49/0.1)]"
+          : "border border-neutral-900/[0.07] bg-white shadow-[0_1px_2px_rgb(4_28_49/0.04),0_14px_32px_-16px_rgb(4_28_49/0.14)] hover:shadow-[0_40px_80px_rgb(4_28_49/0.1)]"
       }`}
     >
       {featured && (

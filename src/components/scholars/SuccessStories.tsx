@@ -40,7 +40,7 @@ export function SuccessStories() {
   ];
 
   return (
-    <section id="success" className="bg-ice-50 section-y ">
+    <section id="success" className="tone-tint section-y ">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="hidden">

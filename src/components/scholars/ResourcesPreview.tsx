@@ -15,7 +15,7 @@ export function ResourcesPreview() {
   ].slice(0, 3);
   if (!picks.length) return null;
   return (
-    <section className="bg-ice-50 section-y">
+    <section className="tone-tint section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <h2 className="type-h2 max-w-[18ch] text-neutral-900">
@@ -37,7 +37,7 @@ export function ResourcesPreview() {
             <Reveal key={r.title} delay={i * 0.06}>
               <Link
                 to="/resources"
-                className="group flex h-full flex-col justify-between gap-6 rounded-3xl border border-neutral-900/[0.06] bg-white p-7 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
+                className="card-soft card-hover group flex h-full flex-col justify-between gap-6 p-7"
               >
                 <div>
                   <p className="type-caption text-blue-700">{clean(r.tag)}</p>
