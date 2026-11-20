@@ -3,10 +3,7 @@ import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { ArrowUpRight, Check } from "lucide-react";
 import { CmsText, useCmsCollection, useCmsValue } from "@/lib/cms";
-import {
-  PROGRAMS as DEFAULT_PROGRAMS,
-  PROCESS as CMS_DEFAULT_PROCESS,
-} from "@/lib/scholars-data";
+import { PROGRAMS as DEFAULT_PROGRAMS, PROCESS as CMS_DEFAULT_PROCESS } from "@/lib/scholars-data";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { NameMarquee } from "@/components/scholars/NameMarquee";
@@ -73,7 +70,7 @@ function ProgramsPage() {
             ),
             process: (
               <>
-                <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(56px,8vw,112px)] text-white">
+                <section className="relative isolate overflow-hidden bg-blue-950 section-y text-white">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"
@@ -95,7 +92,7 @@ function ProgramsPage() {
                   </div>
                   <ol
                     aria-label="Our process"
-                    className="mx-auto mt-16 flex max-w-[1200px] snap-x snap-mandatory scroll-pl-6 gap-5 overflow-x-auto px-6 pb-4 md:scroll-pl-12 [scrollbar-width:thin] md:mt-20 md:px-12"
+                    className="section-body mx-auto flex max-w-[1200px] snap-x snap-mandatory scroll-pl-6 gap-5 overflow-x-auto px-6 pb-4 md:scroll-pl-12 [scrollbar-width:thin] md:px-12"
                   >
                     {PROCESS.map((step) => (
                       <li
@@ -119,7 +116,7 @@ function ProgramsPage() {
                   src="/media/pages/campus-early-fall.webp"
                   srcSm="/media/pages/campus-early-fall-sm.webp"
                   alt="A quiet college campus in early fall"
-                  className="h-[56vh] min-h-[360px] md:h-[80vh]"
+                  className="image-band"
                 />
               </>
             ),

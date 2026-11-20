@@ -7,7 +7,7 @@ export function Stats() {
   const STATS = useCmsValue("data.STATS", CMS_DEFAULT_STATS);
 
   return (
-    <section className="brand-stats light-panel bg-sky-soft py-20 md:py-28">
+    <section className="brand-stats light-panel bg-sky-soft section-y">
       <div className="mx-auto max-w-[1320px] px-5 md:px-10">
         <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4 md:gap-x-12">
           {STATS.map((s, i) => (

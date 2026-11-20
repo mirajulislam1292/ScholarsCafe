@@ -31,7 +31,7 @@ function BlogPage() {
         limit={1000}
         heading={null}
         empty={
-          <div className="mx-auto max-w-[1200px] px-6 py-20 md:px-12">
+          <div className="mx-auto max-w-[1200px] px-6 section-y md:px-12">
             <EmptyNote>
               <CmsText id="ResourcesBlog.empty">
                 No articles yet. Our first posts are on the way.

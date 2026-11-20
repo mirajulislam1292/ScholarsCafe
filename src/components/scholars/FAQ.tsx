@@ -3,10 +3,7 @@ import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { useState } from "react";
 import { Reveal } from "./Reveal";
-import {
-  FAQS as CMS_DEFAULT_FAQS,
-  EMAIL as CMS_DEFAULT_EMAIL,
-} from "@/lib/scholars-data";
+import { FAQS as CMS_DEFAULT_FAQS, EMAIL as CMS_DEFAULT_EMAIL } from "@/lib/scholars-data";
 import { Plus, Mail, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -16,9 +13,9 @@ export function FAQ() {
 
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section id="faq" className="bg-white py-[clamp(56px,8vw,112px)]">
+    <section id="faq" className="bg-white section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
-        <Reveal className="max-w-2xl md:mx-auto md:text-center">
+        <Reveal className="max-w-2xl">
           <span className="hidden">
             <CmsText id="FAQ.4e9f48728271">Got Questions?</CmsText>
           </span>
@@ -30,7 +27,7 @@ export function FAQ() {
           </p>
         </Reveal>
 
-        <Reveal className="mx-auto mt-12 max-w-3xl">
+        <Reveal className="section-body max-w-3xl">
           <div className="divide-y divide-border rounded-2xl border border-neutral-900/[0.08] bg-white">
             {FAQS.map((f, i) => {
               const isOpen = open === i;
@@ -68,7 +65,7 @@ export function FAQ() {
           </div>
         </Reveal>
 
-        <Reveal className="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <Reveal className="mt-8 flex max-w-3xl flex-wrap items-center gap-3">
           <span className="text-sm text-neutral-500">
             <CmsText id="FAQ.6089a8bb7c64">Still have questions?</CmsText>
           </span>

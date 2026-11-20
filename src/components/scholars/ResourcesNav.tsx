@@ -37,7 +37,7 @@ export const RESOURCE_PAGES = [
 export function ResourcesHubCards() {
   const cmsLabel = useCmsLookup();
   return (
-    <section className="bg-white py-[clamp(56px,9vw,120px)]">
+    <section className="bg-white section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <h2 className="type-h2 text-neutral-900">
           <CmsText id="ResourcesHub.title">Explore resources</CmsText>
@@ -87,7 +87,7 @@ export function ResourcesSubPage({
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <section className="bg-blue-950 pb-10 pt-32 text-white md:pt-40">
+        <section className="bg-blue-950 pb-10 pt-32 text-white md:pt-36">
           <div className="mx-auto max-w-[1200px] px-6 md:px-12">
             <a href="/resources" className="type-caption text-ice-300 hover:text-white">
               ← <CmsText id="ResourcesHub.back">Resources</CmsText>

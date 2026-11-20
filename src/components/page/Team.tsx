@@ -101,9 +101,9 @@ function Group({ label, members }: { label: string; members: Member[] }) {
   const shown = members.filter((m) => m.name?.trim());
   if (!shown.length) return null;
   return (
-    <div className="grid gap-10 border-t border-neutral-900/[0.08] pt-10 lg:grid-cols-[1fr_3fr] lg:gap-16">
+    <div className="grid gap-8 border-t border-neutral-900/[0.08] pt-8 md:pt-10 lg:grid-cols-[1fr_3fr] lg:gap-16">
       <h3 className="type-h3 text-neutral-500 lg:sticky lg:top-32 lg:self-start">{t(label)}</h3>
-      <div className="grid grid-cols-1 gap-y-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-14 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-y-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-12 md:grid-cols-3">
         {shown.map((m, i) => (
           <Portrait key={m.name} m={m} index={i} />
         ))}
@@ -137,12 +137,12 @@ export function Team() {
   const team = { ...SITE.team, heading: useCmsValue("site.team.heading", SITE.team.heading) };
   const members = useCmsList<Member>("team", DEFAULT_TEAM);
   return (
-    <section id="team" className="bg-white py-[clamp(72px,13vw,200px)]">
+    <section id="team" className="bg-white section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal>
           <h2 className="type-h2 text-neutral-900">{team.heading}</h2>
         </Reveal>
-        <div className="mt-16 grid gap-20 md:mt-20">
+        <div className="section-body grid gap-12 md:gap-16">
           {byGroup(members).map((g) => (
             <Group key={g.label} label={g.label} members={g.members} />
           ))}

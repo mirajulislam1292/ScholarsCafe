@@ -15,7 +15,7 @@ export function ResourcesPreview() {
   ].slice(0, 3);
   if (!picks.length) return null;
   return (
-    <section className="bg-ice-50 py-[clamp(56px,8vw,112px)]">
+    <section className="bg-ice-50 section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <h2 className="type-h2 max-w-[18ch] text-neutral-900">
@@ -32,7 +32,7 @@ export function ResourcesPreview() {
             />
           </Link>
         </Reveal>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="section-body grid gap-6 md:grid-cols-3">
           {picks.map((r, i) => (
             <Reveal key={r.title} delay={i * 0.06}>
               <Link

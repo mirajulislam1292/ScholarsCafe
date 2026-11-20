@@ -28,7 +28,7 @@ function WebinarsPage() {
         </CmsText>
       }
     >
-      <section className="mx-auto max-w-[1200px] px-6 py-[clamp(56px,9vw,120px)] md:px-12">
+      <section className="mx-auto max-w-[1200px] px-6 section-y md:px-12">
         <ResourceEntries
           categories={["webinar", "live", "video"]}
           action={t("Join or watch")}

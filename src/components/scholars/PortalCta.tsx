@@ -14,7 +14,7 @@ export function PortalCta() {
     { icon: FileCheck2, id: "reviews", text: "Essay and document reviews" },
   ];
   return (
-    <section className="bg-white py-[clamp(56px,8vw,112px)]">
+    <section className="bg-white section-y">
       <div className="mx-auto grid max-w-[1200px] gap-12 px-6 md:grid-cols-[1fr_1fr] md:items-end md:px-12">
         <Reveal>
           <p className="type-caption text-blue-700">

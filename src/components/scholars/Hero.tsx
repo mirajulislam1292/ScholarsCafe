@@ -31,7 +31,7 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_0%_100%,rgb(4_28_49/0.65)_0%,transparent_70%)]"
       />
 
-      <div className="relative mx-auto w-full max-w-[1200px] px-6 pb-[clamp(64px,10vh,120px)] pt-40 md:px-12">
+      <div className="relative mx-auto w-full max-w-[1200px] px-6 pb-(--space-section) pt-36 md:px-12">
         <h1 className="max-w-[15ch] type-display text-white">
           {headline.map((word, i) => (
             <Fragment key={word}>

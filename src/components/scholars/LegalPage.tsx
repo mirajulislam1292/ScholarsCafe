@@ -28,7 +28,7 @@ export function LegalPage({
           </>
         }
       />
-      <section className="bg-white py-[clamp(56px,8vw,112px)]">
+      <section className="bg-white section-y">
         <article
           className="prose mx-auto max-w-[720px] px-6 md:px-0
             prose-headings:font-heading prose-headings:font-light prose-headings:tracking-[-0.02em] prose-headings:text-neutral-900

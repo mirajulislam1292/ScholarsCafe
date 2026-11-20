@@ -92,7 +92,7 @@ function ServicesPage() {
                   src="/media/pages/library.webp"
                   srcSm="/media/pages/library-sm.webp"
                   alt="Students working together in a university library"
-                  className="h-[56vh] min-h-[360px] md:h-[72vh]"
+                  className="image-band"
                 />
               </>
             ),

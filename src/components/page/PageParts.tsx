@@ -65,7 +65,7 @@ export function PageHero({
   imageAlt?: string;
 }) {
   return (
-    <section className="relative isolate flex min-h-[78svh] items-end overflow-hidden bg-blue-950 text-white">
+    <section className="relative isolate page-hero flex min-h-[clamp(420px,64svh,620px)] items-end overflow-hidden bg-blue-950 text-white">
       {image && (
         <ParallaxImage
           src={image}
@@ -81,7 +81,7 @@ export function PageHero({
         className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(4_28_49/0.6)_0%,rgb(4_28_49/0.35)_40%,rgb(4_28_49/0.92)_100%),radial-gradient(80%_70%_at_100%_0%,rgb(43_109_166/0.35)_0%,transparent_60%)]"
       />
       <div aria-hidden className={GRAIN} />
-      <div className="mx-auto w-full max-w-[1200px] px-6 pb-[clamp(72px,10vh,128px)] pt-40 md:px-12">
+      <div className="mx-auto w-full max-w-[1200px] px-6 pb-(--space-section) pt-36 md:px-12">
         <h1 className="type-h1 max-w-[16ch] motion-safe:animate-rise">{title}</h1>
         {lead && (
           <p
@@ -133,18 +133,18 @@ export function Block({
     </Reveal>
   );
   return (
-    <section id={id} className={`${toneClass[tone]} py-[clamp(56px,8vw,112px)]`}>
+    <section id={id} className={`${toneClass[tone]} section-y`}>
       {dark && <div aria-hidden className={GRAIN} />}
       <div className="relative mx-auto max-w-[1200px] px-6 md:px-12">
         {sticky ? (
-          <div className="grid grid-cols-1 gap-14 lg:grid-cols-[5fr_7fr] lg:gap-24">
+          <div className="grid grid-cols-1 gap-(--space-head) lg:grid-cols-[5fr_7fr] lg:gap-24">
             {heading}
             <div className="min-w-0">{children}</div>
           </div>
         ) : (
           <>
             {heading}
-            {children && <div className={title ? "mt-10 md:mt-14" : ""}>{children}</div>}
+            {children && <div className={title ? "section-body" : ""}>{children}</div>}
           </>
         )}
       </div>
@@ -166,7 +166,7 @@ export function CtaBand({
   if (typeof title === "string") title = t(title);
   if (typeof action === "string") action = t(action);
   return (
-    <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(64px,9vw,128px)] text-white">
+    <section className="relative isolate overflow-hidden bg-blue-950 section-y text-white">
       <div
         aria-hidden
         className="absolute inset-0 -z-10 bg-[radial-gradient(70%_90%_at_10%_100%,rgb(43_109_166/0.4)_0%,transparent_60%)]"

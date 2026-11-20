@@ -3,10 +3,7 @@ import { useCmsValue } from "@/lib/cms";
 import { CmsText } from "@/lib/cms";
 import { useMemo, useState } from "react";
 import { Reveal } from "./Reveal";
-import {
-  UNIVERSITIES as CMS_DEFAULT_UNIVERSITIES,
-  type University,
-} from "@/lib/scholars-data";
+import { UNIVERSITIES as CMS_DEFAULT_UNIVERSITIES, type University } from "@/lib/scholars-data";
 import { Search, X, ArrowRight } from "lucide-react";
 import { useEnabledCountries } from "@/lib/site-content";
 
@@ -65,9 +62,9 @@ export function UniversityExplorer() {
   if (tuition !== "All") activeTags.push({ label: tuition, onRemove: () => setTuition("All") });
 
   return (
-    <section id="universities" className="bg-white py-[clamp(56px,8vw,112px)]">
+    <section id="universities" className="bg-white section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
-        <Reveal className="max-w-2xl md:mx-auto md:text-center">
+        <Reveal className="max-w-2xl">
           <span className="hidden">
             <CmsText id="UniversityExplorer.0d7a9a83ef6d">University Explorer</CmsText>
           </span>
@@ -84,7 +81,7 @@ export function UniversityExplorer() {
 
         {/* Filter bar */}
         <Reveal>
-          <div className="mt-12 rounded-3xl border border-neutral-900/[0.08] bg-white p-6 shadow-[0_4px_16px_rgb(4_28_49/0.04)] md:p-8">
+          <div className="section-body rounded-3xl border border-neutral-900/[0.08] bg-white p-6 shadow-[0_4px_16px_rgb(4_28_49/0.04)] md:p-8">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {COUNTRIES.length > 2 && (
                 <Select

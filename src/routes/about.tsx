@@ -103,7 +103,7 @@ function AboutPage() {
                   src="/media/pages/library.webp"
                   srcSm="/media/pages/library-sm.webp"
                   alt="Students studying together in a university library"
-                  className="h-[56vh] min-h-[360px] md:h-[78vh]"
+                  className="image-band"
                 />
               </>
             ),

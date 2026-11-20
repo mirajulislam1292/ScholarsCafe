@@ -88,7 +88,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
     }
   }
   return (
-    <section id="contact" className="bg-white py-[clamp(56px,8vw,112px)]">
+    <section id="contact" className="bg-white section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         {showHeader && (
           <Reveal className="max-w-2xl md:mx-auto md:text-center">
@@ -108,7 +108,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
         )}
 
         <div
-          className={`${showHeader ? "mt-16" : ""} grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16`}
+          className={`${showHeader ? "section-body" : ""} grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16`}
         >
           {/* Left: contact info */}
           <Reveal className="space-y-4 sm:space-y-6">
