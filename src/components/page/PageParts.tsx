@@ -98,11 +98,12 @@ export function PageHero({
   );
 }
 
-type Tone = "light" | "muted" | "dark";
+type Tone = "light" | "muted" | "tint" | "dark";
 const toneClass: Record<Tone, string> = {
   light: "bg-white text-neutral-700",
   muted: "bg-neutral-50 text-neutral-700",
-  dark: "relative isolate bg-blue-950 text-ice-200/85",
+  tint: "tone-tint text-neutral-700",
+  dark: "relative isolate bg-blue-950 navy-glow text-ice-200/85",
 };
 
 /** Section with consistent spacing (120–200px desktop). Optional sticky side heading. */
@@ -174,9 +175,9 @@ export function CtaBand({
         className="absolute inset-0 -z-10 bg-[radial-gradient(70%_90%_at_10%_100%,rgb(43_109_166/0.4)_0%,transparent_60%)]"
       />
       <div aria-hidden className={GRAIN} />
-      <div className="mx-auto flex max-w-[1200px] flex-col items-start justify-between gap-10 px-6 md:flex-row md:items-end md:px-12">
+      <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-8 px-6 text-center md:gap-10 md:px-12">
         <Reveal>
-          <h2 className="type-h1 max-w-[14ch]">{title}</h2>
+          <h2 className="type-h1 mx-auto max-w-[18ch] text-balance">{title}</h2>
         </Reveal>
         <Reveal>
           <a

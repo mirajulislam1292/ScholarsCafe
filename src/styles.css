@@ -984,6 +984,47 @@ footer .footer-brand {
 main
   :is(.bg-white, .bg-neutral-50, .bg-ice-50).section-y
   + :is(.bg-white, .bg-neutral-50, .bg-ice-50).section-y,
-main .bg-blue-950:is(.section-y, .page-hero) + .bg-blue-950.section-y {
+main .bg-blue-950.page-hero + .bg-blue-950.section-y {
   padding-top: 0;
+}
+/* Two dark bands in a row keep their own padding and get a hairline between them. */
+main .bg-blue-950.section-y + .bg-blue-950.section-y {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+/* ── Section tones ───────────────────────────────────────────────
+   Pages alternate: light (bg-white) → tinted (tone-tint) → navy
+   (bg-blue-950 + navy-glow, the same light as the closing CTA band). */
+@utility tone-tint {
+  background: linear-gradient(180deg, var(--color-ice-100) 0%, #f2f8fc 100%);
+}
+@utility navy-glow {
+  background-image:
+    radial-gradient(70% 90% at 10% 100%, rgb(43 109 166 / 0.38) 0%, transparent 60%),
+    radial-gradient(55% 70% at 100% 0%, rgb(43 109 166 / 0.16) 0%, transparent 60%);
+}
+
+/* ── Soft cards ──────────────────────────────────────────────────
+   One card surface for the light sections: rounded, hairline border,
+   soft two-layer shadow; card-hover lifts it a little on hover. */
+@utility card-soft {
+  border-radius: 1.5rem;
+  border: 1px solid rgb(4 28 49 / 0.07);
+  background-color: #fff;
+  box-shadow:
+    0 1px 2px rgb(4 28 49 / 0.04),
+    0 14px 32px -16px rgb(4 28 49 / 0.14);
+}
+@utility card-hover {
+  transition:
+    transform 0.6s var(--ease-premium),
+    box-shadow 0.6s var(--ease-premium),
+    border-color 0.6s var(--ease-premium);
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgb(43 109 166 / 0.28);
+    box-shadow:
+      0 2px 4px rgb(4 28 49 / 0.05),
+      0 28px 56px -20px rgb(4 28 49 / 0.24);
+  }
 }
