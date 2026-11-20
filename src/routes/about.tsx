@@ -113,7 +113,7 @@ function AboutPage() {
                   <ol className="border-t border-white/10">
                     {VALUES.map((v, i) => (
                       <Reveal key={v.title} delay={i * 0.05}>
-                        <li className="group grid grid-cols-[3.5rem_1fr] gap-6 border-b border-white/10 py-9 transition-colors duration-500 ease-premium md:grid-cols-[5rem_1fr]">
+                        <li className="group grid grid-cols-[3.5rem_1fr] gap-6 border-b border-white/10 py-6 transition-colors md:py-8 duration-500 ease-premium md:grid-cols-[5rem_1fr]">
                           <span className="font-heading text-[1.75rem] font-light leading-none text-ice-500 transition-colors duration-500 group-hover:text-ice-200">
                             {String(i + 1).padStart(2, "0")}
                           </span>
