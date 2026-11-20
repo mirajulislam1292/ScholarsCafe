@@ -69,6 +69,8 @@ export function outboxMessage(row, transport, line = tagline.value) {
           transport.adminOrigin,
         ),
     tagline: line,
+    // Mail typed in the dashboard (compose, replies) may use **bold** and [label](https://…) links.
+    format: fromContact,
   });
   return {
     from: `Scholars Cafe <${from}>`,
@@ -95,8 +97,11 @@ export function outboxMessage(row, transport, line = tagline.value) {
 }
 
 // At-least-once delivery: a crash after sending can cause a duplicate, never lost records.
+// Mail sent as contact@ is then copied to that mailbox's Sent folder (transport.saveSent, IMAP APPEND),
+// after the database transaction, so a slow mail server never holds the queue lock.
 export async function deliverMail(store, transport) {
   if (!transport) return;
+  let sentFromContact = null;
   await store.transaction(async (c) => {
     const rows = await store.query(
       "SELECT * FROM mail_outbox WHERE sent_at IS NULL AND attempts<5 AND next_attempt_at<=UTC_TIMESTAMP() ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED",
@@ -109,7 +114,9 @@ export async function deliverMail(store, transport) {
     try {
       const via = row.from_contact ? transport.contact : transport;
       if (!via) throw new Error("contact mailbox not configured");
-      await via.sendMail(outboxMessage(row, transport, line));
+      const message = outboxMessage(row, transport, line);
+      await via.sendMail(message);
+      if (row.from_contact) sentFromContact = message;
       await store.query(
         "UPDATE mail_outbox SET sent_at=UTC_TIMESTAMP(),attempts=attempts+1 WHERE id=?",
         [row.id],
@@ -125,6 +132,8 @@ export async function deliverMail(store, transport) {
       console.error("Mailbox delivery failed; message remains in dashboard and delivery queue.");
     }
   });
+  if (sentFromContact && transport.saveSent)
+    await transport.saveSent(sentFromContact).catch(() => {});
 }
 
 /** Sign-in code + magic link (sent straight to the account's own address, not via the outbox). */

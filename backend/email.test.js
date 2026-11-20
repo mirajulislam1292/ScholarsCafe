@@ -1,13 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { renderEmail, textToHtml, actionFor, SOCIAL, DEFAULT_TAGLINE } from "./email-template.js";
+import {
+  renderEmail,
+  textToHtml,
+  actionFor,
+  SOCIAL,
+  DEFAULT_TAGLINE,
+  BRAND_NAME,
+  CONTACT,
+} from "./email-template.js";
 import { createMailer, deliverMail, outboxMessage, loginEmail, emailTagline } from "./mail.js";
 
 test("Email template: branded card, escaped body, links, signature, plain-text alternative", () => {
   const body = "Hi <b>Rafi</b> & team\n\nOpen: https://admin.scholarscafe.com/?a=1&b=2.\nThanks";
   const { html, text } = renderEmail({ subject: "Hello", text: body });
   // Wording is kept exactly; the plain part is the body, then the signature and a short footer.
-  assert.ok(text.startsWith(body + "\n\n—\nScholars Cafe\n" + DEFAULT_TAGLINE));
+  assert.ok(text.startsWith(body + "\n\n—\n" + BRAND_NAME + "\n" + DEFAULT_TAGLINE));
   assert.match(text, /contact@scholarscafe\.com/);
   for (const [, url] of SOCIAL) assert.ok(text.includes(url) && html.includes(url));
   // Never trusted as markup.
@@ -28,7 +36,7 @@ test("Email template: branded card, escaped body, links, signature, plain-text a
     /<img class="sc-dark-img" src="https:\/\/scholarscafe\.com\/brand\/mark-ice\.png"/,
   );
   assert.match(html, /\.sc-link \{ color:#8cc2f0 !important; \}/);
-  assert.match(html, /class="sc-sig"/);
+  assert.match(html, /class="sc-foot"/);
   // Gmail/Outlook/mobile basics: tables, inline styles, 600px, MSO wrapper; dark-mode styles for Apple Mail.
   assert.match(html, /max-width:600px/);
   assert.match(html, /<!--\[if mso\]>/);
@@ -164,8 +172,8 @@ test("Outbox mail: From name, Reply-To contact@ on no-reply mail, threading, lis
   assert.equal(reply.replyTo, undefined);
   assert.equal(reply.inReplyTo, "<m1@x.co>");
   assert.equal(reply.references, "<m0@x.co> <m1@x.co>");
-  // Dashboard replies carry the same signature card, but no button.
-  assert.match(reply.html, /class="sc-sig"/);
+  // Dashboard replies carry the same footer, but no button.
+  assert.match(reply.html, /class="sc-foot"/);
   assert.doesNotMatch(reply.html, /sc-btn/);
   const eca = outboxMessage(
     { id: "e", subject: "ECA", body: "b", to_email: "s@x.co", unsubscribe_url: "https://u/x" },
@@ -281,6 +289,7 @@ test("Preview emails: owners/admins only, every template renders, nothing is sen
     "inquiry-team",
     "eca-alert",
     "contact-reply",
+    "contact-compose",
     "sign-in-code",
   ])
     assert.ok(ids.includes(id), id);
@@ -292,7 +301,8 @@ test("Preview emails: owners/admins only, every template renders, nothing is sen
       .get("/api/email-previews/" + id)
       .set("Cookie", cookie)
       .expect(200);
-    assert.match(page.text, /class="sc-sig"/, id);
+    assert.match(page.text, /class="sc-foot"/, id);
+    assert.equal(page.text.split('href="https://scholarscafe.com"').length - 1, 1, id);
     assert.doesNotMatch(page.headers["content-security-policy"], /script-src/);
   }
   const confirmed = await request(app)
@@ -302,4 +312,60 @@ test("Preview emails: owners/admins only, every template renders, nothing is sen
   const eca = await request(app).get("/api/email-previews/eca-alert").set("Cookie", cookie);
   assert.match(eca.text, />Unsubscribe<\/a>/);
   await request(app).get("/api/email-previews/nope").set("Cookie", cookie).expect(404);
+});
+
+test("Footer: divider, logo, name, tagline, socials + contact, then the website once", () => {
+  const { html, text } = renderEmail({ subject: "Hi", text: "Hello" });
+  const at = (needle) => {
+    const i = html.indexOf(needle);
+    assert.ok(i > 0, needle);
+    return i;
+  };
+  const order = [
+    at('class="sc-line"'),
+    at('class="sc-light-img" src="https://scholarscafe.com/brand/mark-blue.png"'),
+    at("Scholars&#39; Cafe</div>"),
+    at(DEFAULT_TAGLINE + "</div>"),
+    at(">Facebook</a>"),
+    at(">Instagram</a>"),
+    at(">LinkedIn</a>"),
+    at(`href="mailto:${CONTACT}"`),
+    at('href="https://scholarscafe.com"'),
+  ];
+  assert.deepEqual(
+    [...order].sort((a, b) => a - b),
+    order,
+  );
+  assert.equal(DEFAULT_TAGLINE, "Mentor-led guidance for studying abroad from Bangladesh");
+  // Heading font with web-safe fallbacks; brand colours.
+  assert.match(html, /font-family:'Funnel Display','Segoe UI',Helvetica,Arial,sans-serif/);
+  assert.match(html, /bgcolor="#e8f3f9"/);
+  // Every image is an absolute https PNG (no SVG/webp: many mail apps don't show them).
+  const imgs = [...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(imgs.length >= 2);
+  for (const src of imgs) assert.match(src, /^https:\/\/scholarscafe\.com\/brand\/[\w-]+\.png$/);
+  // The website appears exactly once, in HTML (link and visible text) and in the plain text.
+  assert.equal(html.split('href="https://scholarscafe.com"').length - 1, 1);
+  assert.equal(html.split(">scholarscafe.com</a>").length - 1, 1);
+  assert.equal(text.match(/(^|[^@/.])scholarscafe\.com/gm).length, 1);
+  assert.ok(text.trimEnd().endsWith("scholarscafe.com"));
+  for (const [n, u] of SOCIAL) assert.ok(text.includes(`${n}: ${u}`));
+  assert.ok(text.includes(`Email: ${CONTACT}`));
+});
+
+test("Formatting (Compose/replies only): bold and https links, everything else escaped", () => {
+  const src =
+    'Hi **Rafi** <img src=x onerror=alert(1)>\n\nRead [the guide](https://scholarscafe.com/resources?a=1&b=2) and [bad](javascript:alert(1)) **[x](https://e.co/"onmouseover=1)**';
+  const html = textToHtml(src, { format: true });
+  assert.match(html, /Hi <strong>Rafi<\/strong> &lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.match(
+    html,
+    /<a href="https:\/\/scholarscafe\.com\/resources\?a=1&amp;b=2"[^>]*>the guide<\/a>/,
+  );
+  assert.doesNotMatch(html, /href="javascript/);
+  assert.doesNotMatch(html, /<img|onmouseover="|" onmouseover/);
+  // Automatic mails keep their text exactly (no formatting).
+  assert.match(textToHtml("a **b**"), /a \*\*b\*\*/);
+  const { text } = renderEmail({ text: "**Hi** [site](https://x.co/a)", format: true });
+  assert.ok(text.startsWith("Hi site (https://x.co/a)"));
 });

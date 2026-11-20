@@ -289,9 +289,7 @@ export function receiptText(title, name, summary) {
     summary,
     "",
     "If anything needs to change, reply to this email or write to contact@scholarscafe.com.",
-    "",
-    "Scholars Cafe",
-    "https://scholarscafe.com",
+    // The shared email template adds the signature, socials and the website link (once).
     "",
     "You are getting this automatic email because this address was entered on a form at scholarscafe.com.",
   ].join("\n");

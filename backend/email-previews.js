@@ -1,5 +1,5 @@
-// "Preview emails" (owners and admins, team admin only): every automatic email and a contact@ reply,
-// rendered with the real text builders and the shared template, using made-up sample data. Read only:
+// "Preview emails" (owners and admins, team admin only): every automatic email, a contact@ reply and a
+// Compose mail, rendered with the real text builders and the shared template, using made-up sample data. Read only:
 // nothing is queued or sent. Each preview is its own tiny page with a strict CSP, shown in a sandbox.
 import { canPublish } from "./security.js";
 import { outboxMessage, loginEmail, emailTagline } from "./mail.js";
@@ -90,6 +90,12 @@ export function previewMails(config, transport) {
       from_contact: 1,
       in_reply_to: "<q1@example.com>",
     }),
+    row("contact-compose", "New email from contact@ (Compose, with formatting)", {
+      subject: "Your shortlist for Fall 2027",
+      body: "Hi Rafi,\n\nHere is your **updated university shortlist**. Before our next call, please read [our free guides](https://scholarscafe.com/resources) and send us your test dates.\n\nBest wishes,\nScholars Cafe team",
+      to_email: booking.email,
+      from_contact: 1,
+    }),
   ]
     .map((p) => ({ ...p, message: outboxMessage(p.row, transport, p.tagline) }))
     .concat([
@@ -141,7 +147,7 @@ export function installEmailPreviewRoutes(app, { store, fail, config }) {
     res
       .set({
         "Content-Security-Policy":
-          "default-src 'none'; img-src https: data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'; sandbox allow-popups allow-popups-to-escape-sandbox",
+          "default-src 'none'; img-src https: data:; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'; frame-ancestors 'self'; sandbox allow-popups allow-popups-to-escape-sandbox",
         "X-Frame-Options": "SAMEORIGIN",
         "Content-Type": "text/html; charset=utf-8",
       })
