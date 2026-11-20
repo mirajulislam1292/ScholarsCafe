@@ -28,7 +28,7 @@ export function FAQ() {
         </Reveal>
 
         <Reveal className="section-body max-w-3xl">
-          <div className="divide-y divide-border rounded-2xl border border-neutral-900/[0.08] bg-white">
+          <div className="card-soft divide-y divide-border overflow-hidden">
             {FAQS.map((f, i) => {
               const isOpen = open === i;
               return (

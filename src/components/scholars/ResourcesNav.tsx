@@ -47,7 +47,7 @@ export function ResourcesHubCards() {
             <Reveal key={p.href} delay={i * 0.05}>
               <a
                 href={p.href}
-                className="group flex h-full flex-col justify-between gap-6 rounded-3xl border border-neutral-900/[0.08] bg-ice-50 p-7 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
+                className="card-soft card-hover group flex h-full flex-col justify-between gap-6 p-7"
               >
                 <div>
                   <h3 className="type-h3 text-neutral-900 group-hover:text-blue-800">
@@ -57,10 +57,9 @@ export function ResourcesHubCards() {
                     {cmsLabel("ResourcesHub." + p.id + ".desc", p.desc)}
                   </p>
                 </div>
-                <ArrowUpRight
-                  aria-hidden
-                  className="h-5 w-5 text-blue-700 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                />
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-ice-100 text-blue-700 transition-colors duration-500 ease-premium group-hover:bg-blue-700 group-hover:text-white">
+                  <ArrowUpRight aria-hidden className="h-4 w-4" />
+                </span>
               </a>
             </Reveal>
           ))}
@@ -87,17 +86,26 @@ export function ResourcesSubPage({
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <section className="bg-blue-950 pb-10 pt-32 text-white md:pt-36">
+        <section className="relative isolate overflow-hidden bg-blue-950 navy-glow pb-12 pt-32 text-white md:pt-36">
+          <div
+            aria-hidden
+            className="absolute -right-24 -top-24 -z-10 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgb(110_164_215/0.22)_0%,transparent_65%)] md:-right-10 md:h-[560px] md:w-[560px]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-ice-300/25 to-transparent"
+          />
           <div className="mx-auto max-w-[1200px] px-6 md:px-12">
             <a href="/resources" className="type-caption text-ice-300 hover:text-white">
               ← <CmsText id="ResourcesHub.back">Resources</CmsText>
             </a>
             <h1 className="type-h1 mt-4 max-w-[18ch]">{title}</h1>
             <p className="type-lead mt-5 max-w-[46ch] text-ice-200/85">{lead}</p>
-            <nav
-              aria-label="Resources"
-              className="-mx-6 mt-10 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0 [&::-webkit-scrollbar]:hidden"
-            >
+            <nav aria-label="Resources" className="mt-8 flex flex-wrap gap-2">
               {RESOURCE_PAGES.map((p) => {
                 const active = p.href === path;
                 return (
@@ -107,8 +115,8 @@ export function ResourcesSubPage({
                     aria-current={active ? "page" : undefined}
                     className={`type-nav inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-full px-4 transition-colors duration-500 ease-premium ${
                       active
-                        ? "bg-ice-100 text-blue-950"
-                        : "text-white/80 ring-1 ring-white/20 hover:bg-white/10 hover:text-white"
+                        ? "bg-ice-100 text-blue-950 shadow-[0_8px_24px_rgb(0_0_0/0.25)]"
+                        : "bg-white/[0.04] text-white/85 ring-1 ring-white/20 hover:bg-white/10 hover:text-white hover:ring-white/35"
                     }`}
                   >
                     {cmsLabel("ResourcesHub." + p.id, p.label)}
@@ -128,7 +136,7 @@ export function ResourcesSubPage({
 /** Honest empty state for a sub-page with nothing published yet. */
 export function EmptyNote({ children }: { children: ReactNode }) {
   return (
-    <p className="type-body rounded-3xl border border-dashed border-neutral-900/15 p-8 text-neutral-600">
+    <p className="type-body rounded-3xl border border-dashed border-blue-600/25 bg-ice-50 p-8 text-neutral-600">
       {children}
     </p>
   );

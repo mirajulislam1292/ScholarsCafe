@@ -34,10 +34,7 @@ export function BlogPosts({
         {heading && <h2 className="type-h2 text-neutral-900">{heading}</h2>}
         <div className={`${heading ? "section-body " : ""}grid gap-6 md:grid-cols-2`}>
           {posts.map((post) => (
-            <article
-              key={post.id}
-              className="rounded-2xl border border-neutral-900/[0.08] bg-white p-7"
-            >
+            <article key={post.id} className="card-soft card-hover p-7">
               {post.image && (
                 <img
                   src={post.image}

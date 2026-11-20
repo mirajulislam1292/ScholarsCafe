@@ -80,7 +80,7 @@ function ResourcesPage() {
                         <Reveal key={r.title} delay={i * 0.06}>
                           <a
                             href="#newsletter"
-                            className="group flex h-full flex-col justify-between gap-8 rounded-3xl border border-white/10 bg-white/[0.03] p-7 md:p-8 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] md:p-12"
+                            className="group flex h-full flex-col justify-between gap-8 rounded-3xl border border-white/10 bg-white/[0.04] p-7 shadow-[0_24px_48px_-24px_rgb(0_0_0/0.5)] md:p-8 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] md:p-12"
                           >
                             <div>
                               <p className="type-caption text-ice-400">{clean(r.tag)}</p>
@@ -107,11 +107,7 @@ function ResourcesPage() {
             guides: (
               <>
                 <Block sticky title="All guides">
-                  <div
-                    role="tablist"
-                    aria-label="Guide topics"
-                    className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden"
-                  >
+                  <div role="tablist" aria-label="Guide topics" className="flex flex-wrap gap-2">
                     {["All", ...CATEGORIES.map((c) => c.id)].map((c) => {
                       const label =
                         c === "All" ? t("All") : (CATEGORIES.find((x) => x.id === c)?.label ?? c);
