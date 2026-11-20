@@ -47,7 +47,7 @@ function FormsList() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/85 via-blue-950/45 to-blue-950/75" />
       </div>
-      <main className="relative mx-auto -mt-[clamp(120px,16vw,210px)] max-w-[720px] px-4 pb-24 sm:px-6">
+      <main className="relative mx-auto -mt-[clamp(120px,16vw,210px)] max-w-[720px] px-4 pb-(--space-section) sm:px-6">
         <div className="rounded-3xl border border-neutral-900/[0.06] bg-white p-7 md:p-12">
           <p className="type-caption font-semibold uppercase tracking-[0.14em] text-blue-700">
             Scholars Cafe

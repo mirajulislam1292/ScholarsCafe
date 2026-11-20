@@ -8,7 +8,7 @@ export function Destinations() {
   const usa = useCmsValue("site.usa", SITE.usa);
 
   return (
-    <section id="destinations" className="bg-white py-[clamp(56px,8vw,112px)]">
+    <section id="destinations" className="bg-white section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
@@ -27,7 +27,7 @@ export function Destinations() {
           </a>
         </Reveal>
 
-        <div className="-mx-6 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+        <div className="section-body -mx-6 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-2 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
           {usa.regions.map((r, i) => (
             <Reveal key={r.name} delay={i * 0.08} className="w-[82%] shrink-0 snap-start md:w-auto">
               <figure className="group relative aspect-[4/5] overflow-hidden rounded-3xl bg-blue-950">

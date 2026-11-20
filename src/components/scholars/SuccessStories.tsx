@@ -40,7 +40,7 @@ export function SuccessStories() {
   ];
 
   return (
-    <section id="success" className="bg-ice-50 py-[clamp(56px,8vw,112px)] ">
+    <section id="success" className="bg-ice-50 section-y ">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="hidden">
@@ -57,7 +57,7 @@ export function SuccessStories() {
           </p>
         </Reveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr_1fr] lg:items-stretch">
+        <div className="section-body grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr_1fr] lg:items-stretch">
           {visibleTestimonials.map(({ testimonial, position }) => {
             const isCenter = position === "center";
             const isSide = position !== "center";
@@ -110,7 +110,6 @@ export function SuccessStories() {
             );
           })}
         </div>
-
       </div>
     </section>
   );

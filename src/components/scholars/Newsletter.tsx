@@ -46,7 +46,7 @@ export function Newsletter() {
   }
 
   return (
-    <section id="newsletter" className="bg-blue-950 py-[clamp(56px,8vw,112px)]">
+    <section id="newsletter" className="bg-blue-950 section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="mx-auto max-w-2xl text-center text-white">
           <motion.div

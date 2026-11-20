@@ -15,7 +15,7 @@ export function ResourcesPreview() {
   ].slice(0, 3);
   if (!picks.length) return null;
   return (
-    <section className="bg-ice-50 py-[clamp(56px,8vw,112px)]">
+    <section className="bg-ice-50 section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <h2 className="type-h2 max-w-[18ch] text-neutral-900">
@@ -32,12 +32,12 @@ export function ResourcesPreview() {
             />
           </Link>
         </Reveal>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="section-body grid gap-6 md:grid-cols-3">
           {picks.map((r, i) => (
             <Reveal key={r.title} delay={i * 0.06}>
               <Link
                 to="/resources"
-                className="group flex h-full flex-col justify-between gap-10 rounded-3xl border border-neutral-900/[0.06] bg-white p-8 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
+                className="group flex h-full flex-col justify-between gap-6 rounded-3xl border border-neutral-900/[0.06] bg-white p-7 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
               >
                 <div>
                   <p className="type-caption text-blue-700">{clean(r.tag)}</p>

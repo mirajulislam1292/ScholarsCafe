@@ -58,7 +58,7 @@ function ServicesPage() {
                   <ol className="border-t border-neutral-900/[0.08]">
                     {SERVICES.map((s, i) => (
                       <Reveal key={s.title} delay={i * 0.04}>
-                        <li className="group grid grid-cols-[3rem_1fr] gap-5 border-b border-neutral-900/[0.08] py-8 md:grid-cols-[4.5rem_1fr] md:py-10">
+                        <li className="group grid grid-cols-[3rem_1fr] gap-5 border-b border-neutral-900/[0.08] py-6 md:grid-cols-[4.5rem_1fr] md:py-8">
                           <span className="font-heading text-[1.5rem] font-light leading-none text-neutral-400 transition-colors duration-500 ease-premium group-hover:text-blue-700">
                             {String(i + 1).padStart(2, "0")}
                           </span>
@@ -92,7 +92,7 @@ function ServicesPage() {
                   src="/media/pages/library.webp"
                   srcSm="/media/pages/library-sm.webp"
                   alt="Students working together in a university library"
-                  className="h-[56vh] min-h-[360px] md:h-[72vh]"
+                  className="image-band"
                 />
               </>
             ),

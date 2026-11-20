@@ -962,3 +962,28 @@ footer .footer-brand {
     font-weight: 600;
   }
 }
+
+/* ── Vertical rhythm ─────────────────────────────────────────────
+   One spacing scale for every public page. Sections use .section-y,
+   the content under a section heading uses .section-body, full-bleed
+   photos use .image-band. Two neighbouring sections of the same tone
+   share one gap instead of stacking two paddings. */
+:root {
+  --space-section: clamp(48px, 6vw, 88px);
+  --space-head: clamp(28px, 3.2vw, 44px);
+}
+@utility section-y {
+  padding-block: var(--space-section);
+}
+@utility section-body {
+  margin-top: var(--space-head);
+}
+@utility image-band {
+  height: clamp(260px, 50vh, 540px);
+}
+main
+  :is(.bg-white, .bg-neutral-50, .bg-ice-50).section-y
+  + :is(.bg-white, .bg-neutral-50, .bg-ice-50).section-y,
+main .bg-blue-950:is(.section-y, .page-hero) + .bg-blue-950.section-y {
+  padding-top: 0;
+}

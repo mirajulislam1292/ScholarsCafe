@@ -3,10 +3,7 @@ import { seo } from "@/lib/seo";
 import { Sections } from "@/components/page/Sections";
 import { ArrowUpRight, Check } from "lucide-react";
 import { CmsText, useCmsCollection, useCmsValue } from "@/lib/cms";
-import {
-  PROGRAMS as DEFAULT_PROGRAMS,
-  PROCESS as CMS_DEFAULT_PROCESS,
-} from "@/lib/scholars-data";
+import { PROGRAMS as DEFAULT_PROGRAMS, PROCESS as CMS_DEFAULT_PROCESS } from "@/lib/scholars-data";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { NameMarquee } from "@/components/scholars/NameMarquee";
@@ -73,7 +70,7 @@ function ProgramsPage() {
             ),
             process: (
               <>
-                <section className="relative isolate overflow-hidden bg-blue-950 py-[clamp(56px,8vw,112px)] text-white">
+                <section className="relative isolate overflow-hidden bg-blue-950 section-y text-white">
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay [background-image:var(--grain)]"
@@ -95,17 +92,17 @@ function ProgramsPage() {
                   </div>
                   <ol
                     aria-label="Our process"
-                    className="mx-auto mt-16 flex max-w-[1200px] snap-x snap-mandatory scroll-pl-6 gap-5 overflow-x-auto px-6 pb-4 md:scroll-pl-12 [scrollbar-width:thin] md:mt-20 md:px-12"
+                    className="section-body mx-auto flex max-w-[1200px] snap-x snap-mandatory scroll-pl-6 gap-5 overflow-x-auto px-6 pb-4 md:scroll-pl-12 [scrollbar-width:thin] md:px-12"
                   >
                     {PROCESS.map((step) => (
                       <li
                         key={step.n}
-                        className="group w-[78%] shrink-0 snap-start rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] sm:w-[46%] lg:w-[31%] md:p-10"
+                        className="group w-[78%] shrink-0 snap-start rounded-3xl border border-white/10 bg-white/[0.03] p-7 transition-[background-color,border-color,transform] duration-700 ease-premium hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06] sm:w-[46%] lg:w-[31%] md:p-8"
                       >
                         <span className="font-heading text-[3.5rem] font-light leading-none text-ice-500 transition-colors duration-700 group-hover:text-ice-200">
                           {String(step.n).padStart(2, "0")}
                         </span>
-                        <h3 className="type-h3 mt-14 text-white">{step.title}</h3>
+                        <h3 className="type-h3 mt-8 text-white">{step.title}</h3>
                         <p className="type-body mt-3 text-ice-300/80">{step.desc}</p>
                       </li>
                     ))}
@@ -119,7 +116,7 @@ function ProgramsPage() {
                   src="/media/pages/campus-early-fall.webp"
                   srcSm="/media/pages/campus-early-fall-sm.webp"
                   alt="A quiet college campus in early fall"
-                  className="h-[56vh] min-h-[360px] md:h-[80vh]"
+                  className="image-band"
                 />
               </>
             ),
@@ -145,7 +142,7 @@ function ProgramRow({ p }: { p: Program }) {
   const featured = Boolean(p.featured);
   return (
     <article
-      className={`group relative isolate grid gap-10 overflow-hidden rounded-3xl p-8 transition-shadow duration-700 ease-premium md:grid-cols-[5fr_7fr] md:gap-16 md:p-14 ${
+      className={`group relative isolate grid gap-8 overflow-hidden rounded-3xl p-7 transition-shadow duration-700 ease-premium md:grid-cols-[5fr_7fr] md:gap-12 md:p-12 ${
         featured
           ? "bg-blue-950 text-ice-200/85 hover:shadow-[0_40px_80px_rgb(4_28_49/0.25)]"
           : "border border-neutral-900/[0.08] bg-white hover:shadow-[0_40px_80px_rgb(4_28_49/0.1)]"
@@ -157,7 +154,7 @@ function ProgramRow({ p }: { p: Program }) {
           className="absolute inset-0 -z-10 bg-[radial-gradient(70%_90%_at_100%_0%,rgb(43_109_166/0.45)_0%,transparent_60%)]"
         />
       )}
-      <div className="flex flex-col justify-between gap-8">
+      <div className="flex flex-col justify-between gap-6">
         <div>
           <p className={`type-caption ${featured ? "text-ice-400" : "text-blue-700"}`}>{p.badge}</p>
           <h3 className={`type-h2 mt-4 ${featured ? "text-white" : "text-neutral-900"}`}>
@@ -185,7 +182,7 @@ function ProgramRow({ p }: { p: Program }) {
         <p className={`type-lead ${featured ? "text-ice-200/90" : "text-neutral-700"}`}>
           {p.description}
         </p>
-        <ul className="mt-8 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+        <ul className="mt-6 grid gap-x-8 gap-y-3 sm:grid-cols-2">
           {p.features.map((f) => (
             <li key={f} className="type-body flex items-start gap-3">
               <Check
