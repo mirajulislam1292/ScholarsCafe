@@ -49,3 +49,29 @@ test("Offline page and icons are static files", async () => {
       .expect(200)
       .expect("Content-Type", /png/);
 });
+
+test("Service worker: shows pushed notifications and opens the right screen", async () => {
+  const res = await request(createApp({}, base)).get("/sw.js").expect(200);
+  assert.match(res.text, /addEventListener\("push"/);
+  assert.match(res.text, /showNotification\(/);
+  assert.match(res.text, /addEventListener\("notificationclick"/);
+  assert.match(res.text, /"\?open=" \+ encodeURIComponent\(open\)/);
+  // Push handling never adds to the cache.
+  const push = res.text.slice(res.text.indexOf('addEventListener("push"'));
+  assert.doesNotMatch(push, /caches\./);
+});
+
+test("Push is iPhone-first: audible, tagged, renotifies, badges; app has a bundled sound", async () => {
+  const app = createApp({}, base);
+  const sw = (await request(app).get("/sw.js").expect(200)).text;
+  assert.doesNotMatch(sw, /silent:\s*true/);
+  assert.match(sw, /silent: false/);
+  assert.match(sw, /renotify: true/);
+  assert.match(sw, /tag,/);
+  assert.match(sw, /setAppBadge\(shown\.length\)/);
+  assert.match(sw, /postMessage\(\{ type: "push", open \}\)/);
+  const wav = await request(app).get("/sounds/notify.wav").buffer(true).expect(200);
+  assert.match(wav.headers["content-type"], /audio\/(wav|x-wav|wave)/);
+  assert.ok(wav.body.length > 1000 && wav.body.length < 64 * 1024, "small file");
+  assert.equal(wav.body.subarray(0, 4).toString(), "RIFF");
+});

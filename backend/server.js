@@ -4,6 +4,8 @@ import { createMailer, deliverMail } from "./mail.js";
 import { seedFormTemplates } from "./forms.js";
 import { queueBookingReminders } from "./booking.js";
 import { queueTaskReminders } from "./workspace.js";
+import { deliverPush, onPushQueued, vapidKeys } from "./push.js";
+import { pollInbox, imapConfigured } from "./inbox.js";
 
 for (const key of [
   "DB_HOST",
@@ -87,6 +89,30 @@ async function start() {
     }
   }, 60000);
   bookingTimer.unref();
+  // Web Push (admin app only): sent about a second after an event is queued, with a 15-second safety net.
+  if (process.env.PORTAL !== "student") {
+    await vapidKeys(store, process.env); // makes and stores the VAPID keys on first start
+    let pushing = false;
+    const push = async () => {
+      if (pushing) return;
+      pushing = true;
+      try {
+        await deliverPush(store, process.env);
+      } catch {
+        console.error("Push delivery check failed");
+      } finally {
+        pushing = false;
+      }
+    };
+    onPushQueued(push);
+    setInterval(push, 15000).unref();
+    // The contact@ mailbox (IMAP), checked every 90 seconds when CONTACT_IMAP_USER/PASSWORD are set.
+    if (imapConfigured(process.env)) {
+      const check = () => pollInbox(store, process.env).catch(() => {});
+      setTimeout(check, 5000).unref();
+      setInterval(check, 90000).unref();
+    }
+  }
   const server = createApp(store, portalConfig(process.env), undefined, mailer).listen(
     Number(process.env.PORT || 3000),
     "0.0.0.0",

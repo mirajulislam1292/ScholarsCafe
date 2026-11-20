@@ -30,6 +30,7 @@ const LABELS = {
   "Student courses": "Courses & videos",
   Media: "Media library",
   Account: "Profile",
+  Mail: "Mail (contact@)",
 };
 const ABOUT = {
   Overview: "Everything on the website, at a glance.",
@@ -64,6 +65,10 @@ const ABOUT = {
     "People who asked to hear about new ECAs. Write one email and it goes to all of them.",
   Access: "Who can sign in to this workspace, and with which role.",
   "Email delivery": "Outgoing notification emails and their status.",
+  Mail: "The contact@scholarscafe.com inbox: read, search and reply.",
+  "Preview emails":
+    "Every automatic email and a contact@ reply, with sample data. Nothing is sent.",
+  Notifications: "Get notified on your phone or computer, and install the app.",
   Activity: "Every change, who made it and when. Only the Super Admin sees this.",
   "Team chat": "One group chat for the whole team. Pin important messages.",
   Tasks: "Team to-dos with deadlines. People get an email when assigned and before the deadline.",
@@ -414,6 +419,18 @@ function render() {
     renderAudit().catch(report);
     return;
   }
+  if (section === "Mail") {
+    renderContactMail().catch(report);
+    return;
+  }
+  if (section === "Preview emails") {
+    renderEmailPreviews().catch(report);
+    return;
+  }
+  if (section === "Notifications") {
+    renderNotifications().catch(report);
+    return;
+  }
   if (WORKSPACE[section]) {
     WORKSPACE[section]().catch(report);
     return;
@@ -621,6 +638,7 @@ function navigate(next) {
   // Like an app: a new section opens at the top of the page.
   if (next !== section) window.scrollTo({ top: 0 });
   section = next;
+  clearSectionBadge(next);
   notice("");
   render();
 }
@@ -4836,6 +4854,557 @@ function startHeartbeat() {
   beat();
   setInterval(beat, 60000);
 }
+// ---------- Mail (contact@ inbox), notifications and "install the app" (backend: inbox.js, push.js) ----------
+const isIos =
+  /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" &&
+    navigator.maxTouchPoints > 1 &&
+    !/android/i.test(navigator.userAgent));
+const standalone = () =>
+  matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const pushSupported = () =>
+  "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const IOS_PUSH_NOTE =
+  "iPhone and iPad: notifications work only after you add this app to your Home Screen (Share → Add to Home Screen) and open it from there. Needs iOS 16.4 or later.";
+let installPrompt = null;
+addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  showInstallHint();
+});
+addEventListener("appinstalled", () => {
+  installPrompt = null;
+  $("install-hint")?.remove();
+});
+/** A small "Install the app" card: the browser's own prompt where supported, steps on iPhone. */
+function installCard(always = false) {
+  if (standalone()) return null;
+  if (!always) {
+    try {
+      if (localStorage.getItem("install-hint") === "dismissed") return null;
+    } catch {}
+  }
+  if (!installPrompt && !isIos) return null;
+  const card = node("aside", undefined, "card install-hint");
+  card.append(node("strong", "Install the app"));
+  if (installPrompt)
+    card.append(
+      node(
+        "p",
+        "Add Scholars Cafe Studio to this device: it opens like an app and can show notifications.",
+      ),
+      button(
+        "Install",
+        async () => {
+          const p = installPrompt;
+          installPrompt = null;
+          await p.prompt();
+          await p.userChoice.catch(() => {});
+          card.remove();
+        },
+        "primary",
+      ),
+    );
+  else
+    card.append(
+      node(
+        "p",
+        "On iPhone or iPad, open this page in Safari, tap Share, then “Add to Home Screen”.",
+      ),
+      node("p", IOS_PUSH_NOTE, "muted"),
+    );
+  if (!always)
+    card.append(
+      button("Not now", () => {
+        try {
+          localStorage.setItem("install-hint", "dismissed");
+        } catch {}
+        card.remove();
+      }),
+    );
+  return card;
+}
+function showInstallHint() {
+  if (!me || me.role === "student" || $("install-hint") || $("workspace").hidden) return;
+  const card = installCard();
+  if (!card) return;
+  card.id = "install-hint";
+  $("screen").before(card);
+}
+
+// In-app alert while the app is open: a short bundled sound and a badge on the menu item.
+// Browsers (iOS Safari above all) only allow sound after the person has tapped the page once, so the
+// first tap "unlocks" the audio element silently.
+const chime = new Audio("/sounds/notify.wav");
+chime.preload = "auto";
+let soundReady = false;
+addEventListener(
+  "pointerdown",
+  () => {
+    if (soundReady) return;
+    chime.muted = true;
+    chime
+      .play()
+      .then(() => {
+        chime.pause();
+        chime.currentTime = 0;
+        chime.muted = false;
+        soundReady = true;
+      })
+      .catch(() => {});
+  },
+  true,
+);
+const newBySection = {};
+function markSection(key) {
+  const count = newBySection[key] || 0;
+  const text = count > 9 ? "9+" : String(count);
+  const tab = $("tabbar")?.querySelector(`[data-section="${CSS.escape(key)}"]`);
+  const more = $("tabbar")?.querySelector('[data-section="More"]');
+  for (const b of [tab, $("nav")?.querySelector(`[data-section="${CSS.escape(key)}"]`)])
+    if (b && key !== "Mail") count ? (b.dataset.badge = text) : delete b.dataset.badge;
+  // Screens without their own tab show the dot on "More".
+  if (!tab && more) {
+    const hidden = Object.entries(newBySection)
+      .filter(([k]) => !$("tabbar").querySelector(`[data-section="${CSS.escape(k)}"]`))
+      .reduce((n, [, v]) => n + v, 0);
+    hidden ? (more.dataset.badge = hidden > 9 ? "9+" : String(hidden)) : delete more.dataset.badge;
+  }
+}
+function inAppAlert(open) {
+  if (document.visibilityState === "visible" && soundReady) {
+    chime.currentTime = 0;
+    chime.play().catch(() => {});
+  }
+  if (open && open !== section) {
+    newBySection[open] = (newBySection[open] || 0) + 1;
+    markSection(open);
+  }
+  if (open === "Mail")
+    api("inbox")
+      .then((r) => setMailBadge(r.unread))
+      .catch(() => {});
+}
+function clearSectionBadge(key) {
+  if (!newBySection[key]) return;
+  delete newBySection[key];
+  markSection(key);
+}
+// Opening the app clears the icon badge (Badging API; iOS 16.4+ Home Screen apps, Chrome, Edge).
+const clearAppBadge = () => navigator.clearAppBadge?.().catch(() => {});
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") clearAppBadge();
+});
+const b64url = (s) =>
+  Uint8Array.from(
+    atob(
+      s
+        .replace(/-/g, "+")
+        .replace(/_/g, "/")
+        .padEnd(Math.ceil(s.length / 4) * 4, "="),
+    ),
+    (c) => c.charCodeAt(0),
+  );
+function deviceName() {
+  const ua = navigator.userAgent;
+  const os = /android/i.test(ua)
+    ? "Android"
+    : isIos
+      ? "iPhone/iPad"
+      : /mac/i.test(ua)
+        ? "Mac"
+        : /win/i.test(ua)
+          ? "Windows"
+          : "computer";
+  const browser = /edg\//i.test(ua)
+    ? "Edge"
+    : /firefox|fxios/i.test(ua)
+      ? "Firefox"
+      : /chrome|crios/i.test(ua)
+        ? "Chrome"
+        : /safari/i.test(ua)
+          ? "Safari"
+          : "Browser";
+  return `${browser} on ${os}${standalone() ? " (app)" : ""}`;
+}
+async function currentSubscription() {
+  if (!pushSupported()) return null;
+  const reg = await navigator.serviceWorker.getRegistration();
+  return reg ? reg.pushManager.getSubscription() : null;
+}
+async function turnOnPush() {
+  if (!pushSupported())
+    throw Error(isIos && !standalone() ? IOS_PUSH_NOTE : "This browser can't show notifications.");
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted")
+    throw Error(
+      "Notifications are blocked. Allow them for this site in your browser or phone settings, then try again.",
+    );
+  const reg = await navigator.serviceWorker.ready;
+  const { publicKey } = await api("push");
+  const key = b64url(publicKey);
+  let sub = await reg.pushManager.getSubscription();
+  const same = (a) =>
+    a && new Uint8Array(a).every((v, i) => v === key[i]) && a.byteLength === key.length;
+  if (sub && !same(sub.options?.applicationServerKey)) {
+    await sub.unsubscribe();
+    sub = null;
+  }
+  sub ||= await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+  await api("push/subscribe", { ...sub.toJSON(), device: deviceName() });
+}
+async function turnOffPush() {
+  const sub = await currentSubscription();
+  if (!sub) return;
+  await api("push/unsubscribe", { endpoint: sub.endpoint }).catch(() => {});
+  await sub.unsubscribe();
+}
+/** Keeps the server's copy of this device's subscription current (it may have been cleaned up). */
+async function syncPush() {
+  if (!pushSupported() || Notification.permission !== "granted") return;
+  const sub = await currentSubscription();
+  if (sub) await api("push/subscribe", { ...sub.toJSON(), device: deviceName() });
+}
+
+async function renderNotifications() {
+  const screen = $("screen");
+  const data = await api("push");
+  const sub = await currentSubscription().catch(() => null);
+  const on = Boolean(sub) && Notification.permission === "granted";
+  const card = node("article", undefined, "card");
+  card.append(
+    node("h2", "This device"),
+    node(
+      "p",
+      on ? "Notifications are on for this device." : "Notifications are off for this device.",
+    ),
+  );
+  const actions = node("div", undefined, "actions");
+  if (on)
+    actions.append(
+      button("Send a test", async () => {
+        await api("push/test", {});
+        notice("Test sent. It should arrive in a few seconds.");
+      }),
+      button("Turn off", async () => {
+        await turnOffPush();
+        notice("Notifications are off for this device.");
+        render();
+      }),
+    );
+  else
+    actions.append(
+      button(
+        "Turn on notifications",
+        async () => {
+          await turnOnPush();
+          notice("Notifications are on for this device.");
+          render();
+        },
+        "primary",
+      ),
+    );
+  card.append(actions);
+  if (isIos || !pushSupported()) card.append(node("p", IOS_PUSH_NOTE, "muted"));
+  screen.append(card);
+
+  const what = node("article", undefined, "card");
+  const list = node("ul");
+  for (const t of [
+    "A new team chat message (pinned messages are marked 📌).",
+    "A task assigned to you, and reminders before its deadline.",
+    ...(canPublishRole(me.role) ? ["A new email to contact@scholarscafe.com."] : []),
+  ])
+    list.append(node("li", t));
+  what.append(
+    node("h2", "What you'll get"),
+    list,
+    node(
+      "p",
+      "Notifications show only a short preview. Tap one to open the right screen.",
+      "muted",
+    ),
+    node(
+      "p",
+      "Each one plays your device's notification sound. iPhone: if you hear nothing, open Settings → Notifications → SC Studio and turn on Sounds (and check the silent switch). While the app is open it plays a short sound too, after your first tap.",
+      "muted",
+    ),
+  );
+  screen.append(what);
+
+  const install = installCard(true);
+  if (install) screen.append(install);
+
+  screen.append(node("h2", "Your devices"));
+  for (const d of data.devices) {
+    const row = node("div", undefined, "card row");
+    row.append(
+      node("span", d.device || "Device"),
+      node("span", "Added " + new Date(d.created_at).toLocaleDateString(), "badge"),
+      button("Remove", async () => {
+        if (sub && (await sha16(sub.endpoint)) === d.key) await sub.unsubscribe().catch(() => {});
+        await api("push/unsubscribe", { id: d.id });
+        render();
+      }),
+    );
+    screen.append(row);
+  }
+  if (!data.devices.length) screen.append(node("p", "No devices yet.", "empty"));
+}
+async function sha16(text) {
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(h)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 16);
+}
+
+const previewState = { id: null, phone: false, text: false };
+async function renderEmailPreviews() {
+  const screen = $("screen");
+  const { items } = await api("email-previews");
+  const current = items.find((p) => p.id === previewState.id) || items[0];
+  previewState.id = current.id;
+  const bar = node("div", undefined, "mail-bar");
+  const [, pick] = select(
+    "Email",
+    items.map((p) => [p.id, p.label]),
+    current.id,
+  );
+  pick.setAttribute("aria-label", "Choose an email");
+  pick.onchange = () => {
+    previewState.id = pick.value;
+    render();
+  };
+  const toggle = (labelText, key) => {
+    const b = button(labelText, () => {
+      previewState[key] = !previewState[key];
+      render();
+    });
+    b.setAttribute("aria-pressed", String(previewState[key]));
+    return b;
+  };
+  bar.append(pick, toggle("Phone width", "phone"), toggle("Plain text", "text"));
+  screen.append(bar);
+  const meta = node("div", undefined, "card preview-meta");
+  for (const [k, v] of [
+    ["Subject", current.subject],
+    ["From", current.from],
+    ["To", current.to],
+    ["Reply-To", current.replyTo || "—"],
+  ]) {
+    const line = node("p");
+    line.append(node("b", k + ": "), document.createTextNode(v));
+    meta.append(line);
+  }
+  screen.append(meta);
+  if (previewState.text) {
+    screen.append(node("pre", current.text, "card preview-text"));
+    return;
+  }
+  const frame = node(
+    "iframe",
+    undefined,
+    "mail-body preview-frame" + (previewState.phone ? " phone" : ""),
+  );
+  frame.setAttribute("sandbox", "allow-popups allow-popups-to-escape-sandbox");
+  frame.setAttribute("referrerpolicy", "no-referrer");
+  frame.title = "Email preview";
+  frame.src = "/api/email-previews/" + encodeURIComponent(current.id);
+  screen.append(frame);
+}
+
+const mailState = { q: "", unread: false, open: null, images: false };
+const mailDate = (t) => {
+  const d = new Date(t);
+  return d.toDateString() === new Date().toDateString()
+    ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : d.toLocaleDateString([], { day: "numeric", month: "short" });
+};
+function setMailBadge(unread) {
+  for (const b of document.querySelectorAll('#nav [data-section="Mail"]'))
+    b.textContent = label("Mail") + (unread ? ` (${unread})` : "");
+}
+async function renderContactMail() {
+  const screen = $("screen");
+  const data = await api(
+    "inbox?" + new URLSearchParams({ q: mailState.q, filter: mailState.unread ? "unread" : "" }),
+  );
+  setMailBadge(data.unread);
+  if (!data.connected)
+    screen.append(
+      node(
+        "p",
+        "Not connected. The contact@ mailbox appears here once the owner adds CONTACT_IMAP_USER and CONTACT_IMAP_PASSWORD in hPanel (Node.js app → Environment variables) and restarts the app.",
+        "card notice-card",
+      ),
+    );
+  else if (data.status && !data.status.ok)
+    screen.append(node("p", "Last check failed: " + data.status.reason, "card notice-card"));
+
+  const bar = node("form", undefined, "mail-bar");
+  const search = node("input");
+  search.type = "search";
+  search.placeholder = "Search mail";
+  search.value = mailState.q;
+  search.maxLength = 100;
+  search.setAttribute("aria-label", "Search mail");
+  bar.onsubmit = (e) => {
+    e.preventDefault();
+    mailState.q = search.value.trim();
+    mailState.open = null;
+    render();
+  };
+  const unreadChip = button(`Unread${data.unread ? " " + data.unread : ""}`, () => {
+    mailState.unread = !mailState.unread;
+    render();
+  });
+  unreadChip.setAttribute("aria-pressed", String(mailState.unread));
+  bar.append(search, unreadChip);
+  if (data.connected)
+    bar.append(
+      button("Check now", async () => {
+        const r = await api("inbox/sync", {});
+        notice(r.added ? `${r.added} new message${r.added === 1 ? "" : "s"}.` : "No new mail.");
+        render();
+      }),
+    );
+  screen.append(bar);
+
+  const layout = node("div", undefined, "mail" + (mailState.open ? " reading" : ""));
+  const list = node("div", undefined, "mail-list");
+  list.setAttribute("role", "list");
+  for (const m of data.items) {
+    const b = node("button", undefined, "mail-item" + (m.read ? "" : " unread"));
+    b.type = "button";
+    b.setAttribute("role", "listitem");
+    if (m.id === mailState.open) b.setAttribute("aria-current", "true");
+    const top = node("span", undefined, "mail-top");
+    top.append(
+      node("span", m.from_name || m.from_email, "mail-from"),
+      node("time", mailDate(m.received_at)),
+    );
+    b.append(
+      top,
+      node(
+        "span",
+        (m.replied ? "↩ " : "") + (m.has_attachments ? "📎 " : "") + m.subject,
+        "mail-subject",
+      ),
+      node("span", m.snippet, "mail-snippet"),
+    );
+    b.onclick = () => {
+      mailState.open = m.id;
+      mailState.images = false;
+      render();
+    };
+    list.append(b);
+  }
+  if (!data.items.length)
+    list.append(
+      node("p", mailState.q ? "No messages match your search." : "No mail yet.", "empty"),
+    );
+  const reader = node("section", undefined, "mail-reader");
+  layout.append(list, reader);
+  screen.append(layout);
+  const opened = data.items.find((m) => m.id === mailState.open);
+  if (opened && !opened.read) {
+    // Opening a message marks it read on the server; reflect that at once.
+    setMailBadge(data.unread - 1);
+    list.querySelector('[aria-current="true"]')?.classList.remove("unread");
+  }
+  if (mailState.open)
+    await renderMailMessage(reader, data.can_reply).catch((e) => {
+      mailState.open = null;
+      report(e);
+    });
+  else reader.append(node("p", "Choose a message to read it.", "empty"));
+}
+async function renderMailMessage(reader, canReply) {
+  const m = await api("inbox/" + mailState.open);
+  const head = node("div", undefined, "mail-head");
+  head.append(
+    button(
+      "← Back",
+      () => {
+        mailState.open = null;
+        render();
+      },
+      "mail-back",
+    ),
+    node("h2", m.subject),
+    node("p", `${m.from_name ? m.from_name + " · " : ""}${m.from_email}`, "mail-meta"),
+    node("p", new Date(m.received_at).toLocaleString(), "mail-meta"),
+  );
+  const actions = node("div", undefined, "actions");
+  actions.append(
+    button("Mark unread", async () => {
+      await api(`inbox/${m.id}/read`, { read: false });
+      mailState.open = null;
+      render();
+    }),
+  );
+  if (m.has_remote_images && !mailState.images)
+    actions.append(
+      button("Show images", () => {
+        mailState.images = true;
+        frame.src = `/api/inbox/${m.id}/view?images=1`;
+        actions.lastChild.remove();
+      }),
+    );
+  head.append(actions);
+  if (m.has_remote_images && !mailState.images)
+    head.append(node("p", "Remote images are blocked to protect your privacy.", "muted"));
+  // No scripts and no same-origin access: the frame's own CSP (see /api/inbox/:id/view) also forbids them.
+  const frame = node("iframe", undefined, "mail-body");
+  frame.setAttribute("sandbox", "allow-popups allow-popups-to-escape-sandbox");
+  frame.setAttribute("referrerpolicy", "no-referrer");
+  frame.title = "Message";
+  frame.src = `/api/inbox/${m.id}/view${mailState.images ? "?images=1" : ""}`;
+  reader.append(head, frame);
+  if (m.attachments.length) {
+    const a = node("ul", undefined, "mail-attachments");
+    for (const f of m.attachments)
+      a.append(node("li", `📎 ${f.name} (${Math.max(1, Math.round(f.size / 1024))} KB)`));
+    reader.append(a, node("p", "Open webmail to download attachments.", "muted"));
+  }
+  for (const r of m.replies) {
+    const c = node("div", undefined, "card mail-reply-sent");
+    c.append(
+      node(
+        "p",
+        `Replied by ${(r.by || "team").split("@")[0]} · ${new Date(r.at).toLocaleString()}`,
+        "mail-meta",
+      ),
+      node("p", r.body, "pre"),
+    );
+    reader.append(c);
+  }
+  const form = node("form", undefined, "card mail-compose");
+  const [bl, body] = input(`Reply to ${m.from_email}`, "", "textarea", 20000);
+  body.rows = 6;
+  body.required = true;
+  const send = node("button", "Send reply", "primary");
+  send.type = "submit";
+  form.append(bl, node("p", "Sent from contact@scholarscafe.com.", "muted"), send);
+  if (!canReply) {
+    send.disabled = true;
+    form.append(node("p", "Replies need CONTACT_IMAP_PASSWORD in hPanel.", "muted"));
+  }
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    send.disabled = true;
+    try {
+      await api(`inbox/${m.id}/reply`, { body: body.value });
+      notice("Reply queued. It goes out from contact@ within a minute.");
+      render();
+    } catch (err) {
+      send.disabled = false;
+      report(err);
+    }
+  };
+  reader.append(form);
+}
 // ---------- Mobile: bottom tab bar (up to 5 tabs) and a "More" sheet with the full menu ----------
 const TAB_ICONS = {
   Home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
@@ -4969,6 +5538,7 @@ try {
         ? [
             ["", ["Leads", "Students", "Documents", "Messages"]],
             ["Team", ["Team chat", "Tasks", "Progress"]],
+            ["Settings", ["Notifications"]],
           ]
         : [
             // Daily screens first; everything else sits under "More" (see DAILY below).
@@ -4986,7 +5556,7 @@ try {
               me.visual ? ["Overview", "Visual editor", ...website] : ["Overview", ...website],
             ],
             ...(me.role === "editor"
-              ? []
+              ? [["Settings", ["Notifications"]]]
               : [
                   [
                     "Students",
@@ -5000,11 +5570,17 @@ try {
                       "Reviews",
                     ],
                   ],
-                  ["Inbox", ["Forms", "Private feedback", "Newsletter", "ECA alerts"]],
+                  ["Inbox", ["Mail", "Forms", "Private feedback", "Newsletter", "ECA alerts"]],
                   // The audit log is for the Super Admin only.
                   [
                     "Settings",
-                    ["Access", "Email delivery", ...(me.super_admin ? ["Activity"] : [])],
+                    [
+                      "Access",
+                      "Email delivery",
+                      "Preview emails",
+                      "Notifications",
+                      ...(me.super_admin ? ["Activity"] : []),
+                    ],
                   ],
                 ]),
           ];
@@ -5071,6 +5647,25 @@ try {
       report(e);
     }
   };
+  // A tapped notification opens its screen: ?open=… on a fresh start, a message when the app is open.
+  const canOpen = (key) =>
+    Boolean(key && $("nav").querySelector(`[data-section="${CSS.escape(key)}"]`));
+  const wanted = new URLSearchParams(location.search).get("open");
+  if (canOpen(wanted)) section = wanted;
+  if (wanted) history.replaceState(null, "", "/");
+  navigator.serviceWorker?.addEventListener("message", (e) => {
+    if (e.data?.type === "push") return inAppAlert(canOpen(e.data.open) ? e.data.open : "");
+    if (canOpen(e.data?.open)) navigate(e.data.open);
+  });
+  clearAppBadge();
+  if (me.role !== "student") {
+    syncPush().catch(() => {});
+    showInstallHint();
+  }
+  if (canPublishRole(me.role))
+    api("inbox")
+      .then((r) => setMailBadge(r.unread))
+      .catch(() => {});
   render();
   startHeartbeat();
 } catch (e) {

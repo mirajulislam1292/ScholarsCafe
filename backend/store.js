@@ -132,6 +132,10 @@ export class Store {
     // Bookings: the bookings and booking_settings tables are created by schema.sql (CREATE TABLE IF NOT
     // EXISTS) on every start. Columns added to them later go here.
     await add("bookings", "reminded_at", "reminded_at DATETIME NULL");
+    // Mail screen replies: sent as contact@ and threaded under the message they answer.
+    await add("mail_outbox", "from_contact", "from_contact BOOLEAN NOT NULL DEFAULT FALSE");
+    await add("mail_outbox", "in_reply_to", "in_reply_to VARCHAR(255) NULL");
+    await add("mail_outbox", "references_hdr", "references_hdr TEXT NULL");
     // Team workspace tables (staff_messages, staff_tasks, staff_task_assignees, staff_activity) are new
     // CREATE TABLE IF NOT EXISTS statements in schema.sql, which initialize() runs on every start.
   }
