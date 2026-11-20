@@ -29,18 +29,20 @@ export function LegalPage({
         }
       />
       <section className="bg-white section-y">
-        <article
-          className="prose mx-auto max-w-[720px] px-6 md:px-0
+        <div className="mx-auto max-w-[1200px] px-6 md:px-12">
+          <article
+            className="prose max-w-[720px] [&>h2:first-child]:mt-0
             prose-headings:font-heading prose-headings:font-light prose-headings:tracking-[-0.02em] prose-headings:text-neutral-900
-            prose-h2:mt-16 prose-h2:text-[clamp(1.5rem,2.4vw,2rem)]
+            prose-h2:mt-12 prose-h2:text-[clamp(1.5rem,2.4vw,2rem)]
             prose-h3:mt-10 prose-h3:text-[1.25rem] prose-h3:font-medium
             prose-p:font-heading prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:text-neutral-700
             prose-li:font-heading prose-li:text-neutral-700 prose-li:marker:text-blue-400
             prose-a:font-medium prose-a:text-blue-700 prose-a:underline-offset-4
             prose-strong:font-semibold prose-strong:text-neutral-900"
-        >
-          {children}
-        </article>
+          >
+            {children}
+          </article>
+        </div>
       </section>
       <CtaBand title="Questions about your data? Just ask." action="Contact us" href="/contact" />
     </main>

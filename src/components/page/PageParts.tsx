@@ -65,7 +65,9 @@ export function PageHero({
   imageAlt?: string;
 }) {
   return (
-    <section className="relative isolate page-hero flex min-h-[clamp(420px,64svh,620px)] items-end overflow-hidden bg-blue-950 text-white">
+    <section
+      className={`relative isolate page-hero flex ${image ? "min-h-[clamp(420px,64svh,620px)]" : ""} items-end overflow-hidden bg-blue-950 text-white`}
+    >
       {image && (
         <ParallaxImage
           src={image}
