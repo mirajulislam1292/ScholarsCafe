@@ -75,3 +75,17 @@ test("Push is iPhone-first: audible, tagged, renotifies, badges; app has a bundl
   assert.ok(wav.body.length > 1000 && wav.body.length < 64 * 1024, "small file");
   assert.equal(wav.body.subarray(0, 4).toString(), "RIFF");
 });
+
+test("Install hint: a slim in-flow banner (never the sidebar's <aside>), phones only, dismissible", async () => {
+  const { readFileSync } = await import("node:fs");
+  const js = readFileSync(new URL("./public/app.js", import.meta.url), "utf8");
+  const css = readFileSync(new URL("./public/style.css", import.meta.url), "utf8");
+  // The global `aside` rule is the fixed 240px sidebar; the hint once inherited it and covered the chat.
+  assert.doesNotMatch(js, /node\("aside"[^)]*install/);
+  const hint = js.slice(js.indexOf("function showInstallHint"), js.indexOf("// In-app alert"));
+  assert.match(hint, /phoneLike\(\)/, "not shown on desktop");
+  assert.match(hint, /localStorage\.setItem\("install-hint", "dismissed"\)/);
+  assert.match(hint, /\$\("notice"\)\.before\(bar\)/, "part of the page flow");
+  const rule = /\.install-hint \{([^}]*)\}/.exec(css)[1];
+  assert.doesNotMatch(rule, /position:\s*(fixed|absolute)/);
+});
