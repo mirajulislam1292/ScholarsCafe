@@ -1,7 +1,8 @@
 // One shared, branded look for every email the app sends: replies from contact@ and the automatic mails
 // from no-reply@ (bookings, sign-in codes, tasks, form receipts, ECA alerts, team notices). The wording
 // stays exactly what each feature writes as plain text; this wraps it in a card with the logo, one clear
-// button for the main action, a signature card and a short footer, and keeps the plain text alternative.
+// button for the main action and a branded footer (logo, name, tagline, socials, contact; the website link
+// once at the very bottom), and keeps the plain text alternative.
 //
 // Built for Gmail (web/iOS/Android), Apple Mail and Outlook (Word renderer) and phones: tables, inline
 // styles, bgcolor attributes, a VML button for Outlook, 600px max width. Dark mode: the header and button
@@ -18,16 +19,22 @@ export const SOCIAL = [
   ["Instagram", "https://www.instagram.com/scholars_cafe_/"],
   ["LinkedIn", "https://www.linkedin.com/company/scholars-cafe09/"],
 ];
-// The /links page tagline (CMS key Links.tagline); this default is the website's own text.
-export const DEFAULT_TAGLINE = "Mentor-led guidance for studying abroad, from Bangladesh.";
+// The footer tagline. The CMS key Links.tagline (the /links page) overrides it when it has been edited.
+export const DEFAULT_TAGLINE = "Mentor-led guidance for studying abroad from Bangladesh";
+export const BRAND_NAME = "Scholars' Cafe";
 
-const NAVY = "#041c31";
-const BLUE = "#185689";
+// Brand colours from the website (src/styles.css).
+const NAVY = "#041c31"; // blue-950
+const BLUE = "#0b426d"; // blue-800: buttons
+const LINK = "#2b6da6"; // blue-600: links
+const ICE = "#e8f3f9"; // ice-100: footer panel
 const INK = "#1f2a37";
 const MUTED = "#5b6876";
 const LINE = "#e3e8ee";
 const PAGE = "#f1f5f8";
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+// The website's heading font; mail apps without it fall back to web-safe fonts.
+const HEADING = "'Funnel Display','Segoe UI',Helvetica,Arial,sans-serif";
 
 export const escapeHtml = (s) =>
   String(s ?? "").replace(
@@ -40,19 +47,40 @@ const URL_RE = /https?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)\]]/g;
 function linkify(escaped) {
   return escaped.replace(URL_RE, (url) => {
     const href = url.replace(/&amp;/g, "&");
-    return `<a href="${escapeHtml(href)}" class="sc-link" style="color:${BLUE};text-decoration:underline;word-break:break-all">${url}</a>`;
+    return `<a href="${escapeHtml(href)}" class="sc-link" style="color:${LINK};text-decoration:underline;word-break:break-all">${url}</a>`;
   });
 }
 
+// Simple formatting for mail typed in the dashboard (compose and replies): **bold** and [label](https://…).
+const MD_LINK = /\[([^\]\n]{1,200})\]\((https:\/\/[^\s()<>"']{1,2000})\)/g;
+const BOLD = /\*\*([^*\n]{1,500}?)\*\*/g;
+function rich(escaped) {
+  const links = [];
+  const held = escaped.replace(MD_LINK, (_m, label, url) => {
+    links.push(
+      `<a href="${escapeHtml(url.replace(/&amp;/g, "&"))}" class="sc-link" style="color:${LINK};text-decoration:underline">${label}</a>`,
+    );
+    return `\u0000${links.length - 1}\u0000`;
+  });
+  return linkify(held)
+    .replace(BOLD, "<strong>$1</strong>")
+    .replace(/\u0000(\d+)\u0000/g, (_m, i) => links[Number(i)]);
+}
+/** The plain-text version of formatted text: "**x**" → "x", "[label](url)" → "label (url)". */
+export const plainFormatted = (text) =>
+  String(text ?? "")
+    .replace(MD_LINK, "$1 ($2)")
+    .replace(BOLD, "$1");
+
 /** Plain text → HTML paragraphs (blank line = new paragraph, single line break = <br>). */
-export function textToHtml(text) {
+export function textToHtml(text, { format = false } = {}) {
   return String(text ?? "")
     .replace(/\r\n?/g, "\n")
     .trim()
     .split(/\n{2,}/)
     .map(
       (para) =>
-        `<p class="sc-text" style="margin:0 0 16px;font-family:${FONT};font-size:15px;line-height:1.6;color:${INK}">${linkify(escapeHtml(para)).replace(/\n/g, "<br>")}</p>`,
+        `<p class="sc-text" style="margin:0 0 16px;font-family:${FONT};font-size:15px;line-height:1.6;color:${INK}">${(format ? rich : linkify)(escapeHtml(para)).replace(/\n/g, "<br>")}</p>`,
     )
     .join("\n");
 }
@@ -84,13 +112,14 @@ export function actionFor({ subject = "", text = "", toTeam = false }, adminOrig
   return null;
 }
 
-/** The plain-text signature (same content as the HTML signature card). */
+/** The plain-text footer (same content and order as the HTML footer; the website appears once, last). */
 export function signatureText(tagline = DEFAULT_TAGLINE) {
   return [
-    "Scholars Cafe",
+    BRAND_NAME,
     tagline,
-    `${SITE.replace("https://", "")} · ${CONTACT}`,
-    SOCIAL.map(([n, u]) => `${n}: ${u}`).join("\n"),
+    "",
+    ...SOCIAL.map(([n, u]) => `${n}: ${u}`),
+    `Email: ${CONTACT}`,
   ].join("\n");
 }
 
@@ -104,18 +133,23 @@ function button({ label, url }) {
 </td></tr></table>`;
 }
 
-function signatureHtml(tagline) {
-  const social = SOCIAL.map(
-    ([n, u]) =>
-      `<a href="${escapeHtml(u)}" class="sc-link" style="color:${BLUE};text-decoration:none;font-weight:600">${n}</a>`,
-  ).join(`<span style="color:${MUTED}"> &nbsp;·&nbsp; </span>`);
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="sc-sig" bgcolor="#f7fafc" style="background:#f7fafc;border:1px solid ${LINE};border-radius:12px">
-<tr><td width="56" valign="top" style="padding:16px 0 16px 16px"><img class="sc-light-img" src="${LOGO_BLUE}" width="40" height="36" alt="" style="display:block;border:0;outline:none;width:40px;height:36px"><!--[if !mso]><!--><img class="sc-dark-img" src="${LOGO_ICE}" width="40" height="36" alt="" style="display:none;border:0;outline:none;width:40px;height:36px"><!--<![endif]--></td>
-<td valign="top" class="sc-muted" style="padding:16px;font-family:${FONT};font-size:13px;line-height:1.6;color:${MUTED}">
-<strong class="sc-text" style="font-size:15px;color:${INK}">Scholars Cafe</strong><br>
-${escapeHtml(tagline)}<br>
-<a href="${SITE}" class="sc-link" style="color:${BLUE};text-decoration:none">scholarscafe.com</a> &nbsp;·&nbsp; <a href="mailto:${CONTACT}" class="sc-link" style="color:${BLUE};text-decoration:none">${CONTACT}</a><br>
-${social}
+// The footer every email ends with: divider, centred logo, name in the heading font, tagline, social
+// links and the contact address. The website link follows once, at the very bottom (see renderEmail).
+function footerHtml(tagline) {
+  const sep = `<span class="sc-muted" style="color:${MUTED}">&nbsp;&nbsp;·&nbsp;&nbsp;</span>`;
+  const links = [...SOCIAL.map(([n, u]) => [n, u]), [CONTACT, "mailto:" + CONTACT]]
+    .map(
+      ([n, u]) =>
+        `<a href="${escapeHtml(u)}" class="sc-link" style="color:${LINK};text-decoration:none;font-weight:600;white-space:nowrap">${escapeHtml(n)}</a>`,
+    )
+    .join(sep);
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td class="sc-line" style="border-top:1px solid ${LINE};font-size:0;line-height:0;height:1px">&nbsp;</td></tr>
+<tr><td align="center" bgcolor="${ICE}" class="sc-foot" style="background:${ICE};padding:24px 20px 22px;text-align:center;border-radius:0 0 14px 14px">
+<img class="sc-light-img" src="${LOGO_BLUE}" width="48" height="43" alt="Scholars' Cafe logo" style="display:block;margin:0 auto 10px;border:0;outline:none;width:48px;height:43px"><!--[if !mso]><!--><img class="sc-dark-img" src="${LOGO_ICE}" width="48" height="43" alt="Scholars' Cafe logo" style="display:none;margin:0 auto 10px;border:0;outline:none;width:48px;height:43px"><!--<![endif]-->
+<div class="sc-text" style="font-family:${HEADING};font-size:20px;font-weight:700;line-height:1.3;color:${NAVY}">${escapeHtml(BRAND_NAME)}</div>
+<div class="sc-muted" style="font-family:${FONT};font-size:13px;line-height:1.5;color:${BLUE};margin:4px 0 14px">${escapeHtml(tagline)}</div>
+<div style="font-family:${FONT};font-size:13px;line-height:1.9">${links}</div>
 </td></tr></table>`;
 }
 
@@ -130,16 +164,18 @@ export function renderEmail({
   unsubscribeUrl = null,
   action = null,
   tagline = DEFAULT_TAGLINE,
+  format = false,
 }) {
   const body = String(text ?? "")
     .replace(/\r\n?/g, "\n")
     .trim();
   const footerText = [
-    `Questions? Reply to this email or write to ${CONTACT}.`,
+    "Questions? Just reply to this email.",
     ...(unsubscribeUrl && !body.includes(unsubscribeUrl) ? [`Unsubscribe: ${unsubscribeUrl}`] : []),
   ].join("\n");
-  const plain = `${body}\n\n${action && !body.includes(action.url) ? `${action.label}: ${action.url}\n\n` : ""}—\n${signatureText(tagline)}\n\n${footerText}\n`;
-  const preheader = escapeHtml(body.replace(/\s+/g, " ").slice(0, 110));
+  const plainBody = format ? plainFormatted(body) : body;
+  const plain = `${plainBody}\n\n${action && !body.includes(action.url) ? `${action.label}: ${action.url}\n\n` : ""}—\n${signatureText(tagline)}\n\n${footerText}\n${SITE.replace("https://", "")}\n`;
+  const preheader = escapeHtml(plainBody.replace(/\s+/g, " ").slice(0, 110));
   const unsub = unsubscribeUrl
     ? `<br><a href="${escapeHtml(unsubscribeUrl)}" style="color:${MUTED};text-decoration:underline">Unsubscribe</a> from these emails.`
     : "";
@@ -156,7 +192,8 @@ export function renderEmail({
 @media (prefers-color-scheme: dark) {
   .sc-page { background:#0b1622 !important; }
   .sc-card { background:#13202d !important; border-color:#24364a !important; }
-  .sc-sig { background:#0f1b27 !important; border-color:#24364a !important; }
+  .sc-foot { background:#0f1b27 !important; }
+  .sc-line { border-color:#24364a !important; }
   .sc-text { color:#e6edf3 !important; }
   .sc-muted { color:#9fb0c0 !important; }
   .sc-link { color:#8cc2f0 !important; }
@@ -167,7 +204,8 @@ export function renderEmail({
   .sc-pad { padding-left:20px !important; padding-right:20px !important; }
 }
 </style>
-<!--[if mso]><style>body,table,td,p,a{font-family:Arial,sans-serif!important}</style><![endif]-->
+<!--[if !mso]><!--><link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@700&display=swap" rel="stylesheet"><!--<![endif]-->
+<!--[if mso]><style>body,table,td,p,a,div{font-family:Arial,sans-serif!important}</style><![endif]-->
 </head>
 <body class="sc-page" style="margin:0;padding:0;background:${PAGE};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${PAGE}">${preheader}</div>
@@ -182,15 +220,15 @@ export function renderEmail({
 </tr></table>
 </td></tr>
 <tr><td bgcolor="#ffffff" class="sc-card sc-pad" style="background:#ffffff;padding:28px 28px 8px;border-left:1px solid ${LINE};border-right:1px solid ${LINE}">
-${textToHtml(body)}
+${textToHtml(body, { format })}
 ${action ? button(action) : ""}
 </td></tr>
-<tr><td bgcolor="#ffffff" class="sc-card sc-pad" style="background:#ffffff;padding:4px 28px 24px;border:1px solid ${LINE};border-top:0;border-radius:0 0 14px 14px">
-${signatureHtml(tagline)}
+<tr><td bgcolor="#ffffff" class="sc-card" style="background:#ffffff;padding:8px 0 0;border:1px solid ${LINE};border-top:0;border-radius:0 0 14px 14px">
+${footerHtml(tagline)}
 </td></tr>
 <tr><td class="sc-pad sc-muted" style="padding:16px 28px 0;font-family:${FONT};font-size:12px;line-height:1.6;color:${MUTED};text-align:center">
-Questions? Reply to this email or write to <a href="mailto:${CONTACT}" style="color:${MUTED};text-decoration:underline">${CONTACT}</a>.${unsub}<br>
-© Scholars Cafe · <a href="${SITE}" style="color:${MUTED};text-decoration:underline">scholarscafe.com</a>
+Questions? Just reply to this email.${unsub}<br>
+<a href="${SITE}" style="color:${MUTED};text-decoration:underline">scholarscafe.com</a>
 </td></tr>
 </table>
 <!--[if mso]></td></tr></table><![endif]-->

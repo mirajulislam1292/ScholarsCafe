@@ -5,7 +5,7 @@ import { seedFormTemplates } from "./forms.js";
 import { queueBookingReminders } from "./booking.js";
 import { queueTaskReminders } from "./workspace.js";
 import { deliverPush, onPushQueued, vapidKeys } from "./push.js";
-import { pollInbox, imapConfigured } from "./inbox.js";
+import { pollInbox, imapConfigured, appendSent } from "./inbox.js";
 
 for (const key of [
   "DB_HOST",
@@ -47,6 +47,9 @@ async function start() {
   );
   cleanup.unref();
   const mailer = createMailer(process.env);
+  // Mail sent as contact@ (replies, Compose) also lands in that mailbox's Sent folder.
+  if (mailer && imapConfigured(process.env))
+    mailer.saveSent = (message) => appendSent(process.env, message);
   let delivering = false;
   const mailTimer = setInterval(async () => {
     // Team notifications are delivered by the admin deployment only.

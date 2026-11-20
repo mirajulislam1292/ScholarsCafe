@@ -5459,7 +5459,7 @@ async function renderEmailPreviews() {
   screen.append(frame);
 }
 
-const mailState = { q: "", unread: false, open: null, images: false };
+const mailState = { q: "", unread: false, open: null, images: false, folder: "inbox" };
 const mailDate = (t) => {
   const d = new Date(t);
   return d.toDateString() === new Date().toDateString()
@@ -5472,8 +5472,14 @@ function setMailBadge(unread) {
 }
 async function renderContactMail() {
   const screen = $("screen");
+  const sent = mailState.folder === "sent";
   const data = await api(
-    "inbox?" + new URLSearchParams({ q: mailState.q, filter: mailState.unread ? "unread" : "" }),
+    "inbox?" +
+      new URLSearchParams({
+        q: mailState.q,
+        filter: mailState.unread && !sent ? "unread" : "",
+        folder: mailState.folder,
+      }),
   );
   setMailBadge(data.unread);
   if (!data.connected)
@@ -5500,12 +5506,29 @@ async function renderContactMail() {
     mailState.open = null;
     render();
   };
-  const unreadChip = button(`Unread${data.unread ? " " + data.unread : ""}`, () => {
-    mailState.unread = !mailState.unread;
-    render();
-  });
-  unreadChip.setAttribute("aria-pressed", String(mailState.unread));
-  bar.append(search, unreadChip);
+  const compose = button(
+    "✏️ Compose",
+    () => openComposer(data.can_reply),
+    "primary mail-compose-btn",
+  );
+  const folder = (key, text) => {
+    const b = button(text, () => {
+      mailState.folder = key;
+      mailState.open = null;
+      render();
+    });
+    b.setAttribute("aria-pressed", String(mailState.folder === key));
+    return b;
+  };
+  bar.append(compose, folder("inbox", "Inbox"), folder("sent", "Sent"), search);
+  if (!sent) {
+    const unreadChip = button(`Unread${data.unread ? " " + data.unread : ""}`, () => {
+      mailState.unread = !mailState.unread;
+      render();
+    });
+    unreadChip.setAttribute("aria-pressed", String(mailState.unread));
+    bar.append(unreadChip);
+  }
   if (data.connected)
     bar.append(
       button("Check now", async () => {
@@ -5526,7 +5549,7 @@ async function renderContactMail() {
     if (m.id === mailState.open) b.setAttribute("aria-current", "true");
     const top = node("span", undefined, "mail-top");
     top.append(
-      node("span", m.from_name || m.from_email, "mail-from"),
+      node("span", sent ? "To: " + m.to : m.from_name || m.from_email, "mail-from"),
       node("time", mailDate(m.received_at)),
     );
     b.append(
@@ -5547,7 +5570,15 @@ async function renderContactMail() {
   }
   if (!data.items.length)
     list.append(
-      node("p", mailState.q ? "No messages match your search." : "No mail yet.", "empty"),
+      node(
+        "p",
+        mailState.q
+          ? "No messages match your search."
+          : sent
+            ? "Nothing sent yet."
+            : "No mail yet.",
+        "empty",
+      ),
     );
   const reader = node("section", undefined, "mail-reader");
   layout.append(list, reader);
@@ -5578,17 +5609,24 @@ async function renderMailMessage(reader, canReply) {
       "mail-back",
     ),
     node("h2", m.subject),
-    node("p", `${m.from_name ? m.from_name + " · " : ""}${m.from_email}`, "mail-meta"),
+    node(
+      "p",
+      m.sent
+        ? `From ${m.from_email} · To: ${m.to}`
+        : `${m.from_name ? m.from_name + " · " : ""}${m.from_email}`,
+      "mail-meta",
+    ),
     node("p", new Date(m.received_at).toLocaleString(), "mail-meta"),
   );
   const actions = node("div", undefined, "actions");
-  actions.append(
-    button("Mark unread", async () => {
-      await api(`inbox/${m.id}/read`, { read: false });
-      mailState.open = null;
-      render();
-    }),
-  );
+  if (!m.sent)
+    actions.append(
+      button("Mark unread", async () => {
+        await api(`inbox/${m.id}/read`, { read: false });
+        mailState.open = null;
+        render();
+      }),
+    );
   if (m.has_remote_images && !mailState.images)
     actions.append(
       button("Show images", () => {
@@ -5625,6 +5663,7 @@ async function renderMailMessage(reader, canReply) {
     );
     reader.append(c);
   }
+  if (m.sent) return;
   const form = node("form", undefined, "card mail-compose");
   const [bl, body] = input(`Reply to ${m.from_email}`, "", "textarea", 20000);
   body.rows = 6;
@@ -5649,6 +5688,179 @@ async function renderMailMessage(reader, canReply) {
     }
   };
   reader.append(form);
+}
+// Compose: a new email from contact@ in the branded template. Desktop: a modal with a live preview beside
+// the form. Phone: a full-screen sheet with Write / Preview tabs and a sticky Send / Cancel bar.
+// The preview is rendered by the server (same template as the real mail) in a sandboxed frame.
+function openComposer(canSend) {
+  if (document.querySelector(".compose-overlay")) return;
+  const overlay = node("div", undefined, "compose-overlay");
+  const sheet = node("div", undefined, "compose");
+  sheet.setAttribute("role", "dialog");
+  sheet.setAttribute("aria-modal", "true");
+  sheet.setAttribute("aria-labelledby", "compose-title");
+  const head = node("div", undefined, "compose-head");
+  const title = node("h2", "New email");
+  title.id = "compose-title";
+  const tabs = node("div", undefined, "compose-tabs");
+  tabs.setAttribute("role", "tablist");
+  const tab = (text, key) => {
+    const b = button(text, () => show(key));
+    b.setAttribute("role", "tab");
+    b.dataset.tab = key;
+    return b;
+  };
+  tabs.append(tab("Write", "write"), tab("Preview", "preview"));
+  head.append(title, tabs);
+
+  const form = node("form", undefined, "compose-form");
+  form.noValidate = true;
+  const [toL, to] = input("To", "", "text", 1000);
+  to.type = "email";
+  to.multiple = true;
+  to.autocomplete = "email";
+  to.inputMode = "email";
+  to.autocapitalize = "off";
+  to.spellcheck = false;
+  to.placeholder = "name@example.com, another@example.com";
+  const [subL, subject] = input("Subject", "", "text", 160);
+  const [bodyL, body] = input("Message", "", "textarea", 20000);
+  body.rows = 12;
+  const tools = node("div", undefined, "compose-tools");
+  const wrap = (before, after, fallback) => {
+    const { selectionStart: a, selectionEnd: b, value } = body;
+    const picked = value.slice(a, b) || fallback;
+    body.setRangeText(before + picked + after, a, b, "select");
+    body.focus();
+    schedule();
+  };
+  tools.append(
+    button("B", () => wrap("**", "**", "bold text"), "compose-tool compose-bold"),
+    button(
+      "Link",
+      () => {
+        const url = (prompt("Link address (https://…)", "https://") || "").trim();
+        if (!/^https:\/\/\S+$/.test(url)) return;
+        wrap("[", `](${url})`, "link text");
+      },
+      "compose-tool",
+    ),
+    node("span", "**bold**, [text](https://…), blank line = new paragraph", "muted"),
+  );
+  form.append(toL, subL, bodyL, tools);
+  const from = node("p", "Sent from contact@scholarscafe.com with the branded footer.", "muted");
+  const error = node("p", undefined, "compose-error");
+  error.setAttribute("role", "alert");
+  error.hidden = true;
+  form.append(from, error);
+
+  const previewPane = node("div", undefined, "compose-preview");
+  const frame = node("iframe", undefined, "compose-frame");
+  frame.setAttribute("sandbox", "allow-popups allow-popups-to-escape-sandbox");
+  frame.setAttribute("referrerpolicy", "no-referrer");
+  frame.title = "Email preview";
+  previewPane.append(frame);
+
+  const panes = node("div", undefined, "compose-panes");
+  panes.append(form, previewPane);
+
+  const bar = node("div", undefined, "compose-bar");
+  const cancel = button("Cancel", () => close());
+  const send = node("button", "Send", "primary");
+  send.type = "button";
+  if (!canSend) {
+    send.disabled = true;
+    from.textContent = "Sending needs CONTACT_IMAP_PASSWORD in hPanel.";
+  }
+  bar.append(cancel, send);
+  sheet.append(head, panes, bar);
+  overlay.append(sheet);
+  document.body.append(overlay);
+  document.body.classList.add("compose-open");
+
+  let timer = 0;
+  let seq = 0;
+  const visible = () => getComputedStyle(previewPane).display !== "none";
+  async function refresh() {
+    if (!visible()) return;
+    const n = ++seq;
+    try {
+      const r = await api("inbox/compose/preview", {
+        to: to.value,
+        subject: subject.value,
+        body: body.value,
+      });
+      if (n === seq) frame.src = r.url;
+    } catch {
+      /* the preview is a convenience; sending shows real errors */
+    }
+  }
+  function schedule() {
+    clearTimeout(timer);
+    timer = setTimeout(refresh, 500);
+  }
+  function show(key) {
+    sheet.dataset.tab = key;
+    for (const b of tabs.children) b.setAttribute("aria-selected", String(b.dataset.tab === key));
+    if (key === "preview") refresh();
+  }
+  const dirty = () => Boolean(to.value.trim() || subject.value.trim() || body.value.trim());
+  function close(force) {
+    if (!force && dirty() && !confirm("Discard this email?")) return;
+    clearTimeout(timer);
+    document.removeEventListener("keydown", onKey);
+    document.body.classList.remove("compose-open");
+    overlay.remove();
+  }
+  function onKey(e) {
+    if (e.key === "Escape") close();
+  }
+  document.addEventListener("keydown", onKey);
+  for (const el of [to, subject, body]) el.addEventListener("input", schedule);
+  const fail = (msg, field) => {
+    error.textContent = msg;
+    error.hidden = false;
+    if (field) {
+      show("write");
+      field.focus();
+    }
+  };
+  async function submit() {
+    error.hidden = true;
+    const list = to.value.split(/[,;\s]+/).filter(Boolean);
+    if (!list.length) return fail("Add at least one recipient.", to);
+    if (list.length > 5) return fail("Send to at most 5 people at once.", to);
+    const bad = list.find((a) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a));
+    if (bad) return fail(`"${bad}" is not a valid email address.`, to);
+    if (!subject.value.trim()) return fail("Add a subject.", subject);
+    if (!body.value.trim()) return fail("Write a message.", body);
+    send.disabled = true;
+    send.textContent = "Sending…";
+    try {
+      const r = await api("inbox/compose", {
+        to: to.value,
+        subject: subject.value,
+        body: body.value,
+      });
+      close(true);
+      notice(`Sent to ${r.to.join(", ")}. It goes out from contact@ within a minute.`);
+      mailState.folder = "sent";
+      mailState.open = null;
+      render();
+    } catch (err) {
+      send.disabled = false;
+      send.textContent = "Send";
+      fail(err.message || "Sending failed. Try again.");
+    }
+  }
+  send.onclick = submit;
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    submit();
+  };
+  show("write");
+  refresh();
+  to.focus();
 }
 // ---------- Mobile: bottom tab bar (up to 5 tabs) and a "More" sheet with the full menu ----------
 const TAB_ICONS = {

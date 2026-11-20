@@ -2,7 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import request from "supertest";
 import { createApp } from "./app.js";
-import { pollInbox, sanitizeMail, parseMessage, viewCsp, hasRemoteImages } from "./inbox.js";
+import {
+  pollInbox,
+  sanitizeMail,
+  parseMessage,
+  viewCsp,
+  hasRemoteImages,
+  appendSent,
+  parseRecipients,
+} from "./inbox.js";
+import { deliverMail } from "./mail.js";
 
 const ADMIN = "https://admin.scholarscafe.com";
 const IMAP = { CONTACT_IMAP_USER: "contact@scholarscafe.com", CONTACT_IMAP_PASSWORD: "pw" };
@@ -258,4 +267,184 @@ test("Reply: from contact@, threaded, logged; refused without the mailbox passwo
     store.db.sql.some(([q]) => q.includes("from_contact") && q.includes("VALUES (?,?,?,?,1,?,?)")),
   );
   assert.ok(store.db.sql.some(([q]) => q.startsWith("UPDATE contact_mail SET replied_at")));
+});
+
+const SEND_CFG = { ...base, ...IMAP, SMTP_PASSWORD: "s", SMTP_USER: "no-reply@scholarscafe.com" };
+const composeReq = (app, body, { csrf = "c", origin = ADMIN } = {}) =>
+  request(app)
+    .post("/api/inbox/compose")
+    .set("Cookie", cookie)
+    .set("Origin", origin)
+    .set("X-CSRF-Token", csrf)
+    .send(body);
+const good = {
+  to: "rafi@example.com, Mim@Example.org",
+  subject: "Your shortlist",
+  body: "Hi **Rafi**",
+};
+
+test("Compose: owners/admins only, CSRF and origin checked", async () => {
+  for (const role of ["editor", "mentor"]) {
+    const store = fakeStore({ id: "u", role, email: "x@x.com" });
+    await composeReq(createApp(store, SEND_CFG), good).expect(403);
+    assert.equal(store.db.outbox.length, 0);
+  }
+  const store = fakeStore({ id: "u", role: "owner", email: "o@x.com" });
+  const app = createApp(store, SEND_CFG);
+  await composeReq(app, good, { csrf: "wrong" }).expect(403);
+  await composeReq(app, good, { origin: "https://evil.example" }).expect(403);
+  // Signed out.
+  await request(createApp(fakeStore(null), SEND_CFG))
+    .post("/api/inbox/compose")
+    .set("Origin", ADMIN)
+    .send(good)
+    .expect(401);
+  assert.equal(store.db.outbox.length, 0);
+});
+
+test("Compose: validates recipients, subject and body", async () => {
+  const store = fakeStore({ id: "u", role: "admin", email: "a@x.com" });
+  const app = createApp(store, SEND_CFG);
+  const bad = async (body, re) => {
+    const r = await composeReq(app, { ...good, ...body }).expect(400);
+    if (re) assert.match(r.body.error, re);
+  };
+  await bad({ to: "" }, /at least one recipient/);
+  await bad({ to: "not-an-email" }, /not a valid email/);
+  await bad({ to: "a@x.com, b@x" }, /not a valid email/);
+  await bad({ to: "a@x.co,b@x.co,c@x.co,d@x.co,e@x.co,f@x.co" }, /at most 5/);
+  await bad({ subject: "   " });
+  await bad({ body: "" });
+  await bad({ body: "x".repeat(20001) });
+  await bad({ extra: 1 });
+  assert.equal(store.db.outbox.length, 0);
+  // Without the contact@ password nothing can be sent.
+  await composeReq(
+    createApp(store, { ...base, SMTP_PASSWORD: "s", SMTP_USER: "no-reply@scholarscafe.com" }),
+    good,
+  ).expect(400);
+  assert.deepEqual(parseRecipients("A@x.com; a@x.com b@y.org").list, ["a@x.com", "b@y.org"]);
+});
+
+test("Compose: rate limited per staff member", async () => {
+  const store = fakeStore({ id: "u", role: "owner", email: "o@x.com" });
+  const scopes = [];
+  store.checkRateLimit = async (scope, who, limit, seconds) => (
+    scopes.push([scope, who, limit, seconds]),
+    false
+  );
+  await composeReq(createApp(store, SEND_CFG), good).expect(429);
+  assert.deepEqual(scopes[0], ["inbox_compose", "u", 20, 600]);
+  assert.equal(store.db.outbox.length, 0);
+});
+
+test("Compose: queued from contact@ (no real sending), stored for Sent, subject cleaned", async () => {
+  const store = fakeStore({ id: "u", role: "owner", email: "o@x.com" });
+  const logs = [];
+  const orig = console.error;
+  console.error = (...a) => logs.push(a.join(" "));
+  const r = await composeReq(createApp(store, SEND_CFG), {
+    ...good,
+    subject: "Hello\r\nBcc: x@evil.example",
+    body: "Secret body text",
+  }).expect(201);
+  console.error = orig;
+  assert.deepEqual(r.body.to, ["rafi@example.com", "mim@example.org"]);
+  const [id, subject, body, to] = store.db.outbox[0];
+  assert.equal(id, r.body.id);
+  assert.equal(subject, "Hello Bcc: x@evil.example");
+  assert.equal(body, "Secret body text");
+  assert.equal(to, "rafi@example.com, mim@example.org");
+  assert.ok(
+    store.db.sql.some(([q]) => q.includes("VALUES (?,?,?,?,1)")),
+    "from contact@",
+  );
+  assert.ok(
+    store.db.sql.some(([q]) => q.includes("INSERT INTO contact_mail") && q.includes("'out'")),
+  );
+  assert.ok(!logs.some((l) => l.includes("Secret body")), "body never logged");
+});
+
+test("Compose preview: rendered card on its own sandboxed page, only for the same user", async () => {
+  const store = fakeStore({ id: "u", role: "owner", email: "o@x.com" });
+  const app = createApp(store, SEND_CFG);
+  const r = await request(app)
+    .post("/api/inbox/compose/preview")
+    .set("Cookie", cookie)
+    .set("Origin", ADMIN)
+    .set("X-CSRF-Token", "c")
+    .send({ to: "", subject: "Hi", body: "Hello **there**" })
+    .expect(200);
+  assert.match(r.body.url, /^\/api\/inbox\/compose\/preview\?t=[\w-]+$/);
+  const page = await request(app).get(r.body.url).set("Cookie", cookie).expect(200);
+  assert.match(page.text, /Hello <strong>there<\/strong>/);
+  assert.match(page.text, /class="sc-foot"/);
+  const csp = page.headers["content-security-policy"];
+  assert.match(csp, /default-src 'none'/);
+  assert.doesNotMatch(csp, /script-src/);
+  assert.match(csp, /sandbox/);
+  assert.equal(store.db.outbox.length, 0, "preview never queues mail");
+  const other = fakeStore({ id: "someone-else", role: "owner", email: "p@x.com" });
+  await request(createApp(other, SEND_CFG)).get(r.body.url).set("Cookie", cookie).expect(404);
+});
+
+test("Sent folder: listing shows our own mail with recipients", async () => {
+  const store = fakeStore({ id: "u", role: "owner", email: "o@x.com" });
+  await request(createApp(store, SEND_CFG))
+    .get("/api/inbox?folder=sent")
+    .set("Cookie", cookie)
+    .expect(200);
+  const [q] = store.db.sql.find(([sql]) => sql.includes("FROM contact_mail WHERE direction="));
+  assert.match(q, /direction='out'/);
+});
+
+test("Sent copy: delivered contact@ mail is appended to the IMAP Sent folder", async () => {
+  const appended = [];
+  const client = {
+    async connect() {},
+    async list() {
+      return [{ path: "INBOX" }, { path: "INBOX.Sent", specialUse: "\\Sent" }];
+    },
+    async append(path, raw, flags) {
+      appended.push({ path, raw: raw.toString(), flags });
+    },
+    async logout() {},
+  };
+  const message = {
+    from: "Scholars Cafe <contact@scholarscafe.com>",
+    to: "rafi@example.com",
+    subject: "Hello",
+    text: "Plain",
+    html: "<p>Plain</p>",
+    messageId: "<x@scholarscafe.com>",
+  };
+  assert.equal(await appendSent(IMAP, message, () => client), true);
+  assert.equal(appended[0].path, "INBOX.Sent");
+  assert.deepEqual(appended[0].flags, ["\\Seen"]);
+  assert.match(appended[0].raw, /Subject: Hello/);
+  assert.equal(await appendSent({}, message, () => client), false, "not configured: skipped");
+
+  // The outbox calls saveSent after sending a contact@ row, never for no-reply@ mail; sending is mocked.
+  const rows = [
+    { id: "a", subject: "S", body: "B", to_email: "s@x.co", from_contact: 1 },
+    { id: "b", subject: "T", body: "C", to_email: "s@x.co", from_contact: 0 },
+  ];
+  const saved = [];
+  const sent = [];
+  const fake = (row) => ({
+    transaction: (fn) => fn({}),
+    query: async (q) =>
+      q.startsWith("SELECT * FROM mail_outbox") ? [row] : q.startsWith("SELECT") ? [] : {},
+  });
+  const transport = {
+    sender: "no-reply@scholarscafe.com",
+    sendMail: async (m) => sent.push(m),
+    saveSent: async (m) => saved.push(m),
+  };
+  transport.contact = { sender: "contact@scholarscafe.com", sendMail: async (m) => sent.push(m) };
+  await deliverMail(fake(rows[0]), transport);
+  await deliverMail(fake(rows[1]), transport);
+  assert.equal(sent.length, 2);
+  assert.equal(saved.length, 1);
+  assert.equal(saved[0].messageId, "<a@scholarscafe.com>");
 });

@@ -2193,6 +2193,172 @@ nav .nav-more[aria-expanded="true"]::after {
     height: 65vh;
   }
 }
+.mail-bar .mail-compose-btn {
+  font-weight: 700;
+}
+/* Compose: modal with a live preview (desktop), full-screen sheet with tabs (phone). */
+body.compose-open {
+  overflow: hidden;
+}
+.compose-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(4 28 49 / 0.45);
+}
+.compose {
+  display: flex;
+  flex-direction: column;
+  width: min(1180px, 100%);
+  height: min(860px, 100%);
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgb(4 28 49 / 0.3);
+  overflow: hidden;
+}
+.compose-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ice-200);
+}
+.compose-head h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--blue-950);
+}
+.compose-tabs {
+  display: none;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--ice-100);
+}
+.compose-tabs button {
+  border: 0;
+  padding: 8px 16px;
+  min-height: 36px;
+  background: transparent;
+}
+.compose-tabs button[aria-selected="true"] {
+  background: var(--white);
+  color: var(--blue-950);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgb(4 28 49 / 0.15);
+}
+.compose-panes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+}
+.compose-form {
+  overflow-y: auto;
+  padding: 4px 20px 16px;
+}
+.compose-form input,
+.compose-form textarea {
+  font-size: 16px; /* 16px or more: iOS does not zoom in on focus */
+}
+.compose-form textarea {
+  min-height: 240px;
+  resize: vertical;
+  line-height: 1.55;
+}
+.compose-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.compose-tool {
+  padding: 6px 14px;
+  min-height: 36px;
+}
+.compose-bold {
+  font-weight: 800;
+}
+.compose-error {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fdecec;
+  color: #8a1c1c;
+  font-weight: 600;
+}
+.compose-preview {
+  min-height: 0;
+  background: var(--ice-100);
+  border-left: 1px solid var(--ice-200);
+}
+.compose-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--ice-100);
+}
+.compose-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--ice-200);
+  background: var(--white);
+}
+.compose-bar .primary {
+  min-width: 120px;
+  font-weight: 700;
+}
+@media (max-width: 800px) {
+  .compose-overlay {
+    padding: 0;
+    place-items: stretch;
+  }
+  .compose {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .compose-head {
+    padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 10px
+      calc(16px + env(safe-area-inset-left));
+  }
+  .compose-tabs {
+    display: flex;
+  }
+  .compose-panes {
+    grid-template-columns: 1fr;
+  }
+  .compose-form {
+    padding: 0 calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
+  }
+  .compose[data-tab="write"] .compose-preview,
+  .compose[data-tab="preview"] .compose-form {
+    display: none;
+  }
+  .compose-preview {
+    border-left: 0;
+  }
+  /* Sticky action bar above the home indicator. */
+  .compose-bar {
+    position: sticky;
+    bottom: 0;
+    padding: 10px calc(16px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom))
+      calc(16px + env(safe-area-inset-left));
+  }
+  .compose-bar button {
+    flex: 1;
+    min-height: 48px;
+  }
+}
 /* New-activity count on a sidebar item (desktop), set when a notification arrives while the app is open. */
 #nav button[data-badge]::after {
   content: attr(data-badge);

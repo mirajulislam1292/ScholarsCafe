@@ -138,10 +138,8 @@ async function takenDays(store, c) {
   );
 }
 
+// The shared email template adds the signature, socials and the website link (once).
 const footer = [
-  "",
-  "Scholars Cafe",
-  "https://scholarscafe.com",
   "",
   "You are getting this email because this address was used to book a session at scholarscafe.com.",
 ];

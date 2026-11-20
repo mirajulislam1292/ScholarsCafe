@@ -4,16 +4,18 @@
 // - Headers and sanitised bodies are stored in MySQL (contact_mail). Attachments: names and sizes only.
 // - HTML mail is shown in a sandboxed frame with its own strict CSP: no scripts, remote images blocked
 //   until someone clicks "Show images".
-// - Replies go out from contact@ through the normal mail outbox, threaded with In-Reply-To/References.
-import { randomUUID } from "node:crypto";
+// - Replies and new mail (Compose) go out from contact@ through the normal mail outbox (replies threaded
+//   with In-Reply-To/References); after sending, a copy is appended to the mailbox's Sent folder.
+import { randomUUID, randomBytes } from "node:crypto";
 import { ImapFlow } from "imapflow";
+import MailComposer from "nodemailer/lib/mail-composer";
 import { simpleParser } from "mailparser";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 import { canPublish } from "./security.js";
 import { escapeHtml, CONTACT } from "./email-template.js";
 import { queuePush, inboxReaderIds, preview } from "./push.js";
-import { sender } from "./mail.js";
+import { sender, outboxMessage, emailTagline } from "./mail.js";
 
 const MAX_SOURCE = 15 * 1024 * 1024; // bigger messages: headers only
 const FIRST_IMPORT = 50; // on first connect, only the latest messages
@@ -113,6 +115,72 @@ export const defaultImap = (config) =>
     connectionTimeout: 15000,
     socketTimeout: 60000,
   });
+
+/**
+ * Saves a copy of a message sent as contact@ into that mailbox's Sent folder (IMAP APPEND), so it shows
+ * in webmail and phone mail apps too. Best effort: a failure is logged (no content) and never retried.
+ */
+export async function appendSent(config, message, connect = defaultImap) {
+  if (!imapConfigured(config)) return false;
+  const raw = await new MailComposer({ ...message, date: new Date() }).compile().build();
+  const client = connect(config);
+  try {
+    await client.connect();
+    const boxes = await client.list();
+    const box =
+      boxes.find((b) => b.specialUse === "\\Sent") ||
+      boxes.find((b) => /^(INBOX[./])?Sent( Items| Messages)?$/i.test(b.path));
+    await client.append(box?.path || "INBOX.Sent", raw, ["\\Seen"]);
+    return true;
+  } catch (error) {
+    console.error("Saving to Sent failed:", error?.code || error?.name);
+    return false;
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+/** Recipients typed in Compose: comma/semicolon separated, at most 5, each a valid address. */
+export const MAX_RECIPIENTS = 5;
+export function parseRecipients(value) {
+  const list = [
+    ...new Set(
+      String(value ?? "")
+        .split(/[,;\s]+/)
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+  if (!list.length) return { error: "Add at least one recipient." };
+  if (list.length > MAX_RECIPIENTS)
+    return { error: `Send to at most ${MAX_RECIPIENTS} people at once.` };
+  const bad = list.find((a) => a.length > 254 || !z.email().safeParse(a).success);
+  if (bad) return { error: `"${bad.slice(0, 60)}" is not a valid email address.` };
+  const joined = list.join(", ");
+  if (joined.length > 254) return { error: "The recipient list is too long." };
+  return { list, joined };
+}
+const composeSchema = z
+  .object({
+    to: z.string().max(1000),
+    subject: z.string().trim().min(1, "Add a subject.").max(160),
+    body: z.string().trim().min(1, "Write a message.").max(20000),
+  })
+  .strict();
+const cleanSubject = (s) => s.replace(/[\x00-\x1f\x7f]+/g, " ").trim();
+
+// Compose previews: the rendered card is kept for a few minutes under a random token so the sandboxed
+// preview frame can load it as its own page (with its own CSP). Memory only; nothing is logged.
+const previews = new Map();
+const PREVIEW_MS = 10 * 60 * 1000;
+function keepPreview(userId, html) {
+  const now = Date.now();
+  for (const [k, v] of previews) if (v.exp < now) previews.delete(k);
+  while (previews.size >= 200) previews.delete(previews.keys().next().value);
+  const token = randomBytes(18).toString("base64url");
+  previews.set(token, { userId, html, exp: now + PREVIEW_MS });
+  return token;
+}
 
 let polling = null;
 /**
@@ -263,13 +331,14 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
   };
   app.get("/api/inbox", async (req, res) => {
     const q = typeof req.query.q === "string" ? req.query.q.trim().slice(0, 100) : "";
-    const filter = req.query.filter === "unread" ? " AND read_at IS NULL" : "";
+    const sent = req.query.folder === "sent";
+    const filter = !sent && req.query.filter === "unread" ? " AND read_at IS NULL" : "";
     const like = "%" + q.replace(/[\\%_]/g, (c) => "\\" + c) + "%";
     const items = await store.query(
-      `SELECT id,from_name,from_email,subject,snippet,received_at,read_at,replied_at,
+      `SELECT id,from_name,from_email,to_text,subject,snippet,received_at,read_at,replied_at,
               (attachments IS NOT NULL AND JSON_LENGTH(attachments)>0) AS has_attachments
-         FROM contact_mail WHERE direction='in'${filter}
-         ${q ? "AND (subject LIKE ? OR from_email LIKE ? OR from_name LIKE ? OR body_text LIKE ?)" : ""}
+         FROM contact_mail WHERE direction='${sent ? "out" : "in"}'${filter}
+         ${q ? `AND (subject LIKE ? OR ${sent ? "to_text" : "from_email"} LIKE ? OR from_name LIKE ? OR body_text LIKE ?)` : ""}
         ORDER BY received_at DESC LIMIT 100`,
       q ? [like, like, like, like] : [],
     );
@@ -293,14 +362,102 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
         id: m.id,
         from_name: m.from_name,
         from_email: m.from_email,
+        to: sent ? m.to_text : undefined,
         subject: m.subject,
         snippet: m.snippet,
         received_at: m.received_at,
-        read: Boolean(m.read_at),
+        read: sent || Boolean(m.read_at),
         replied: Boolean(m.replied_at),
         has_attachments: Boolean(Number(m.has_attachments)),
       })),
     });
+  });
+  // New mail from contact@ (Compose). Same path as replies: the outbox sends it as contact@ with the
+  // branded template, and a copy goes to the Sent folder. The body is never logged.
+  const composed = async (req) => {
+    const input = composeSchema.parse(req.body);
+    const to = parseRecipients(input.to);
+    if (to.error) throw fail(400, to.error);
+    return { ...input, subject: cleanSubject(input.subject), to };
+  };
+  app.post("/api/inbox/compose/preview", async (req, res) => {
+    if (
+      store.checkRateLimit &&
+      !(await store.checkRateLimit("inbox_preview", req.actor.id, 300, 600))
+    )
+      throw fail(429, "Too many previews. Wait a minute.");
+    const input = z
+      .object({
+        to: z.string().max(1000).default(""),
+        subject: z.string().max(160).default(""),
+        body: z.string().max(20000).default(""),
+      })
+      .strict()
+      .parse(req.body);
+    const to = parseRecipients(input.to);
+    const message = outboxMessage(
+      {
+        id: "preview",
+        subject: cleanSubject(input.subject) || "(no subject)",
+        body: input.body.trim() || "Your message appears here.",
+        to_email: to.joined || "",
+        from_contact: 1,
+      },
+      { contact: { sender: CONTACT }, sender: CONTACT },
+      await emailTagline(store),
+    );
+    res.json({ url: `/api/inbox/compose/preview?t=${keepPreview(req.actor.id, message.html)}` });
+  });
+  app.get("/api/inbox/compose/preview", (req, res) => {
+    const p = previews.get(String(req.query.t || ""));
+    if (!p || p.userId !== req.actor.id || p.exp < Date.now()) throw fail(404, "Preview expired.");
+    res
+      .set({
+        "Content-Security-Policy":
+          "default-src 'none'; img-src https: data:; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; base-uri 'none'; form-action 'none'; frame-ancestors 'self'; sandbox allow-popups allow-popups-to-escape-sandbox",
+        "X-Frame-Options": "SAMEORIGIN",
+        "Cache-Control": "no-store",
+        "Content-Type": "text/html; charset=utf-8",
+      })
+      .send(p.html);
+  });
+  app.post("/api/inbox/compose", async (req, res) => {
+    if (!canReplyFrom(config))
+      throw fail(
+        400,
+        "Sending needs the contact@ mailbox password (CONTACT_IMAP_PASSWORD) in hPanel.",
+      );
+    const { to, subject, body } = await composed(req);
+    if (
+      store.checkRateLimit &&
+      !(await store.checkRateLimit("inbox_compose", req.actor.id, 20, 600))
+    )
+      throw fail(429, "Too many emails in a short time. Wait a few minutes.");
+    const outId = randomUUID();
+    await store.transaction(async (c) => {
+      await store.query(
+        "INSERT INTO mail_outbox (id,subject,body,to_email,from_contact) VALUES (?,?,?,?,1)",
+        [outId, subject, body, to.joined],
+        c,
+      );
+      await store.query(
+        `INSERT INTO contact_mail (id,direction,message_id,from_name,from_email,to_text,subject,snippet,body_text,received_at,read_at,sent_by)
+         VALUES (?,'out',?,'Scholars Cafe',?,?,?,?,?,UTC_TIMESTAMP(),UTC_TIMESTAMP(),?)`,
+        [
+          outId,
+          `<${outId}@scholarscafe.com>`,
+          CONTACT,
+          to.joined,
+          subject,
+          preview(body, 280),
+          body,
+          req.actor.id,
+        ],
+        c,
+      );
+      await store.audit(req.actor.id, "inbox_compose", to.joined, c);
+    });
+    res.status(201).json({ ok: true, id: outId, to: to.list });
   });
   app.get("/api/inbox/:id", async (req, res) => {
     const m = await one(req);
@@ -322,6 +479,7 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
     } catch {}
     res.json({
       id: m.id,
+      sent: m.direction === "out",
       from_name: m.from_name,
       from_email: m.from_email,
       to: m.to_text,
