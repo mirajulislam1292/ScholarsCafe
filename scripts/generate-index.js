@@ -103,7 +103,7 @@ async function generateIndexHtml() {
     "/resources/blog",
     "/resources/eca",
     "/resources/webinars",
-    "/resources/broadcast",
+    "/resources/podcast",
     "/contact",
     "/privacy",
     "/terms",

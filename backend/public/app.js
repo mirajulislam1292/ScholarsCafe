@@ -85,7 +85,7 @@ const label = (key) => names[key] || LABELS[key] || key;
 const canPublishRole = (role) => role === "owner" || role === "admin";
 const ENUMS = {
   device: ["desktop", "mobile"],
-  category: ["guide", "video", "live", "webinar", "broadcast", "course", "template", "other"],
+  category: ["guide", "video", "live", "webinar", "podcast", "course", "template", "other"],
   type: ["link", "social", "youtube"],
   platform: [
     "instagram",
@@ -113,9 +113,10 @@ const HELP = {
     "Featured: the button gets a light outline so it stands out. Order is set by position.",
   date: "Publish date, YYYY-MM-DD. The home page shows the five newest; Resources → Blog shows all.",
   category:
-    "webinar, live or video = shown on Resources → Webinars. broadcast = shown on Resources → Broadcast (announcements and updates).",
+    "webinar, live or video = shown on Resources → Webinars. podcast = shown on Resources → Podcast (episodes, announcements and updates). Older entries saved as broadcast still show there.",
   linkedin: "Optional. Full LinkedIn profile link (https://…). Leave empty to hide the icon.",
   instagram: "Optional. Full Instagram profile link (https://…). Leave empty to hide the icon.",
+  facebook: "Optional. Full Facebook profile link (https://…). Leave empty to hide the icon.",
 };
 // Free-text fields with suggestions (pick one or type a new value).
 const SUGGEST = {
@@ -154,6 +155,7 @@ const defaults = {
     photo: "",
     linkedin: "",
     instagram: "",
+    facebook: "",
     position: 0,
   },
   faqs: { q: "", a: "", position: 0 },
@@ -239,7 +241,8 @@ function field(form, key, value) {
       o.value = opt;
       select.append(o);
     }
-    select.value = value;
+    // "broadcast" was renamed "podcast"; older entries open with the new name selected.
+    select.value = key === "category" && value === "broadcast" ? "podcast" : value;
     select.id = "field-" + key;
     label.htmlFor = select.id;
     form.append(label, select);
@@ -297,7 +300,7 @@ function field(form, key, value) {
     input.checked = value;
   } else input.value = Array.isArray(value) ? value.join("\n") : value;
   if (key === "body") input.className = "body-field";
-  if (["photo", "image", "linkedin", "instagram"].includes(key)) input.type = "url";
+  if (["photo", "image", "linkedin", "instagram", "facebook"].includes(key)) input.type = "url";
   if (key === "email") input.type = "email";
   input.id = "field-" + key;
   label.htmlFor = input.id;
@@ -653,7 +656,7 @@ function edit(item) {
   );
   const getters = {};
   const title = field(form, "Entry name", item.title);
-  // Team entries saved before the LinkedIn/Instagram fields existed still get those (empty) fields.
+  // Team entries saved before the LinkedIn/Instagram/Facebook fields existed still get those (empty) fields.
   const data = item.kind === "team" ? { ...defaults.team, ...item.data } : item.data;
   // Retired website text is not shown, but saving keeps its stored value as it was.
   const kept = {};

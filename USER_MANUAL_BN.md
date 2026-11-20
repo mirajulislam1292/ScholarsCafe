@@ -180,7 +180,7 @@ Website → **Link page** → **+ Add entry**:
 - **Blog** (`/resources/blog`): Website → **Blog** এর সব পোস্ট, নতুনগুলো আগে।
 - **ECA Notification** (`/resources/eca`): নতুন ECA এর খবর পেতে মানুষ এখানে ইমেইল দেয়।
 - **Webinar** (`/resources/webinars`): Website → **Resources** এর যেসব এন্ট্রির category `webinar`, `live` বা `video`।
-- **Broadcast** (`/resources/broadcast`): Website → **Resources** এর যেসব এন্ট্রির category `broadcast` (ঘোষণা ও আপডেট)।
+- **Podcast** (`/resources/podcast`): Website → **Resources** এর যেসব এন্ট্রির category `podcast` (এপিসোড, ঘোষণা ও আপডেট)। পুরনো `broadcast` এন্ট্রিগুলোও এখানে দেখায়, আর `/resources/broadcast` লিংক `/resources/podcast`-এ চলে যায়।
 
 কোনো পাতায় এখনো কিছু প্রকাশ না হলে সেটা সরাসরি বলে দেয় (যেমন "No webinars scheduled right now")।
 

@@ -79,7 +79,7 @@ const FALLBACK: Item[] = [
     url: "https://www.linkedin.com/company/scholars-cafe09/",
   },
   { id: "em", type: "social", platform: "email", label: "Email", url: "mailto:" + EMAIL },
-  { id: "call", type: "link", label: "Book a free strategy call", url: BOOK_LINK, highlight: true },
+  { id: "call", type: "link", label: "Book a Meeting", url: BOOK_LINK, highlight: true },
   { id: "res", type: "link", label: "Free guides", url: "/resources" },
   { id: "portal", type: "link", label: "Student portal", url: STUDENT_PORTAL_URL },
   { id: "site", type: "link", label: "Our website", url: "/" },

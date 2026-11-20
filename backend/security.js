@@ -124,18 +124,21 @@ const fields = {
     // Optional profile links (HTTPS). The icon is shown only when a link is set.
     linkedin: safeUrl.optional(),
     instagram: safeUrl.optional(),
+    facebook: safeUrl.optional(),
     position,
   }),
   faqs: z.object({ q: short, a: text, position }),
   // Public resources (guides, templates, live links). Package-only student material is private (Phase 3).
   resources: z.object({
     title: short,
-    // webinar/live/video show on scholarscafe.com/resources/webinars; broadcast on /resources/broadcast.
+    // webinar/live/video show on scholarscafe.com/resources/webinars; podcast on /resources/podcast
+    // ("broadcast" is the old name of podcast and still accepted, so older entries keep working).
     category: z.enum([
       "guide",
       "video",
       "live",
       "webinar",
+      "podcast",
       "broadcast",
       "course",
       "template",

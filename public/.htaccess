@@ -40,6 +40,9 @@ AddType font/woff2 .woff2
   RewriteCond %{HTTP_HOST} ^www\.scholarscafe\.com$ [NC]
   RewriteRule ^ https://scholarscafe.com%{REQUEST_URI} [R=301,L]
 
+  # Broadcast was renamed Podcast: keep old links working
+  RewriteRule ^resources/broadcast/?$ /resources/podcast [R=301,L]
+
   # Allow direct access to real files
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]

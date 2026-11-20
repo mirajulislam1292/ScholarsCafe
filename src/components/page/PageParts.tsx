@@ -158,7 +158,7 @@ export function Block({
 /** Closing call-to-action band, used at the end of every page. */
 export function CtaBand({
   title = "Start with one honest conversation.",
-  action = "Book a free strategy call",
+  action = "Book a Meeting",
   href = BOOK_LINK,
 }: {
   title?: ReactNode;

@@ -121,7 +121,7 @@ export function Navbar() {
                   : "bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md hover:bg-white/20"
               }`}
             >
-              <CmsText id="Navbar.33b0f3e06600"> Book a Free Call</CmsText>
+              <CmsText id="Navbar.cta.meeting">Book a Meeting</CmsText>
             </a>
             <button
               type="button"
@@ -206,7 +206,7 @@ export function Navbar() {
               href={BOOK_LINK}
               className="mt-3 inline-flex h-12 items-center justify-center rounded-full bg-ice-100 type-button text-blue-950"
             >
-              <CmsText id="Navbar.b2151df99763">Book Call</CmsText>
+              <CmsText id="Navbar.cta.meeting.mobile">Book a Meeting</CmsText>
             </a>
           </motion.div>
         )}
