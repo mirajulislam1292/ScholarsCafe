@@ -211,7 +211,7 @@ export function Contact({ showHeader = true }: { showHeader?: boolean } = {}) {
 
           {/* Right: form */}
           <Reveal>
-            <div className="rounded-3xl border border-neutral-900/[0.08] bg-white p-6 shadow-[0_4px_16px_rgb(4_28_49/0.04)] sm:p-8 md:p-10">
+            <div className="card-soft p-6 sm:p-8 md:p-10">
               <h3 className="type-h3 text-neutral-900">
                 <CmsText id="Contact.19ecf8fecb75">Send Us a Message</CmsText>
               </h3>
@@ -332,7 +332,7 @@ function ContactItem({
   const WA_LINK = useCmsValue("data.WA_LINK", CMS_DEFAULT_WA_LINK);
 
   const Inner = (
-    <div className="flex items-start gap-4 rounded-2xl border border-neutral-900/[0.08] p-5 transition-all hover:border-blue-300 hover:bg-ice-50">
+    <div className="flex items-start gap-4 card-soft card-hover p-5">
       <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-ice-100 text-blue-700">
         {icon}
       </div>

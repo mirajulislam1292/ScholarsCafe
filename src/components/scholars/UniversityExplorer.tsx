@@ -62,7 +62,7 @@ export function UniversityExplorer() {
   if (tuition !== "All") activeTags.push({ label: tuition, onRemove: () => setTuition("All") });
 
   return (
-    <section id="universities" className="bg-white section-y">
+    <section id="universities" className="tone-tint section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="max-w-2xl">
           <span className="hidden">
@@ -81,7 +81,7 @@ export function UniversityExplorer() {
 
         {/* Filter bar */}
         <Reveal>
-          <div className="section-body rounded-3xl border border-neutral-900/[0.08] bg-white p-6 shadow-[0_4px_16px_rgb(4_28_49/0.04)] md:p-8">
+          <div className="section-body card-soft p-6 md:p-8">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {COUNTRIES.length > 2 && (
                 <Select

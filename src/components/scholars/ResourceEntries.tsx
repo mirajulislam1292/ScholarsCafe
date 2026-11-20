@@ -32,10 +32,7 @@ export function ResourceEntries({
   return (
     <ul className="grid gap-6 md:grid-cols-2">
       {items.map((r) => (
-        <li
-          key={r.id}
-          className="flex flex-col overflow-hidden rounded-3xl border border-neutral-900/[0.08] bg-white"
-        >
+        <li key={r.id} className="card-soft card-hover flex flex-col overflow-hidden">
           {r.image && (
             <img src={r.image} alt="" loading="lazy" className="aspect-video w-full object-cover" />
           )}
