@@ -2231,3 +2231,153 @@ nav .nav-more[aria-expanded="true"]::after {
   flex: 1 1 220px;
   min-width: 0;
 }
+/* "Enable notifications": the same slim banner, a little more prominent. */
+.install-hint.enable {
+  border-color: var(--blue-300);
+  background: var(--blue-100);
+}
+.install-hint.enable strong {
+  color: var(--blue-800);
+}
+@media (max-width: 560px) {
+  .install-hint {
+    flex-wrap: wrap;
+  }
+  .install-hint p {
+    flex-basis: calc(100% - 46px);
+  }
+}
+/* The bell in the header: unread count, and a small list of recent alerts. */
+.bell-wrap {
+  position: relative;
+  flex: none;
+}
+.bell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 999px;
+}
+.bell svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bell-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: var(--white);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+.bell-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 40;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 12px;
+  box-shadow: 0 12px 32px rgb(4 28 49 / 0.14);
+}
+.bell-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px 8px;
+}
+.bell-head strong {
+  font-size: 15px;
+  margin: 0;
+}
+.bell-list {
+  display: grid;
+}
+.bell-item {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--neutral-800);
+  font-weight: 400;
+  text-align: left;
+}
+.bell-item:hover {
+  background: var(--ice-50);
+}
+.bell-item.unread {
+  background: var(--blue-50);
+}
+.bell-title {
+  font-weight: 700;
+}
+.bell-body,
+.bell-item time {
+  color: var(--neutral-500);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.bell-panel > .link {
+  margin-top: 6px;
+}
+.push-diag dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+.push-diag dt {
+  color: var(--neutral-600);
+}
+.push-diag dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.push-results .ok {
+  color: var(--blue-700);
+}
+.push-results .error,
+.badge.warn {
+  color: var(--danger);
+}
+@media (max-width: 800px) {
+  /* Phones: the bell sits at the top right of the screen title. */
+  header {
+    position: relative;
+  }
+  header > div:first-child {
+    padding-right: 52px;
+  }
+  .bell-wrap {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .push-diag dl {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .push-diag dd {
+    margin-bottom: 8px;
+  }
+}

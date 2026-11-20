@@ -4911,45 +4911,101 @@ async function promptInstall(el) {
 }
 const phoneLike = () => isIos || matchMedia("(max-width: 800px), (pointer: coarse)").matches;
 /**
- * A one-line, dismissible banner above the screen, on phones and tablets only (on desktop the option
- * lives in Settings → Notifications). Part of the page flow, never on top of content. × remembers it.
+ * One slim banner above the screen (in the page flow, never over content), most important first:
+ * iPhone in a Safari tab → "Add to Home Screen first"; notifications not decided yet → "Enable
+ * notifications" (shown on every device, it is how alerts arrive); blocked → how to turn them back on;
+ * else, on phones with the browser's install prompt → "Install". × remembers a dismissal.
  */
-function showInstallHint() {
-  if (!me || me.role === "student" || $("install-hint") || $("workspace").hidden) return;
-  if (standalone() || !phoneLike() || (!installPrompt && !isIos)) return;
+function bannerState() {
+  if (!me || me.role === "student" || $("workspace").hidden) return null;
+  if (isIos && !standalone()) return "ios-install";
+  if (pushSupported() && Notification.permission === "default") return "enable";
+  if (pushSupported() && Notification.permission === "denied") return "denied";
+  if (!standalone() && phoneLike() && installPrompt) return "install";
+  return null;
+}
+const DISMISS_KEY = {
+  "ios-install": "install-hint",
+  install: "install-hint",
+  denied: "push-denied",
+};
+let enableLater = false;
+function deniedHelp() {
+  if (isIos)
+    return "Notifications are off for SC Studio. Turn them on in iPhone Settings → Notifications → SC Studio → Allow Notifications (and Sounds, Badges).";
+  if (/android/i.test(navigator.userAgent))
+    return "Notifications are blocked. Turn them on: long-press the SC Studio icon → App info → Notifications → Allow (in Chrome: ⋮ → Settings → Site settings → Notifications).";
+  return "Notifications are blocked. Click the site icon left of the address → Notifications → Allow, then reload.";
+}
+function showAlertsBanner() {
+  $("install-hint")?.remove();
+  const state = bannerState();
+  if (!state || (state === "enable" && enableLater)) return;
   try {
-    if (localStorage.getItem("install-hint") === "dismissed") return;
+    if (DISMISS_KEY[state] && localStorage.getItem(DISMISS_KEY[state]) === "dismissed") return;
   } catch {}
-  const bar = node("div", undefined, "install-hint");
+  const bar = node("div", undefined, "install-hint" + (state === "enable" ? " enable" : ""));
   bar.id = "install-hint";
   bar.setAttribute("role", "region");
-  bar.setAttribute("aria-label", "Install the app");
-  bar.append(
-    node(
-      "p",
-      installPrompt
-        ? "Install SC Studio for quick access and notifications."
-        : "Add SC Studio to your Home Screen to get notifications.",
-    ),
-  );
-  bar.append(
-    installPrompt
-      ? button("Install", () => promptInstall(), "primary")
-      : button("How", () => navigate("Notifications")),
-  );
-  const close = button(
-    "×",
-    () => {
-      try {
-        localStorage.setItem("install-hint", "dismissed");
-      } catch {}
-      bar.remove();
-    },
-    "install-close",
-  );
-  close.setAttribute("aria-label", "Dismiss");
-  bar.append(close);
+  bar.setAttribute("aria-label", "Notifications");
+  const text = node("p");
+  if (state === "enable")
+    text.append(
+      node("strong", "Enable notifications"),
+      " – you need this to get alerts for messages, tasks, mail and form submissions.",
+    );
+  else
+    text.textContent = {
+      "ios-install":
+        "Add to Home Screen first: tap Share → “Add to Home Screen”, then open SC Studio from there to get notifications (iOS 16.4+).",
+      denied: deniedHelp(),
+      install: "Install SC Studio for quick access and notifications.",
+    }[state];
+  bar.append(text);
+  if (state === "enable")
+    bar.append(
+      // requestPermission() must run right inside the tap (iOS 16.4+ ignores it otherwise).
+      button(
+        "Enable notifications",
+        () => enableFromTap(Notification.requestPermission()),
+        "primary",
+      ),
+      button("Later", () => {
+        enableLater = true;
+        bar.remove();
+      }),
+    );
+  if (state === "ios-install") bar.append(button("How", () => navigate("Notifications")));
+  if (state === "install") bar.append(button("Install", () => promptInstall(), "primary"));
+  if (DISMISS_KEY[state]) {
+    const close = button(
+      "×",
+      () => {
+        try {
+          localStorage.setItem(DISMISS_KEY[state], "dismissed");
+        } catch {}
+        bar.remove();
+      },
+      "install-close",
+    );
+    close.setAttribute("aria-label", "Dismiss");
+    bar.append(close);
+  }
   $("notice").before(bar);
+}
+function showInstallHint() {
+  showAlertsBanner();
+}
+async function enableFromTap(asked) {
+  try {
+    await turnOnPush(asked);
+    notice("Notifications are on for this device.");
+  } catch (e) {
+    report(e);
+  }
+  showAlertsBanner();
+  refreshBell();
+  if (section === "Notifications") render();
 }
 
 // In-app alert while the app is open: a short bundled sound and a badge on the menu item.
@@ -5004,17 +5060,127 @@ function inAppAlert(open) {
     api("inbox")
       .then((r) => setMailBadge(r.unread))
       .catch(() => {});
+  refreshBell();
 }
 function clearSectionBadge(key) {
+  markAlertsRead(key);
   if (!newBySection[key]) return;
   delete newBySection[key];
   markSection(key);
 }
-// Opening the app clears the icon badge (Badging API; iOS 16.4+ Home Screen apps, Chrome, Edge).
-const clearAppBadge = () => navigator.clearAppBadge?.().catch(() => {});
+// ---------- The bell: recent alerts, unread count, and the app icon badge (Badging API) ----------
+const BELL_ICON = "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0";
+const bell = { unread: 0, items: [] };
+const setAppBadge = (n) =>
+  (n > 0 ? navigator.setAppBadge?.(n) : navigator.clearAppBadge?.())?.catch?.(() => {});
+const clearAppBadge = () => setAppBadge(0);
+function buildBell() {
+  if ($("bell") || !me || me.role === "student") return;
+  const wrap = node("div", undefined, "bell-wrap");
+  const b = node("button", undefined, "bell");
+  b.id = "bell";
+  b.type = "button";
+  b.setAttribute("aria-label", "Notifications");
+  b.setAttribute("aria-expanded", "false");
+  b.setAttribute("aria-controls", "bell-panel");
+  b.append(icon(BELL_ICON), node("span", "", "bell-count"));
+  const panel = node("div", undefined, "bell-panel card");
+  panel.id = "bell-panel";
+  panel.hidden = true;
+  b.onclick = () => toggleBell(panel.hidden);
+  wrap.append(b, panel);
+  document.querySelector("main header").append(wrap);
+  document.addEventListener("click", (e) => {
+    if (!panel.hidden && !wrap.contains(e.target)) toggleBell(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !panel.hidden) toggleBell(false);
+  });
+}
+function drawBell() {
+  const count = $("bell")?.querySelector(".bell-count");
+  if (count) {
+    count.textContent = bell.unread > 9 ? "9+" : String(bell.unread);
+    count.hidden = !bell.unread;
+    $("bell").setAttribute(
+      "aria-label",
+      bell.unread ? `Notifications, ${bell.unread} unread` : "Notifications",
+    );
+  }
+  setAppBadge(bell.unread);
+  const panel = $("bell-panel");
+  if (!panel || panel.hidden) return;
+  const head = node("div", undefined, "bell-head");
+  head.append(node("strong", "Notifications"));
+  if (bell.unread)
+    head.append(
+      button(
+        "Mark all read",
+        async () => {
+          await markAlertsRead();
+        },
+        "link",
+      ),
+    );
+  const list = node("div", undefined, "bell-list");
+  for (const a of bell.items) {
+    const item = node("button", undefined, "bell-item" + (a.read ? "" : " unread"));
+    item.type = "button";
+    item.append(
+      node("span", a.title, "bell-title"),
+      node("span", a.body, "bell-body"),
+      node("time", mailDate(a.created_at)),
+    );
+    item.onclick = () => {
+      toggleBell(false);
+      if (a.open && $("nav").querySelector(`[data-section="${CSS.escape(a.open)}"]`))
+        navigate(a.open);
+      else markAlertsRead(a.open);
+    };
+    list.append(item);
+  }
+  if (!bell.items.length) list.append(node("p", "No alerts yet.", "empty"));
+  const foot = button(
+    "Notification settings",
+    () => {
+      toggleBell(false);
+      navigate("Notifications");
+    },
+    "link",
+  );
+  panel.replaceChildren(head, list, foot);
+}
+function toggleBell(open) {
+  const panel = $("bell-panel");
+  if (!panel) return;
+  panel.hidden = !open;
+  $("bell").setAttribute("aria-expanded", String(open));
+  if (open) refreshBell();
+}
+async function refreshBell() {
+  if (!$("bell")) return;
+  try {
+    Object.assign(bell, await api("push/alerts"));
+  } catch {
+    return;
+  }
+  drawBell();
+}
+/** Marks alerts read: all of them, or only those for one screen (when that screen is opened). */
+async function markAlertsRead(open) {
+  if (open !== undefined && !bell.items.some((a) => !a.read && a.open === open)) return;
+  const r = await api("push/alerts/read", open ? { open } : {}).catch(() => null);
+  if (r) await refreshBell();
+}
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") clearAppBadge();
+  if (document.visibilityState === "visible") {
+    refreshBell();
+    showAlertsBanner(); // permission may have changed in Settings meanwhile
+  }
 });
+setInterval(() => {
+  if (document.visibilityState === "visible") refreshBell();
+}, 60000);
 const b64url = (s) =>
   Uint8Array.from(
     atob(
@@ -5052,14 +5218,13 @@ async function currentSubscription() {
   const reg = await navigator.serviceWorker.getRegistration();
   return reg ? reg.pushManager.getSubscription() : null;
 }
-async function turnOnPush() {
+async function turnOnPush(asked) {
   if (!pushSupported())
     throw Error(isIos && !standalone() ? IOS_PUSH_NOTE : "This browser can't show notifications.");
-  const permission = await Notification.requestPermission();
+  // Asked synchronously inside the tap that called this (required on iPhone).
+  const permission = await (asked ?? Notification.requestPermission());
   if (permission !== "granted")
-    throw Error(
-      "Notifications are blocked. Allow them for this site in your browser or phone settings, then try again.",
-    );
+    throw Error(permission === "denied" ? deniedHelp() : "Notifications were not allowed.");
   const reg = await navigator.serviceWorker.ready;
   const { publicKey } = await api("push");
   const key = b64url(publicKey);
@@ -5070,7 +5235,11 @@ async function turnOnPush() {
     await sub.unsubscribe();
     sub = null;
   }
-  sub ||= await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+  try {
+    sub ||= await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+  } catch (e) {
+    throw Error("This device couldn't register for push: " + (e?.message || e?.name || "error"));
+  }
   await api("push/subscribe", { ...sub.toJSON(), device: deviceName() });
 }
 async function turnOffPush() {
@@ -5083,7 +5252,9 @@ async function turnOffPush() {
 async function syncPush() {
   if (!pushSupported() || Notification.permission !== "granted") return;
   const sub = await currentSubscription();
-  if (sub) await api("push/subscribe", { ...sub.toJSON(), device: deviceName() });
+  // Allowed but never registered (or the registration was lost): register now, no tap needed.
+  if (!sub) return turnOnPush(Promise.resolve("granted"));
+  await api("push/subscribe", { ...sub.toJSON(), device: deviceName() });
 }
 
 async function renderNotifications() {
@@ -5103,8 +5274,8 @@ async function renderNotifications() {
   if (on)
     actions.append(
       button("Send a test", async () => {
-        await api("push/test", {});
-        notice("Test sent. It should arrive in a few seconds.");
+        const r = await api("push/test", {});
+        testResults(results, r);
       }),
       button("Turn off", async () => {
         await turnOffPush();
@@ -5125,15 +5296,41 @@ async function renderNotifications() {
       ),
     );
   card.append(actions);
+  const results = node("div", undefined, "push-results");
+  results.setAttribute("aria-live", "polite");
+  card.append(results);
+  if (Notification?.permission === "denied") card.append(node("p", deniedHelp(), "muted"));
   if (isIos || !pushSupported()) card.append(node("p", IOS_PUSH_NOTE, "muted"));
   screen.append(card);
+
+  // What this device reports, to find out quickly why nothing arrives.
+  const reg = await navigator.serviceWorker?.getRegistration().catch(() => null);
+  const diag = node("article", undefined, "card push-diag");
+  const rows = [
+    ["Notifications permission", pushSupported() ? Notification.permission : "not supported here"],
+    ["Opened as installed app", standalone() ? "yes" : "no (browser tab)"],
+    [
+      "Service worker",
+      reg?.active ? "active, scope " + new URL(reg.scope).pathname : "not running",
+    ],
+    ["Registered for push", sub ? "yes, via " + new URL(sub.endpoint).hostname : "no"],
+    ["Your devices on the server", String(data.devices.length)],
+    ["App icon badge", "setAppBadge" in navigator ? "supported" : "not supported here"],
+  ];
+  diag.append(node("h2", "Check this device"));
+  const dl = node("dl");
+  for (const [k, v] of rows) dl.append(node("dt", k), node("dd", v));
+  diag.append(dl);
+  screen.append(diag);
 
   const what = node("article", undefined, "card");
   const list = node("ul");
   for (const t of [
     "A new team chat message (pinned messages are marked 📌).",
     "A task assigned to you, and reminders before its deadline.",
-    ...(canPublishRole(me.role) ? ["A new email to contact@scholarscafe.com."] : []),
+    ...(canPublishRole(me.role)
+      ? ["A new email to contact@scholarscafe.com.", "A new form submission or website inquiry."]
+      : []),
   ])
     list.append(node("li", t));
   what.append(
@@ -5160,7 +5357,15 @@ async function renderNotifications() {
     const row = node("div", undefined, "card row");
     row.append(
       node("span", d.device || "Device"),
-      node("span", "Added " + new Date(d.created_at).toLocaleDateString(), "badge"),
+      node(
+        "span",
+        d.last_error
+          ? `Last push failed (${d.last_status || "network"}): ${d.last_error}`
+          : d.last_ok_at
+            ? "Last push delivered " + new Date(d.last_ok_at).toLocaleString()
+            : "Added " + new Date(d.created_at).toLocaleDateString(),
+        "badge" + (d.last_error ? " warn" : ""),
+      ),
       button("Remove", async () => {
         if (sub && (await sha16(sub.endpoint)) === d.key) await sub.unsubscribe().catch(() => {});
         await api("push/unsubscribe", { id: d.id });
@@ -5170,6 +5375,23 @@ async function renderNotifications() {
     screen.append(row);
   }
   if (!data.devices.length) screen.append(node("p", "No devices yet.", "empty"));
+}
+/** Shows exactly what each push service (Apple, Google, Mozilla, Microsoft) answered to the test. */
+function testResults(box, r) {
+  box.replaceChildren();
+  if (!r.results.length) {
+    box.append(
+      node("p", "No devices are registered for you yet. Tap Turn on notifications first.", "muted"),
+    );
+    return;
+  }
+  for (const x of r.results) {
+    const line = node("p", undefined, x.ok ? "ok" : "error");
+    line.textContent = x.ok
+      ? `✓ ${x.device}: accepted by ${x.service} (${x.status}). It should arrive in a few seconds.`
+      : `✗ ${x.device}: ${x.service} answered ${x.status || "no response"}${x.body ? " — " + x.body : ""}${x.gone ? " (removed: turn notifications on again on that device)" : ""}`;
+    box.append(line);
+  }
 }
 async function sha16(text) {
   const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
@@ -5677,7 +5899,8 @@ try {
     if (e.data?.type === "push") return inAppAlert(canOpen(e.data.open) ? e.data.open : "");
     if (canOpen(e.data?.open)) navigate(e.data.open);
   });
-  clearAppBadge();
+  buildBell();
+  refreshBell();
   if (me.role !== "student") {
     syncPush().catch(() => {});
     showInstallHint();

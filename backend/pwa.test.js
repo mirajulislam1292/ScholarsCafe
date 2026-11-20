@@ -68,7 +68,9 @@ test("Push is iPhone-first: audible, tagged, renotifies, badges; app has a bundl
   assert.match(sw, /silent: false/);
   assert.match(sw, /renotify: true/);
   assert.match(sw, /tag,/);
-  assert.match(sw, /setAppBadge\(shown\.length\)/);
+  // Icon badge = the unread count the server sends (falls back to notifications still showing).
+  assert.match(sw, /appBadge\(Number\(d\.badge\)\)/);
+  assert.match(sw, /self\.navigator\.setAppBadge\(n\)/);
   assert.match(sw, /postMessage\(\{ type: "push", open \}\)/);
   const wav = await request(app).get("/sounds/notify.wav").buffer(true).expect(200);
   assert.match(wav.headers["content-type"], /audio\/(wav|x-wav|wave)/);
@@ -82,10 +84,34 @@ test("Install hint: a slim in-flow banner (never the sidebar's <aside>), phones 
   const css = readFileSync(new URL("./public/style.css", import.meta.url), "utf8");
   // The global `aside` rule is the fixed 240px sidebar; the hint once inherited it and covered the chat.
   assert.doesNotMatch(js, /node\("aside"[^)]*install/);
-  const hint = js.slice(js.indexOf("function showInstallHint"), js.indexOf("// In-app alert"));
-  assert.match(hint, /phoneLike\(\)/, "not shown on desktop");
-  assert.match(hint, /localStorage\.setItem\("install-hint", "dismissed"\)/);
+  const hint = js.slice(js.indexOf("function bannerState"), js.indexOf("// In-app alert"));
+  assert.match(hint, /phoneLike\(\) && installPrompt/, "install banner not shown on desktop");
+  assert.match(hint, /localStorage\.setItem\(DISMISS_KEY\[state\], "dismissed"\)/);
   assert.match(hint, /\$\("notice"\)\.before\(bar\)/, "part of the page flow");
   const rule = /\.install-hint \{([^}]*)\}/.exec(css)[1];
   assert.doesNotMatch(rule, /position:\s*(fixed|absolute)/);
+});
+
+test("Enable prompt: on top of every screen while undecided; asked inside the tap; blocked/iPhone help", async () => {
+  const { readFileSync } = await import("node:fs");
+  const js = readFileSync(new URL("./public/app.js", import.meta.url), "utf8");
+  const state = js.slice(js.indexOf("function bannerState"), js.indexOf("const DISMISS_KEY"));
+  // Order matters: iPhone Safari tab first (push needs the Home Screen app), then undecided, then blocked.
+  const order = ["ios-install", "enable", "denied", "install"].map((k) => state.indexOf(`"${k}"`));
+  assert.deepEqual(
+    [...order].sort((a, b) => a - b),
+    order,
+  );
+  assert.match(state, /Notification\.permission === "default"\) return "enable"/);
+  assert.match(js, /Enable notifications<|"Enable notifications"/);
+  assert.match(js, /you need this to get alerts for messages, tasks, mail and form submissions/);
+  // iOS 16.4+: requestPermission() runs synchronously in the click handler, before any await.
+  assert.match(js, /\(\) => enableFromTap\(Notification\.requestPermission\(\)\)/);
+  assert.match(js, /await \(asked \?\? Notification\.requestPermission\(\)\)/);
+  assert.match(js, /Settings → Notifications → SC Studio → Allow Notifications/);
+  // Allowed but not registered: register without asking again.
+  assert.match(js, /if \(!sub\) return turnOnPush\(Promise\.resolve\("granted"\)\)/);
+  // Bell: count, list, and the app icon badge from the same unread number.
+  assert.match(js, /setAppBadge\(bell\.unread\)/);
+  assert.match(js, /api\("push\/alerts"\)/);
 });
