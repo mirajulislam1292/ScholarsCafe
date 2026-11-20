@@ -37,7 +37,7 @@ export function ResourcesPreview() {
             <Reveal key={r.title} delay={i * 0.06}>
               <Link
                 to="/resources"
-                className="group flex h-full flex-col justify-between gap-10 rounded-3xl border border-neutral-900/[0.06] bg-white p-8 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
+                className="group flex h-full flex-col justify-between gap-6 rounded-3xl border border-neutral-900/[0.06] bg-white p-7 transition-[transform,box-shadow] duration-700 ease-premium hover:-translate-y-1 hover:shadow-[0_24px_60px_rgb(15_40_70/0.08)]"
               >
                 <div>
                   <p className="type-caption text-blue-700">{clean(r.tag)}</p>
