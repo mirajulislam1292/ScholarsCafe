@@ -11,6 +11,7 @@ import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
 import { verifyTurnstile } from "./security.js";
 import { makeToken, readToken } from "./tokens.js";
+import { queuePush, inboxReaderIds } from "./push.js";
 import { checkFile, FILE_TYPES, MAX_FILE } from "./files.js";
 import { FORM_TEMPLATES } from "./form-templates.js";
 import { xlsx } from "./xlsx.js";
@@ -815,6 +816,13 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
           [inquiryId, name, email, phone, message, form.id, JSON.stringify(clean)],
           c,
         );
+        // Owners and admins get a push + bell alert for every new submission (a short preview only).
+        await queuePush(store, c, await inboxReaderIds(store, c), {
+          title: "New form submission",
+          body: `${form.title}: ${name}`,
+          open: "Leads",
+          tag: "lead",
+        });
         if (form.notify)
           await q(
             "INSERT INTO mail_outbox (id,subject,body,reply_to) VALUES (?,?,?,?)",

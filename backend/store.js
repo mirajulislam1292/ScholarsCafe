@@ -136,6 +136,9 @@ export class Store {
     await add("mail_outbox", "from_contact", "from_contact BOOLEAN NOT NULL DEFAULT FALSE");
     await add("mail_outbox", "in_reply_to", "in_reply_to VARCHAR(255) NULL");
     await add("mail_outbox", "references_hdr", "references_hdr TEXT NULL");
+    // Push diagnostics: the push service's last answer for each device (e.g. 403 from Apple).
+    await add("push_subscriptions", "last_status", "last_status INT NULL");
+    await add("push_subscriptions", "last_error", "last_error VARCHAR(300) NULL");
     // Team workspace tables (staff_messages, staff_tasks, staff_task_assignees, staff_activity) are new
     // CREATE TABLE IF NOT EXISTS statements in schema.sql, which initialize() runs on every start.
   }
@@ -158,6 +161,7 @@ export class Store {
     await this.query("DELETE FROM oauth_attempts WHERE expires_at<UTC_TIMESTAMP()");
     await this.query("DELETE FROM email_codes WHERE expires_at<UTC_TIMESTAMP()");
     await this.query("DELETE FROM rate_limits WHERE expires_at<UTC_TIMESTAMP()");
+    await this.query("DELETE FROM staff_alerts WHERE created_at<UTC_TIMESTAMP()-INTERVAL 30 DAY");
   }
   async checkRateLimit(scope, identity, limit, seconds) {
     const window = Math.floor(Date.now() / (seconds * 1000));
