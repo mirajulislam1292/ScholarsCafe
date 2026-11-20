@@ -47,7 +47,8 @@ function sessionStore(expiresAt, sql = []) {
     query: async (q, a) => (sql.push([q, a]), q.startsWith("SELECT") ? [] : { affectedRows: 1 }),
   };
 }
-const renewals = (store) => store.sql.filter(([q]) => q.startsWith("UPDATE sessions SET expires_at"));
+const renewals = (store) =>
+  store.sql.filter(([q]) => q.startsWith("UPDATE sessions SET expires_at"));
 
 test("Sign-out cause: a tab or installed app left open never reloads /api/me, so its session used to run out", async () => {
   // A session renewed 10 days ago (20 days left): any signed-in request slides it back to 30 days.

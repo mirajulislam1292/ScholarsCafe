@@ -90,7 +90,10 @@ function fakeStore(actor) {
         db.tasks.push({ id, title, details, status, due_at, created_by });
         return { affectedRows: 1 };
       }
-      if (q.startsWith("SELECT * FROM staff_tasks") || q.startsWith("SELECT id,created_by FROM staff_tasks"))
+      if (
+        q.startsWith("SELECT * FROM staff_tasks") ||
+        q.startsWith("SELECT id,created_by FROM staff_tasks")
+      )
         return db.tasks.filter((t) => t.id === a[0] && !t.deleted_at);
       if (q.includes("FROM staff_tasks t LEFT JOIN users u"))
         return db.tasks
@@ -364,7 +367,10 @@ test("Tasks: every staff member sees all tasks; only the assigner, an assignee o
   const as = (who) => {
     actor = people[who];
     return {
-      get: (p) => request(app).get("/api" + p).set("Cookie", cookie),
+      get: (p) =>
+        request(app)
+          .get("/api" + p)
+          .set("Cookie", cookie),
       post: (p, body = {}) =>
         request(app)
           .post("/api" + p)
@@ -375,7 +381,11 @@ test("Tasks: every staff member sees all tasks; only the assigner, an assignee o
     };
   };
   const created = await as("admin")
-    .post("/workspace/tasks", { title: "Write the FAQ", assignees: [people.mentor.id], due: "2026-12-01T18:00" })
+    .post("/workspace/tasks", {
+      title: "Write the FAQ",
+      assignees: [people.mentor.id],
+      due: "2026-12-01T18:00",
+    })
     .expect(201);
   const id = created.body.id;
   // An editor who has nothing to do with it still sees it, with who it's for, the deadline and the status.
@@ -389,18 +399,26 @@ test("Tasks: every staff member sees all tasks; only the assigner, an assignee o
   assert.equal(seen[0].can_edit, false);
   assert.equal(seen[0].can_status, false);
   // ...but can't change or delete it.
-  await as("editor").post("/workspace/tasks/" + id, { status: "done" }).expect(403);
+  await as("editor")
+    .post("/workspace/tasks/" + id, { status: "done" })
+    .expect(403);
   await as("editor").post(`/workspace/tasks/${id}/delete`).expect(403);
   // The assignee may move it along (status only).
   const forMentor = (await as("mentor").get("/workspace/tasks").expect(200)).body.items[0];
   assert.equal(forMentor.can_status, true);
   assert.equal(forMentor.can_edit, false);
-  await as("mentor").post("/workspace/tasks/" + id, { status: "doing" }).expect(200);
-  await as("mentor").post("/workspace/tasks/" + id, { title: "Renamed" }).expect(400);
+  await as("mentor")
+    .post("/workspace/tasks/" + id, { status: "doing" })
+    .expect(200);
+  await as("mentor")
+    .post("/workspace/tasks/" + id, { title: "Renamed" })
+    .expect(400);
   // Whoever assigned it may edit it fully, even without the admin role.
   store.db.tasks[0].created_by = people.editor.id;
   assert.equal((await as("editor").get("/workspace/tasks")).body.items[0].can_edit, true);
-  await as("editor").post("/workspace/tasks/" + id, { title: "Write the FAQ page" }).expect(200);
+  await as("editor")
+    .post("/workspace/tasks/" + id, { title: "Write the FAQ page" })
+    .expect(200);
   assert.equal(store.db.tasks[0].title, "Write the FAQ page");
   await as("editor").post(`/workspace/tasks/${id}/delete`).expect(200);
   // Students never reach the team's tasks (the admin portal refuses their session outright).

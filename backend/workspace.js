@@ -357,7 +357,10 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
           c,
         );
         if (!mine)
-          throw fail(403, "Only the person who assigned it, its assignees or an admin can change it.");
+          throw fail(
+            403,
+            "Only the person who assigned it, its assignees or an admin can change it.",
+          );
         await q(
           "UPDATE staff_tasks SET status=?,completed_at=?,updated_at=UTC_TIMESTAMP() WHERE id=?",
           [status, status === "done" ? current.completed_at || new Date() : null, id],
@@ -400,9 +403,10 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
   });
   app.post("/api/workspace/tasks/:id/delete", async (req, res) => {
     const id = uuid.parse(req.params.id);
-    const [task] = await q("SELECT id,created_by FROM staff_tasks WHERE id=? AND deleted_at IS NULL", [
-      id,
-    ]);
+    const [task] = await q(
+      "SELECT id,created_by FROM staff_tasks WHERE id=? AND deleted_at IS NULL",
+      [id],
+    );
     if (!task) throw fail(404, "Task not found.");
     if (!canEditTask(req.actor, task))
       throw fail(403, "Only the person who assigned it or an admin can delete a task.");

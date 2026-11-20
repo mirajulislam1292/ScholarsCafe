@@ -51,7 +51,9 @@ test("Sign-out cause: one 401 in the middle of work used to bounce people to the
     ["/api/workspace/tasks", "/api/me", "/api/workspace/tasks"],
   );
   // /api/me can't be reached either: still not signed out.
-  const flaky = setup(replies([401, { error: "no" }], "offline", "offline", "offline", "offline", [200, { ok: 1 }]));
+  const flaky = setup(
+    replies([401, { error: "no" }], "offline", "offline", "offline", "offline", [200, { ok: 1 }]),
+  );
   assert.deepEqual(await flaky.api("workspace/tasks"), { ok: 1 });
   assert.equal(flaky.signedOut(), 0);
   // Confirmed by /api/me: signed out.

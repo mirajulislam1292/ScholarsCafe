@@ -4617,9 +4617,7 @@ function taskCard(t, { admin, overdue, staff }) {
       ),
     );
   if (t.assigned_by)
-    meta.append(
-      node("span", "From " + (t.created_by === me.id ? "you" : t.assigned_by), "muted"),
-    );
+    meta.append(node("span", "From " + (t.created_by === me.id ? "you" : t.assigned_by), "muted"));
   card.append(meta);
   if (t.details) card.append(node("p", t.details, "task-details"));
   if (t.can_edit ?? admin) {
