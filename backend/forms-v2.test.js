@@ -235,6 +235,12 @@ test("Form file uploads: website only, content checked, private, and claimed onc
   const data = JSON.parse(lead[1][6]);
   assert.equal(data.cv.name, ".._.._my cv.png");
   assert.ok(store.uploads[0].inquiry_id, "the upload is attached to the submission");
+  // Owners and admins get a push + bell alert for the new submission (queued in the same transaction).
+  assert.ok(
+    store.sql.some(([q]) =>
+      q.startsWith("SELECT id FROM users WHERE active=1 AND role IN ('owner','admin')"),
+    ),
+  );
   // The same ticket can't be used for a second submission.
   const again = await request(app)
     .post("/public/forms/apply")

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import request from "supertest";
 import { createApp } from "./app.js";
-import { deliverPush, pushEndpointOk, queuePush, vapidKeys, preview } from "./push.js";
+import { deliverPush, pushEndpointOk, queuePush, vapidKeys, preview, subjectOk } from "./push.js";
 import { queueTaskReminders } from "./workspace.js";
 
 const ADMIN = "https://admin.scholarscafe.com";
@@ -148,6 +148,11 @@ test("Delivery: short payload to each device, dead subscriptions removed", async
   const p = calls[0].payload;
   assert.equal(p.open, "Team chat");
   assert.ok(p.body.length <= 90, "preview only");
+  assert.equal(p.badge, 1, "unread count for the app icon badge");
+  // The bell keeps one alert per person.
+  assert.ok(
+    store.db.sql.some(([q, a]) => q.startsWith("INSERT INTO staff_alerts") && a.length === 8),
+  );
   assert.equal(calls[0].opts.vapidDetails.publicKey, "PUB");
   assert.equal(preview("a  b\n c"), "a b c");
 });
@@ -155,7 +160,18 @@ test("Delivery: short payload to each device, dead subscriptions removed", async
 test("Routes: subscribe validates the endpoint; mentors allowed, students refused", async () => {
   const mentor = fakeStore({ id: ID(5), role: "mentor", email: "m@x.com" });
   mentor.db.settings.vapid_keys = "PUB.PRIV";
-  const app = createApp(mentor, config);
+  const sent = [];
+  const app = createApp(mentor, {
+    ...config,
+    // Apple's answer when the VAPID JWT is rejected: shown to the person, recorded on the device.
+    pushSend: async (sub, payload) => {
+      sent.push([sub.endpoint, JSON.parse(payload)]);
+      throw Object.assign(new Error("Received unexpected response code"), {
+        statusCode: 403,
+        body: '{"reason":"BadJwtToken"}',
+      });
+    },
+  });
   const got = await request(app).get("/api/push").set("Cookie", cookie).expect(200);
   assert.equal(got.body.publicKey, "PUB");
   const post = (body) =>
@@ -172,18 +188,29 @@ test("Routes: subscribe validates the endpoint; mentors allowed, students refuse
   );
   assert.equal(mentor.db.subs[0].user_id, ID(5));
   assert.equal(mentor.db.subs[0].device, "Chrome on Android");
-  // Test notification goes to yourself only.
-  await request(app)
+  // "Send a test" goes to your own devices right away and shows each push service's real answer.
+  const t = await request(app)
     .post("/api/push/test")
     .set("Cookie", cookie)
     .set("Origin", ADMIN)
     .set("X-CSRF-Token", "c")
     .send({})
     .expect(200);
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0][0], FCM);
+  assert.equal(sent[0][1].open, "Notifications");
+  assert.equal(t.body.subject, "mailto:contact@scholarscafe.com");
   assert.deepEqual(
-    mentor.db.outbox.map((r) => r.user_id),
-    [ID(5)],
+    t.body.results.map((r) => [r.device, r.service, r.ok, r.status, r.body]),
+    [["Chrome on Android", "fcm.googleapis.com", false, 403, '{"reason":"BadJwtToken"}']],
   );
+  // The failure is kept on the device (shown in Notifications) and the device is not deleted.
+  assert.ok(
+    mentor.db.sql.some(
+      ([q, a]) => q.startsWith("UPDATE push_subscriptions SET last_status") && a[0] === 403,
+    ),
+  );
+  assert.equal(mentor.db.subs.length, 1);
   // Students never reach the team admin API; the student portal refuses them too.
   const student = fakeStore({ id: ID(6), role: "student", email: "s@x.com" });
   await request(createApp(student, config)).get("/api/push").set("Cookie", cookie).expect(401);
@@ -260,4 +287,100 @@ test("Triggers: chat (not the sender), pinned marked, task assignee, deadline re
   assert.equal(rem.db.outbox[0].user_id, ID(4));
   assert.equal(r.title, "Due in about 2 hours");
   assert.equal(r.body, "Visa form");
+});
+
+test("VAPID subject: only real mailto:/https: (Apple rejects others), else the default", async () => {
+  for (const ok of [
+    "mailto:contact@scholarscafe.com",
+    "https://scholarscafe.com",
+    "https://scholarscafe.com/x",
+  ])
+    assert.ok(subjectOk(ok), ok);
+  for (const bad of [
+    "contact@scholarscafe.com",
+    "mailto:contact",
+    "https://localhost",
+    "http://scholarscafe.com",
+    "mailto: a@b.co",
+    "",
+  ])
+    assert.equal(subjectOk(bad), false, bad);
+  const k = await vapidKeys(fakeStore(), {
+    VAPID_PUBLIC_KEY: "A",
+    VAPID_PRIVATE_KEY: "B",
+    VAPID_SUBJECT: "contact@scholarscafe.com",
+  });
+  assert.equal(k.subject, "mailto:contact@scholarscafe.com");
+});
+
+test("Bell: recent alerts and unread count; reading clears all or one screen", async () => {
+  const actor = { id: ID(2), role: "admin", email: "a@x.com" };
+  const alerts = [
+    {
+      id: 2,
+      title: "New form submission",
+      body: "Consultation: Rafi",
+      open: "Leads",
+      read_at: null,
+      created_at: new Date(),
+    },
+    {
+      id: 1,
+      title: "Team chat",
+      body: "boss: hi",
+      open: "Team chat",
+      read_at: new Date(),
+      created_at: new Date(),
+    },
+  ];
+  const store = fakeStore(actor, (q, a) => {
+    if (q.startsWith("SELECT id,title,body,open")) return a[0] === ID(2) ? alerts : [];
+    if (q.startsWith("SELECT COUNT(*) AS n FROM staff_alerts"))
+      return [{ n: alerts.filter((x) => !x.read_at).length }];
+    if (q.startsWith("UPDATE staff_alerts SET read_at")) {
+      for (const x of alerts)
+        if (!x.read_at && (a.length === 1 || x.open === a[1])) x.read_at = new Date();
+      return { affectedRows: 1 };
+    }
+  });
+  const app = createApp(store, config);
+  const got = await request(app).get("/api/push/alerts").set("Cookie", cookie).expect(200);
+  assert.equal(got.body.unread, 1);
+  assert.deepEqual(
+    got.body.items.map((x) => [x.title, x.open, x.read]),
+    [
+      ["New form submission", "Leads", false],
+      ["Team chat", "Team chat", true],
+    ],
+  );
+  const read = await request(app)
+    .post("/api/push/alerts/read")
+    .set("Cookie", cookie)
+    .set("Origin", ADMIN)
+    .set("X-CSRF-Token", "c")
+    .send({ open: "Leads" })
+    .expect(200);
+  assert.equal(read.body.unread, 0);
+  assert.ok(
+    store.db.sql.some(([q, a]) => q.includes("AND open=?") && a[0] === ID(2) && a[1] === "Leads"),
+  );
+});
+
+test("Trigger: a new website inquiry alerts owners and admins", async () => {
+  const store = fakeStore(null, (q) => {
+    if (q.startsWith("SELECT id FROM users WHERE active=1 AND role IN ('owner','admin')"))
+      return [{ id: ID(1) }, { id: ID(2) }];
+  });
+  await request(createApp(store, config))
+    .post("/public/inquiries")
+    .set("Origin", "https://scholarscafe.com")
+    .send({ name: "Rafi Ahmed", email: "rafi@example.com", phone: "1", message: "Hi" })
+    .expect(201);
+  const rows = store.db.outbox.map((r) => ({ user: r.user_id, ...JSON.parse(r.payload) }));
+  assert.deepEqual(
+    rows.map((r) => r.user),
+    [ID(1), ID(2)],
+  );
+  assert.equal(rows[0].title, "New website inquiry");
+  assert.equal(rows[0].open, "Leads");
 });

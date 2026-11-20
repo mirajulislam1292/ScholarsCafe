@@ -64,11 +64,12 @@ self.addEventListener("fetch", (event) => {
 // iPhone first: a normal, audible notification (never silent), so iOS 16.4+ Home Screen apps and
 // Chrome/Edge/Safari on desktop play the system sound. Each kind of event shares a tag (one card per
 // chat/task/mail thread instead of a pile) and renotify makes every new one alert again.
-const appBadge = async () => {
-  // App icon badge (Badging API: iOS 16.4+ Home Screen apps, Chrome/Edge installed apps) = notifications shown.
+const appBadge = async (count) => {
+  // App icon badge (Badging API: iOS 16.4+ Home Screen apps, Chrome/Edge installed apps). The server sends
+  // the person's unread alert count; otherwise count the notifications still showing.
   if (!self.navigator.setAppBadge) return;
-  const shown = await self.registration.getNotifications();
-  await (shown.length ? self.navigator.setAppBadge(shown.length) : self.navigator.clearAppBadge());
+  const n = Number.isFinite(count) ? count : (await self.registration.getNotifications()).length;
+  await (n > 0 ? self.navigator.setAppBadge(n) : self.navigator.clearAppBadge());
 };
 self.addEventListener("push", (event) => {
   let d = {};
@@ -87,7 +88,7 @@ self.addEventListener("push", (event) => {
         silent: false,
         data: { open },
       })
-      .then(appBadge)
+      .then(() => appBadge(Number(d.badge)))
       .catch(() => {})
       // An open app window plays its own short sound and badges the right menu item.
       .then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true }))

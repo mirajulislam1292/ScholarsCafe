@@ -433,6 +433,8 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
   device VARCHAR(120) NOT NULL DEFAULT '',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_ok_at DATETIME NULL,
+  last_status INT NULL,
+  last_error VARCHAR(300) NULL,
   INDEX push_user (user_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -472,4 +474,16 @@ CREATE TABLE IF NOT EXISTS contact_mail (
   UNIQUE KEY imap_uid (uidvalidity, uid),
   INDEX mail_received (received_at),
   INDEX mail_message (message_id)
+);
+-- Recent alerts per staff member (the bell in the admin header, and the app icon badge count).
+CREATE TABLE IF NOT EXISTS staff_alerts (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  title VARCHAR(80) NOT NULL,
+  body VARCHAR(120) NOT NULL DEFAULT '',
+  open VARCHAR(40) NOT NULL DEFAULT '',
+  read_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX alerts_user (user_id, read_at, id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

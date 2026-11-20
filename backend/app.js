@@ -19,7 +19,7 @@ import { installVisualRoutes } from "./visual.js";
 import { installWorkspaceRoutes } from "./workspace.js";
 import { installEcaAdminRoutes, installEcaPublicRoutes } from "./eca.js";
 import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
-import { installPushRoutes } from "./push.js";
+import { installPushRoutes, queuePush, inboxReaderIds } from "./push.js";
 import { installInboxRoutes } from "./inbox.js";
 import { installEmailPreviewRoutes } from "./email-previews.js";
 import {
@@ -279,6 +279,12 @@ export function createApp(
         [randomUUID(), data.name, data.email, data.phone, data.message],
         c,
       );
+      await queuePush(store, c, await inboxReaderIds(store, c), {
+        title: "New website inquiry",
+        body: data.name,
+        open: "Leads",
+        tag: "lead",
+      });
       await queueNotification(
         c,
         "New website inquiry",

@@ -20,8 +20,16 @@ export const nameOf = (email) => String(email || "").split("@")[0];
 
 let cached = null;
 /** { publicKey, privateKey, subject }: env vars first, then the stored pair, else a new pair is stored. */
+/** Apple and Google reject a VAPID subject that is not a real mailto: or https: URL (403 BadJwtToken). */
+export const DEFAULT_SUBJECT = "mailto:contact@scholarscafe.com";
+export const subjectOk = (s) =>
+  /^mailto:[^@\s/]+@[^@\s/]+\.[a-z]{2,}$/i.test(String(s || "")) ||
+  /^https:\/\/(?!localhost)[^\s/]+\.[a-z]{2,}(\/\S*)?$/i.test(String(s || ""));
 export async function vapidKeys(store, config, generate = webpush.generateVAPIDKeys) {
-  const subject = config.VAPID_SUBJECT || "mailto:contact@scholarscafe.com";
+  const wanted = String(config.VAPID_SUBJECT || "").trim();
+  if (wanted && !subjectOk(wanted))
+    console.error("VAPID_SUBJECT is not a valid mailto:/https: URL; using " + DEFAULT_SUBJECT);
+  const subject = wanted && subjectOk(wanted) ? wanted : DEFAULT_SUBJECT;
   if (config.VAPID_PUBLIC_KEY && config.VAPID_PRIVATE_KEY)
     return {
       publicKey: config.VAPID_PUBLIC_KEY.trim(),
@@ -61,16 +69,22 @@ function kick() {
   kickTimer.unref?.();
 }
 
-/** Queues one notification per user. `payload`: { title, body, open, tag }. */
+/**
+ * Queues one notification per user, and keeps it as an alert for the bell in the header (and the app
+ * icon badge count). `payload`: { title, body, open, tag }.
+ */
 export async function queuePush(store, c, userIds, payload) {
   const ids = [...new Set(userIds.filter(Boolean))];
   if (!ids.length) return 0;
-  const json = JSON.stringify({
-    title: preview(payload.title, 60),
-    body: preview(payload.body),
-    open: payload.open || "",
-    tag: payload.tag || "",
-  });
+  const title = preview(payload.title, 60);
+  const body = preview(payload.body);
+  const open = String(payload.open || "").slice(0, 40);
+  const json = JSON.stringify({ title, body, open, tag: payload.tag || "" });
+  await store.query(
+    `INSERT INTO staff_alerts (user_id,title,body,open) VALUES ${ids.map(() => "(?,?,?,?)").join(",")}`,
+    ids.flatMap((id) => [id, title, body, open]),
+    c,
+  );
   await store.query(
     `INSERT INTO push_outbox (user_id,payload) VALUES ${ids.map(() => "(?,?)").join(",")}`,
     ids.flatMap((id) => [id, json]),
@@ -88,7 +102,7 @@ export async function staffIds(store, c, except) {
   );
   return rows.map((r) => r.id);
 }
-/** Owners and admins: the only people who may read the contact@ inbox. */
+/** Owners and admins: the only people who may read the contact@ inbox (and every lead). */
 export async function inboxReaderIds(store, c) {
   const rows = await store.query(
     "SELECT id FROM users WHERE active=1 AND role IN ('owner','admin')",
@@ -98,9 +112,63 @@ export async function inboxReaderIds(store, c) {
   return rows.map((r) => r.id);
 }
 
+/** Unread alert counts per user (the number on the app icon). */
+async function unreadCounts(store, users) {
+  if (!users.length) return {};
+  const rows = await store.query(
+    `SELECT user_id,COUNT(*) AS n FROM staff_alerts WHERE read_at IS NULL AND user_id IN (${users.map(() => "?").join(",")}) GROUP BY user_id`,
+    users,
+  );
+  return Object.fromEntries((rows || []).map((r) => [r.user_id, Number(r.n)]));
+}
+const OPTIONS = (keys) => ({ TTL: 24 * 3600, urgency: "high", vapidDetails: keys, timeout: 10000 });
+const hostOf = (url) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "";
+  }
+};
+/**
+ * Sends one payload to one device and records the push service's answer on the subscription.
+ * 404/410 (gone) deletes it. Returns { ok, status, body } with the service's reply (for "Send a test").
+ */
+async function sendOne(store, s, payload, keys, send) {
+  try {
+    const r = await send(
+      { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+      payload,
+      OPTIONS(keys),
+    );
+    await store.query(
+      "UPDATE push_subscriptions SET last_ok_at=UTC_TIMESTAMP(),last_status=?,last_error=NULL WHERE id=?",
+      [r?.statusCode || 201, s.id],
+    );
+    return { ok: true, status: r?.statusCode || 201, body: String(r?.body || "").slice(0, 200) };
+  } catch (error) {
+    const status = error?.statusCode || 0;
+    const body = String(error?.body || error?.message || error?.name || "")
+      .replace(/\s+/g, " ")
+      .slice(0, 200);
+    if (status === 404 || status === 410) {
+      await store.query("DELETE FROM push_subscriptions WHERE id=?", [s.id]);
+    } else {
+      await store.query("UPDATE push_subscriptions SET last_status=?,last_error=? WHERE id=?", [
+        status || null,
+        body || "Network error",
+        s.id,
+      ]);
+      // e.g. "Push delivery failed: 403 web.push.apple.com BadJwtToken" (never the payload or keys).
+      console.error("Push delivery failed:", status || "network", hostOf(s.endpoint), body);
+    }
+    return { ok: false, status, body, gone: status === 404 || status === 410 };
+  }
+}
+
 /**
  * Sends what is queued (up to 100 per run). Push is best effort: a failed send is not retried, but a
- * subscription the push service says is gone (404/410) is deleted at once.
+ * subscription the push service says is gone (404/410) is deleted at once. Each payload carries the
+ * person's unread count so the service worker can set the app icon badge.
  */
 export async function deliverPush(store, config, send = webpush.sendNotification) {
   const rows = await store.query(
@@ -117,33 +185,52 @@ export async function deliverPush(store, config, send = webpush.sendNotification
     `SELECT id,user_id,endpoint,p256dh,auth FROM push_subscriptions WHERE user_id IN (${users.map(() => "?").join(",")})`,
     users,
   );
+  const unread = await unreadCounts(store, users);
   let sent = 0;
   const gone = new Set();
-  for (const row of rows)
+  for (const row of rows) {
+    let payload = row.payload;
+    try {
+      payload = JSON.stringify({ ...JSON.parse(row.payload), badge: unread[row.user_id] || 1 });
+    } catch {}
     for (const s of subs.filter((s) => s.user_id === row.user_id && !gone.has(s.id))) {
-      try {
-        await send(
-          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-          row.payload,
-          {
-            TTL: 24 * 3600,
-            urgency: "high",
-            vapidDetails: keys,
-            timeout: 10000,
-          },
-        );
-        sent++;
-        await store.query("UPDATE push_subscriptions SET last_ok_at=UTC_TIMESTAMP() WHERE id=?", [
-          s.id,
-        ]);
-      } catch (error) {
-        if (error?.statusCode === 404 || error?.statusCode === 410) {
-          gone.add(s.id);
-          await store.query("DELETE FROM push_subscriptions WHERE id=?", [s.id]);
-        } else console.error("Push delivery failed:", error?.statusCode || error?.name);
-      }
+      const r = await sendOne(store, s, payload, keys, send);
+      if (r.ok) sent++;
+      if (r.gone) gone.add(s.id);
     }
+  }
   return { sent, removed: gone.size };
+}
+
+/** "Send a test": straight to every device of this person, returning each push service's answer. */
+export async function sendTest(store, config, userId, send = webpush.sendNotification) {
+  const keys = await vapidKeys(store, config);
+  await store.query("INSERT INTO staff_alerts (user_id,title,body,open) VALUES (?,?,?,?)", [
+    userId,
+    "Notifications are on",
+    "This is a test from Scholars Cafe Studio.",
+    "Notifications",
+  ]);
+  const unread = await unreadCounts(store, [userId]);
+  const payload = JSON.stringify({
+    title: "Notifications are on",
+    body: "This is a test from Scholars Cafe Studio.",
+    open: "Notifications",
+    tag: "test",
+    badge: unread[userId] || 1,
+  });
+  const subs = await store.query(
+    "SELECT id,user_id,endpoint,p256dh,auth,device FROM push_subscriptions WHERE user_id=?",
+    [userId],
+  );
+  const results = [];
+  for (const s of subs)
+    results.push({
+      device: s.device || "Device",
+      service: hostOf(s.endpoint),
+      ...(await sendOne(store, s, payload, keys, send)),
+    });
+  return { subject: keys.subject, results };
 }
 
 // Only the real browser push services: an endpoint is a URL the server will POST to, so no other hosts.
@@ -172,7 +259,7 @@ export function installPushRoutes(app, { store, fail, config }) {
     staffOnly(req);
     const { publicKey } = await vapidKeys(store, config);
     const devices = await store.query(
-      "SELECT id,device,created_at,last_ok_at,endpoint_hash FROM push_subscriptions WHERE user_id=? ORDER BY created_at DESC",
+      "SELECT id,device,created_at,last_ok_at,last_status,last_error,endpoint,endpoint_hash FROM push_subscriptions WHERE user_id=? ORDER BY created_at DESC",
       [req.actor.id],
     );
     res.json({
@@ -182,6 +269,9 @@ export function installPushRoutes(app, { store, fail, config }) {
         device: d.device,
         created_at: d.created_at,
         last_ok_at: d.last_ok_at,
+        last_status: d.last_status ?? null,
+        last_error: d.last_error ?? null,
+        service: hostOf(d.endpoint),
         key: d.endpoint_hash.slice(0, 16),
       })),
     });
@@ -224,12 +314,48 @@ export function installPushRoutes(app, { store, fail, config }) {
     staffOnly(req);
     if (store.checkRateLimit && !(await store.checkRateLimit("push_test", req.actor.id, 5, 300)))
       throw fail(429, "Wait a few minutes before sending another test.");
-    await queuePush(store, undefined, [req.actor.id], {
-      title: "Notifications are on",
-      body: "This is how Scholars Cafe Studio will let you know about new messages.",
-      open: "Notifications",
-      tag: "test",
+    // Sent now (not queued) so the screen can show exactly what Apple/Google/Mozilla answered.
+    res.json(await sendTest(store, config, req.actor.id, config.pushSend));
+  });
+
+  // ---------- The bell: recent alerts for this person ----------
+  app.get("/api/push/alerts", async (req, res) => {
+    staffOnly(req);
+    const items = await store.query(
+      "SELECT id,title,body,open,read_at,created_at FROM staff_alerts WHERE user_id=? ORDER BY id DESC LIMIT 20",
+      [req.actor.id],
+    );
+    const [count] = await store.query(
+      "SELECT COUNT(*) AS n FROM staff_alerts WHERE user_id=? AND read_at IS NULL",
+      [req.actor.id],
+    );
+    res.json({
+      unread: Number(count?.n || 0),
+      items: items.map((a) => ({
+        id: Number(a.id),
+        title: a.title,
+        body: a.body,
+        open: a.open,
+        read: Boolean(a.read_at),
+        created_at: a.created_at,
+      })),
     });
-    res.json({ ok: true });
+  });
+  // Marks alerts read: all of them (bell opened), or those for one screen (that screen was opened).
+  app.post("/api/push/alerts/read", async (req, res) => {
+    staffOnly(req);
+    const { open } = z
+      .object({ open: z.string().max(40).optional() })
+      .strict()
+      .parse(req.body);
+    await store.query(
+      `UPDATE staff_alerts SET read_at=UTC_TIMESTAMP() WHERE user_id=? AND read_at IS NULL${open ? " AND open=?" : ""}`,
+      open ? [req.actor.id, open] : [req.actor.id],
+    );
+    const [count] = await store.query(
+      "SELECT COUNT(*) AS n FROM staff_alerts WHERE user_id=? AND read_at IS NULL",
+      [req.actor.id],
+    );
+    res.json({ ok: true, unread: Number(count?.n || 0) });
   });
 }
