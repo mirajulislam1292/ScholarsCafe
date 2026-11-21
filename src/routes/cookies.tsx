@@ -11,7 +11,7 @@ export const Route = createFileRoute("/cookies")({
   head: () =>
     seo({
       path: "/cookies",
-      title: "Cookie Notice - Scholars Cafe",
+      title: "Cookie Notice | Scholars Cafe",
       description:
         "How Scholars Cafe uses cookies and similar technologies on its website, and how you can control them.",
     }),

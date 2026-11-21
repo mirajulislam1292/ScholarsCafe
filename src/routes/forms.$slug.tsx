@@ -97,7 +97,7 @@ function FormPage() {
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((f: Form) => {
         setForm(f);
-        document.title = f.title + " · Scholars Cafe";
+        document.title = f.title + " | Scholars Cafe";
       })
       .catch(() => setMissing(true));
   }, []);

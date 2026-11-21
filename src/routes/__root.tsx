@@ -88,7 +88,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // Structured data: who Scholars Cafe is (see src/lib/seo.ts). Pages add their own title, description and canonical.
     scripts: [{ type: "application/ld+json", children: ORGANIZATION_JSON_LD }],
     links: [
-      { rel: "icon", type: "image/png", href: "/brand/icon-180.png" },
+      { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/brand/icon-32.png" },
+      { rel: "icon", type: "image/png", sizes: "180x180", href: "/brand/icon-180.png" },
       { rel: "apple-touch-icon", href: "/brand/icon-180.png" },
       {
         rel: "preload",
