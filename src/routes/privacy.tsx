@@ -11,7 +11,7 @@ export const Route = createFileRoute("/privacy")({
   head: () =>
     seo({
       path: "/privacy",
-      title: "Privacy Policy - Scholars Cafe",
+      title: "Privacy Policy | Scholars Cafe",
       description:
         "How Scholars Cafe collects, uses, and protects the personal information of students and families using our admissions services.",
     }),

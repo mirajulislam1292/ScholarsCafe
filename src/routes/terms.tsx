@@ -11,7 +11,7 @@ export const Route = createFileRoute("/terms")({
   head: () =>
     seo({
       path: "/terms",
-      title: "Terms of Service - Scholars Cafe",
+      title: "Terms of Service | Scholars Cafe",
       description:
         "The terms that govern your use of Scholars Cafe's admissions consultancy, test prep, and related services.",
     }),
