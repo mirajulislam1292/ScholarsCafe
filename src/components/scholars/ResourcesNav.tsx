@@ -31,6 +31,12 @@ export const RESOURCE_PAGES = [
     label: "Podcast",
     desc: "Episodes, announcements and updates from the Scholars Cafe team.",
   },
+  {
+    id: "tools",
+    href: "/resources/tools",
+    label: "Essay Tools",
+    desc: "Core values finder, Common App activity helper and official supplemental prompts.",
+  },
 ] as const;
 
 /** Hub: four cards linking to the sub-pages. */

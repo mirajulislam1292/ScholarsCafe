@@ -26,6 +26,7 @@ import { Route as ResourcesIndexRouteImport } from './routes/resources.index'
 import { Route as ResourcesBlogRouteImport } from './routes/resources.blog'
 import { Route as ResourcesEcaRouteImport } from './routes/resources.eca'
 import { Route as ResourcesPodcastRouteImport } from './routes/resources.podcast'
+import { Route as ResourcesToolsRouteImport } from './routes/resources.tools'
 import { Route as ResourcesWebinarsRouteImport } from './routes/resources.webinars'
 import { Route as UniversitiesStateRouteImport } from './routes/universities.$state'
 
@@ -114,6 +115,11 @@ const ResourcesPodcastRoute = ResourcesPodcastRouteImport.update({
   path: '/resources/podcast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResourcesToolsRoute = ResourcesToolsRouteImport.update({
+  id: '/resources/tools',
+  path: '/resources/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourcesWebinarsRoute = ResourcesWebinarsRouteImport.update({
   id: '/resources/webinars',
   path: '/resources/webinars',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/resources/blog': typeof ResourcesBlogRoute
   '/resources/eca': typeof ResourcesEcaRoute
   '/resources/podcast': typeof ResourcesPodcastRoute
+  '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/universities/$state': typeof UniversitiesStateRoute
   '/forms/': typeof FormsIndexRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/resources/blog': typeof ResourcesBlogRoute
   '/resources/eca': typeof ResourcesEcaRoute
   '/resources/podcast': typeof ResourcesPodcastRoute
+  '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/universities/$state': typeof UniversitiesStateRoute
   '/forms': typeof FormsIndexRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/resources/blog': typeof ResourcesBlogRoute
   '/resources/eca': typeof ResourcesEcaRoute
   '/resources/podcast': typeof ResourcesPodcastRoute
+  '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/universities/$state': typeof UniversitiesStateRoute
   '/forms/': typeof FormsIndexRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/resources/blog'
     | '/resources/eca'
     | '/resources/podcast'
+    | '/resources/tools'
     | '/resources/webinars'
     | '/universities/$state'
     | '/forms/'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/resources/blog'
     | '/resources/eca'
     | '/resources/podcast'
+    | '/resources/tools'
     | '/resources/webinars'
     | '/universities/$state'
     | '/forms'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/resources/blog'
     | '/resources/eca'
     | '/resources/podcast'
+    | '/resources/tools'
     | '/resources/webinars'
     | '/universities/$state'
     | '/forms/'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   ResourcesBlogRoute: typeof ResourcesBlogRoute
   ResourcesEcaRoute: typeof ResourcesEcaRoute
   ResourcesPodcastRoute: typeof ResourcesPodcastRoute
+  ResourcesToolsRoute: typeof ResourcesToolsRoute
   ResourcesWebinarsRoute: typeof ResourcesWebinarsRoute
   UniversitiesStateRoute: typeof UniversitiesStateRoute
   FormsIndexRoute: typeof FormsIndexRoute
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesPodcastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resources/tools': {
+      id: '/resources/tools'
+      path: '/resources/tools'
+      fullPath: '/resources/tools'
+      preLoaderRoute: typeof ResourcesToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resources/webinars': {
       id: '/resources/webinars'
       path: '/resources/webinars'
@@ -431,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcesBlogRoute: ResourcesBlogRoute,
   ResourcesEcaRoute: ResourcesEcaRoute,
   ResourcesPodcastRoute: ResourcesPodcastRoute,
+  ResourcesToolsRoute: ResourcesToolsRoute,
   ResourcesWebinarsRoute: ResourcesWebinarsRoute,
   UniversitiesStateRoute: UniversitiesStateRoute,
   FormsIndexRoute: FormsIndexRoute,
