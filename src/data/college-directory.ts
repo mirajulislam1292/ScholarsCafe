@@ -3303,6 +3303,1169 @@ export const COLLEGES: College[] = [
     },
   },
   {
+    slug: "colgate-university",
+    name: "Colgate University",
+    type: "LAC",
+    city: "Hamilton",
+    state: "New York",
+    code: "NY",
+    rank: {
+      label: "#22 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 17310,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    admitted: {
+      value: 3030,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    edApplicants: {
+      value: 1342,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    edAdmitted: {
+      value: 477,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Binding ED I and ED II; no Early Action (CDS C22 = No). ED counts are ED I and ED II combined as reported in C21.",
+    sat: {
+      value: "1450-1510",
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    act: {
+      value: "33-35",
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.colgate.edu/admission-aid/apply/first-year-applicants",
+    },
+    testNote:
+      "SAT/ACT optional with no disadvantage for non-submitters; self-reported scores accepted; superscores both. 23% submitted SAT and 16% ACT (CDS C9).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    policyQuote:
+      "Colgate meets 100% of demonstrated financial need for every admitted student, including those who would require a full financial package. ... We consider financial need during the review process for all applicants.",
+    intlAided: {
+      value: 119,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    intlAvgAward: {
+      value: 86649,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    intlNote:
+      "International applicants must submit the CSS Profile by the deadline (Nov 1 ED I; Jan 22 ED II/RD per the international page). Application is fee-free for international students. CDS H6 checks both need-based and non-need-based aid.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 73206,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    fees: {
+      value: 440,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    roomBoard: {
+      value: 18446,
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    costNote:
+      "CDS 2025-26 G1 (2026-2027 year), first-year column; food and housing on campus is 19,192 for other undergraduates.",
+    ielts: {
+      value: 7,
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    toefl: {
+      value: 4.5,
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    duolingo: {
+      value: 130,
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    englishNote:
+      "Minimums for non-native speakers not at an English-medium school. TOEFL iBT minimum is stated as 4.5, i.e. on the new 1-6 band scale, not the old 0-120 total. No waiver based on SAT; interviews via InitialView or Vericant encouraged.",
+    nationalCurriculum: {
+      value:
+        "Results of external national or international exams must be sent by the testing agency or a school official; seniors send mid-year grades or, if the school has none, predicted final grades, then a final transcript.",
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    ed2: {
+      value: "2027-01-15",
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.colgate.edu/sites/default/files/2026-07/CDS-PDF-2025-2026.pdf",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+    },
+    deadlineNote:
+      "Deadlines page lists Nov. 1 (ED I) and Jan. 15 (ED II, RD) without a year; taken as the 2026-27 cycle. Notifications mid-Dec, mid-Feb, late March.",
+    highlight:
+      "Colgate's lucky number is 13, after the 13 men who founded it in Hamilton with 13 dollars and 13 prayers.",
+    image: {
+      src: "/media/colleges/colgate-university.webp",
+      card: "/media/colleges/colgate-university-card.webp",
+      title: "Colgate University Across Taylor Lake.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Colgate_University_Across_Taylor_Lake.jpg",
+      author: "Balon Greyjoy",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
+    urls: {
+      admissions: "https://www.colgate.edu/admission-aid/apply/first-year-applicants",
+      international: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+      aid: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+      cds: "https://www.colgate.edu/about/offices-centers-institutes/office-institutional-analysis/common-data-set",
+    },
+  },
+  {
+    slug: "college-of-the-holy-cross",
+    name: "College of the Holy Cross",
+    type: "LAC",
+    city: "Worcester",
+    state: "Massachusetts",
+    code: "MA",
+    rank: {
+      label: "#22 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2023-2024",
+    applicants: {
+      value: 8670,
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    admitted: {
+      value: 1829,
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    edApplicants: {
+      value: 761,
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    edAdmitted: {
+      value: 511,
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Binding ED I and ED II; no Early Action (CDS C22 = No; admissions page confirms). ED counts are for the Fall 2023 entering class.",
+    sat: {
+      value: "1270-1420",
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    act: {
+      value: "28-32",
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply",
+    },
+    testNote:
+      "Submitting SAT/ACT is entirely optional with no disadvantage; self-reported scores accepted; superscores SAT and ACT. Fall 2023: 35% submitted SAT, 19% ACT (CDS C9).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.holycross.edu/admissions-aid/tuition-financial-aid/financial-aid",
+    },
+    intlAidPolicy: {
+      value: "limited",
+      source: "https://www.holycross.edu/admissions-aid/tuition-financial-aid/financial-aid",
+    },
+    policyQuote:
+      "Holy Cross meets 100% of demonstrated financial need at time of admission for all admitted international students. Funding is limited, so financial aid for international applicants is very competitive.",
+    intlAided: {
+      value: 1,
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    intlAvgAward: {
+      value: 81875,
+      source: "https://www.holycross.edu/document/common-data-set-20232024",
+    },
+    intlNote:
+      "International aid applicants file the CSS Profile for International Students; all international applicants also submit the Holy Cross Certification of Finances and a bank letter or affidavit. Pages do not say need-blind or need-aware.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 70220,
+      source: "https://www.holycross.edu/admissions-aid/tuition-financial-aid/tuition-fees",
+    },
+    fees: {
+      value: 930,
+      source: "https://www.holycross.edu/admissions-aid/tuition-financial-aid/tuition-fees",
+    },
+    roomBoard: {
+      value: 20590,
+      source: "https://www.holycross.edu/admissions-aid/tuition-financial-aid/tuition-fees",
+    },
+    costNote:
+      "College tuition page for 2026-2027: fees = health service 470 + activity fee 460; food and housing = standard housing 11,500 + resident food plan 9,090. CDS 2023-24 G1 was left blank.",
+    ielts: {
+      value: 7,
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    toefl: {
+      value: 100,
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    duolingo: {
+      value: 120,
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    englishNote:
+      "Not minimums: the page says the most competitive applicants score TOEFL 100+, IELTS 7+ or DET 120. Required for non-native speakers not at an English-speaking high school. Duolingo can replace an interview.",
+    nationalCurriculum: {
+      value:
+        "Originals or notarized copies of all secondary school records are required, with certified English translations if needed.",
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    ed2: {
+      value: "2027-01-15",
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+    },
+    deadlineNote:
+      "Same deadlines for international applicants: ED I Nov 15, ED II Jan 15, RD Jan 15 (no year printed; taken as the 2026-27 cycle). No Early Action.",
+    highlight:
+      "Founded by the Jesuits in 1843, Holy Cross calls itself the only exclusively undergraduate Jesuit, Catholic liberal arts college in the US.",
+    image: null,
+    urls: {
+      admissions: "https://www.holycross.edu/admissions-aid/how-to-apply",
+      international: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+      aid: "https://www.holycross.edu/admissions-aid/tuition-financial-aid/financial-aid",
+      cds: "https://www.holycross.edu/about-holy-cross/offices-services/office-of-institutional-research-analytics",
+    },
+  },
+  {
+    slug: "smith-college",
+    name: "Smith College",
+    type: "LAC",
+    city: "Northampton",
+    state: "Massachusetts",
+    code: "MA",
+    rank: {
+      label: "#22 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 8102,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    admitted: {
+      value: 1816,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    edApplicants: {
+      value: 1107,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    edAdmitted: {
+      value: 371,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Binding ED I and ED II; no Early Action (CDS C22 = No). ED counts are for the Fall 2025 entering class, both rounds combined.",
+    sat: {
+      value: "1420-1520",
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    act: {
+      value: "32-34",
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.smith.edu/admission-aid/apply-smith/standardized-testing-policy",
+    },
+    testNote:
+      "Test-optional since 2009; SAT/ACT optional for all applicants including international citizens. 30% (SAT) and 15% (ACT) of enrolled first-years submitted (CDS C9).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.smith.edu/admission-aid/tuition-aid-applicants/international-applicants",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://catalog.smith.edu/smith-college/fees-expenses-financial-aid/",
+    },
+    policyQuote:
+      "The college does operate under a need-sensitive admission policy that typically affects only a small fraction of our applicant pool. ... However, the college may choose to consider a student's level of financial need when making the final admission decision.",
+    intlAided: {
+      value: 155,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    intlAvgAward: {
+      value: 89103,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    intlNote:
+      "Smith meets full documented need of admitted students who apply for aid by the deadlines, with no loans in need-based packages. Internationals must apply for aid before admission (CSS Profile plus tax/income statements; CSS due Nov 15 ED I, Jan 6 ED II, Jan 25 RD) or are never eligible. Family contribution is fixed for all four years. CDS H6 checks both need-based and non-need-based aid.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 70460,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    fees: {
+      value: 308,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    roomBoard: {
+      value: 24520,
+      source: "https://drive.google.com/file/d/1qDhlH43IbOCQzP6xtUHMzTmgEss1I-68/view",
+    },
+    costNote:
+      "CDS 2025-26 G1 (2026-2027 year); food and housing on campus (housing 12,300 + food 12,300).",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "TOEFL, IELTS, PTE or Duolingo required for international citizens whose first language is not English and who did not attend an English-medium school; exemptions include IB Diploma or A levels taught in English. No minimum scores published for undergraduates. TOEFL MyBest accepted.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://www.smith.edu/admission-aid/apply-smith/first-year-applicants",
+    },
+    ed2: {
+      value: "2027-01-05",
+      source: "https://www.smith.edu/admission-aid/apply-smith/first-year-applicants",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.smith.edu/admission-aid/apply-smith/first-year-applicants",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://www.smith.edu/admission-aid/apply-smith/first-year-applicants",
+    },
+    deadlineNote:
+      "Admission page: ED I Nov 15, ED II Jan 5, RD Jan 15 (no year printed). The 2026-27 catalog separately says the international undergraduate RD deadline is January 25, which matches the international CSS Profile deadline; the admission page date is used here.",
+    highlight:
+      "Smith's Picker Engineering Program produced the first graduates of an ABET-accredited engineering program at a women's college, in 2004.",
+    image: {
+      src: "/media/colleges/smith-college.webp",
+      card: "/media/colleges/smith-college-card.webp",
+      title: "College Hall - Smith College - Northampton, MA - DSC02109.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:College_Hall_-_Smith_College_-_Northampton,_MA_-_DSC02109.jpg",
+      author: "Daderot",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
+    urls: {
+      admissions: "https://www.smith.edu/admission-aid/apply-smith/first-year-applicants",
+      international: "https://www.smith.edu/admission-aid/apply-smith/standardized-testing-policy",
+      aid: "https://www.smith.edu/admission-aid/tuition-aid-applicants/international-applicants",
+      cds: "https://www.smith.edu/your-campus/offices-services/institutional-research/data-about-smith",
+    },
+  },
+  {
+    slug: "bates-college",
+    name: "Bates College",
+    type: "LAC",
+    city: "Lewiston",
+    state: "Maine",
+    code: "ME",
+    rank: {
+      label: "#26 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 9660,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    admitted: {
+      value: 1433,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    edApplicants: {
+      value: 949,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    edAdmitted: {
+      value: 318,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Binding ED I and ED II; no Early Action (CDS C22 = No). ED counts are both rounds combined as reported in C21.",
+    sat: {
+      value: "1325-1510",
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    act: {
+      value: "31-34",
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.bates.edu/admission/apply/",
+    },
+    testNote:
+      "SAT/ACT optional for all applicants, including internationals, since 1984; official or self-reported scores accepted. Only 13% (SAT) and 8% (ACT) of enrolled first-years submitted (CDS C9).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://www.bates.edu/admission/apply/international-students/",
+    },
+    policyQuote:
+      "Bates meets the full calculated financial need for all admitted students, regardless of citizenship status. Bates is not need-blind when evaluating applications; however, the college offers one of the most generous and inclusive financial aid programs in the United States.",
+    intlAided: {
+      value: 106,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    intlAvgAward: {
+      value: 84952,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    intlNote:
+      "Need-based aid only (no merit scholarships). Non-US citizens apply with the Bates International Student Application for Financial Aid (BISAFA), not the CSS Profile, and must state intent to apply for aid before the admission decision; no later requests. Aid is grant plus campus work, no loans. Application is free.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 73760,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    fees: {
+      value: 475,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    roomBoard: {
+      value: 20800,
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    costNote:
+      "CDS 2025-26 G1 (2026-2027 year), first-year column; required fee 475 for first-years (0 for other undergraduates); food and housing on campus.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "TOEFL, IELTS or Duolingo English Test required if English is neither the native language nor the main language of secondary instruction; official scores only, best score accepted. No minimum scores published. InitialView/Vericant interview encouraged.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://www.bates.edu/admission/apply/application-options/",
+    },
+    ed2: {
+      value: "2027-01-10",
+      source: "https://www.bates.edu/admission/apply/application-options/",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.bates.edu/research/files/2026/06/CDS_2025-2026.pdf",
+    },
+    rd: {
+      value: "2027-01-10",
+      source: "https://www.bates.edu/admission/apply/application-options/",
+    },
+    deadlineNote:
+      "Application deadlines ED I Nov 15, ED II Jan 10, RD Jan 10 (page gives no year; taken as the 2026-27 cycle). Supporting materials may follow by Nov 20 (ED I) and Jan 15 (ED II/RD).",
+    highlight: "Bates has let every applicant choose whether to send SAT or ACT scores since 1984.",
+    image: null,
+    urls: {
+      admissions: "https://www.bates.edu/admission/apply/",
+      international: "https://www.bates.edu/admission/apply/international-students/",
+      aid: "https://www.bates.edu/admission/apply/international-students/",
+      cds: "https://www.bates.edu/research/common-data-set/",
+    },
+  },
+  {
+    slug: "macalester-college",
+    name: "Macalester College",
+    type: "LAC",
+    city: "Saint Paul",
+    state: "Minnesota",
+    code: "MN",
+    rank: {
+      label: "#28 National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 8819,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    admitted: {
+      value: 2481,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    edApplicants: {
+      value: 479,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    edAdmitted: {
+      value: 201,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Offers ED I, ED II and non-restrictive Early Action. CDS C21 gives ED counts (labelled 'For the Fall 2024 entering class' on the 2025-26 form); CDS C22 does not report EA counts.",
+    sat: {
+      value: "1350-1480",
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    act: {
+      value: "30-33",
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.macalester.edu/admissions/international/first-year/",
+    },
+    testNote:
+      "Test-optional; no minimum SAT/ACT. IB students must submit IB exam scores. 35% of enrolled first-years submitted SAT, 24% ACT (CDS).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.macalester.edu/admissions/international/faq/",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://www.macalester.edu/admissions/international/faq/",
+    },
+    policyQuote:
+      "Financial need also plays a role in admission decisions. This is necessary in order for Macalester to make sure our financial aid budget meets our promise of meeting 100% of demonstrated need for every student we admit.",
+    intlAided: {
+      value: 287,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    intlAvgAward: {
+      value: 59839,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    intlNote:
+      "International FAQ: students with the highest need (family contribution under $40,000) face the most competition; extra consideration for high-need internationals applying Early Decision. Aid interest must be stated at application (CSS Profile or ISAFA plus Macalester Financial Declaration); no aid can be awarded after admission.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 70632,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    fees: {
+      value: 230,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    roomBoard: {
+      value: 16476,
+      source:
+        "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+    costNote: "CDS G1 is reported for 2026-2027; tuition includes required course materials.",
+    ielts: {
+      value: 7,
+      source: "https://www.macalester.edu/admissions/international/faq/",
+    },
+    toefl: {
+      value: 100,
+      source: "https://www.macalester.edu/admissions/international/faq/",
+    },
+    duolingo: {
+      value: 130,
+      source: "https://www.macalester.edu/admissions/international/faq/",
+    },
+    englishNote:
+      "English tests are optional and there are no minimums; these are the scores of the 'most successful' submitters (TOEFL 100 for tests before Jan 2026, 5.0 on the new TOEFL scale after). Recommended for non-native speakers with under two years of English-medium schooling; InitialView/Vericant also accepted.",
+    nationalCurriculum: {
+      value:
+        "Transcripts should cover years 9-12/13 with available external exam results; applicants who have not sat final exams send predicted results. O Levels alone are not enough; A Level (and similar exam-based systems) applicants send O, AS and A Level results or predictions.",
+      source: "https://www.macalester.edu/admissions/international/faq/",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://www.macalester.edu/admissions/international/first-year/",
+    },
+    ed2: {
+      value: "2027-01-01",
+      source: "https://www.macalester.edu/admissions/international/first-year/",
+    },
+    ea: {
+      value: "2026-11-01",
+      source: "https://www.macalester.edu/admissions/international/first-year/",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://www.macalester.edu/admissions/international/first-year/",
+    },
+    deadlineNote:
+      "Early Action is non-restrictive (CDS C22). Page lists month/day only; years inferred from the current (2027-28 aid form) cycle.",
+    highlight:
+      "Macalester has flown the United Nations flag on campus every day since 1950, a symbol of its internationalism.",
+    image: {
+      src: "/media/colleges/macalester-college.webp",
+      card: "/media/colleges/macalester-college-card.webp",
+      title: "Macalester Weyerhauser Hall 2007.JPG",
+      page: "https://commons.wikimedia.org/wiki/File:Macalester_Weyerhauser_Hall_2007.JPG",
+      author: "SEWilco",
+      licence: "CC BY-SA 3.0",
+      licenceUrl: "http://creativecommons.org/licenses/by-sa/3.0/",
+    },
+    urls: {
+      admissions: "https://www.macalester.edu/admissions/",
+      international: "https://www.macalester.edu/admissions/international/first-year/",
+      aid: "https://www.macalester.edu/admissions/international/understanding-your-financial-aid-package/",
+      cds: "https://www.macalester.edu/institutional-research/wp-content/uploads/sites/515/CDS_2025-2026_Macalester-College_completed-1.pdf",
+    },
+  },
+  {
+    slug: "bucknell-university",
+    name: "Bucknell University",
+    type: "LAC",
+    city: "Lewisburg",
+    state: "Pennsylvania",
+    code: "PA",
+    rank: {
+      label: "#29 National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 11561,
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    admitted: {
+      value: 3723,
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    edApplicants: {
+      value: 1200,
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    edAdmitted: {
+      value: 656,
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "ED I and ED II only; no Early Action (CDS C22: No). ED counts in C21 combine both ED rounds.",
+    sat: {
+      value: "1170-1360",
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    act: {
+      value: "25-32",
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.bucknell.edu/admissions-aid/admissions-dates-deadlines",
+    },
+    testNote:
+      "CDS C8 (for Fall 2027): SAT/ACT not required but considered if submitted. Deadlines page describes a test-optional pilot: enrolling students who took the SAT/ACT must later send verified scores (research use only, does not change the decision). 68% of enrolled first-years submitted SAT, 18% ACT.",
+    needBasedForIntl: {
+      value: true,
+      source:
+        "https://www.bucknell.edu/admissions-aid/tuition-fees-financial-aid/apply-financial-aid/financial-aid-international-students",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source:
+        "https://www.bucknell.edu/admissions-aid/tuition-fees-financial-aid/apply-financial-aid/financial-aid-international-students",
+    },
+    policyQuote:
+      'Please be aware that competition is higher for applicants with higher financial need. Bucknell is currently not "need-blind" for international students.',
+    intlAided: {
+      value: 130,
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    intlAvgAward: {
+      value: 71387,
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    intlNote:
+      "International aid is described as limited and competitive. Aid applicants submit the free ISAFA (CSS Profile accepted, no CSS fee waivers) plus a certified bank statement or Financial Certification Document, due Nov 1 (ED I) or Jan 10 (ED II/RD). Bucknell's general aid page says it is not able to meet full financial need.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 72600,
+      source:
+        "https://www.bucknell.edu/admissions-aid/tuition-fees-financial-aid/apply-financial-aid/financial-aid-international-students",
+    },
+    fees: {
+      value: 900,
+      source:
+        "https://www.bucknell.edu/admissions-aid/tuition-fees-financial-aid/apply-financial-aid/financial-aid-international-students",
+    },
+    roomBoard: {
+      value: 18380,
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    costNote:
+      "International aid page 2026-27 budget: tuition $72,600, student fee $900, housing $11,400 + food $6,980 (= CDS G1 food and housing $18,380).",
+    ielts: {
+      value: 7,
+      source:
+        "https://www.bucknell.edu/admissions-aid/apply-bucknell/undergraduate-admission-requirements/admission-requirements-international-students",
+    },
+    toefl: {
+      value: 100,
+      source:
+        "https://www.bucknell.edu/admissions-aid/apply-bucknell/undergraduate-admission-requirements/admission-requirements-international-students",
+    },
+    duolingo: {
+      value: 130,
+      source:
+        "https://www.bucknell.edu/admissions-aid/apply-bucknell/undergraduate-admission-requirements/admission-requirements-international-students",
+    },
+    englishNote:
+      "Minimums: TOEFL 5 on the new scale (100 if taken before Jan 21, 2026), IELTS 7, PTE 68, DET 130. Required if English is not the first language or schooling was not in English for at least three years; waiver possible on written request from the school.",
+    nationalCurriculum: {
+      value:
+        "Official secondary school transcripts, certificates and academic results (with certified English translations) must come from the school or testing agency; grades for the three most recently completed years plus final-year courses are required for review.",
+      source:
+        "https://www.bucknell.edu/admissions-aid/apply-bucknell/undergraduate-admission-requirements/admission-requirements-international-students",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://www.bucknell.edu/admissions-aid/admissions-dates-deadlines",
+    },
+    ed2: {
+      value: "2027-01-10",
+      source: "https://www.bucknell.edu/admissions-aid/admissions-dates-deadlines",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+    rd: {
+      value: "2027-01-10",
+      source: "https://www.bucknell.edu/admissions-aid/admissions-dates-deadlines",
+    },
+    deadlineNote: null,
+    highlight:
+      "A liberal arts university that also houses its own College of Engineering and Freeman College of Management.",
+    image: {
+      src: "/media/colleges/bucknell-university.webp",
+      card: "/media/colleges/bucknell-university-card.webp",
+      title: "Cherry blossoms on academic quad.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Cherry_blossoms_on_academic_quad.jpg",
+      author: "Dbl228",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
+    urls: {
+      admissions: "https://www.bucknell.edu/admissions-aid",
+      international:
+        "https://www.bucknell.edu/admissions-aid/apply-bucknell/undergraduate-admission-requirements/admission-requirements-international-students",
+      aid: "https://www.bucknell.edu/admissions-aid/tuition-fees-financial-aid/apply-financial-aid/financial-aid-international-students",
+      cds: "https://www.bucknell.edu/sites/default/files/institutional-research/common_data_set_2025-26.pdf",
+    },
+  },
+  {
+    slug: "lafayette-college",
+    name: "Lafayette College",
+    type: "LAC",
+    city: "Easton",
+    state: "Pennsylvania",
+    code: "PA",
+    rank: {
+      label: "#30 National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 10556,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    admitted: {
+      value: 3289,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    edApplicants: {
+      value: 937,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    edAdmitted: {
+      value: 356,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II only; no Early Action (CDS C22: No). ED counts combine both rounds.",
+    sat: {
+      value: "1360-1490",
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    act: {
+      value: null,
+      source: null,
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admissions.lafayette.edu/apply/international-students/",
+    },
+    testNote:
+      "SAT/ACT optional for fall 2027 and fall 2028 entry; self-reported scores accepted, official scores required on enrolment. CDS reports ACT 25th percentile as 30.5. 27% of enrolled first-years submitted SAT, 9% ACT.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admissions.lafayette.edu/apply/international-students/",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://admissions.lafayette.edu/apply/international-students/",
+    },
+    policyQuote:
+      "Lafayette is proud to be one of only a select few colleges in the United States to guarantee to meet full demonstrated financial need of all admitted students, both domestic and international. ... Lafayette College is need aware and considers a student’s financial situation when making admission decisions.",
+    intlAided: {
+      value: 111,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    intlAvgAward: {
+      value: 64791,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    intlNote:
+      "International aid applicants submit the CSS Profile (an alternative International Financial Aid Form if the family contribution is under $20,000/yr and the CSS fee is a hardship; ISFAA not accepted). FAQ: aid is awarded on an extremely competitive basis; internationals who do not qualify for aid in their first year cannot receive it later.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 70486,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    fees: {
+      value: 1110,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    roomBoard: {
+      value: 20896,
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    costNote:
+      "CDS G1 first-year column for 2026-27; required fees are $1,110 for first-years vs $360 for other undergraduates.",
+    ielts: {
+      value: 7,
+      source: "https://admissions.lafayette.edu/apply/international-students/",
+    },
+    toefl: {
+      value: 100,
+      source: "https://admissions.lafayette.edu/apply/international-students/",
+    },
+    duolingo: {
+      value: 130,
+      source: "https://admissions.lafayette.edu/apply/international-students/",
+    },
+    englishNote:
+      "English test required; Lafayette 'typically looks for' minimums of TOEFL 100 (new TOEFL 5), IELTS 7, Duolingo 130. Waiver form if English is the first language or instruction has been in English for the past 3 years.",
+    nationalCurriculum: {
+      value:
+        "Official transcript and school report must come directly from the school, with mid-year grades. The international page says national examination programs (e.g. GCE A-level) are considered individually for college credit on receipt of certified results; nothing specific on national-curriculum admission requirements.",
+      source: "https://admissions.lafayette.edu/apply/international-students/",
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://admissions.lafayette.edu/deadlines-and-forms/",
+    },
+    ed2: {
+      value: "2027-01-15",
+      source: "https://admissions.lafayette.edu/deadlines-and-forms/",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://admissions.lafayette.edu/deadlines-and-forms/",
+    },
+    deadlineNote:
+      "Regular Decision applicants who applied by Jan 15 may convert to ED II until Feb 1. Pages give month/day only.",
+    highlight:
+      "Chartered in 1826 and named for the Marquis de Lafayette, it pairs a liberal arts college with a nationally recognised engineering program.",
+    image: null,
+    urls: {
+      admissions: "https://admissions.lafayette.edu/",
+      international: "https://admissions.lafayette.edu/apply/international-students/",
+      aid: "https://admissions.lafayette.edu/apply/international-students/international-student-faq/",
+      cds: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
+    },
+  },
+  {
+    slug: "bryn-mawr-college",
+    name: "Bryn Mawr College",
+    type: "LAC",
+    city: "Bryn Mawr",
+    state: "Pennsylvania",
+    code: "PA",
+    rank: {
+      label: "#31 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 4260,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    admitted: {
+      value: 1199,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    edApplicants: {
+      value: 470,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    edAdmitted: {
+      value: 194,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "ED I and ED II only; no Early Action (CDS C22: No). CDS C21 ED counts are labelled 'For the Fall 2024 entering class' on the 2025-26 form.",
+    sat: {
+      value: "1300-1470",
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    act: {
+      value: "29-33",
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.brynmawr.edu/admissions-aid/policies-resources/admissions-policies",
+    },
+    testNote:
+      "Test-optional; highest section scores considered (superscore); self-reported scores accepted. Policy page also says scores sent after admission are used only for advising/placement. 65% of enrolled first-years submitted SAT, 23% ACT.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.brynmawr.edu/admissions-aid/tuition-financial-aid",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://www.brynmawr.edu/admissions-aid/tuition-financial-aid",
+    },
+    policyQuote:
+      "Bryn Mawr is need-aware, which means the amount of aid a student requests of the College may affect the admission decision. ... The College meets 100% of calculated financial need for admitted undergraduate students.",
+    intlAided: {
+      value: 110,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    intlAvgAward: {
+      value: 80407,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    intlNote:
+      "The aid page's need-aware statement is general (all applicants); the international-applicant section of the How to Apply page calls Bryn Mawr 'a need-sensitive institution' that meets full calculated need with limited funds. Internationals apply for aid only once, at admission; family contribution stays fixed for four years. CDS H6 ticks both need-based and non-need-based aid for nonresidents.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 71290,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    fees: {
+      value: 1120,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    roomBoard: {
+      value: 21440,
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    costNote: "CDS G1 undergraduate column (first-year column left blank).",
+    ielts: {
+      value: 7,
+      source: "https://www.brynmawr.edu/admissions-aid/policies-resources/admissions-policies",
+    },
+    toefl: {
+      value: 100,
+      source: "https://www.brynmawr.edu/admissions-aid/policies-resources/admissions-policies",
+    },
+    duolingo: {
+      value: 130,
+      source: "https://www.brynmawr.edu/admissions-aid/policies-resources/admissions-policies",
+    },
+    englishNote:
+      "Minimums: TOEFL 5 on the new scale (100 legacy), IELTS 7, Duolingo 130. Waiver possible after full English-medium instruction for grades 9-12, but proof is strongly recommended for all internationals; preference to Duolingo or InitialView recorded interviews.",
+    nationalCurriculum: {
+      value:
+        "Requires copies of all external exam results that are part of the school or national curriculum (official IGCSE results, school-leaving certificates for IB, A-Level or another national curriculum); applicants not yet graduated give intended exam dates. Mid-year report may be predicted grades for some curricula.",
+      source: "https://brynmawr.edu/admissions/undergraduate-admissions/apply",
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://brynmawr.edu/admissions/undergraduate-admissions/apply",
+    },
+    ed2: {
+      value: "2027-01-01",
+      source: "https://brynmawr.edu/admissions/undergraduate-admissions/apply",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://brynmawr.edu/admissions/undergraduate-admissions/apply",
+    },
+    deadlineNote:
+      "Page lists month/day for the 2026-2027 application cycle (essay prompt labelled 2026-2027).",
+    highlight:
+      "A women's college founded in 1885 whose campus pioneered the American Collegiate Gothic style of architecture.",
+    image: {
+      src: "/media/colleges/bryn-mawr-college.webp",
+      card: "/media/colleges/bryn-mawr-college-card.webp",
+      title: "Bryn Mawr College Rock Dorm.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Bryn_Mawr_College_Rock_Dorm.jpg",
+      author: "Montgomery County Planning Commission",
+      licence: "CC BY-SA 2.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
+    },
+    urls: {
+      admissions: "https://www.brynmawr.edu/admissions-aid",
+      international: "https://brynmawr.edu/admissions/undergraduate-admissions/apply",
+      aid: "https://www.brynmawr.edu/admissions-aid/tuition-financial-aid",
+      cds: "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+  },
+  {
     slug: "massachusetts-institute-of-technology",
     name: "Massachusetts Institute of Technology",
     type: "NU",
