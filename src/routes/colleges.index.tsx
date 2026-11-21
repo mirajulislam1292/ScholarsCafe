@@ -90,8 +90,8 @@ function CollegesPage() {
               <h2 className="type-h2 text-neutral-900">Find colleges that fit</h2>
               <p className="mt-5 type-body text-neutral-600">
                 {COLLEGE_RANK_RULE} Figures come from each college's Common Data Set and its
-                admissions and aid pages. If a college does not publish something, we write "
-                {NP}" instead of guessing. Taka amounts use one rate: ৳{BDT_RATE.value}/USD on{" "}
+                admissions and aid pages. If a college does not publish something, we write "{NP}"
+                instead of guessing. Taka amounts use one rate: ৳{BDT_RATE.value}/USD on{" "}
                 {fmtDate(BDT_RATE.date)} (
                 <a
                   href={BDT_RATE.source}
@@ -122,7 +122,10 @@ function CollegesPage() {
                     label="State"
                     value={f.state}
                     onChange={(v) => set("state", v)}
-                    options={[[ALL, "All states"], ...states.map((s) => [s, s] as [string, string])]}
+                    options={[
+                      [ALL, "All states"],
+                      ...states.map((s) => [s, s] as [string, string]),
+                    ]}
                   />
                   <Pick
                     label="Aid for international students"
@@ -236,7 +239,8 @@ function CollegeCard({ c }: { c: College }) {
           />
         )}
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-medium text-blue-900">
-          {c.rank.label.replace(/ National .*$/, "")} {c.type === "LAC" ? "Liberal arts" : "National"}
+          {c.rank.label.replace(/ National .*$/, "")}{" "}
+          {c.type === "LAC" ? "Liberal arts" : "National"}
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">

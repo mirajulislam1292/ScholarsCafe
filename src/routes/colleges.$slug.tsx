@@ -195,9 +195,7 @@ function Profile({ c }: { c: College }) {
                   <Row label="Required fees" f={c.fees} show={usd} />
                   <Row label="Room and board" f={c.roomBoard} show={usd} />
                   <Plain label="Total">{sticker != null ? usd(sticker) : NP}</Plain>
-                  <Plain label="Sticker cost in BDT">
-                    {sticker != null ? bdt(sticker) : NP}
-                  </Plain>
+                  <Plain label="Sticker cost in BDT">{sticker != null ? bdt(sticker) : NP}</Plain>
                 </Rows>
                 <p className="mt-3 type-caption text-neutral-500">
                   Before aid. Books, travel and insurance are extra. At ৳{BDT_RATE.value}/USD on{" "}
@@ -206,9 +204,7 @@ function Profile({ c }: { c: College }) {
               </Fact>
 
               <Fact title="SSC and HSC results">
-                <p className="type-body text-neutral-800">
-                  {c.nationalCurriculum.value ?? NP}
-                </p>
+                <p className="type-body text-neutral-800">{c.nationalCurriculum.value ?? NP}</p>
                 <SourceLine href={c.nationalCurriculum.source} />
               </Fact>
 
@@ -324,7 +320,9 @@ function Row<T>({ label, f, show }: { label: string; f: Fig<T>; show: (v: T) => 
     <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
       <dt className="text-sm text-neutral-600">{label}</dt>
       <dd className="flex items-baseline gap-2 text-right">
-        <span className={f.value == null ? "text-sm text-neutral-500" : "font-medium text-neutral-900"}>
+        <span
+          className={f.value == null ? "text-sm text-neutral-500" : "font-medium text-neutral-900"}
+        >
           {f.value == null ? NP : show(f.value)}
         </span>
         {f.source && (

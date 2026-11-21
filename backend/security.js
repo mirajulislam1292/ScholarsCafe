@@ -81,7 +81,11 @@ const short = z.string().max(300);
 // says so); a figure that is filled in must have an HTTPS source. Entries override the built-in
 // list (src/data/college-directory.ts) by slug, or add a new college.
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-const blankOr = (re) => z.string().max(40).regex(new RegExp(`^(${re.source.slice(1, -1)})?$`));
+const blankOr = (re) =>
+  z
+    .string()
+    .max(40)
+    .regex(new RegExp(`^(${re.source.slice(1, -1)})?$`));
 export const COLLEGE_FIGURES = {
   applicants: blankOr(/^\d{1,7}$/),
   admitted: blankOr(/^\d{1,7}$/),

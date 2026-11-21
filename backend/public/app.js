@@ -107,7 +107,8 @@ const ENUMS = {
 };
 const HELP = {
   slug: "Web address: scholarscafe.com/colleges/<slug>. Use the same slug as a built-in college to replace it.",
-  collegeType: "LAC = National Liberal Arts College · NU = National University (U.S. News category).",
+  collegeType:
+    "LAC = National Liberal Arts College · NU = National University (U.S. News category).",
   asOf: "Date you checked these figures, YYYY-MM-DD. After 12 months the entry shows a Stale badge.",
   applicants:
     "Every figure: leave blank if the college does not publish it (the site shows Not published). Never estimate. A filled figure needs its source link below it.",
@@ -118,7 +119,8 @@ const HELP = {
   needBasedForIntl: "Do international students get need-based aid? Blank = not published.",
   policyQuote: "The college's exact words about need-blind or need-aware admission.",
   hidden: "Tick to hide this college from the website without deleting anything.",
-  imageLicence: "Wikimedia Commons photos only, with a CC or public-domain licence. Leave the photo blank if unsure.",
+  imageLicence:
+    "Wikimedia Commons photos only, with a CC or public-domain licence. Leave the photo blank if unsure.",
   order: "Section ids in display order, separated by commas.",
   hidden: "Section ids to hide, separated by commas (leave empty to show all).",
   position: "Lower numbers appear first. Use the ↑ ↓ buttons in the list to reorder.",
