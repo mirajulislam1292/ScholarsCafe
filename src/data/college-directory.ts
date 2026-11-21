@@ -1461,8 +1461,8 @@ export const COLLEGES: College[] = [
         "https://wellesley-college.files.svdcdn.com/production/administrative-departments/OIR/CDS_2025-2026-FINAL.pdf",
     },
     testPolicy: {
-      value: "optional",
-      source: "https://www.wellesley.edu/admission-aid/apply/first-year-applicants",
+      value: null,
+      source: null,
     },
     testNote:
       "Wellesley states it will continue to be test optional for those applying for entry in fall 2027.",
@@ -1472,9 +1472,8 @@ export const COLLEGES: College[] = [
         "https://wellesley-college.files.svdcdn.com/production/administrative-departments/OIR/CDS_2025-2026-FINAL.pdf",
     },
     intlAidPolicy: {
-      value: "need-aware",
-      source:
-        "https://www.wellesley.edu/admission-aid/student-financial-services/understanding-financial-aid/apply-for-aid/international-students",
+      value: null,
+      source: null,
     },
     policyQuote: null,
     intlAided: {
@@ -1491,16 +1490,16 @@ export const COLLEGES: College[] = [
       "Wellesley describes admission as not need-blind (need-sensitive) for non-US citizens/permanent residents; it funds full calculated need of admitted international aid applicants but only a limited number each year. Aid must be requested with the admission application; students admitted without aid cannot get aid later.",
     costYear: "2026-2027",
     tuition: {
-      value: 72570,
-      source: "https://www.wellesley.edu/admission-aid/student-financial-services/tuition-cost",
+      value: null,
+      source: null,
     },
     fees: {
-      value: 360,
-      source: "https://www.wellesley.edu/admission-aid/student-financial-services/tuition-cost",
+      value: null,
+      source: null,
     },
     roomBoard: {
-      value: 23206,
-      source: "https://www.wellesley.edu/admission-aid/student-financial-services/tuition-cost",
+      value: null,
+      source: null,
     },
     costNote:
       "Housing $12,020 + meals $11,186 summed; fees = student activity fee. CDS 2025-26 G1 left blank.",
@@ -1519,17 +1518,16 @@ export const COLLEGES: College[] = [
     englishNote:
       "English proficiency exam not required; recommended (TOEFL, Duolingo, IELTS, Cambridge, InitialView/Vericant) for non-native speakers with fewer than four years in an English-based curriculum. No minimum score seen.",
     nationalCurriculum: {
-      value:
-        "International applicants must submit certified copies of academic diplomas and government examination certificates.",
-      source: "https://www.wellesley.edu/admission/apply/international/instructions",
+      value: null,
+      source: null,
     },
     ed1: {
-      value: "2026-11-01",
-      source: "https://www.wellesley.edu/admission-aid/apply/first-year-applicants",
+      value: null,
+      source: null,
     },
     ed2: {
-      value: "2027-01-05",
-      source: "https://www.wellesley.edu/admission-aid/apply/first-year-applicants",
+      value: null,
+      source: null,
     },
     ea: {
       value: "not-offered",
@@ -1537,8 +1535,8 @@ export const COLLEGES: College[] = [
         "https://wellesley-college.files.svdcdn.com/production/administrative-departments/OIR/CDS_2025-2026-FINAL.pdf",
     },
     rd: {
-      value: "2027-01-08",
-      source: "https://www.wellesley.edu/admission-aid/apply/first-year-applicants",
+      value: null,
+      source: null,
     },
     deadlineNote: "Nov 1 (ED I), Jan 5 (ED II), Jan 8 (RD); mapped to the 2026-27 cycle.",
     highlight:
@@ -1911,8 +1909,8 @@ export const COLLEGES: College[] = [
       source: "https://www.wlu.edu/admissions/financial-aid",
     },
     intlAidPolicy: {
-      value: "need-blind",
-      source: "https://www.wlu.edu/admissions/financial-aid",
+      value: null,
+      source: null,
     },
     policyQuote:
       "All First-Year applicants, including domestic, international and undocumented students, are eligible and encouraged to apply for need-based financial aid. Need Blind — W&L admits students without considering their ability to pay.",
@@ -2349,8 +2347,8 @@ export const COLLEGES: College[] = [
       source: "https://www.carleton.edu/admissions/apply/steps/international/",
     },
     intlAidPolicy: {
-      value: "need-aware",
-      source: "https://www.carleton.edu/admissions/apply/steps/international/",
+      value: null,
+      source: null,
     },
     policyQuote:
       "Carleton meets 100% of your demonstrated financial need, without loans. ... We have limited funding available to international students. As a result, we will not consider a new or revised application for aid once you have been offered admission.",
@@ -2640,8 +2638,7 @@ export const COLLEGES: College[] = [
       value: "need-aware",
       source: "https://www.grinnell.edu/admission/apply/international",
     },
-    policyQuote:
-      "Grinnell employs a need-aware admission policy for international students. ... Grinnell is committed to meeting 100% of institutionally determined need for all admitted international students.",
+    policyQuote: null,
     intlAided: {
       value: 243,
       source:
@@ -3027,6 +3024,282 @@ export const COLLEGES: College[] = [
         "https://www.middlebury.edu/college/admissions/application-instructions-and-deadlines",
       aid: "https://www.middlebury.edu/college/admissions/financial-aid",
       cds: "https://www.middlebury.edu/assessment-institutional-research/institutional-data/historical-data",
+    },
+  },
+  {
+    slug: "university-of-richmond",
+    name: "University of Richmond",
+    type: "LAC",
+    city: "Richmond",
+    state: "Virginia",
+    code: "VA",
+    rank: {
+      label: "#21 National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 16560,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionC.pdf",
+    },
+    admitted: {
+      value: 3683,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionC.pdf",
+    },
+    edApplicants: {
+      value: 1154,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionC.pdf",
+    },
+    edAdmitted: {
+      value: 421,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionC.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "ED I, ED II (counts combined) and non-binding Early Action offered; CDS C22 does not report EA applicant/admit counts.",
+    sat: {
+      value: "1420-1490",
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionC.pdf",
+    },
+    act: {
+      value: "33-34",
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionC.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admission.richmond.edu/process/materials/test-optional.html",
+    },
+    testNote:
+      "Test optional for first-years entering in 2027; homeschooled/online-school students must submit SAT/ACT. ~19% of Fall 2025 enrollees submitted SAT, 15% ACT.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admission.richmond.edu/process/international/index.html",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://admission.richmond.edu/process/international/index.html",
+    },
+    policyQuote: null,
+    intlAided: {
+      value: 187,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionH.pdf",
+    },
+    intlAvgAward: {
+      value: 67911,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionH.pdf",
+    },
+    intlNote:
+      "Need-based aid for non-US citizens is limited; all non-citizens submit a Certification of Financial Responsibility. Internationals advised to apply by the Dec 1 Richmond Scholars merit deadline.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 70725,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionG.pdf",
+    },
+    fees: {
+      value: null,
+      source: null,
+    },
+    roomBoard: {
+      value: 18815,
+      source: "https://ifx.richmond.edu/pdfs/CDS2025-2026SectionG.pdf",
+    },
+    costNote: "CDS G1 (2026-27) says required fees are included in tuition.",
+    ielts: {
+      value: 7.5,
+      source: "https://admission.richmond.edu/process/international/english-proficiency.html",
+    },
+    toefl: {
+      value: 100,
+      source: "https://admission.richmond.edu/process/international/english-proficiency.html",
+    },
+    duolingo: {
+      value: 135,
+      source: "https://admission.richmond.edu/process/international/english-proficiency.html",
+    },
+    englishNote:
+      "Published scores are 'competitive scores, not minimum required scores' (TOEFL 100 or 5.5 new scale, IELTS 7.5, DET 135). Waivers for 4 years in English-medium school, qualifying SAT/ACT, or strong AP/IB/A-level English.",
+    nationalCurriculum: {
+      value:
+        "Translated transcripts are evaluated for progress in both national and internationally recognized curricula (e.g., AP, IB, A-levels); no specific national-exam requirements published.",
+      source: "https://admission.richmond.edu/process/international/index.html",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admission.richmond.edu/process/index.html",
+    },
+    ed2: {
+      value: "2027-01-01",
+      source: "https://admission.richmond.edu/process/index.html",
+    },
+    ea: {
+      value: "2026-11-01",
+      source: "https://admission.richmond.edu/process/index.html",
+    },
+    rd: {
+      value: "2027-01-01",
+      source: "https://admission.richmond.edu/process/index.html",
+    },
+    deadlineNote:
+      "Early Action is non-binding (not restrictive per CDS C22). Dates listed without years. Richmond Scholars merit application Dec 1.",
+    highlight:
+      "International applicants can be considered for the Richmond Scholars merit scholarship program, which has a December 1 application deadline.",
+    image: {
+      src: "/media/colleges/university-of-richmond.webp",
+      card: "/media/colleges/university-of-richmond-card.webp",
+      title: "University of Richmond.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:University_of_Richmond.jpg",
+      author: "Andrij Bulba from Slovakia",
+      licence: "CC BY 2.0",
+      licenceUrl: "https://creativecommons.org/licenses/by/2.0",
+    },
+    urls: {
+      admissions: "https://admission.richmond.edu/",
+      international: "https://admission.richmond.edu/process/international/index.html",
+      aid: "https://admission.richmond.edu/process/international/index.html",
+      cds: "https://ifx.richmond.edu/research/common-data.html",
+    },
+  },
+  {
+    slug: "colby-college",
+    name: "Colby College",
+    type: "LAC",
+    city: "Waterville",
+    state: "Maine",
+    code: "ME",
+    rank: {
+      label: "#22 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: null,
+    applicants: {
+      value: 21065,
+      source: "https://afa.colby.edu/apply/college-profile/",
+    },
+    admitted: {
+      value: null,
+      source: null,
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II offered; no Early Action. ED counts unavailable (no public CDS).",
+    sat: {
+      value: "1430-1520",
+      source: "https://afa.colby.edu/apply/college-profile/",
+    },
+    act: {
+      value: "33-34",
+      source: "https://afa.colby.edu/apply/college-profile/",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://afa.colby.edu/apply/requirements/",
+    },
+    testNote:
+      "Test optional; self-reported scores accepted, superscored. SAT/ACT ranges are the college profile's 'middle 50%' for the Class of 2030 (not CDS).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://afa.colby.edu/apply/requirements/international-applicants/",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://afa.colby.edu/apply/faq/",
+    },
+    policyQuote:
+      "Colby meets 100 percent of demonstrated need for all admitted students, including international students. ... Is Colby need blind or need aware? Colby is need aware.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote:
+      "International aid applicants file the CSS Profile (fee waiver available). Students who do not apply for aid before admission wait two years for Colby grant eligibility. Application is free.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 75790,
+      source: "https://afa.colby.edu/cost-and-aid/tuition-and-fees/",
+    },
+    fees: {
+      value: null,
+      source: null,
+    },
+    roomBoard: {
+      value: 19480,
+      source: "https://afa.colby.edu/cost-and-aid/tuition-and-fees/",
+    },
+    costNote:
+      "Colby lists tuition and fees combined ($75,790); first-years also billed a $500 orientation-trip (COOT) fee.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "TOEFL iBT/Home, IELTS Academic or DET required if English is neither first language nor language of instruction; self-reporting allowed, TOEFL superscored. No minimum or recommended scores published.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://afa.colby.edu/apply/requirements/",
+    },
+    ed2: {
+      value: "2027-01-04",
+      source: "https://afa.colby.edu/apply/requirements/",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://afa.colby.edu/apply/requirements/",
+    },
+    rd: {
+      value: "2027-01-04",
+      source: "https://afa.colby.edu/apply/requirements/",
+    },
+    deadlineNote:
+      "Dates shown without years. International CSS Profile due Nov 15 / Jan 4 / Jan 15 (ED I / ED II / RD).",
+    highlight:
+      "Colby runs a 4-1-4 calendar with a January term called Jan Plan between the fall and spring semesters.",
+    image: null,
+    urls: {
+      admissions: "https://afa.colby.edu/",
+      international: "https://afa.colby.edu/apply/requirements/international-applicants/",
+      aid: "https://afa.colby.edu/apply/applying-for-aid/",
+      cds: null,
     },
   },
   {
@@ -3814,8 +4087,8 @@ export const COLLEGES: College[] = [
       source: "https://drive.google.com/file/d/1GIPKgVj1d86dkmLkHI_mZVCk_iY6kiCp/view",
     },
     testPolicy: {
-      value: "required",
-      source: "https://admission.stanford.edu/apply/first-year/",
+      value: null,
+      source: null,
     },
     testNote:
       "ACT or SAT listed as a required component for first-year applicants (latest REA sittings: ACT end of September, SAT end of October; RD through end of December).",
@@ -3824,8 +4097,8 @@ export const COLLEGES: College[] = [
       source: "https://drive.google.com/file/d/1GIPKgVj1d86dkmLkHI_mZVCk_iY6kiCp/view",
     },
     intlAidPolicy: {
-      value: "need-aware",
-      source: "https://admission.stanford.edu/apply/international/index.html",
+      value: null,
+      source: null,
     },
     policyQuote: null,
     intlAided: {
@@ -3853,16 +4126,16 @@ export const COLLEGES: College[] = [
     },
     costNote: "CDS 2025-26 G1 reports 2026-2027 costs; food and housing on campus.",
     ielts: {
-      value: "none",
-      source: "https://admission.stanford.edu/apply/international/index.html",
+      value: null,
+      source: null,
     },
     toefl: {
-      value: "none",
-      source: "https://admission.stanford.edu/apply/international/index.html",
+      value: null,
+      source: null,
     },
     duolingo: {
-      value: "none",
-      source: "https://admission.stanford.edu/apply/international/index.html",
+      value: null,
+      source: null,
     },
     englishNote:
       "International page says no English proficiency exams are required; scores may be self-reported. (Older FAQ page strongly recommends a test for non-native speakers not in English-medium schools.)",
@@ -3879,12 +4152,12 @@ export const COLLEGES: College[] = [
       source: "https://drive.google.com/file/d/1GIPKgVj1d86dkmLkHI_mZVCk_iY6kiCp/view",
     },
     ea: {
-      value: "2026-11-01",
-      source: "https://admission.stanford.edu/apply/first-year/",
+      value: null,
+      source: null,
     },
     rd: {
-      value: "2027-01-05",
-      source: "https://admission.stanford.edu/apply/first-year/",
+      value: null,
+      source: null,
     },
     deadlineNote:
       "EA is Restrictive Early Action. Arts-portfolio applicants have earlier Common App deadlines (REA Oct 15; RD Dec 5).",
@@ -4215,20 +4488,24 @@ export const COLLEGES: College[] = [
     asOf: "2026-11-21",
     cdsYear: "2025-2026",
     applicants: {
-      value: null,
-      source: null,
+      value: 50259,
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     admitted: {
-      value: null,
-      source: null,
+      value: 3072,
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     edApplicants: {
-      value: null,
-      source: null,
+      value: 7639,
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     edAdmitted: {
-      value: null,
-      source: null,
+      value: 835,
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     eaApplicants: {
       value: null,
@@ -4239,14 +4516,16 @@ export const COLLEGES: College[] = [
       source: null,
     },
     earlyNote:
-      "Binding Early Decision I and II offered; no Early Action. ED counts not collected (CDS PDF could not be read).",
+      "Binding Early Decision I (C21: closing 11/1, notification 12/11) and ED II (closing 1/3, notification 2/12); ED counts are for both rounds combined. No Early Action (C22 = No).",
     sat: {
-      value: null,
-      source: null,
+      value: "1530-1565",
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     act: {
-      value: null,
-      source: null,
+      value: "35-35",
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     testPolicy: {
       value: "required",
@@ -4265,30 +4544,35 @@ export const COLLEGES: College[] = [
     policyQuote:
       "Hopkins is need-aware for international students, meaning that financial circumstances are considered in the admissions process. Hopkins meets 100% of demonstrated need for all admitted students, including international students.",
     intlAided: {
-      value: null,
-      source: null,
+      value: 183,
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     intlAvgAward: {
-      value: null,
-      source: null,
+      value: 43101,
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     intlNote:
       "All international citizens submit the Certification of Finances (COF); aid applicants also submit the CSS Profile. About 10% of international students receive financial aid; those who don't apply for aid as first-years can't apply later.",
     costYear: "2026-2027",
     tuition: {
       value: 68670,
-      source: "https://sfs.jhu.edu/cost-tuition/",
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     fees: {
       value: 500,
-      source: "https://sfs.jhu.edu/cost-tuition/",
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     roomBoard: {
       value: 21967,
-      source: "https://sfs.jhu.edu/cost-tuition/",
+      source:
+        "https://oira.jhu.edu/wp-content/uploads/2025-2026-CDS-Johns-Hopkins-University-v2.pdf",
     },
     costNote:
-      "From JHU Student Financial Support 2026-27 cost of attendance (freshman on campus): housing 13,073 + food 8,894. Fee is a one-time 500 matriculation fee; health insurance (3,624) billed separately.",
+      "CDS 2025-26 G1 (2026-2027 year), matching sfs.jhu.edu: required fees 500 for first-years (0 for other undergraduates), food and housing 21,967 for first-years (23,338 for others). Health insurance (3,624) billed separately.",
     ielts: {
       value: null,
       source: null,
@@ -4481,6 +4765,151 @@ export const COLLEGES: College[] = [
       international: "https://admissions.northwestern.edu/apply/identities/international.html",
       aid: "https://admissions.northwestern.edu/tuition-aid/international-student-aid/",
       cds: "https://enrollment.northwestern.edu/data/common-data-set.html",
+    },
+  },
+  {
+    slug: "university-of-chicago",
+    name: "University of Chicago",
+    type: "NU",
+    city: "Chicago",
+    state: "Illinois",
+    code: "IL",
+    rank: {
+      label: "#9 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 45533,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    admitted: {
+      value: 2039,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Offers ED I, ED II (binding) and non-restrictive Early Action (CDS C21/C22 = Yes), but the CDS leaves ED/EA counts and dates blank.",
+    sat: {
+      value: "1500-1560",
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    act: {
+      value: "34-35",
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://collegeadmissions.uchicago.edu/apply/application/required-materials/",
+    },
+    testNote:
+      "Test-optional with a 'No Harm' policy: SAT/ACT scores are used only if they help the applicant; applies to international applicants too.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    intlAidPolicy: {
+      value: null,
+      source: null,
+    },
+    policyQuote:
+      "We are committed to meeting 100% of your demonstrated need with a loan-free financial aid package if you are admitted and applied for funding.",
+    intlAided: {
+      value: 269,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    intlAvgAward: {
+      value: 74765,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    intlNote:
+      "International first-years are eligible for need-based and merit aid; must apply for aid when applying for admission or no funds later. The aid pages seen do not say whether review is need-blind or need-aware for internationals. CDS H6 checks both need-based and non-need-based.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 75960,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    fees: {
+      value: 2715,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    roomBoard: {
+      value: 21414,
+      source: "https://data.uchicago.edu/files/2026/08/CDS_2025-2026_to_publish-1.pdf",
+    },
+    costNote:
+      "CDS 2025-26 G1 (2026-2027 year); required fees 2,715 for first-years (1,995 for other undergraduates); food and housing on campus.",
+    ielts: {
+      value: "none",
+      source: "https://collegeadmissions.uchicago.edu/apply/international-applicants/",
+    },
+    toefl: {
+      value: "none",
+      source: "https://collegeadmissions.uchicago.edu/apply/international-applicants/",
+    },
+    duolingo: {
+      value: "none",
+      source: "https://collegeadmissions.uchicago.edu/apply/international-applicants/",
+    },
+    englishNote:
+      "No English test required if mastery is evident in the application; scores from any English proficiency exam may be submitted (official or self-reported). No minimums stated; no ESL program.",
+    nationalCurriculum: {
+      value:
+        "Transcripts are evaluated in the system of the applicant's school; do not convert grades to a 4.0 GPA, and leave rank/GPA blank if the school does not report them.",
+      source: "https://collegeadmissions.uchicago.edu/apply/international-applicants/",
+    },
+    ed1: {
+      value: "2026-11-02",
+      source: "https://collegeadmissions.uchicago.edu/apply/application/",
+    },
+    ed2: {
+      value: "2027-01-04",
+      source: "https://collegeadmissions.uchicago.edu/apply/application/",
+    },
+    ea: {
+      value: "2026-11-02",
+      source: "https://collegeadmissions.uchicago.edu/apply/application/",
+    },
+    rd: {
+      value: "2027-01-04",
+      source: "https://collegeadmissions.uchicago.edu/apply/application/",
+    },
+    deadlineNote:
+      "Four plans: ED I and EA Nov 2, 2026; ED II and RD Jan 4, 2027. EA is non-restrictive.",
+    highlight:
+      "Every UChicago undergraduate takes the Core, a shared common curriculum that underpins all majors.",
+    image: {
+      src: "/media/colleges/university-of-chicago.webp",
+      card: "/media/colleges/university-of-chicago-card.webp",
+      title:
+        "Harper Memorial Library, University of Chicago, 59th Street, Hyde Park, Chicago, IL (54514972872).jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Harper_Memorial_Library,_University_of_Chicago,_59th_Street,_Hyde_Park,_Chicago,_IL_(54514972872).jpg",
+      author: "Warren LeMay from Chicago, IL, United States",
+      licence: "CC BY-SA 2.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
+    },
+    urls: {
+      admissions: "https://collegeadmissions.uchicago.edu/apply/application/",
+      international: "https://collegeadmissions.uchicago.edu/apply/international-applicants/",
+      aid: "https://collegeadmissions.uchicago.edu/financial-support/international-financial-aid/",
+      cds: "https://data.uchicago.edu/common-data-set/",
     },
   },
 ];
