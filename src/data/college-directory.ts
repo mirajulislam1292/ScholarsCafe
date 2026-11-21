@@ -189,19 +189,16 @@ export const COLLEGES: College[] = [
     },
     costNote: "CDS 2025-26 G1 reports the 2026-2027 academic year (housing $9,830 + food $9,490).",
     ielts: {
-      value: 7.5,
-      source:
-        "https://www.williams.edu/admission-aid/how-to-apply/additional-applicant-information/international/",
+      value: null,
+      source: null,
     },
     toefl: {
-      value: 100,
-      source:
-        "https://www.williams.edu/admission-aid/how-to-apply/additional-applicant-information/international/",
+      value: null,
+      source: null,
     },
     duolingo: {
-      value: 135,
-      source:
-        "https://www.williams.edu/admission-aid/how-to-apply/additional-applicant-information/international/",
+      value: null,
+      source: null,
     },
     englishNote:
       "No minimum; these are the low ends of TYPICAL ranges for competitive applicants: TOEFL 5-6 (prior to Jan 2026, 100-120), IELTS 7.5-9, Duolingo 135-160. Scores encouraged if English is not the first language or language of instruction.",
@@ -3396,8 +3393,8 @@ export const COLLEGES: College[] = [
       source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
     },
     toefl: {
-      value: 4.5,
-      source: "https://www.colgate.edu/admission-aid/apply/international-applicants",
+      value: null,
+      source: null,
     },
     duolingo: {
       value: 130,
@@ -3511,12 +3508,12 @@ export const COLLEGES: College[] = [
     policyQuote:
       "Holy Cross meets 100% of demonstrated financial need at time of admission for all admitted international students. Funding is limited, so financial aid for international applicants is very competitive.",
     intlAided: {
-      value: 1,
-      source: "https://www.holycross.edu/document/common-data-set-20232024",
+      value: null,
+      source: null,
     },
     intlAvgAward: {
-      value: 81875,
-      source: "https://www.holycross.edu/document/common-data-set-20232024",
+      value: null,
+      source: null,
     },
     intlNote:
       "International aid applicants file the CSS Profile for International Students; all international applicants also submit the Holy Cross Certification of Finances and a bank letter or affidavit. Pages do not say need-blind or need-aware.",
@@ -3536,16 +3533,16 @@ export const COLLEGES: College[] = [
     costNote:
       "College tuition page for 2026-2027: fees = health service 470 + activity fee 460; food and housing = standard housing 11,500 + resident food plan 9,090. CDS 2023-24 G1 was left blank.",
     ielts: {
-      value: 7,
-      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+      value: null,
+      source: null,
     },
     toefl: {
-      value: 100,
-      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+      value: null,
+      source: null,
     },
     duolingo: {
-      value: 120,
-      source: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
+      value: null,
+      source: null,
     },
     englishNote:
       "Not minimums: the page says the most competitive applicants score TOEFL 100+, IELTS 7+ or DET 120. Required for non-native speakers not at an English-speaking high school. Duolingo can replace an interview.",
@@ -3574,7 +3571,15 @@ export const COLLEGES: College[] = [
       "Same deadlines for international applicants: ED I Nov 15, ED II Jan 15, RD Jan 15 (no year printed; taken as the 2026-27 cycle). No Early Action.",
     highlight:
       "Founded by the Jesuits in 1843, Holy Cross calls itself the only exclusively undergraduate Jesuit, Catholic liberal arts college in the US.",
-    image: null,
+    image: {
+      src: "/media/colleges/college-of-the-holy-cross.webp",
+      card: "/media/colleges/college-of-the-holy-cross-card.webp",
+      title: "College of the Holy Cross.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:College_of_the_Holy_Cross.jpg",
+      author: "Quintin Soloviev",
+      licence: "CC BY 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by/4.0",
+    },
     urls: {
       admissions: "https://www.holycross.edu/admissions-aid/how-to-apply",
       international: "https://www.holycross.edu/admissions-aid/how-to-apply/international-students",
@@ -3860,6 +3865,142 @@ export const COLLEGES: College[] = [
     },
   },
   {
+    slug: "haverford-college",
+    name: "Haverford College",
+    type: "LAC",
+    city: "Haverford",
+    state: "Pennsylvania",
+    code: "PA",
+    rank: {
+      label: "#26 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 6730,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    admitted: {
+      value: 896,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    edApplicants: {
+      value: 702,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    edAdmitted: {
+      value: 229,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Binding ED I and ED II; no Early Action (CDS C22 = No). ED counts are for the Fall 2025 entering class, both rounds combined.",
+    sat: {
+      value: "1460-1530",
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    act: {
+      value: "33-35",
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.haverford.edu/admission/applying/international-students",
+    },
+    testNote:
+      "Test-optional with no negative impact either way; self-reported or official SAT/ACT accepted (official required after enrolling).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    intlAidPolicy: {
+      value: "limited",
+      source:
+        "https://www.haverford.edu/financial-aid/frequently-asked-questions/international-students-faq",
+    },
+    policyQuote:
+      "There is limited aid available for international students, making admission for such students especially competitive; however, we do meet 100% of the demonstrated need of all admitted students.",
+    intlAided: {
+      value: 55,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    intlAvgAward: {
+      value: 92126,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    intlNote:
+      "All aid is need-based; aid for a limited number of international students per class. Internationals abroad file the 2027-2028 CSS Profile (or Haverford's own international aid form), no FAFSA; aid deadlines Nov 15, 2026 (ED I), Jan 5, 2027 (ED II), Jan 10, 2027 (RD). No aid in later years if none at entry; none for international transfers. CDS H6: need-based only.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 74930,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    fees: {
+      value: 863,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    roomBoard: {
+      value: 20554,
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    costNote:
+      "CDS 2025-26 G1 (2026-2027 year), first-year column; required fees 552 for other undergraduates; food and housing on campus (housing 12,458 + food 8,096).",
+    ielts: {
+      value: 7,
+      source: "https://www.haverford.edu/admission/applying/international-students",
+    },
+    toefl: {
+      value: 100,
+      source: "https://www.haverford.edu/admission/applying/international-students",
+    },
+    duolingo: {
+      value: 130,
+      source: "https://www.haverford.edu/admission/applying/international-students",
+    },
+    englishNote:
+      "Stated minimums for applicants whose first language is not English and who never attended an English-medium secondary school: TOEFL iBT 100 (old 0-120 scale) or 5 (new 1-6 scale), IELTS Academic 7.0, DET 130. No preferred test.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://www.haverford.edu/admission/applying/application-timeline",
+    },
+    ed2: {
+      value: "2027-01-05",
+      source: "https://www.haverford.edu/admission/applying/application-timeline",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.haverford.edu/sites/default/files/Office/President/CDS-2025-26.pdf",
+    },
+    rd: {
+      value: "2027-01-10",
+      source: "https://www.haverford.edu/admission/applying/application-timeline",
+    },
+    deadlineNote:
+      "International students have the same deadlines as all applicants. Timeline page gives no year; the international aid page dates the matching aid deadlines Nov 15, 2026 / Jan 5, 2027 / Jan 10, 2027.",
+    highlight:
+      "Haverford's Honor Code shapes student life from the start, and admitted students are not asked for an enrollment deposit.",
+    image: null,
+    urls: {
+      admissions: "https://www.haverford.edu/admission/applying/application-timeline",
+      international: "https://www.haverford.edu/admission/applying/international-students",
+      aid: "https://www.haverford.edu/financial-aid/international-applicants",
+      cds: "https://www.haverford.edu/president/institutional-effectiveness/institutional-research-and-effectiveness",
+    },
+  },
+  {
     slug: "macalester-college",
     name: "Macalester College",
     type: "LAC",
@@ -3959,16 +4100,16 @@ export const COLLEGES: College[] = [
     },
     costNote: "CDS G1 is reported for 2026-2027; tuition includes required course materials.",
     ielts: {
-      value: 7,
-      source: "https://www.macalester.edu/admissions/international/faq/",
+      value: null,
+      source: null,
     },
     toefl: {
-      value: 100,
-      source: "https://www.macalester.edu/admissions/international/faq/",
+      value: null,
+      source: null,
     },
     duolingo: {
-      value: 130,
-      source: "https://www.macalester.edu/admissions/international/faq/",
+      value: null,
+      source: null,
     },
     englishNote:
       "English tests are optional and there are no minimums; these are the scores of the 'most successful' submitters (TOEFL 100 for tests before Jan 2026, 5.0 on the new TOEFL scale after). Recommended for non-native speakers with under two years of English-medium schooling; InitialView/Vericant also accepted.",
@@ -4219,8 +4360,8 @@ export const COLLEGES: College[] = [
       source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
     },
     act: {
-      value: null,
-      source: null,
+      value: "30.5-33",
+      source: "https://oir.lafayette.edu/wp-content/uploads/sites/196/2026/01/CDS2025-2026.pdf",
     },
     testPolicy: {
       value: "optional",
@@ -4463,6 +4604,157 @@ export const COLLEGES: College[] = [
       international: "https://brynmawr.edu/admissions/undergraduate-admissions/apply",
       aid: "https://www.brynmawr.edu/admissions-aid/tuition-financial-aid",
       cds: "https://www.brynmawr.edu/sites/default/files/media/documents/2026-04/CDS%202025-26%20Bryn%20Mawr%20Read%20Only.pdf",
+    },
+  },
+  {
+    slug: "denison-university",
+    name: "Denison University",
+    type: "LAC",
+    city: "Granville",
+    state: "Ohio",
+    code: "OH",
+    rank: {
+      label: "#31 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 12202,
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    admitted: {
+      value: 2385,
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    edApplicants: {
+      value: 1589,
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    edAdmitted: {
+      value: 394,
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "ED 1 and ED 2 only; no Early Action (CDS C22: No). ED counts (Fall 2025 class) combine both rounds.",
+    sat: {
+      value: "1270-1420",
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    act: {
+      value: "28-33",
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://denison.edu/campus/admission/international-applicants",
+    },
+    testNote:
+      "Test-optional since 2008; submitted scores are superscored and may be self-reported. 26.6% of enrolled first-years submitted SAT, 18.6% ACT. No application fee and no supplemental essay.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://denison.edu/campus/admission/international-applicant-financial-aid",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://denison.edu/campus/admission/international-applicant-financial-aid",
+    },
+    policyQuote:
+      "Denison is need-aware in the application process as this allows us to meet 100% of demonstrated need for all admitted students.",
+    intlAided: {
+      value: 358,
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    intlAvgAward: {
+      value: 55613,
+      source:
+        "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
+    },
+    intlNote:
+      "Quote answers the page's question 'Is Denison need-aware for international students?'. Internationals get the same need-based aid and merit scholarships ($5,000/yr to full tuition, automatic) as domestic students. Aid uses the free Denison Certification of Finances (CSS Profile not accepted); need-based aid can only be requested at admission. The income-based Denison Commitment is for US citizens/permanent residents only.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 74000,
+      source: "https://denison.edu/campus/finances/tuition-fees",
+    },
+    fees: {
+      value: null,
+      source: null,
+    },
+    roomBoard: {
+      value: 18400,
+      source: "https://denison.edu/campus/finances/tuition-fees",
+    },
+    costNote:
+      "Cost page itemises 2026-27 charges of $92,400 as tuition $74,000 + housing & food $18,400 (same in CDS G1); no separate required fee is listed and the CDS fee row is blank.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "English proficiency demonstration is required; the international page lists TOEFL iBT, IELTS, Duolingo, SAT Reading, ACT English, English-medium schooling or an interview as considerations, with waivers case by case, but gives no score minimums. The course catalog (which may list scores) could not be loaded (catalog.denison.edu unreachable).",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://denison.edu/campus/admission/international-applicants",
+    },
+    ed2: {
+      value: "2027-01-15",
+      source: "https://denison.edu/campus/admission/international-applicants",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://denison.edu/campus/admission/international-applicants",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://denison.edu/campus/admission/international-applicants",
+    },
+    deadlineNote:
+      "Page states first-year rounds are early decision and regular decision only; month/day given, years inferred. Financial aid (Certification of Finances) deadlines match.",
+    highlight:
+      "Founded in 1831, it keeps a 350-acre Biological Reserve of forest, orchards, fields and ponds used for research.",
+    image: {
+      src: "/media/colleges/denison-university.webp",
+      card: "/media/colleges/denison-university-card.webp",
+      title: "AcademicQuadDenisonUniversity.JPG",
+      page: "https://commons.wikimedia.org/wiki/File:AcademicQuadDenisonUniversity.JPG",
+      author: "Pbass1956",
+      licence: "CC BY-SA 3.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
+    },
+    urls: {
+      admissions: "https://denison.edu/campus/admission",
+      international: "https://denison.edu/campus/admission/international-applicants",
+      aid: "https://denison.edu/campus/admission/international-applicant-financial-aid",
+      cds: "https://denison.edu/sites/default/files/forms/2026-08/cds_du_20252026_published_updated2026.08.14.pdf",
     },
   },
   {

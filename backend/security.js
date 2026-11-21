@@ -94,7 +94,7 @@ export const COLLEGE_FIGURES = {
   eaApplicants: blankOr(/^\d{1,7}$/),
   eaAdmitted: blankOr(/^\d{1,7}$/),
   sat: blankOr(/^\d{3,4}-\d{3,4}$/),
-  act: blankOr(/^\d{1,2}-\d{1,2}$/),
+  act: blankOr(/^\d{1,2}(\.\d)?-\d{1,2}(\.\d)?$/),
   testPolicy: z.enum(["", "required", "optional", "test-blind"]),
   needBasedForIntl: z.enum(["", "yes", "no"]),
   intlAidPolicy: z.enum(["", "need-blind", "need-aware", "merit-only", "limited", "none"]),
