@@ -19,12 +19,15 @@ export type EssayPrompt = {
   noSupplement?: boolean;
   position: number;
 };
+// status: verified | no-supplement | unpublished (checked, text not public for 2026-27) | not-found
 export type PromptCoverage = {
   college: string;
   list: "lac" | "nu";
   rank: string;
   status: string;
   note: string | null;
+  checked: string | null;
+  asOf: string | null;
 };
 
 export const ESSAY_PROMPTS: EssayPrompt[] = [
@@ -2849,6 +2852,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "1",
     status: "no-supplement",
     note: 'Official first-year page (current: ED Nov. 15 / RD Jan. 4 deadlines, read 2026-11-21) states "Williams does not require a writing supplement." It offers only an optional academic paper on any topic (with a description of the assignment), which is not a prompt.',
+    checked: "https://www.williams.edu/admission-aid/how-to-apply/first-year/",
+    asOf: "2026-11-21",
   },
   {
     college: "Amherst College",
@@ -2856,6 +2861,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "2",
     status: "verified",
     note: "Page explicitly says prompts are for the 2026-27 application cycle (Fall 2027 entry term). Supplement is required: Option A (choose one of three quotation prompts, max 350 words) OR Option B (graded paper) OR Option C (A2A applicants only, reuse A2A essay). Each prompt below stores the quotation followed by its question.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Bowdoin College",
@@ -2863,6 +2870,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-3",
     status: "verified",
     note: "Official Apply page has no year label, but it is the live first-year requirements page (server Last-Modified 2026-10-29) for the current ED1 Nov. 15 / RD Jan. 5 round; judged current for 2026-27. Both essays are optional, max 250 words each, in the Bowdoin Supplement.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Claremont McKenna College",
@@ -2870,6 +2879,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-3",
     status: "verified",
     note: "Official first-year instructions page is current (references test policy through the Fall 2027 entry term; read 2026-11-21). Page calls both prompts required and does not state a word limit. Optional two-minute video response prompts on the same page are not included.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Pomona College",
@@ -2877,6 +2888,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-3",
     status: "not-found",
     note: 'Official page https://www.pomona.edu/admissions/apply (read 2026-11-21) still labels its Pomona-specific prompts as "for those applying for Fall 2026 admission" (2025-26 cycle). No official 2026-27 / Fall 2027 prompt text found.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Swarthmore College",
@@ -2884,6 +2897,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-3",
     status: "verified",
     note: 'Official page states "For the 2026-2027 admissions cycle, students will be asked to answer both of the following questions"; max 250 words each.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "United States Naval Academy",
@@ -2891,6 +2906,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-3",
     status: "not-found",
     note: "Uses its own candidate application. Official 'Application Guidance for the Class of 2031' page (https://www.usna.edu/Admissions/Candidate-Instructions.php) lists \"Personal Data (Application) and 2 Essay Questions\" but does not publish the essay question text; prompts are only visible inside the candidate portal.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Harvey Mudd College",
@@ -2898,6 +2915,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "8",
     status: "verified",
     note: 'Official first-year page is current (states test-optional "for students applying for Fall 2027"); "An additional essay and short answer response are required."',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "United States Military Academy",
@@ -2905,6 +2924,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "9",
     status: "not-found",
     note: 'Uses its own candidate application. Official Steps to Admission page (https://www.westpoint.edu/admissions/steps-to-admission) lists "Essays" in the candidate checklist but publishes no prompt text; prompts are only in the candidate portal.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Wellesley College",
@@ -2912,6 +2933,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "10",
     status: "not-found",
     note: "Official first-year page (https://www.wellesley.edu/admission-aid/apply/first-year-applicants) is behind a Cloudflare human-verification challenge (HTTP 403 for WebFetch, curl and browser); could not read it, so prompt text and cycle not verified. Retry manually.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "United States Air Force Academy",
@@ -2919,6 +2942,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "11",
     status: "not-found",
     note: "Uses its own application. Official Requirements page (https://www.usafa.edu/admissions/commitment/requirements/) says the online application has three essay questions (third optional but highly recommended), max 3,000 characters each, but does not publish the question text.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Vassar College",
@@ -2926,6 +2951,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-12",
     status: "not-found",
     note: "Official first-year requirements page (https://www.vassar.edu/admission/apply/requirements) and How to Apply page list no supplemental essay prompt text (only the optional 'Your Space' submission), carry no cycle/year label, and do not explicitly say there is no writing supplement. Could not confirm 2026-27 prompts.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Washington and Lee University",
@@ -2933,6 +2960,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-12",
     status: "verified",
     note: "Prompts page has no year label, but it is the live page linked from the official Apply page that lists 2026-27 deadlines (Nov 15, 2026 / Jan 5, 2027); judged current. All supplements optional: 'Why W&L?' statement plus ONE of four short-answer options (250 words or less or max 2-minute video), submitted in the Applicant Portal.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Hamilton College",
@@ -2940,6 +2969,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-14",
     status: "not-found",
     note: "Official first-year page (https://www.hamilton.edu/admission/apply/first-year) lists an optional 'Supplemental Short Answer' (via Common App/Scoir/QuestBridge or Applicant Portal) but does not publish the prompt text. The only wording found was on a hamilton.edu web style-guide page, not an admissions page, so not used.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Wesleyan University",
@@ -2947,6 +2978,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-14",
     status: "not-found",
     note: "Official first-year page (https://www.wesleyan.edu/admission/undergraduate-admission/first-year.html) requires 'Wesleyan’s member-specific questions' on the Common App/Scoir but does not publish their text. No official 2026-27 prompt page found.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Carleton College",
@@ -2954,6 +2987,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-16",
     status: "not-found",
     note: "Official Carleton admissions pages (apply, steps, materials, essay tips, QuestBridge) publish no supplemental prompt text and do not state that there is no supplement. Could not verify 2026-27 prompts.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Davidson College",
@@ -2961,6 +2996,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-16",
     status: "verified",
     note: "Official first-year applicants page has no explicit year label but is the live requirements page (server Last-Modified 2026-11-20; links Class of 2030 profile); judged current for 2026-27. Both supplemental questions listed under 'Supplemental Questions' in the Common/Coalition application.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Grinnell College",
@@ -2968,6 +3005,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-16",
     status: "verified",
     note: "Official requirements page shows 'Application Deadlines 2026–27'; says no required supplement, but offers one optional (recommended) short answer prompt submitted via the applicant portal.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Barnard College",
@@ -2975,6 +3014,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-19",
     status: "verified",
     note: 'Official page states "The short answer questions for 2026-2027 are"; both required.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Middlebury College",
@@ -2982,6 +3023,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-19",
     status: "no-supplement",
     note: 'Official current application instructions page (ED I Nov. 15 / RD Jan. 4 table; references 2026 TOEFL change) states: "Use the prompts on the application. We do not require a supplemental essay."',
+    checked: "https://www.middlebury.edu/college/admissions/application-instructions-and-deadlines",
+    asOf: "2026-11-21",
   },
   {
     college: "University of Richmond",
@@ -2989,6 +3032,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "21",
     status: "verified",
     note: 'Official page states "The following essay prompts will appear on the 2026-27 application." One essay response required, choose one of three; minimum 350, maximum 650 words.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Colby College",
@@ -2996,6 +3041,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-22",
     status: "no-supplement",
     note: 'Official Apply page (redirect from colby.edu/admission/apply; dateModified 2026-10-09, aid figures as of July 1, 2026) states: "We do not require any additional writing supplements."',
+    checked: "https://afa.colby.edu/apply/",
+    asOf: "2026-11-21",
   },
   {
     college: "Colgate University",
@@ -3003,6 +3050,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-22",
     status: "not-found",
     note: "Official pages (colgate.edu/admission-aid/apply, /apply/first-year-applicants, /apply/early-decision) mention optional supplemental writing prompts but do not publish the prompt text; prompts appear only inside the application.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "College of the Holy Cross",
@@ -3010,6 +3059,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-22",
     status: "not-found",
     note: "holycross.edu/admissions-aid/how-to-apply lists application requirements but no supplemental essay prompt text; no official 2026-27 prompt page found.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Smith College",
@@ -3017,6 +3068,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-22",
     status: "not-found",
     note: "smith.edu/admission-aid/apply-smith/first-year-applicants does not publish any supplemental essay prompt text; no official prompt page found.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Bates College",
@@ -3024,6 +3077,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-26",
     status: "no-supplement",
     note: 'Official apply page states: "Bates does not require a supplemental essay when applying." Page dateModified 2026-11-15, so it is the current-cycle page.',
+    checked: "https://www.bates.edu/admission/apply/",
+    asOf: "2026-11-21",
   },
   {
     college: "Haverford College",
@@ -3031,6 +3086,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-26",
     status: "not-found",
     note: 'Official checklist (haverford.edu/admission/applying/application-checklist) lists a required "Haverford Supplement" but the site does not publish the prompt text; the former supplement-advice page (node/138941) now returns 404.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Macalester College",
@@ -3038,6 +3095,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "28",
     status: "verified",
     note: 'Official U.S. First-Year Applicants page lists "Application Deadlines for a Fall 2027 start" and was modified 2026-10-16. Page says the Macalester member section has two optional prompts; no word limit printed.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Bucknell University",
@@ -3045,6 +3104,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "29",
     status: "not-found",
     note: "Only official source quoting the prompt is an admissions blog post published 2020-06-22 (bucknell.edu/admissions-aid/admissions-blog/tips-writing-college-application-essay); cannot confirm it applies to 2026-27. bucknell.edu/apply has no prompt text.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Lafayette College",
@@ -3052,6 +3113,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "30",
     status: "verified",
     note: 'Official apply page modified 2026-11-02 and refers to students "planning to enroll in the fall of 2027 and fall of 2028". Prompt is headed "Why Lafayette?".',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Bryn Mawr College",
@@ -3059,6 +3122,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-31",
     status: "not-found",
     note: 'Official first-year page (brynmawr.edu/admissions-aid/apply/first-year-students) still shows the "2025-2026 Application Cycle Prompt" (250-500 words); no 2026-27 prompt published.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Denison University",
@@ -3066,6 +3131,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-31",
     status: "no-supplement",
     note: 'Official live apply page states "No Supplemental Essay Required"; page shows current ED/RD deadlines (no year printed), judged current first-year requirements page.',
+    checked: "https://denison.edu/campus/admission/apply-for-admission",
+    asOf: "2026-11-21",
   },
   {
     college: "Trinity College (Hartford, CT)",
@@ -3073,6 +3140,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-31",
     status: "verified",
     note: 'Official Application Process page shows "2026-27 Deadlines" and was modified 2026-08-03.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Colorado College",
@@ -3080,6 +3149,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-34",
     status: "verified",
     note: 'Official Optional Supplemental Essay page is headed "2026-27 ESSAY PROMPT".',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Franklin & Marshall College",
@@ -3087,6 +3158,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-34",
     status: "not-found",
     note: "fandm.edu/apply and the Regular Decision application checklist list no essay supplement prompt text; no official prompt page found.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Mount Holyoke College",
@@ -3094,6 +3167,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-34",
     status: "not-found",
     note: "mtholyoke.edu/admission/apply-undergraduate-first-year/application-process does not publish supplemental essay prompt text; no official prompt page found.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Spelman College",
@@ -3101,6 +3176,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-34",
     status: "not-found",
     note: 'Official First-Time Student Applicant page ("Now accepting applications for Fall 2027") lists a required "Supplemental Essay" but does not publish the prompt text.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Massachusetts Institute of Technology",
@@ -3108,6 +3185,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "1",
     status: "verified",
     note: 'Official MIT Admissions page states "For the 2026–2027 application, we’re asking these short answer essay questions". MIT uses its own application.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Princeton University",
@@ -3115,6 +3194,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "2",
     status: "verified",
     note: 'Official Princeton-specific Questions page: "Below you will find the questions for the 2026-27 application cycle." Applicants answer one of the two academic prompts depending on degree (A.B./undecided vs B.S.E.). Princeton also requires a graded written paper.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Harvard University",
@@ -3122,6 +3203,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "3",
     status: "verified",
     note: 'Official Harvard College Application Tips guide, "Updated by the Harvard College Office of Admissions and Financial Aid on September 23, 2026." Five required short-answer questions, 150 words each.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Yale University",
@@ -3129,6 +3212,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "4",
     status: "verified",
     note: 'Official Essay Topics page: "Review the 2026-2027 essay topics for all applications." Short takes and essay apply to Common Application and Coalition Application only.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "California Institute of Technology",
@@ -3136,6 +3221,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-5",
     status: "verified",
     note: 'Official page is titled "Fall 2027 Supplemental Application Essays" and shows the 2026-27 questions.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Stanford University",
@@ -3143,6 +3230,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-5",
     status: "not-found",
     note: "Official page admission.stanford.edu/apply/first-year/apply.html returns 403 behind a BitNinja anti-robot CAPTCHA for automated fetches; did not bypass. Prompts not verified.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "University of Pennsylvania",
@@ -3150,6 +3239,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "7",
     status: "verified",
     note: 'Official Penn Admissions writing page is headed "2026-27 Short Answer and Essay Prompts". Two prompts for all applicants plus one school-specific prompt; dual-degree/specialized program essays and transfer essay not included here.',
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Duke University",
@@ -3157,6 +3248,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "8",
     status: "verified",
     note: "Official Duke Apply page states the questions are 'required for all first-year applicants to Duke University during the 2026-27 application cycle.' Duke Embark applicants also complete a 150-word response (prompt text not shown on the page; not recorded).",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Johns Hopkins University",
@@ -3164,6 +3257,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-9",
     status: "verified",
     note: "Official JHU requirements page heading reads '2026–2027 Supplemental Essay Prompt'. QuestBridge applicants complete a questionnaire instead.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Northwestern University",
@@ -3171,6 +3266,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-9",
     status: "verified",
     note: "Official Application Materials page section titled 'Northwestern 2026–27 First-Year Writing Supplements'. Required question is optional for QuestBridge applicants.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "University of Chicago",
@@ -3178,6 +3275,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-9",
     status: "verified",
     note: "Official UChicago Essay Questions page says 'Introducing the 2026-2027 essay prompts.' No word limits stated on the page.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Columbia University",
@@ -3185,6 +3284,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-12",
     status: "verified",
     note: "Official page heading '2026-2027 Columbia-Specific Questions' (updated Tuesday, July 28, 2026). Page instructions: list question 100 word maximum (items separated by commas or semicolons); 'For each of the six short answer questions, please respond in 150 words or fewer.'",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Dartmouth College",
@@ -3192,6 +3293,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-12",
     status: "verified",
     note: "Official page: 'Writing supplement prompts included in Dartmouth's application for admission to the Class of 2031' (Updated July 22, 2026); Class of 2031 = Fall 2027 entry.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Carnegie Mellon University",
@@ -3199,6 +3302,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-14",
     status: "verified",
     note: "Official Admission Consideration page (current first-year page; no year label in text, but page metadata shows modified 2026-05-19, i.e. updated in 2026 ahead of the 2026-27 cycle). Page: 'Your short answer responses shouldn't exceed 300 words each.'",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Cornell University",
@@ -3206,6 +3311,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-14",
     status: "verified",
     note: "Cornell official Enrollment FAQ 'What are the essay questions for the Fall 2027 application?': applicants complete only the essay(s) for the undergraduate college or school to which they apply. Each prompt's limitNote begins with its college/school.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Brown University",
@@ -3213,6 +3320,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-16",
     status: "verified",
     note: "Official How to Apply page: 'Questions specific to Brown, including our essays for the 2026-2027 application cycle...' Four essays required for all first-year and transfer applicants; PLME and Brown|RISD Dual Degree applicants write additional program essays (recorded as required for those applicants).",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Rice University",
@@ -3220,6 +3329,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-16",
     status: "verified",
     note: "Official First-Year Domestic Applicants page heading 'Essay Prompts (2026-2027)'. Rice also asks for 'The Box' (an image, not an essay; not recorded). Architecture applicants answer two additional prompts.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Vanderbilt University",
@@ -3227,6 +3338,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-16",
     status: "not-found",
     note: "Official page admissions.vanderbilt.edu/apply/personal-essay-and-short-answer-prompts/ shows one ~250-word short answer ('Crescere aude' prompt) but states no cycle year and its page metadata says published/modified 27 Jul 2022; no official page found confirming it for 2026-27 / Fall 2027.",
+    checked: "https://admissions.vanderbilt.edu/apply/personal-essay-and-short-answer-prompts/",
+    asOf: "2026-11-21",
   },
   {
     college: "University of Notre Dame",
@@ -3234,6 +3347,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-20",
     status: "verified",
     note: "Official How to Apply page (current; references current high school seniors applying under the test-optional policy 'through 2026-2027' and testing reinstated for the 2027-2028 cycle). Writing Section: one required short essay (max 150 words) and two short answers chosen from options (50-100 words).",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Emory University",
@@ -3241,6 +3356,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-23",
     status: "verified",
     note: "Official Emory Undergraduate Admission blog post 'Emory's Short Answer Questions 2026-27' (August 1, 2026), linked from apply.emory.edu: 'short answer questions for the 2026-2027 first-year application.'",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Georgetown University",
@@ -3248,6 +3365,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-23",
     status: "verified",
     note: "Official Application Requirements and Forms page (first-year); no year label in text, but page metadata shows published 2026-03-18 and modified 2026-07-28, i.e. the current requirements page updated for the 2026-27 cycle. Two short essays and two long essays required; Essay 2 depends on the school applied to.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "Washington University in St. Louis",
@@ -3255,6 +3374,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-16",
     status: "verified",
     note: "Official First-Year applicants page addresses students 'applying to become a part of the class entering in fall 2027' and lists the 250-word WashU question. Signature Scholar Program short answers (250 words each) are in the WashU Pathway and not shown publicly (not recorded).",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "University of California, Berkeley",
@@ -3262,6 +3383,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-20",
     status: "verified",
     note: "These are the University of California Personal Insight Questions (systemwide, same for every UC campus): the official page says 'You will have 8 questions to choose from. You must respond to only 4 of the 8 questions. Each response is limited to a maximum of 350 words.' The PIQ page carries no year label; cycle confirmed by UC's official 'Quick Reference Guide to UC Admissions, August 2026' (fall 2027 filing period), which states first-year applicants must select four out of eight questions, 350 words max each.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "University of California, Los Angeles",
@@ -3269,6 +3392,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-20",
     status: "verified",
     note: "These are the University of California Personal Insight Questions (systemwide, same for every UC campus): the official page says 'You will have 8 questions to choose from. You must respond to only 4 of the 8 questions. Each response is limited to a maximum of 350 words.' The PIQ page carries no year label; cycle confirmed by UC's official 'Quick Reference Guide to UC Admissions, August 2026' (fall 2027 filing period), which states first-year applicants must select four out of eight questions, 350 words max each.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "University of California, San Diego",
@@ -3276,6 +3401,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-29",
     status: "verified",
     note: "These are the University of California Personal Insight Questions (systemwide, same for every UC campus): the official page says 'You will have 8 questions to choose from. You must respond to only 4 of the 8 questions. Each response is limited to a maximum of 350 words.' The PIQ page carries no year label; cycle confirmed by UC's official 'Quick Reference Guide to UC Admissions, August 2026' (fall 2027 filing period), which states first-year applicants must select four out of eight questions, 350 words max each.",
+    checked: null,
+    asOf: "2026-11-21",
   },
   {
     college: "University of Michigan, Ann Arbor",
@@ -3283,6 +3410,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "25",
     status: "not-found",
     note: "Official page admissions.umich.edu/apply/first-year-applicants/essay-questions lists two required U-M questions (300 and 550 word max) but carries no cycle year or update date, and the linked Requirements & Deadlines page gives none either; could not confirm for 2026-27 (WebSearch quota ran out before further checks).",
+    checked: "https://admissions.umich.edu/apply/first-year-applicants/essay-questions",
+    asOf: "2026-11-21",
   },
   {
     college: "University of Virginia",
@@ -3290,6 +3419,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "26",
     status: "not-found",
     note: "Checked admission.virginia.edu (Apply, Deadlines & Instructions, FAQs, site search): the site references Fall 2027 applicants but does not publish the UVA writing-supplement prompt text; prompts appear only inside the Common App.",
+    checked: "https://admission.virginia.edu/admission/deadlines-instructions",
+    asOf: "2026-11-21",
   },
   {
     college: "University of North Carolina at Chapel Hill",
@@ -3297,6 +3428,9 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-27",
     status: "no-supplement",
     note: "Official UNC Admissions post 'Short essays removed from Carolina's 2026-2027 application': 'we're removing the two short answer supplemental questions.' Only the Common App personal essay is required (see also 'Application Prompts for 2026-2027').",
+    checked:
+      "https://admissions.unc.edu/short-essays-removed-from-carolinas-2026-2027-application/",
+    asOf: "2026-11-21",
   },
   {
     college: "University of Southern California",
@@ -3304,6 +3438,8 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-27",
     status: "not-found",
     note: "Official admission.usc.edu First-Year Students page (2026-27: RD January 10, 2027) and site search do not publish USC's writing-supplement prompts; they appear only in the Common App. Search results for the prompts were all aggregators (not used).",
+    checked: "https://admission.usc.edu/prospective-students/how-to-apply/first-year-students/",
+    asOf: "2026-11-21",
   },
   {
     college: "Georgia Institute of Technology",
@@ -3311,5 +3447,7 @@ export const PROMPT_COVERAGE: PromptCoverage[] = [
     rank: "T-29",
     status: "no-supplement",
     note: "Official Personal Essays page: 'Below are the essay questions for 2026-27 applications. First-year applicants will choose one of seven essay prompts provided by Common App.' / 'You will be asked to complete one of the Common App First-Year Essay prompts.' No Georgia Tech-specific essay listed.",
+    checked: "https://admission.gatech.edu/first-year/personal-essays",
+    asOf: "2026-11-21",
   },
 ];
