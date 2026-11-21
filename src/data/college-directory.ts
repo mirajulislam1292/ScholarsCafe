@@ -4758,6 +4758,152 @@ export const COLLEGES: College[] = [
     },
   },
   {
+    slug: "trinity-college",
+    name: "Trinity College",
+    type: "LAC",
+    city: "Hartford",
+    state: "Connecticut",
+    code: "CT",
+    rank: {
+      label: "#31 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 7273,
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    admitted: {
+      value: 2148,
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    edApplicants: {
+      value: 643,
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    edAdmitted: {
+      value: 261,
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II offered; no Early Action (CDS C22: No).",
+    sat: {
+      value: "1350-1460",
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    act: {
+      value: "30.5-32.5",
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
+    },
+    testNote:
+      "Test-optional; SAT or ACT not required. Only 9% of enrolled Fall 2025 first-years submitted SAT, 4% ACT (CDS C9).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.trincoll.edu/admissions/finaid/international-students/",
+    },
+    intlAidPolicy: {
+      value: null,
+      source: null,
+    },
+    policyQuote: "If you are admitted to Trinity, we will meet your full, demonstrated need.",
+    intlAided: {
+      value: 295,
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    intlAvgAward: {
+      value: 70437,
+      source:
+        "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+    intlNote:
+      "International aid page says it meets full demonstrated need of admitted students but does not state need-blind or need-aware. International aid applicants file the CSS Profile; non-aid applicants file a Statement of Finances Form.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 72820,
+      source: "https://www.trincoll.edu/student-accounts/tuition-and-fees/",
+    },
+    fees: {
+      value: 3330,
+      source: "https://www.trincoll.edu/student-accounts/tuition-and-fees/",
+    },
+    roomBoard: {
+      value: 20330,
+      source: "https://www.trincoll.edu/student-accounts/tuition-and-fees/",
+    },
+    costNote:
+      "2026-27 billing page: General Fee $2,900 + Student Activity Fee $430 = fees; Standard Room $13,150 + first-year meal plan $7,180 = room and board. Same figures appear in CDS 2025-2026 G1.",
+    ielts: {
+      value: "none",
+      source:
+        "https://www.trincoll.edu/admissions/international-admissions/english-proficiency-exams/",
+    },
+    toefl: {
+      value: "none",
+      source:
+        "https://www.trincoll.edu/admissions/international-admissions/english-proficiency-exams/",
+    },
+    duolingo: {
+      value: "none",
+      source:
+        "https://www.trincoll.edu/admissions/international-admissions/english-proficiency-exams/",
+    },
+    englishNote:
+      "Page says Trinity has no minimum score cutoffs. Recommended scores: Duolingo 130+, IELTS 7.0 (bands 6.5)+, TOEFL iBT listed as 5.5 (subsections 5.5)+ (new TOEFL band scale). An English test or a waiver is required.",
+    nationalCurriculum: {
+      value:
+        "Requires high school transcripts (grades 9-12); any non-English documents need certified translations. Nothing specific on national exam results published.",
+      source: "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
+    },
+    ed2: {
+      value: "2027-01-15",
+      source: "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
+    },
+    deadlineNote:
+      "Page lists '2026-27 Deadlines': ED I Nov 15, ED II Jan 15, RD Jan 15. RD applicants may convert to ED II by Feb 1.",
+    highlight:
+      "Its brownstone Long Walk and Chapel were listed in 2024 on the National Register of Historic Places as a historic district.",
+    image: null,
+    urls: {
+      admissions:
+        "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
+      international: "https://www.trincoll.edu/admissions/international-admissions/",
+      aid: "https://www.trincoll.edu/admissions/finaid/international-students/",
+      cds: "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+  },
+  {
     slug: "massachusetts-institute-of-technology",
     name: "Massachusetts Institute of Technology",
     type: "NU",
@@ -6365,6 +6511,151 @@ export const COLLEGES: College[] = [
       international: "https://collegeadmissions.uchicago.edu/apply/international-applicants/",
       aid: "https://collegeadmissions.uchicago.edu/financial-support/international-financial-aid/",
       cds: "https://data.uchicago.edu/common-data-set/",
+    },
+  },
+  {
+    slug: "columbia-university",
+    name: "Columbia University",
+    type: "NU",
+    city: "New York",
+    state: "New York",
+    code: "NY",
+    rank: {
+      label: "#12 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-21",
+    cdsYear: "2025-2026 (C1 only; other figures from 2024-2025)",
+    applicants: {
+      value: 59611,
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2025-26_Columbia_College_and_Columbia_Enginnering_CDS.pdf",
+    },
+    admitted: {
+      value: 2946,
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2025-26_Columbia_College_and_Columbia_Enginnering_CDS.pdf",
+    },
+    edApplicants: {
+      value: 6007,
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2024-25_Columbia_College_and_Columbia_Engineering_CDS.pdf",
+    },
+    edAdmitted: {
+      value: 795,
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2024-25_Columbia_College_and_Columbia_Engineering_CDS.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Single binding Early Decision (Nov 1); no Early Action (CDS C22 = No). ED counts are for the Fall 2024 entering class (CDS 2024-25), because the published 2025-26 CDS stops after C2.",
+    sat: {
+      value: "1510-1560",
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2024-25_Columbia_College_and_Columbia_Engineering_CDS.pdf",
+    },
+    act: {
+      value: "34-36",
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2024-25_Columbia_College_and_Columbia_Engineering_CDS.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://undergrad.admissions.columbia.edu/apply/process/testing",
+    },
+    testNote:
+      "Test optional for the 2026-2027 cycle (fall 2027 entry); SAT/ACT will be required from the 2027-2028 cycle (August 2027), with waivers on request. No minimum scores. Fall 2024 enrollees: 44% submitted SAT, 17% ACT (CDS 2024-25 C9).",
+    needBasedForIntl: {
+      value: true,
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2024-25_Columbia_College_and_Columbia_Engineering_CDS.pdf",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://undergrad.admissions.columbia.edu/apply/international/aid",
+    },
+    policyQuote:
+      "Columbia is committed to meeting 100% of the demonstrated need of all admitted first-year students, regardless of citizenship. ... The Columbia admissions process is largely the same for all students, regardless of citizenship and residency, but international students are evaluated in a need-aware manner.",
+    intlAided: {
+      value: 244,
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2024-25_Columbia_College_and_Columbia_Engineering_CDS.pdf",
+    },
+    intlAvgAward: {
+      value: 88789,
+      source:
+        "https://opir.columbia.edu/sites/opir.columbia.edu/files/content/Common%20Data%20Set/2024-25_Columbia_College_and_Columbia_Engineering_CDS.pdf",
+    },
+    intlNote:
+      "International applicants must say they are applying for aid when they apply; if admitted without requesting aid they cannot apply later. All aid is need-based (no merit scholarships); no loans in packages. CDS H6 is 2024-25; the aid page states an average international award of $79,375.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 72800,
+      source: "https://cc-seas.financialaid.columbia.edu/eligibility/facts",
+    },
+    fees: {
+      value: 4160,
+      source: "https://cc-seas.financialaid.columbia.edu/eligibility/facts",
+    },
+    roomBoard: {
+      value: 19650,
+      source: "https://cc-seas.financialaid.columbia.edu/eligibility/facts",
+    },
+    costNote:
+      "First-year on-campus figures for 2026-27: food $7,128 + housing $12,522 = $19,650. First-year fees include one-time transcript and orientation fees ($730). International students also pay a $175/semester International Services Charge; health insurance ($2,218 fall, $3,605 spring) is extra unless waived.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "No minimum scores published. Proficiency is required: met by English home language, English-medium secondary schooling, SAT Reading and Writing 700+ or ACT English/Reading 29+; otherwise submit TOEFL, IELTS, Duolingo English Test or Cambridge English. Optional InitialView or Vericant videos accepted.",
+    nationalCurriculum: {
+      value:
+        "All secondary curricula, including national school curricula, are accepted and reviewed in context. Internal and external exam results (including final national exam results) must be submitted if they are required to complete and graduate from secondary school; otherwise they are not required.",
+      source: "https://undergrad.admissions.columbia.edu/apply/international",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://undergrad.admissions.columbia.edu/apply/first-year",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://undergrad.admissions.columbia.edu/apply/first-year",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://undergrad.admissions.columbia.edu/apply/first-year",
+    },
+    rd: {
+      value: "2027-01-01",
+      source: "https://undergrad.admissions.columbia.edu/apply/first-year",
+    },
+    deadlineNote:
+      "ED and QuestBridge Match Nov 1; ED financial aid application Nov 15; RD Friday, January 1, 2027 (11:59 p.m. applicant's local time); RD financial aid Feb 15.",
+    highlight:
+      "Every Columbia College student takes the Core Curriculum, a shared set of seminars on great works and ideas that has run for over a century.",
+    image: null,
+    urls: {
+      admissions: "https://undergrad.admissions.columbia.edu/apply/first-year",
+      international: "https://undergrad.admissions.columbia.edu/apply/international",
+      aid: "https://undergrad.admissions.columbia.edu/apply/international/aid",
+      cds: "https://opir.columbia.edu/cds",
     },
   },
 ];
