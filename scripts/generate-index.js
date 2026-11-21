@@ -52,6 +52,7 @@ function writeSitemap(clientDir, pages) {
     "/services": "0.9",
     "/resources": "0.9",
     "/contact": "0.8",
+    "/colleges": "0.8",
   };
   const urls = pages
     .filter((p) => !p.startsWith("/forms/"))
@@ -125,6 +126,22 @@ async function generateIndexHtml() {
   if (stateSlugs.length !== 50)
     throw new Error(`Expected 50 state pages, found ${stateSlugs.length}`);
   pages.push(...stateSlugs.map((slug) => `/universities/${slug}`));
+  // College directory (src/data/college-directory.ts), plus colleges added in the admin
+  // (published "colleges" entries baked in above). Hidden ones are skipped.
+  const collegeData = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "..", "src/data/college-directory.ts"),
+    "utf8",
+  );
+  const collegeSlugs = new Set(
+    [...collegeData.matchAll(/^\s*"?slug"?: "([a-z0-9-]+)",$/gm)].map((m) => m[1]),
+  );
+  for (const item of globalThis.__SC_CONTENT__ || []) {
+    if (item.kind !== "colleges" || typeof item.data?.slug !== "string") continue;
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.data.slug)) continue;
+    if (item.data.hidden === true) collegeSlugs.delete(item.data.slug);
+    else collegeSlugs.add(item.data.slug);
+  }
+  pages.push("/colleges", ...[...collegeSlugs].map((slug) => `/colleges/${slug}`));
   const rendered = [];
   for (const path of pages) {
     const response = await serverEntry.default.fetch(new Request("https://example.com" + path));
