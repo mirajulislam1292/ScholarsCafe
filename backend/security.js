@@ -75,6 +75,94 @@ const safeUrlOrPath = z
   );
 const position = z.number().int().min(0).max(10000).optional();
 const short = z.string().max(300);
+
+// College directory (/colleges). One flat entry per college, so the generic editor can show it.
+// Every figure is a text box plus a "<figure>Source" box. Blank figure = not published (the site
+// says so); a figure that is filled in must have an HTTPS source. Entries override the built-in
+// list (src/data/college-directory.ts) by slug, or add a new college.
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const blankOr = (re) =>
+  z
+    .string()
+    .max(40)
+    .regex(new RegExp(`^(${re.source.slice(1, -1)})?$`));
+export const COLLEGE_FIGURES = {
+  applicants: blankOr(/^\d{1,7}$/),
+  admitted: blankOr(/^\d{1,7}$/),
+  edApplicants: blankOr(/^\d{1,7}$/),
+  edAdmitted: blankOr(/^\d{1,7}$/),
+  eaApplicants: blankOr(/^\d{1,7}$/),
+  eaAdmitted: blankOr(/^\d{1,7}$/),
+  sat: blankOr(/^\d{3,4}-\d{3,4}$/),
+  act: blankOr(/^\d{1,2}(\.\d)?-\d{1,2}(\.\d)?$/),
+  testPolicy: z.enum(["", "required", "optional", "test-blind"]),
+  needBasedForIntl: z.enum(["", "yes", "no"]),
+  intlAidPolicy: z.enum(["", "need-blind", "need-aware", "merit-only", "limited", "none"]),
+  intlAided: blankOr(/^\d{1,6}$/),
+  intlAvgAward: blankOr(/^\d{1,7}$/),
+  tuition: blankOr(/^\d{1,7}$/),
+  fees: blankOr(/^\d{1,7}$/),
+  roomBoard: blankOr(/^\d{1,7}$/),
+  ielts: blankOr(/^(\d(\.\d)?|none)$/),
+  toefl: blankOr(/^(\d{1,3}|none)$/),
+  duolingo: blankOr(/^(\d{1,3}|none)$/),
+  nationalCurriculum: z.string().max(1000),
+  ed1: blankOr(/^(\d{4}-\d{2}-\d{2}|not-offered)$/),
+  ed2: blankOr(/^(\d{4}-\d{2}-\d{2}|not-offered)$/),
+  ea: blankOr(/^(\d{4}-\d{2}-\d{2}|not-offered)$/),
+  rd: blankOr(/^(\d{4}-\d{2}-\d{2}|not-offered)$/),
+};
+const collegeNote = z.string().max(1000);
+const colleges = z
+  .object({
+    slug: z
+      .string()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+      .max(100),
+    name: z.string().trim().min(1).max(200),
+    collegeType: z.enum(["LAC", "NU"]),
+    city: short,
+    state: short,
+    code: z.string().regex(/^[A-Z]{2}$/),
+    rankLabel: short,
+    rankEdition: short,
+    rankSource: safeUrl,
+    asOf: z.string().regex(DATE),
+    cdsYear: short,
+    ...COLLEGE_FIGURES,
+    ...Object.fromEntries(Object.keys(COLLEGE_FIGURES).map((k) => [k + "Source", safeUrl])),
+    earlyNote: collegeNote,
+    testNote: collegeNote,
+    policyQuote: collegeNote,
+    intlNote: collegeNote,
+    costYear: short,
+    costNote: collegeNote,
+    englishNote: collegeNote,
+    deadlineNote: collegeNote,
+    highlight: z.string().max(400),
+    // Photo: same licence fields as the state briefs. With a photo, its page and licence are required.
+    image: safeUrlOrPath,
+    imageTitle: short,
+    imagePage: safeUrl,
+    imageAuthor: short,
+    imageLicence: short,
+    imageLicenceUrl: safeUrl,
+    urlAdmissions: safeUrl,
+    urlInternational: safeUrl,
+    urlAid: safeUrl,
+    urlCds: safeUrl,
+    // Hide a built-in college from the site without deleting anything.
+    hidden: z.boolean(),
+    position,
+  })
+  .strict()
+  .superRefine((d, ctx) => {
+    for (const k of Object.keys(COLLEGE_FIGURES))
+      if (String(d[k]).trim() && !d[k + "Source"])
+        ctx.addIssue({ code: "custom", path: [k + "Source"], message: `Add a source for ${k}` });
+    if (d.image && (!d.imagePage || !d.imageLicence))
+      ctx.addIssue({ code: "custom", path: ["imageLicence"], message: "Photo needs its licence" });
+  });
 const fields = {
   mentors: z.object({ name: text, role: text, bio: text, photo: safeUrl, initials: text }),
   blogs: z.object({
@@ -247,6 +335,7 @@ const fields = {
       .regex(/^([a-z-]+(,[a-z-]+)*)?$/)
       .max(500),
   }),
+  colleges,
 };
 export const KINDS = Object.keys(fields);
 /** True when `data` is valid content for `kind` (same rules as saving in the admin). */
@@ -276,6 +365,7 @@ export const recordInput = z
       "sections",
       "resources",
       "links",
+      "colleges",
       "prompts",
       "toolValues",
       "promptAngles",

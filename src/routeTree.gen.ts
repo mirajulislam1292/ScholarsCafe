@@ -20,6 +20,8 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
+import { Route as CollegesSlugRouteImport } from './routes/colleges.$slug'
 import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as FormsSlugRouteImport } from './routes/forms.$slug'
 import { Route as ResourcesIndexRouteImport } from './routes/resources.index'
@@ -85,6 +87,16 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollegesIndexRoute = CollegesIndexRouteImport.update({
+  id: '/colleges/',
+  path: '/colleges/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollegesSlugRoute = CollegesSlugRouteImport.update({
+  id: '/colleges/$slug',
+  path: '/colleges/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FormsIndexRoute = FormsIndexRouteImport.update({
   id: '/forms/',
   path: '/forms/',
@@ -143,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/programs': typeof ProgramsRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/colleges/$slug': typeof CollegesSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/resources/blog': typeof ResourcesBlogRoute
   '/resources/eca': typeof ResourcesEcaRoute
@@ -150,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/universities/$state': typeof UniversitiesStateRoute
+  '/colleges/': typeof CollegesIndexRoute
   '/forms/': typeof FormsIndexRoute
   '/resources/': typeof ResourcesIndexRoute
 }
@@ -165,6 +179,7 @@ export interface FileRoutesByTo {
   '/programs': typeof ProgramsRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/colleges/$slug': typeof CollegesSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/resources/blog': typeof ResourcesBlogRoute
   '/resources/eca': typeof ResourcesEcaRoute
@@ -172,6 +187,7 @@ export interface FileRoutesByTo {
   '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/universities/$state': typeof UniversitiesStateRoute
+  '/colleges': typeof CollegesIndexRoute
   '/forms': typeof FormsIndexRoute
   '/resources': typeof ResourcesIndexRoute
 }
@@ -188,6 +204,7 @@ export interface FileRoutesById {
   '/programs': typeof ProgramsRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/colleges/$slug': typeof CollegesSlugRoute
   '/forms/$slug': typeof FormsSlugRoute
   '/resources/blog': typeof ResourcesBlogRoute
   '/resources/eca': typeof ResourcesEcaRoute
@@ -195,6 +212,7 @@ export interface FileRoutesById {
   '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
   '/universities/$state': typeof UniversitiesStateRoute
+  '/colleges/': typeof CollegesIndexRoute
   '/forms/': typeof FormsIndexRoute
   '/resources/': typeof ResourcesIndexRoute
 }
@@ -212,6 +230,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/services'
     | '/terms'
+    | '/colleges/$slug'
     | '/forms/$slug'
     | '/resources/blog'
     | '/resources/eca'
@@ -219,6 +238,7 @@ export interface FileRouteTypes {
     | '/resources/tools'
     | '/resources/webinars'
     | '/universities/$state'
+    | '/colleges/'
     | '/forms/'
     | '/resources/'
   fileRoutesByTo: FileRoutesByTo
@@ -234,6 +254,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/services'
     | '/terms'
+    | '/colleges/$slug'
     | '/forms/$slug'
     | '/resources/blog'
     | '/resources/eca'
@@ -241,6 +262,7 @@ export interface FileRouteTypes {
     | '/resources/tools'
     | '/resources/webinars'
     | '/universities/$state'
+    | '/colleges'
     | '/forms'
     | '/resources'
   id:
@@ -256,6 +278,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/services'
     | '/terms'
+    | '/colleges/$slug'
     | '/forms/$slug'
     | '/resources/blog'
     | '/resources/eca'
@@ -263,6 +286,7 @@ export interface FileRouteTypes {
     | '/resources/tools'
     | '/resources/webinars'
     | '/universities/$state'
+    | '/colleges/'
     | '/forms/'
     | '/resources/'
   fileRoutesById: FileRoutesById
@@ -279,6 +303,7 @@ export interface RootRouteChildren {
   ProgramsRoute: typeof ProgramsRoute
   ServicesRoute: typeof ServicesRoute
   TermsRoute: typeof TermsRoute
+  CollegesSlugRoute: typeof CollegesSlugRoute
   FormsSlugRoute: typeof FormsSlugRoute
   ResourcesBlogRoute: typeof ResourcesBlogRoute
   ResourcesEcaRoute: typeof ResourcesEcaRoute
@@ -286,6 +311,7 @@ export interface RootRouteChildren {
   ResourcesToolsRoute: typeof ResourcesToolsRoute
   ResourcesWebinarsRoute: typeof ResourcesWebinarsRoute
   UniversitiesStateRoute: typeof UniversitiesStateRoute
+  CollegesIndexRoute: typeof CollegesIndexRoute
   FormsIndexRoute: typeof FormsIndexRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
 }
@@ -369,6 +395,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/colleges/': {
+      id: '/colleges/'
+      path: '/colleges'
+      fullPath: '/colleges/'
+      preLoaderRoute: typeof CollegesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colleges/$slug': {
+      id: '/colleges/$slug'
+      path: '/colleges/$slug'
+      fullPath: '/colleges/$slug'
+      preLoaderRoute: typeof CollegesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forms/': {
       id: '/forms/'
       path: '/forms'
@@ -447,6 +487,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProgramsRoute: ProgramsRoute,
   ServicesRoute: ServicesRoute,
   TermsRoute: TermsRoute,
+  CollegesSlugRoute: CollegesSlugRoute,
   FormsSlugRoute: FormsSlugRoute,
   ResourcesBlogRoute: ResourcesBlogRoute,
   ResourcesEcaRoute: ResourcesEcaRoute,
@@ -454,6 +495,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcesToolsRoute: ResourcesToolsRoute,
   ResourcesWebinarsRoute: ResourcesWebinarsRoute,
   UniversitiesStateRoute: UniversitiesStateRoute,
+  CollegesIndexRoute: CollegesIndexRoute,
   FormsIndexRoute: FormsIndexRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
 }

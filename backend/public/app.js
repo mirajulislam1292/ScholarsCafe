@@ -22,6 +22,7 @@ const names = {
   blogs: "Blog",
   resources: "Resources",
   links: "Link page",
+  colleges: "College directory",
   prompts: "Essay prompts",
   toolValues: "Core values cards",
   promptAngles: "Essay angles",
@@ -51,6 +52,8 @@ const ABOUT = {
   blogs: "Articles on the website blog.",
   resources: "Free public guides, templates and live-session links.",
   links: "The short link page for Instagram, TikTok and Facebook bios.",
+  colleges:
+    "Colleges at scholarscafe.com/colleges. An entry here replaces the built-in college with the same slug, or adds a new one.",
   prompts:
     "Supplemental essay prompts on Resources → Tools. Quote each one word for word from the college's own page and add that page as the source.",
   toolValues: "The value cards in the Core Values tool on Resources → Tools.",
@@ -92,6 +95,10 @@ const label = (key) => names[key] || LABELS[key] || key;
 const canPublishRole = (role) => role === "owner" || role === "admin";
 const ENUMS = {
   device: ["desktop", "mobile"],
+  collegeType: ["LAC", "NU"],
+  testPolicy: ["", "required", "optional", "test-blind"],
+  needBasedForIntl: ["", "yes", "no"],
+  intlAidPolicy: ["", "need-blind", "need-aware", "merit-only", "limited", "none"],
   category: ["guide", "video", "live", "webinar", "podcast", "course", "template", "other"],
   type: ["link", "social", "youtube"],
   platform: [
@@ -109,6 +116,20 @@ const ENUMS = {
   archetype: ["why-us", "community", "intellectual", "extracurricular", "short-answer", "other"],
 };
 const HELP = {
+  slug: "Web address, lowercase-with-dashes. For a college: scholarscafe.com/colleges/<slug>; the same slug as a built-in college replaces it.",
+  collegeType:
+    "LAC = National Liberal Arts College · NU = National University (U.S. News category).",
+  applicants:
+    "Every figure: leave blank if the college does not publish it (the site shows Not published). Never estimate. A filled figure needs its source link below it.",
+  sat: "Middle 50% composite from CDS C9, e.g. 1450-1550.",
+  act: "Middle 50% composite from CDS C9, e.g. 33-35.",
+  ielts: "Minimum score, or none if the college says there is no minimum.",
+  ed1: "Deadline as YYYY-MM-DD, or not-offered.",
+  needBasedForIntl: "Do international students get need-based aid? Blank = not published.",
+  policyQuote: "The college's exact words about need-blind or need-aware admission.",
+  hidden: "Tick to hide this college from the website without deleting anything.",
+  imageLicence:
+    "Wikimedia Commons photos only, with a CC or public-domain licence. Leave the photo blank if unsure.",
   order: "Section ids in display order, separated by commas.",
   hidden: "Section ids to hide, separated by commas (leave empty to show all).",
   position: "Lower numbers appear first. Use the ↑ ↓ buttons in the list to reorder.",
@@ -129,7 +150,7 @@ const HELP = {
   facebook: "Optional. Full Facebook profile link (https://…). Leave empty to hide the icon.",
   source:
     "Required. The college's own admissions or supplement page where this prompt appears (https://…). Never an essay blog.",
-  asOf: "Date you checked the source, YYYY-MM-DD.",
+  asOf: "Date you checked the source, YYYY-MM-DD. College entries show a Stale badge after 12 months.",
   cycle: "Application cycle, e.g. 2026-27.",
   wordLimit: "Word limit. 0 = no limit or a character limit (explain it in limit note).",
   limitNote: "Optional, e.g. “150 characters” or “Choose one of three”.",
@@ -212,6 +233,88 @@ const defaults = {
     enabled: true,
     position: 0,
   },
+  colleges: {
+    slug: "",
+    name: "",
+    collegeType: "LAC",
+    city: "",
+    state: "",
+    code: "",
+    rankLabel: "",
+    rankEdition: "U.S. News 2027",
+    rankSource: "",
+    asOf: "",
+    cdsYear: "",
+    applicants: "",
+    applicantsSource: "",
+    admitted: "",
+    admittedSource: "",
+    edApplicants: "",
+    edApplicantsSource: "",
+    edAdmitted: "",
+    edAdmittedSource: "",
+    eaApplicants: "",
+    eaApplicantsSource: "",
+    eaAdmitted: "",
+    eaAdmittedSource: "",
+    earlyNote: "",
+    sat: "",
+    satSource: "",
+    act: "",
+    actSource: "",
+    testPolicy: "",
+    testPolicySource: "",
+    testNote: "",
+    needBasedForIntl: "",
+    needBasedForIntlSource: "",
+    intlAidPolicy: "",
+    intlAidPolicySource: "",
+    policyQuote: "",
+    intlAided: "",
+    intlAidedSource: "",
+    intlAvgAward: "",
+    intlAvgAwardSource: "",
+    intlNote: "",
+    costYear: "",
+    tuition: "",
+    tuitionSource: "",
+    fees: "",
+    feesSource: "",
+    roomBoard: "",
+    roomBoardSource: "",
+    costNote: "",
+    ielts: "",
+    ieltsSource: "",
+    toefl: "",
+    toeflSource: "",
+    duolingo: "",
+    duolingoSource: "",
+    englishNote: "",
+    nationalCurriculum: "",
+    nationalCurriculumSource: "",
+    ed1: "",
+    ed1Source: "",
+    ed2: "",
+    ed2Source: "",
+    ea: "",
+    eaSource: "",
+    rd: "",
+    rdSource: "",
+    deadlineNote: "",
+    highlight: "",
+    image: "",
+    imageTitle: "",
+    imagePage: "",
+    imageAuthor: "",
+    imageLicence: "",
+    imageLicenceUrl: "",
+    urlAdmissions: "",
+    urlInternational: "",
+    urlAid: "",
+    urlCds: "",
+    hidden: false,
+    position: 0,
+  },
   prompts: {
     college: "",
     list: "lac",
@@ -267,7 +370,23 @@ function field(form, key, value) {
   const label = node("label", key.replace(/[_-]/g, " "));
   const multi =
     Array.isArray(value) ||
-    ["body", "bio", "description", "excerpt", "quote", "text", "angle"].includes(key) ||
+    [
+      "body",
+      "bio",
+      "description",
+      "excerpt",
+      "quote",
+      "policyQuote",
+      "nationalCurriculum",
+      "intlNote",
+      "costNote",
+      "testNote",
+      "englishNote",
+      "deadlineNote",
+      "earlyNote",
+      "text",
+      "angle",
+    ].includes(key) ||
     String(value).length > 100;
   if (ENUMS[key]) {
     const select = node("select");
@@ -615,6 +734,8 @@ function render() {
       node("span", item.title),
       node("span", item.published ? "Published · may have a newer draft" : "Draft", "badge"),
     );
+    if (section === "colleges" && staleCollege(item.data.asOf))
+      row.append(node("span", "Stale: checked " + item.data.asOf, "badge"));
     if (orderable) {
       const up = button("↑", () => move(list, index, -1));
       const down = button("↓", () => move(list, index, 1));
@@ -649,6 +770,14 @@ function render() {
         "muted",
       ),
     );
+}
+/** College figures older than 12 months (by their "as of" date) need a fresh check. */
+function staleCollege(asOf) {
+  const t = Date.parse(String(asOf || "") + "T00:00:00Z");
+  if (!Number.isFinite(t)) return true;
+  const limit = new Date();
+  limit.setUTCFullYear(limit.getUTCFullYear() - 1);
+  return t < limit.getTime();
 }
 /** Reorder: renumber the list (10, 20, 30…), save each changed entry and publish it. */
 async function move(list, index, dir) {
@@ -6008,6 +6137,7 @@ try {
     "team",
     "feedback",
     "faqs",
+    "colleges",
     "prompts",
     "promptAngles",
     "toolValues",
