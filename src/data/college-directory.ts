@@ -5357,6 +5357,157 @@ export const COLLEGES: College[] = [
     },
   },
   {
+    slug: "spelman-college",
+    name: "Spelman College",
+    type: "LAC",
+    city: "Atlanta",
+    state: "Georgia",
+    code: "GA",
+    rank: {
+      label: "#34 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 11533,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    admitted: {
+      value: 2743,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    edApplicants: {
+      value: 437,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    edAdmitted: {
+      value: 70,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    eaApplicants: {
+      value: 5282,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    eaAdmitted: {
+      value: 1599,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    earlyNote: "Offers binding Early Decision and non-binding Early Action.",
+    sat: {
+      value: "1100-1300",
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    act: {
+      value: "22-28",
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.spelman.edu/admissions/applying-to-spelman/international-students.html",
+    },
+    testNote: "SAT/ACT scores are optional.",
+    needBasedForIntl: {
+      value: false,
+      source: "https://www.spelman.edu/admissions/applying-to-spelman/international-students.html",
+    },
+    intlAidPolicy: {
+      value: "merit-only",
+      source: "https://www.spelman.edu/admissions/applying-to-spelman/international-students.html",
+    },
+    policyQuote:
+      "The only form of aid available to our international students is our merit-based scholarships. Spelman College does not offer any financial aid to international students.",
+    intlAided: {
+      value: 10,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    intlAvgAward: {
+      value: 48041,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    intlNote:
+      "A limited number of merit scholarships go to incoming first-year students. CDS H6 figures are as reported (10 students; the reported total is $432,372).",
+    costYear: null,
+    tuition: {
+      value: 29025,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    fees: {
+      value: 3445,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    roomBoard: {
+      value: 18924,
+      source:
+        "https://www.spelman.edu/_1_Docs-and-Files/about/institutional-research/common-data-set/cds_2025-2026_spelman_college_1.26.2026.pdf",
+    },
+    costNote: "CDS 2025-26 G1 (the form does not state the year). Housing $11,306 + food $7,618.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "An official TOEFL score of 4 or higher (new 1-6 scale) is required for students from non-English-speaking countries. IELTS and Duolingo are not mentioned.",
+    nationalCurriculum: {
+      value:
+        "Official secondary school transcripts are required; documents not in English need an official translation.",
+      source: "https://www.spelman.edu/admissions/applying-to-spelman/international-students.html",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source:
+        "https://www.spelman.edu/admissions/applying-to-spelman/first-time-student-applicant.html",
+    },
+    ed2: {
+      value: "not-offered",
+      source:
+        "https://www.spelman.edu/admissions/applying-to-spelman/first-time-student-applicant.html",
+    },
+    ea: {
+      value: "2026-11-01",
+      source:
+        "https://www.spelman.edu/admissions/applying-to-spelman/first-time-student-applicant.html",
+    },
+    rd: {
+      value: "2027-02-01",
+      source:
+        "https://www.spelman.edu/admissions/applying-to-spelman/first-time-student-applicant.html",
+    },
+    deadlineNote:
+      "The page gives Nov. 1 and February 1 without a year (it is accepting applications for Fall 2027).",
+    highlight: "A college for women in Atlanta that welcomes students from all over the world.",
+    image: null,
+    urls: {
+      admissions:
+        "https://www.spelman.edu/admissions/applying-to-spelman/first-time-student-applicant.html",
+      international:
+        "https://www.spelman.edu/admissions/applying-to-spelman/international-students.html",
+      aid: "https://www.spelman.edu/financial-aid/apply-for-financial-aid/index.html",
+      cds: "https://www.spelman.edu/about/institutional-research/common-data-set/index.html",
+    },
+  },
+  {
     slug: "massachusetts-institute-of-technology",
     name: "Massachusetts Institute of Technology",
     type: "NU",
@@ -7117,6 +7268,295 @@ export const COLLEGES: College[] = [
       international: "https://undergrad.admissions.columbia.edu/apply/international",
       aid: "https://undergrad.admissions.columbia.edu/apply/international/aid",
       cds: "https://opir.columbia.edu/cds",
+    },
+  },
+  {
+    slug: "dartmouth-college",
+    name: "Dartmouth College",
+    type: "NU",
+    city: "Hanover",
+    state: "New Hampshire",
+    code: "NH",
+    rank: {
+      label: "#12 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 28230,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    admitted: {
+      value: 1699,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    edApplicants: {
+      value: 3552,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    edAdmitted: {
+      value: 768,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "Binding Early Decision only; CDS C22 says no Early Action.",
+    sat: {
+      value: "1440-1550",
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    act: {
+      value: "32-35",
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    testPolicy: {
+      value: "required",
+      source:
+        "https://admissions.dartmouth.edu/apply-dartmouth/reactivating-dartmouths-testing-policy",
+    },
+    testNote:
+      "Dartmouth reactivated its SAT/ACT requirement starting with applicants to the Class of 2029.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admissions.dartmouth.edu/glossary-term/international-students",
+    },
+    intlAidPolicy: {
+      value: "need-blind",
+      source: "https://admissions.dartmouth.edu/glossary-term/international-students",
+    },
+    policyQuote:
+      "Dartmouth practices need-blind admissions for all applicants including international students. Applicants are admitted to the College without regard to financial circumstances.",
+    intlAided: {
+      value: 483,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    intlAvgAward: {
+      value: 87562,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    intlNote:
+      "The same page says Dartmouth meets the full financial need of all admitted students.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 69207,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    fees: {
+      value: 2318,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    roomBoard: {
+      value: 20920,
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    costNote: "CDS G1 for 2026-27, first-year figures (housing $12,579 + food $8,341).",
+    ielts: {
+      value: "none",
+      source:
+        "https://admissions.dartmouth.edu/glossary-question/if-english-not-my-first-language-am-i-required-submit-language-proficiency-test",
+    },
+    toefl: {
+      value: "none",
+      source:
+        "https://admissions.dartmouth.edu/glossary-question/if-english-not-my-first-language-am-i-required-submit-language-proficiency-test",
+    },
+    duolingo: {
+      value: "none",
+      source:
+        "https://admissions.dartmouth.edu/glossary-question/if-english-not-my-first-language-am-i-required-submit-language-proficiency-test",
+    },
+    englishNote:
+      "No minimum scores. Most successful applicants score above 7 on IELTS, above 135 on Duolingo, above 100 on TOEFL (5 or above for tests from 21 January 2026). Required if English is not your first language and your curriculum hasn't been in English for two years.",
+    nationalCurriculum: {
+      value:
+        "Dartmouth says it reviews each international applicant in the context of their home and school environment, which may include the national curriculum and access to standardized testing.",
+      source: "https://admissions.dartmouth.edu/glossary-term/international-students",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admissions.dartmouth.edu/apply-dartmouth",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.dartmouth.edu/oir/pdfs/cds_2025-26.pdf",
+    },
+    rd: {
+      value: "2027-01-01",
+      source: "https://admissions.dartmouth.edu/apply-dartmouth",
+    },
+    deadlineNote:
+      "The page gives November 1 and January 1 without a year; mapped to the 2026-27 cycle.",
+    highlight:
+      "Students in the Class of 2028 come from 65 countries, a third of the world's nations.",
+    image: {
+      src: "/media/colleges/dartmouth-college.webp",
+      card: "/media/colleges/dartmouth-college-card.webp",
+      title: "Baker-Library-Dartmouth-College-Hanover-New-Hampshire-05-2018a.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Baker-Library-Dartmouth-College-Hanover-New-Hampshire-05-2018a.jpg",
+      author: "Gunnar Klack",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
+    urls: {
+      admissions: "https://admissions.dartmouth.edu/apply-dartmouth",
+      international: "https://admissions.dartmouth.edu/glossary-term/international-students",
+      aid: "https://financialaid.dartmouth.edu/",
+      cds: "https://www.dartmouth.edu/oir/data-reporting/cds/index.html",
+    },
+  },
+  {
+    slug: "carnegie-mellon-university",
+    name: "Carnegie Mellon University",
+    type: "NU",
+    city: "Pittsburgh",
+    state: "Pennsylvania",
+    code: "PA",
+    rank: {
+      label: "#14 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 34867,
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    admitted: {
+      value: 3859,
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    edApplicants: {
+      value: 2680,
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    edAdmitted: {
+      value: 553,
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Binding Early Decision only (not for Drama, Music or BXA Design); CDS C22 says no Early Action.",
+    sat: {
+      value: "1500-1560",
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    act: {
+      value: "34-36",
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    testPolicy: {
+      value: null,
+      source: null,
+    },
+    testNote:
+      "Depends on the college: Computer Science requires the SAT or ACT; Engineering, Dietrich, Mellon College of Science, Tepper and Heinz Information Systems are 'test flexible' (a test is required, but IB, A-Level, AP or French Bac results can replace the SAT/ACT); Fine Arts is test-optional.",
+    needBasedForIntl: {
+      value: false,
+      source: "https://www.cmu.edu/admission/admission/international-applicants",
+    },
+    intlAidPolicy: {
+      value: "none",
+      source: "https://www.cmu.edu/admission/admission/international-applicants",
+    },
+    policyQuote:
+      "Carnegie Mellon doesn't offer financial aid to international students. If you're an international student who plans to enroll at Carnegie Mellon, you and your family must plan to pay the total cost of attendance.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote:
+      "CDS H6 also says institutional scholarship and grant aid is not available to nonresident students.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 69702,
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    fees: {
+      value: 1862,
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    roomBoard: {
+      value: 19560,
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    costNote: "CDS G1 for 2026-27, first-year figures.",
+    ielts: {
+      value: 7.5,
+      source: "https://www.cmu.edu/admission/admission/international-applicants",
+    },
+    toefl: {
+      value: 102,
+      source: "https://www.cmu.edu/admission/admission/international-applicants",
+    },
+    duolingo: {
+      value: 135,
+      source: "https://www.cmu.edu/admission/admission/international-applicants",
+    },
+    englishNote:
+      "Minimums for non-native speakers. TOEFL tests taken on or after 21 Jan 2026: overall 5 on the new scale. Cambridge: 191.",
+    nationalCurriculum: {
+      value:
+        "Transcripts not in English need an official translation verified by a counselor or school official. IB and A-Level students send expected results; under the test-flexible policy, predicted IB or A-Level results can count as the required test.",
+      source: "https://www.cmu.edu/admission/admission/international-applicants",
+    },
+    ed1: {
+      value: "2026-11-02",
+      source: "https://www.cmu.edu/admission/admission/application-plans-deadlines",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://www.cmu.edu/ira/CDS/pdf/cds_2025_26/cds_2025_full_pdf_updated_11jun26.pdf",
+    },
+    rd: {
+      value: "2027-01-04",
+      source: "https://www.cmu.edu/admission/admission/application-plans-deadlines",
+    },
+    deadlineNote:
+      "The deadlines page gives November 2 and January 4 without a year; mapped to the 2026-27 cycle. Drama and Music: December 1. The FAQ page lists other dates (November 3, January 5).",
+    highlight:
+      "About 19% of undergraduates come from outside the United States, one of the highest shares among national universities.",
+    image: {
+      src: "/media/colleges/carnegie-mellon-university.webp",
+      card: "/media/colleges/carnegie-mellon-university-card.webp",
+      title: "Hamerschlag Hall, Carnegie Mellon University, 2023-04-27, 01.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Hamerschlag_Hall,_Carnegie_Mellon_University,_2023-04-27,_01.jpg",
+      author: "Cbaile19",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
+    urls: {
+      admissions: "https://www.cmu.edu/admission/admission/application-plans-deadlines",
+      international: "https://www.cmu.edu/admission/admission/international-applicants",
+      aid: "https://www.cmu.edu/sfs/",
+      cds: "https://www.cmu.edu/ira/CDS/previouscds.html",
     },
   },
 ];
