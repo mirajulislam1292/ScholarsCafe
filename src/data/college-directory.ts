@@ -9086,6 +9086,443 @@ export const COLLEGES: College[] = [
     },
   },
   {
+    slug: "university-of-michigan-ann-arbor",
+    name: "University of Michigan, Ann Arbor",
+    type: "NU",
+    city: "Ann Arbor",
+    state: "Michigan",
+    code: "MI",
+    rank: {
+      label: "#25 National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 109112,
+      source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
+    },
+    admitted: {
+      value: 17915,
+      source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "The 2025-26 CDS reports non-restrictive Early Action (Nov 1) and no Early Decision, with no EA counts. For the 2026-27 cycle Michigan also lists an Early Decision deadline.",
+    sat: {
+      value: "1370-1530",
+      source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
+    },
+    act: {
+      value: "32-34",
+      source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    testNote:
+      "SAT/ACT 'if available'; applicants choose on the application whether scores are considered (self-report by Nov 1 for Early Action).",
+    needBasedForIntl: {
+      value: false,
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    intlAidPolicy: {
+      value: "none",
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    policyQuote:
+      "Please note that international students on temporary visas are not eligible for financial aid, and should expect to pay the full cost of attendance. Scholarships are generally not available.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote:
+      "CDS H6 also says institutional scholarship and grant aid is not available to nonresidents.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 66602,
+      source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
+    },
+    fees: {
+      value: 1494,
+      source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
+    },
+    roomBoard: {
+      value: 17220,
+      source: "https://obp.umich.edu/wp-content/uploads/pubdata/cds/cds_2025-26_umaa.pdf",
+    },
+    costNote:
+      "CDS G1 for 2026-27, first-year international tuition; fees are $494 for all students plus a $1,000 international student fee.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "An English test is required for speakers of English as a second language. Michigan publishes general score ranges rather than minimums (around TOEFL 100 or IELTS 7.0); see its Exams & Visas page.",
+    nationalCurriculum: {
+      value:
+        "Requirements, including the type of transcript, vary by country of education; transcripts not issued in English need an official English translation.",
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    ea: {
+      value: "2026-11-01",
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    rd: {
+      value: "2027-02-01",
+      source: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+    },
+    deadlineNote:
+      "General deadlines listed as Nov. 1 (ED and EA) and Feb. 1 (RD) without a year; mapped to the 2026-27 cycle. Deadlines vary by school or program.",
+    highlight:
+      "International students apply through the same Common Application process as everyone else, with requirements that depend on their country.",
+    image: {
+      src: "/media/colleges/university-of-michigan-ann-arbor.webp",
+      card: "/media/colleges/university-of-michigan-ann-arbor-card.webp",
+      title:
+        "Law Quadrangle, University of Michigan, University Avenue and State Street, Ann Arbor, MI.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Law_Quadrangle,_University_of_Michigan,_University_Avenue_and_State_Street,_Ann_Arbor,_MI.jpg",
+      author: "w_lemay",
+      licence: "CC BY-SA 2.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
+    },
+    urls: {
+      admissions: "https://admissions.umich.edu/",
+      international:
+        "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+      aid: "https://admissions.umich.edu/apply/international-applicants/requirements-deadlines",
+      cds: "https://obp.umich.edu/campus-statistics/common-data-set/",
+    },
+  },
+  {
+    slug: "university-of-virginia",
+    name: "University of Virginia",
+    type: "NU",
+    city: "Charlottesville",
+    state: "Virginia",
+    code: "VA",
+    rank: {
+      label: "#26 National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: null,
+    applicants: {
+      value: null,
+      source: null,
+    },
+    admitted: {
+      value: null,
+      source: null,
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Offers binding Early Decision and non-binding, unrestrictive Early Action. About 10% of offers are made in the ED round (UVA admission page).",
+    sat: {
+      value: null,
+      source: null,
+    },
+    act: {
+      value: null,
+      source: null,
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admission.virginia.edu/admission/deadlines-instructions",
+    },
+    testNote: "Fall 2027 first-year applicants choose whether to share SAT/ACT scores.",
+    needBasedForIntl: {
+      value: false,
+      source: "https://admission.virginia.edu/i-am/international",
+    },
+    intlAidPolicy: {
+      value: "none",
+      source: "https://admission.virginia.edu/i-am/international",
+    },
+    policyQuote:
+      "For international students who are foreign nationals, the University of Virginia does not have funds available for scholarships or loans.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote:
+      "Exception: students at a United World College school who are admitted qualify for need-based scholarship support (Davis Foundation). UVA advises others not to apply if they cannot finance their education.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 57432,
+      source:
+        "https://sfs.virginia.edu/financial-aid-new-applicants/financial-aid-basics/estimated-undergraduate-cost-attendance-2026-2027",
+    },
+    fees: {
+      value: 4622,
+      source:
+        "https://sfs.virginia.edu/financial-aid-new-applicants/financial-aid-basics/estimated-undergraduate-cost-attendance-2026-2027",
+    },
+    roomBoard: {
+      value: 16070,
+      source:
+        "https://sfs.virginia.edu/financial-aid-new-applicants/financial-aid-basics/estimated-undergraduate-cost-attendance-2026-2027",
+    },
+    costNote:
+      "UVA Student Financial Services, College of Arts and Sciences, first-year non-Virginian (housing $8,730 + food $7,340). Other schools differ slightly.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "UVA strongly encourages applicants whose first language is not English to submit TOEFL, IELTS, Cambridge C1/C2 or Duolingo results; no minimum is published.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admission.virginia.edu/admission/deadlines-instructions",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://admission.virginia.edu/admission/deadlines-instructions",
+    },
+    ea: {
+      value: "2026-11-01",
+      source: "https://admission.virginia.edu/admission/deadlines-instructions",
+    },
+    rd: {
+      value: "2027-01-05",
+      source: "https://admission.virginia.edu/admission/deadlines-instructions",
+    },
+    deadlineNote:
+      "Student deadlines given as November 1 and January 5 without a year; mapped to the 2026-27 cycle. Teacher/counselor materials due November 8 and January 10.",
+    highlight: "About 5% of each entering class are foreign nationals.",
+    image: {
+      src: "/media/colleges/university-of-virginia.webp",
+      card: "/media/colleges/university-of-virginia-card.webp",
+      title: "Rotunda - University of Virginia.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Rotunda_-_University_of_Virginia.jpg",
+      author: "Robert Emerson",
+      licence: "CC BY-SA 3.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
+    },
+    urls: {
+      admissions: "https://admission.virginia.edu/admission/deadlines-instructions",
+      international: "https://admission.virginia.edu/i-am/international",
+      aid: "https://sfs.virginia.edu/financial-aid-new-applicants/financial-aid-basics/estimated-undergraduate-cost-attendance-2026-2027",
+      cds: "https://ira.virginia.edu/common-data-set",
+    },
+  },
+  {
+    slug: "university-of-north-carolina-at-chapel-hill",
+    name: "University of North Carolina at Chapel Hill",
+    type: "NU",
+    city: "Chapel Hill",
+    state: "North Carolina",
+    code: "NC",
+    rank: {
+      label: "#27 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 76247,
+      source:
+        "https://oira.unc.edu/wp-content/uploads/sites/297/2026/06/CDS_UNCCH_2025-26_20260615.pdf",
+    },
+    admitted: {
+      value: 12751,
+      source:
+        "https://oira.unc.edu/wp-content/uploads/sites/297/2026/06/CDS_UNCCH_2025-26_20260615.pdf",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "No Early Decision; non-binding Early Action. The CDS gives no EA counts.",
+    sat: {
+      value: "1400-1530",
+      source:
+        "https://oira.unc.edu/wp-content/uploads/sites/297/2026/06/CDS_UNCCH_2025-26_20260615.pdf",
+    },
+    act: {
+      value: null,
+      source: null,
+    },
+    testPolicy: {
+      value: "optional",
+      source:
+        "https://admissions.unc.edu/apply/types-of-applications/international-first-year-students/",
+    },
+    testNote:
+      "SAT/ACT optional with a weighted GPA of 2.8 or above (UNC System rule); for Cambridge-type systems, A-level or external exam grades count for this rule.",
+    needBasedForIntl: {
+      value: false,
+      source: "https://admissions.unc.edu/apply/international-students/",
+    },
+    intlAidPolicy: {
+      value: "none",
+      source: "https://admissions.unc.edu/apply/international-students/",
+    },
+    policyQuote:
+      "Students who do not hold US citizenship or permanent resident status are not eligible to receive need-based financial aid and should be prepared to pay the full cost of attendance for non-resident students.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote: "The CDS leaves the H6 counts blank.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 47472,
+      source:
+        "https://oira.unc.edu/wp-content/uploads/sites/297/2026/06/CDS_UNCCH_2025-26_20260615.pdf",
+    },
+    fees: {
+      value: 2129,
+      source:
+        "https://oira.unc.edu/wp-content/uploads/sites/297/2026/06/CDS_UNCCH_2025-26_20260615.pdf",
+    },
+    roomBoard: {
+      value: 15870,
+      source:
+        "https://oira.unc.edu/wp-content/uploads/sites/297/2026/06/CDS_UNCCH_2025-26_20260615.pdf",
+    },
+    costNote:
+      "CDS G1 for 2026-27, out-of-state tuition (room $9,168 + board $6,702). The table layout in the PDF is hard to read; check UNC's cost page.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "An English test is required for non-citizens (waived after four years in an English-speaking country or school). Typical strong scores, not minimums: TOEFL 100 (5 on the new scale), IELTS 7.5, Duolingo 130, Cambridge C1 185.",
+    nationalCurriculum: {
+      value:
+        "All transcripts must be in English, with an official translation plus the original if the school does not issue English transcripts. For Cambridge-based or similar systems, A-level or external exam grades are considered.",
+      source:
+        "https://admissions.unc.edu/apply/types-of-applications/international-first-year-students/",
+    },
+    ed1: {
+      value: "not-offered",
+      source:
+        "https://admissions.unc.edu/apply/types-of-applications/international-first-year-students/",
+    },
+    ed2: {
+      value: "not-offered",
+      source:
+        "https://admissions.unc.edu/apply/types-of-applications/international-first-year-students/",
+    },
+    ea: {
+      value: "2026-10-15",
+      source:
+        "https://admissions.unc.edu/apply/types-of-applications/international-first-year-students/",
+    },
+    rd: {
+      value: "2027-01-15",
+      source:
+        "https://admissions.unc.edu/apply/types-of-applications/international-first-year-students/",
+    },
+    deadlineNote:
+      "The page gives October 15 and January 15 without a year; mapped to the 2026-27 cycle. Supporting materials due November 7 (EA) and February 15 (RD).",
+    highlight:
+      "Its Early Action deadline, October 15, is one of the earliest among top universities.",
+    image: null,
+    urls: {
+      admissions:
+        "https://admissions.unc.edu/apply/types-of-applications/international-first-year-students/",
+      international: "https://admissions.unc.edu/apply/international-students/",
+      aid: "https://admissions.unc.edu/apply/international-students/",
+      cds: "https://oira.unc.edu/reports/reports-archives/common-data-set/",
+    },
+  },
+  {
     slug: "university-of-southern-california",
     name: "University of Southern California",
     type: "NU",
@@ -9227,6 +9664,147 @@ export const COLLEGES: College[] = [
         "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
       aid: "https://financialaid.usc.edu/undergraduate-financial-aid/cost-of-attendance/",
       cds: "https://oir.usc.edu/statistics-data-visualization/common-data-set/",
+    },
+  },
+  {
+    slug: "georgia-institute-of-technology",
+    name: "Georgia Institute of Technology",
+    type: "NU",
+    city: "Atlanta",
+    state: "Georgia",
+    code: "GA",
+    rank: {
+      label: "#29 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 66881,
+      source: "https://irp.gatech.edu/sites/default/files/CDS/CDS_2025-2026_FINAL_R4_03JUN2026.pdf",
+    },
+    admitted: {
+      value: 8921,
+      source: "https://irp.gatech.edu/sites/default/files/CDS/CDS_2025-2026_FINAL_R4_03JUN2026.pdf",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "No Early Decision. Two non-binding Early Action rounds; the CDS gives no EA counts.",
+    sat: {
+      value: "1370-1530",
+      source: "https://irp.gatech.edu/sites/default/files/CDS/CDS_2025-2026_FINAL_R4_03JUN2026.pdf",
+    },
+    act: {
+      value: "31-35",
+      source: "https://irp.gatech.edu/sites/default/files/CDS/CDS_2025-2026_FINAL_R4_03JUN2026.pdf",
+    },
+    testPolicy: {
+      value: "required",
+      source: "https://admission.gatech.edu/first-year/deadlines",
+    },
+    testNote: "A complete application includes self-reported or official SAT/ACT scores.",
+    needBasedForIntl: {
+      value: false,
+      source: "https://admission.gatech.edu/international/visa-process",
+    },
+    intlAidPolicy: {
+      value: "none",
+      source: "https://admission.gatech.edu/international/visa-process",
+    },
+    policyQuote:
+      "Non-U.S. citizens or Permanent Residents are not able to receive federal or state sponsored financial aid. Likewise, Georgia Tech typically does not have scholarships or financial aid available for international students.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote: "The CDS leaves the H6 counts blank.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 35610,
+      source: "https://irp.gatech.edu/sites/default/files/CDS/CDS_2025-2026_FINAL_R4_03JUN2026.pdf",
+    },
+    fees: {
+      value: 1516,
+      source: "https://irp.gatech.edu/sites/default/files/CDS/CDS_2025-2026_FINAL_R4_03JUN2026.pdf",
+    },
+    roomBoard: {
+      value: 14628,
+      source: "https://irp.gatech.edu/sites/default/files/CDS/CDS_2025-2026_FINAL_R4_03JUN2026.pdf",
+    },
+    costNote: "CDS G1 for 2026-27, first-year nonresident tuition (housing $8,318 + food $6,310).",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "International applicants must meet the University System of Georgia English proficiency requirement by an approved method; the admission page does not list minimum scores. Duolingo and interviews are welcome as extras but do not meet the requirement.",
+    nationalCurriculum: {
+      value:
+        "Records from each year of secondary school are required; Georgia Tech lists credentials by curriculum (for example Indian national curriculum: Class X board results and XI marks, predicted XII results strongly recommended). Students must reach the level that allows entry to a competitive university at home.",
+      source: "https://admission.gatech.edu/international/first-year",
+    },
+    ed1: {
+      value: "not-offered",
+      source: "https://admission.gatech.edu/first-year/deadlines",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://admission.gatech.edu/first-year/deadlines",
+    },
+    ea: {
+      value: "2026-10-15",
+      source: "https://admission.gatech.edu/first-year/deadlines",
+    },
+    rd: {
+      value: "2027-01-06",
+      source: "https://admission.gatech.edu/first-year/deadlines",
+    },
+    deadlineNote:
+      "Early Action 1: October 15; Early Action 2: November 2; Regular Decision: January 6 (2026-27 dates page). The page does not say which EA round applies to whom.",
+    highlight:
+      "Reviews international applicants alongside others from the same country or school system.",
+    image: {
+      src: "/media/colleges/georgia-institute-of-technology.webp",
+      card: "/media/colleges/georgia-institute-of-technology-card.webp",
+      title: "Lettie Pate Whitehead Evans Administration Building.JPG",
+      page: "https://commons.wikimedia.org/wiki/File:Lettie_Pate_Whitehead_Evans_Administration_Building.JPG",
+      author: "Prashkan90",
+      licence: "CC BY-SA 3.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
+    },
+    urls: {
+      admissions: "https://admission.gatech.edu/first-year/deadlines",
+      international: "https://admission.gatech.edu/international/first-year",
+      aid: "https://admission.gatech.edu/international/visa-process",
+      cds: "https://irp.gatech.edu/common-data-set",
     },
   },
   {
