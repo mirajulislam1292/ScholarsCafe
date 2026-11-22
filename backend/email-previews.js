@@ -18,6 +18,7 @@ import { alertBody, unsubscribeUrl } from "./eca.js";
 import { taskMail, taskLayout } from "./workspace.js";
 import { typedLayout } from "./inbox.js";
 import { inviteEmail, codeEmail, signedCopyText, signedCopyLayout } from "./agreements-mail.js";
+import { reminderMail, collegeReminderLayout } from "./my-list.js";
 
 const at = (h) => new Date(Date.UTC(2026, 10, 24, 4 + h, 0));
 const booking = {
@@ -160,6 +161,21 @@ export function previewMails(config, transport, theme = "light") {
         }),
       ),
     }),
+    (() => {
+      // Sample only: a made-up college and date, not a real deadline.
+      const r = { name: "Sample College", round: "rd", date: "2027-01-05", days: 7 };
+      const m = reminderMail(config, r);
+      return row(
+        "college-deadline",
+        "Extra: College deadline reminder (to student, no push device)",
+        {
+          subject: m.subject,
+          body: m.body,
+          to_email: booking.email,
+          layout: json(collegeReminderLayout(config, r)),
+        },
+      );
+    })(),
     row("form-team", "Extra: New form response (to the team inbox)", {
       subject: "New form submission: Free consultation",
       body: "(answers)",

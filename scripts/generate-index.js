@@ -24,7 +24,8 @@ function writeSecurityPolicy(clientDir, html) {
     "font-src 'self'",
     "img-src 'self' data: https:",
     "media-src 'self' https://admin.scholarscafe.com",
-    "connect-src 'self' https://admin.scholarscafe.com",
+    // The student portal: "Save to My List" on /colleges (backend/my-list.js).
+    "connect-src 'self' https://admin.scholarscafe.com https://student.scholarscafe.com",
     `frame-src${turnstile || " 'none'"}`,
     "object-src 'none'",
     "base-uri 'self'",

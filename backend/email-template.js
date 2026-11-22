@@ -148,6 +148,7 @@ export function actionFor({ subject = "", text = "", toTeam = false }, adminOrig
   if ((a = link(/Join here: (https:\/\/\S+)/))) return pick("Join the session", a);
   if ((a = link(/sign in:\n(https:\/\/\S+)/i))) return pick("Sign in", a);
   if ((a = link(/Open your tasks: (https:\/\/\S+)/))) return pick("Open task", a);
+  if ((a = link(/Open your list: (https:\/\/\S+)/))) return pick("Open My List", a);
   if (/cancelled/i.test(subject) && text.includes(SITE + "/book"))
     return pick("Book a new time", SITE + "/book");
   if (toTeam) {

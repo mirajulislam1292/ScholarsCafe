@@ -566,3 +566,27 @@ CREATE TABLE IF NOT EXISTS staff_alerts (
   INDEX alerts_user (user_id, read_at, id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+-- My College List: colleges a student saved from scholarscafe.com/colleges (at most 25, one row each).
+CREATE TABLE IF NOT EXISTS college_list (
+  user_id CHAR(36) NOT NULL,
+  slug VARCHAR(100) NOT NULL,
+  round ENUM('','ed1','ed2','ea','rd') NOT NULL DEFAULT '',
+  status ENUM('researching','applying','submitted','decision') NOT NULL DEFAULT 'researching',
+  notes TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NULL,
+  PRIMARY KEY (user_id, slug),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-- Deadline reminders already sent: one per student, college, round and offset (14, 7 or 1 days).
+CREATE TABLE IF NOT EXISTS college_reminders (
+  user_id CHAR(36) NOT NULL,
+  slug VARCHAR(100) NOT NULL,
+  round ENUM('ed1','ed2','ea','rd') NOT NULL,
+  offset_days TINYINT UNSIGNED NOT NULL,
+  deadline DATE NOT NULL,
+  channel ENUM('push','email') NOT NULL,
+  sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, slug, round, offset_days),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
