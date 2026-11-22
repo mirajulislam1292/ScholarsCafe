@@ -7,6 +7,7 @@ import { confirmationText, reminderText, cancelText, teamText } from "./booking.
 import { receiptText } from "./forms.js";
 import { alertBody, unsubscribeUrl } from "./eca.js";
 import { taskMail } from "./workspace.js";
+import { reminderMail } from "./my-list.js";
 
 const at = (h) => new Date(Date.UTC(2026, 10, 24, 4 + h, 0));
 const booking = {
@@ -59,6 +60,20 @@ export function previewMails(config, transport) {
       body: taskMail(config, task, "Reminder: this task is due in about 24 hours."),
       to_email: "staff@example.com",
     }),
+    (() => {
+      // Sample only: a made-up date, not a real college deadline.
+      const m = reminderMail(config, {
+        name: "Sample College",
+        round: "rd",
+        date: "2027-01-05",
+        days: 7,
+      });
+      return row("college-deadline", "College deadline reminder (to student, no push device)", {
+        subject: m.subject,
+        body: m.body,
+        to_email: booking.email,
+      });
+    })(),
     row("form-receipt", "Form receipt (to the person who filled it in)", {
       subject: "Your response: Free consultation",
       body: receiptText(

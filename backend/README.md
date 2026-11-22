@@ -76,3 +76,26 @@ address settings before setting TRUST_PROXY. Multiple backend replicas require
 a shared rate-limit store. No admin link is added to the public navigation, but
 the public API address and TLS records can reveal the admin hostname. Its
 security relies on authentication and server permissions, not its secrecy.
+
+## My College List (student portal)
+
+Students save colleges from scholarscafe.com/colleges ("Save to My List") or on the portal's My list
+page (student.scholarscafe.com/my-list): up to 25, each with a round (ED1, ED2, EA, RD), a status and
+private notes. Code: `my-list.js`, tables `college_list` and `college_reminders` (created on start).
+
+- College facts come from `college-data.json`, exported from `src/data/college-directory.ts` with
+  `node scripts/export-college-deadlines.mjs` (run it after the directory data changes). Published
+  admin "College directory" entries override it at once, so an edited deadline moves the reminders too.
+- Reminders: 14, 7 and 1 days before the chosen round's deadline, from 9:00 Asia/Dhaka, for statuses
+  Researching and Applying. Sent by the admin deployment every 5 minutes: web push to the student's
+  devices, or email through the outbox when they have none. `college_reminders` keeps each one to once.
+- Push for students uses the same VAPID keys as staff (stored in `settings`). If VAPID_PUBLIC_KEY and
+  VAPID_PRIVATE_KEY are set as environment variables on the admin app, set the same pair on the
+  student app too.
+- The website's Save button calls `/mylist/saved` and `/mylist/save` on the student portal with
+  credentials. Only the exact PUBLIC_ORIGIN is allowed (CORS), and saves need a token derived from the
+  session, which only the website can read. Signed out, the button links to `/my-list?add=<slug>`,
+  and the portal confirms the add after sign-in. The return address must be a /colleges page on
+  the website.
+- Staff: each student's list on the Students screen, and a Deadlines screen (due in the next 14 days).
+  Owners and admins see every student; mentors see their own students; editors see none.

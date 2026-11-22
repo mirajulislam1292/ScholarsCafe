@@ -1,4 +1,5 @@
 import { createApi } from "./net.js";
+import { siteOrigins, safeReturn, safeSlug } from "./return-url.js";
 let me,
   items = [],
   section = "Overview";
@@ -35,6 +36,7 @@ const LABELS = {
   Media: "Media library",
   Account: "Profile",
   Mail: "Mail (contact@)",
+  "My list": "My College List",
 };
 const ABOUT = {
   Overview: "Everything on the website, at a glance.",
@@ -85,6 +87,8 @@ const ABOUT = {
   Progress: "Your streak, approximate hours and tasks done.",
   Account: "Your password and sign-in details.",
   "My courses": "Your courses and lessons.",
+  "My list": "Colleges you saved, sorted by the next deadline. Choose your round to get reminders.",
+  Deadlines: "Due in the next 14 days: students' saved colleges with a deadline coming up.",
   Home: "",
   Documents: "Essays, SOPs, CVs and transcripts, with your mentor's feedback.",
   Resources: "Live sessions, videos and guides included in your package.",
@@ -604,6 +608,14 @@ function render() {
   }
   if (section === "Home") {
     renderHome().catch(report);
+    return;
+  }
+  if (section === "My list") {
+    renderMyList().catch(report);
+    return;
+  }
+  if (section === "Deadlines") {
+    renderDeadlines().catch(report);
     return;
   }
   if (section === "Resources") {
@@ -1128,11 +1140,15 @@ function lessonCard(course, lesson, count) {
 async function renderStudents() {
   const screen = $("screen");
   const staff = canPublishRole(me.role);
-  const [students, courses, mentors, pk] = await Promise.all([
+  const [students, courses, mentors, pk, lists] = await Promise.all([
     api("lms/students").then((r) => r.items),
     api("lms/courses").then((r) => r.items),
     staff ? api("mentors").then((r) => r.items) : [],
     staff ? api("packages") : { items: [], assigned: [] },
+    // My College List (shown on each student; never blocks the screen if it fails).
+    api("lms/college-lists")
+      .then((r) => r.items)
+      .catch(() => []),
   ]);
   const mentorOptions = [["", "No mentor"], ...mentors.map((m) => [m.id, m.email])];
   const mentorName = (id) =>
@@ -1228,6 +1244,7 @@ async function renderStudents() {
     };
     card.append(form);
     if (staff) card.append(...studentControls(s));
+    card.append(...collegeListSection(lists.filter((it) => it.user_id === s.id)));
     card.append(node("h3", "Courses"));
     for (const en of s.enrollments) {
       const row = node("div", undefined, "toolbar");
@@ -3437,6 +3454,355 @@ function renderVisual() {
   window.addEventListener("message", message);
 }
 // ---------- Student dashboard: student screens ----------
+// ---------- My College List (students) and Deadlines (staff). Backend: my-list.js ----------
+const LIST_ROUNDS = ["ed1", "ed2", "ea", "rd"];
+const ROUND_NAMES = {
+  ed1: "Early Decision I",
+  ed2: "Early Decision II",
+  ea: "Early Action",
+  rd: "Regular Decision",
+};
+const ROUND_SHORT = { ed1: "ED1", ed2: "ED2", ea: "EA", rd: "RD" };
+const LIST_STATUSES = [
+  ["researching", "Researching"],
+  ["applying", "Applying"],
+  ["submitted", "Submitted"],
+  ["decision", "Decision"],
+];
+const AID_NAMES = {
+  "need-blind": "Need-blind",
+  "need-aware": "Need-aware",
+  "merit-only": "Merit scholarships only",
+  limited: "Limited",
+  none: "No aid for international undergraduates",
+};
+const TYPE_NAMES = { LAC: "Liberal arts college", NU: "National university" };
+const websiteOrigin = () => siteOrigins(location.origin)[0] || "https://scholarscafe.com";
+const listDay = (iso) =>
+  new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+const daysText = (d) =>
+  d == null ? "" : d < 0 ? "Passed" : d === 0 ? "Today" : d === 1 ? "1 day left" : `${d} days left`;
+const deadlineText = (dl) =>
+  dl.date == null
+    ? "Not published"
+    : dl.date === "not-offered"
+      ? "Not offered"
+      : `${listDay(dl.date)} · ${daysText(dl.days)}`;
+/** "RD · 4 Jan 2027 · 43 days left", for the next deadline of a saved college. */
+const nextText = (next) =>
+  next
+    ? `${ROUND_SHORT[next.round]} · ${listDay(next.date)} · ${daysText(next.days)}${next.chosen ? "" : " (round not chosen)"}`
+    : "No upcoming deadline";
+const urgency = (next) =>
+  !next || next.days < 0 ? "" : next.days <= 7 ? " due-soon" : next.days <= 14 ? " due-near" : "";
+// "Save to My List" from the website: ?add=<slug>&return=<page>, kept through sign-in (Google returns to /).
+const PENDING_KEY = "my-list-pending";
+let listReturn = null;
+function readPendingAdd() {
+  if (location.pathname !== "/my-list") return;
+  const q = new URLSearchParams(location.search);
+  const add = safeSlug(q.get("add"));
+  const ret = safeReturn(q.get("return"), siteOrigins(location.origin));
+  try {
+    if (add) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ add, ret }));
+    else sessionStorage.setItem(PENDING_KEY, JSON.stringify({ add: null, ret }));
+  } catch {}
+  history.replaceState(null, "", "/my-list");
+  return Boolean(add);
+}
+function takePendingAdd() {
+  try {
+    const raw = sessionStorage.getItem(PENDING_KEY);
+    sessionStorage.removeItem(PENDING_KEY);
+    const p = raw ? JSON.parse(raw) : null;
+    if (!p) return null;
+    // Checked again here: the stored value is only trusted as far as these two checks go.
+    return {
+      add: safeSlug(p.add),
+      ret: safeReturn(p.ret, siteOrigins(location.origin)),
+    };
+  } catch {
+    return null;
+  }
+}
+const hasPendingAdd = () => {
+  try {
+    return Boolean(sessionStorage.getItem(PENDING_KEY));
+  } catch {
+    return false;
+  }
+};
+async function renderMyList() {
+  const screen = $("screen");
+  const data = await api("lms/my/list");
+  const pending = takePendingAdd();
+  if (pending?.ret) listReturn = pending.ret;
+  if (listReturn) {
+    const back = node("a", "← Back to the colleges page", "back-link");
+    back.href = listReturn;
+    screen.append(back);
+  }
+  if (pending?.add) {
+    const college = data.colleges.find((c) => c.slug === pending.add);
+    const card = node("article", undefined, "card mylist-confirm");
+    if (!college) card.append(node("p", "That college is not in the directory any more."));
+    else if (data.items.some((i) => i.slug === college.slug))
+      card.append(node("p", `${college.name} is already on your list.`));
+    else if (data.items.length >= data.cap)
+      card.append(
+        node("p", `Your list is full (${data.cap} colleges). Remove one to add ${college.name}.`),
+      );
+    else {
+      const actions = node("div", undefined, "actions");
+      actions.append(
+        button(
+          "Add to My List",
+          async () => {
+            await api("lms/my/list", { slug: college.slug });
+            notice(`${college.name} is on your list.`);
+            render();
+          },
+          "primary",
+        ),
+        button("Not now", () => card.remove()),
+      );
+      card.append(
+        node("h2", `Add ${college.name}?`),
+        node("p", "It starts as Researching. You can choose a round and add notes after.", "muted"),
+        actions,
+      );
+    }
+    screen.append(card);
+  }
+  screen.append(await reminderCard(data.push_devices));
+  // Add from the directory, here in the portal too.
+  const saved = new Set(data.items.map((i) => i.slug));
+  const free = data.colleges.filter((c) => !saved.has(c.slug));
+  const add = node("form", undefined, "card mylist-add");
+  add.append(
+    node("h2", "Add a college"),
+    node("p", `${data.items.length} of ${data.cap} saved.`, "muted"),
+  );
+  if (data.items.length < data.cap && free.length) {
+    const [l, choice] = select(
+      "College",
+      free.map((c) => [c.slug, c.name]),
+    );
+    const go = node("button", "Add", "primary");
+    go.type = "submit";
+    add.append(l, go);
+    add.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api("lms/my/list", { slug: choice.value });
+        notice("Added.");
+        render();
+      } catch (err) {
+        report(err);
+      }
+    };
+  } else if (data.items.length >= data.cap)
+    add.append(node("p", "Your list is full. Remove a college to add another."));
+  const browse = node("a", "Browse all colleges on scholarscafe.com ↗");
+  browse.href = websiteOrigin() + "/colleges";
+  browse.target = "_blank";
+  browse.rel = "noopener";
+  add.append(browse);
+  screen.append(add);
+  if (!data.items.length)
+    screen.append(
+      node(
+        "p",
+        "Nothing saved yet. Add a college above, or tap Save to My List on any college page.",
+        "empty",
+      ),
+    );
+  for (const it of data.items) screen.append(myListCard(it));
+}
+async function reminderCard(devices) {
+  const card = node("article", undefined, "card");
+  card.append(
+    node("h2", "Deadline reminders"),
+    node(
+      "p",
+      `We remind you 14, 7 and 1 days before the deadline of the round you choose (Dhaka time). Reminders come as a notification on a device where you turn them on. With no device, they come by email to ${me.email}.`,
+      "muted",
+    ),
+  );
+  const sub = await currentSubscription().catch(() => null);
+  const on = Boolean(sub) && pushSupported() && Notification.permission === "granted";
+  const actions = node("div", undefined, "actions");
+  if (on) {
+    card.append(node("p", "Notifications are on for this device."));
+    actions.append(
+      button("Turn off on this device", async () => {
+        await turnOffPush();
+        notice("Notifications are off for this device.");
+        render();
+      }),
+    );
+  } else {
+    if (devices) card.append(node("p", `Notifications are on for ${devices} of your devices.`));
+    actions.append(
+      button(
+        "Turn on notifications here",
+        async () => {
+          await turnOnPush();
+          notice("Notifications are on for this device.");
+          render();
+        },
+        "primary",
+      ),
+    );
+    if (isIos && !standalone()) card.append(node("p", IOS_PUSH_NOTE, "muted small"));
+    else if (pushSupported() && Notification.permission === "denied")
+      card.append(node("p", deniedHelp(), "muted small"));
+  }
+  card.append(actions);
+  return card;
+}
+function myListCard(it) {
+  const card = node("article", undefined, "card mylist-item" + urgency(it.next));
+  const head = node("div", undefined, "mylist-head");
+  head.append(node("h3", it.name), node("span", nextText(it.next), "badge mylist-next"));
+  card.append(head);
+  card.append(
+    node(
+      "p",
+      [
+        TYPE_NAMES[it.type] || "",
+        it.admit_rate != null ? `Admit rate ${it.admit_rate}%` : "Admit rate not published",
+        "International aid: " + (AID_NAMES[it.intl_aid] || "not published"),
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      "muted",
+    ),
+  );
+  if (it.missing)
+    card.append(node("p", "This college is no longer in the directory.", "muted small"));
+  const dl = node("dl", undefined, "mylist-deadlines");
+  for (const r of LIST_ROUNDS) {
+    const row = node("div", undefined, it.round === r ? "chosen" : "");
+    row.append(node("dt", ROUND_SHORT[r]), node("dd", deadlineText(it.deadlines[r])));
+    dl.append(row);
+  }
+  card.append(dl);
+  if (it.deadline_note) card.append(node("p", "Note: " + it.deadline_note, "muted small"));
+  const form = node("form", undefined, "mylist-form");
+  const rounds = LIST_ROUNDS.filter(
+    (r) => /^\d{4}-/.test(it.deadlines[r].date || "") || r === it.round,
+  );
+  const [rl, round] = select(
+    "My round",
+    [["", "Not chosen yet"], ...rounds.map((r) => [r, ROUND_NAMES[r]])],
+    it.round,
+  );
+  const [sl, status] = select("Status", LIST_STATUSES, it.status);
+  const [nl, notes] = input("Private notes (only you see these)", it.notes, "textarea", 2000);
+  const save = node("button", "Save", "primary");
+  save.type = "submit";
+  const actions = node("div", undefined, "actions");
+  const profile = node("a", "College page ↗");
+  profile.href = `${websiteOrigin()}/colleges/${encodeURIComponent(it.slug)}`;
+  profile.target = "_blank";
+  profile.rel = "noopener";
+  actions.append(
+    save,
+    button(
+      "Remove",
+      async () => {
+        if (!confirm(`Remove ${it.name} from your list?`)) return;
+        await api(`lms/my/list/${encodeURIComponent(it.slug)}/delete`, {});
+        notice("Removed.");
+        render();
+      },
+      "danger",
+    ),
+    profile,
+  );
+  form.append(rl, sl, nl, actions);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api(`lms/my/list/${encodeURIComponent(it.slug)}`, {
+        round: round.value,
+        status: status.value,
+        notes: notes.value,
+      });
+      notice("Saved.");
+      render();
+    } catch (err) {
+      report(err);
+    }
+  };
+  card.append(form);
+  return card;
+}
+/** Staff: one student's saved colleges (Students screen). */
+function collegeListSection(items) {
+  const out = [node("h3", "College list")];
+  if (!items.length) {
+    out.push(node("p", "No colleges saved yet.", "muted"));
+    return out;
+  }
+  const list = node("ul", undefined, "mylist-staff");
+  for (const it of items) {
+    const li = node("li", undefined, urgency(it.next).trim());
+    li.append(
+      node("strong", it.name),
+      node(
+        "span",
+        `${LIST_STATUSES.find(([v]) => v === it.status)?.[1] || it.status} · ${it.round ? ROUND_NAMES[it.round] : "Round not chosen"} · ${nextText(it.next)}`,
+        "muted",
+      ),
+    );
+    list.append(li);
+  }
+  out.push(list);
+  return out;
+}
+/** Staff: "Due in the next 14 days" across the students they may see. */
+async function renderDeadlines() {
+  const screen = $("screen");
+  const data = await api("lms/college-lists/due");
+  screen.append(
+    node(
+      "p",
+      `Saved colleges with status Researching or Applying and a deadline in the next ${data.days} days (today in Dhaka: ${listDay(data.today)}). Uses the student's chosen round, or the next open round when none is chosen.`,
+      "muted",
+    ),
+  );
+  if (!data.items.length) {
+    screen.append(node("p", "Nothing due in the next 14 days.", "empty"));
+    return;
+  }
+  const list = node("div", undefined, "mylist-due");
+  for (const it of data.items) {
+    const card = node("article", undefined, "card mylist-item" + urgency(it.next));
+    const head = node("div", undefined, "mylist-head");
+    head.append(
+      node("h3", it.student_name || it.student_email),
+      node("span", daysText(it.next.days), "badge mylist-next"),
+    );
+    card.append(
+      head,
+      node("p", `${it.name} · ${ROUND_NAMES[it.next.round]} · ${listDay(it.next.date)}`),
+      node(
+        "p",
+        `${LIST_STATUSES.find(([v]) => v === it.status)?.[1] || it.status}${it.next.chosen ? "" : " · round not chosen yet"} · ${it.student_email}`,
+        "muted small",
+      ),
+    );
+    list.append(card);
+  }
+  screen.append(list);
+}
 async function renderMyCourses() {
   const screen = $("screen");
   const courses = (await api("lms/my/courses")).items;
@@ -4320,6 +4686,10 @@ if (portal === "student") {
     ? "Team members sign in at admin.scholarscafe.com."
     : "Sign-up is by invitation. Team members sign in at admin.scholarscafe.com.";
 }
+// Arrived from the website's "Save to My List": keep the college through sign-in.
+const arrivedToAdd = portal === "student" && readPendingAdd();
+if (arrivedToAdd)
+  $("login-message").textContent = "Sign in to save this college to My College List.";
 const signinResult = new URLSearchParams(location.search).get("signin");
 if (signinResult) {
   $("login-message").textContent =
@@ -5099,10 +5469,19 @@ const DISMISS_KEY = {
 };
 let enableLater = false;
 function deniedHelp() {
+  if (me?.role === "student") return studentDeniedHelp();
   if (isIos)
     return "Notifications are off for SC Studio. Turn them on in iPhone Settings → Notifications → SC Studio → Allow Notifications (and Sounds, Badges).";
   if (/android/i.test(navigator.userAgent))
     return "Notifications are blocked. Turn them on: long-press the SC Studio icon → App info → Notifications → Allow (in Chrome: ⋮ → Settings → Site settings → Notifications).";
+  return "Notifications are blocked. Click the site icon left of the address → Notifications → Allow, then reload.";
+}
+// Students: the student portal's Home Screen app is called "Scholars Cafe".
+function studentDeniedHelp() {
+  if (isIos)
+    return "Notifications are off for Scholars Cafe. Turn them on in iPhone Settings → Notifications → Scholars Cafe → Allow Notifications.";
+  if (/android/i.test(navigator.userAgent))
+    return "Notifications are blocked. Turn them on: long-press the Scholars Cafe icon → App info → Notifications → Allow (in Chrome: ⋮ → Settings → Site settings → Notifications).";
   return "Notifications are blocked. Click the site icon left of the address → Notifications → Allow, then reload.";
 }
 function showAlertsBanner() {
@@ -5394,7 +5773,7 @@ async function turnOnPush(asked) {
   if (permission !== "granted")
     throw Error(permission === "denied" ? deniedHelp() : "Notifications were not allowed.");
   const reg = await navigator.serviceWorker.ready;
-  const { publicKey } = await api("push");
+  const { publicKey } = await api(pushBase() || "push");
   const key = b64url(publicKey);
   let sub = await reg.pushManager.getSubscription();
   const same = (a) =>
@@ -5408,12 +5787,14 @@ async function turnOnPush(asked) {
   } catch (e) {
     throw Error("This device couldn't register for push: " + (e?.message || e?.name || "error"));
   }
-  await api("push/subscribe", { ...sub.toJSON(), device: deviceName() });
+  await api(pushBase() + "/subscribe", { ...sub.toJSON(), device: deviceName() });
 }
+// Students (deadline reminders) use their own routes on the student portal; staff use /api/push.
+const pushBase = () => (me?.role === "student" ? "lms/my/push" : "push");
 async function turnOffPush() {
   const sub = await currentSubscription();
   if (!sub) return;
-  await api("push/unsubscribe", { endpoint: sub.endpoint }).catch(() => {});
+  await api(pushBase() + "/unsubscribe", { endpoint: sub.endpoint }).catch(() => {});
   await sub.unsubscribe();
 }
 /** Keeps the server's copy of this device's subscription current (it may have been cleaned up). */
@@ -5422,7 +5803,7 @@ async function syncPush() {
   const sub = await currentSubscription();
   // Allowed but never registered (or the registration was lost): register now, no tap needed.
   if (!sub) return turnOnPush(Promise.resolve("granted"));
-  await api("push/subscribe", { ...sub.toJSON(), device: deviceName() });
+  await api(pushBase() + "/subscribe", { ...sub.toJSON(), device: deviceName() });
 }
 
 async function renderNotifications() {
@@ -6048,9 +6429,12 @@ const TAB_ICONS = {
   Progress: "M3 3v18h18M7 15l4-4 3 3 6-6",
   Bookings:
     "M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
+  "My list": "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
+  Deadlines: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2",
 };
 const TAB_LABELS = {
   "My courses": "Courses",
+  "My list": "My list",
   Account: "Profile",
   Overview: "Website",
   "Team chat": "Chat",
@@ -6153,6 +6537,7 @@ try {
             [
               "Home",
               "My courses",
+              "My list",
               "Resources",
               ...(myFeatures.uploads || myFeatures.reviews ? ["Documents"] : []),
               ...(myFeatures.messaging ? ["Messages"] : []),
@@ -6162,7 +6547,7 @@ try {
         ]
       : me.role === "mentor"
         ? [
-            ["", ["Leads", "Students", "Documents", "Messages"]],
+            ["", ["Leads", "Students", "Deadlines", "Documents", "Messages"]],
             ["Team", ["Team chat", "Tasks", "Progress"]],
             ["Settings", ["Notifications"]],
           ]
@@ -6188,6 +6573,7 @@ try {
                     "Students",
                     [
                       "Students",
+                      "Deadlines",
                       "Packages",
                       "Student courses",
                       "Student resources",
@@ -6279,12 +6665,17 @@ try {
   const wanted = new URLSearchParams(location.search).get("open");
   if (canOpen(wanted)) section = wanted;
   if (wanted) history.replaceState(null, "", "/");
+  // The list page (/my-list), opened from the website, a reminder email or after signing in to save.
+  if (me.role === "student" && (location.pathname === "/my-list" || hasPendingAdd()))
+    section = "My list";
   navigator.serviceWorker?.addEventListener("message", (e) => {
     if (e.data?.type === "push") return inAppAlert(canOpen(e.data.open) ? e.data.open : "");
     if (canOpen(e.data?.open)) navigate(e.data.open);
   });
   buildBell();
   refreshBell();
+  // Students: keep this device's reminder subscription current if they turned notifications on.
+  if (me.role === "student") syncPush().catch(() => {});
   if (me.role !== "student") {
     syncPush().catch(() => {});
     showInstallHint();
