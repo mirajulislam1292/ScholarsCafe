@@ -8487,6 +8487,443 @@ export const COLLEGES: College[] = [
       cds: "https://iris.nd.edu/institutional-research/common-data-set-cds/",
     },
   },
+  {
+    slug: "emory-university",
+    name: "Emory University",
+    type: "NU",
+    city: "Atlanta",
+    state: "Georgia",
+    code: "GA",
+    rank: {
+      label: "#23 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 37561,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    admitted: {
+      value: 3869,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    edApplicants: {
+      value: 4728,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    edAdmitted: {
+      value: 1049,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II (C21 counts combined); no Early Action.",
+    sat: {
+      value: "1480-1540",
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    act: {
+      value: "33-35",
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://apply.emory.edu/apply/requirements/exams",
+    },
+    testNote: "Test-optional for fall 2027 entry; SAT and ACT superscored.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://studentaid.emory.edu/undergraduate/apply/new-students/international.html",
+    },
+    intlAidPolicy: {
+      value: "limited",
+      source: "https://studentaid.emory.edu/undergraduate/apply/new-students/international.html",
+    },
+    policyQuote:
+      "Each year we offer need-based financial aid packages to a select group of international students. To be considered for need-based financial aid, please apply under our Regular Decision plan.",
+    intlAided: {
+      value: 101,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    intlAvgAward: {
+      value: 62950,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    intlNote:
+      "International students who want need-based aid must apply Regular Decision. Merit scholarships are available through the Emory University Scholar Programs (deadline November 15). No page says need-blind or need-aware.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 70300,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    fees: {
+      value: 1148,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    roomBoard: {
+      value: 22406,
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    costNote: "CDS G1 for 2026-27 (housing $13,222 + food $9,184).",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "No strict cutoffs. Expected: TOEFL 100 (5.5 on the new scale), IELTS 7.5; competitive Duolingo scores are typically above 130.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://apply.emory.edu/apply/plans-deadlines",
+    },
+    ed2: {
+      value: "2027-01-01",
+      source: "https://apply.emory.edu/apply/plans-deadlines",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://provost.emory.edu/planning-administration/_includes/documents/sections/institutional-data/emory-common-date-set-2025-2026.pdf",
+    },
+    rd: {
+      value: "2027-01-01",
+      source: "https://apply.emory.edu/apply/plans-deadlines",
+    },
+    deadlineNote:
+      "The page gives November 1 and January 1 without a year; mapped to the 2026-27 cycle. International aid applicants must use Regular Decision (aid documents due February 10).",
+    highlight:
+      "Applicants can apply to Emory College, Oxford College or both with one application.",
+    image: {
+      src: "/media/colleges/emory-university.webp",
+      card: "/media/colleges/emory-university-card.webp",
+      title: "Asa Griggs Candler Library on the Quad at Emory University.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Asa_Griggs_Candler_Library_on_the_Quad_at_Emory_University.jpg",
+      author: "Marc Merlin",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
+    urls: {
+      admissions: "https://apply.emory.edu/apply/plans-deadlines",
+      international: "https://apply.emory.edu/apply/international-applicants.html",
+      aid: "https://studentaid.emory.edu/undergraduate/apply/new-students/international.html",
+      cds: "https://provost.emory.edu/planning-administration/data/common-data-set.html",
+    },
+  },
+  {
+    slug: "georgetown-university",
+    name: "Georgetown University",
+    type: "NU",
+    city: "Washington",
+    state: "District of Columbia",
+    code: "DC",
+    rank: {
+      label: "#23 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 26822,
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    admitted: {
+      value: 3618,
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "No Early Decision. Offers Early Action (CDS C22); the CDS gives no EA counts.",
+    sat: {
+      value: "1405-1530",
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    act: {
+      value: "32-35",
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    testPolicy: {
+      value: "required",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    testNote:
+      "SAT and/or ACT required for all applicants, including those abroad; exceptions only when a test center is physically out of reach.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    intlAidPolicy: {
+      value: "limited",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    policyQuote:
+      "Admitted students who have requested financial aid and are not U.S. citizens or permanent residents will be considered for a very limited number of need-based scholarships.",
+    intlAided: {
+      value: 48,
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    intlAvgAward: {
+      value: 75050,
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    intlNote: "Aid must be requested on the application, with the CSS Profile.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 74520,
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    fees: {
+      value: 212,
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    roomBoard: {
+      value: 22180,
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    costNote: "CDS G1 for 2026-27, first-year figures (housing $13,944 + food $8,236).",
+    ielts: {
+      value: "none",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    toefl: {
+      value: "none",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    duolingo: {
+      value: "none",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    englishNote:
+      "An English test is recommended, not required, for students whose school does not teach in English. Accepts Duolingo, IELTS or TOEFL. No minimum score is published.",
+    nationalCurriculum: {
+      value:
+        "Applicants submit four years of secondary school credentials, translated into English with the originals. Students in systems with final exams (A-Levels, IB, French Bac) submit projected and/or final results.",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    ed1: {
+      value: "not-offered",
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://georgetown.box.com/s/0r8akn4cbm52zjkll6i7uttlb9k36px2",
+    },
+    ea: {
+      value: "2026-11-01",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    rd: {
+      value: "2027-01-01",
+      source: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+    },
+    deadlineNote:
+      "The page gives November 1 and January 1 without a year; mapped to the 2026-27 cycle.",
+    highlight:
+      "Citizenship has no effect on review: applicants are read in the context of their own school and curriculum.",
+    image: {
+      src: "/media/colleges/georgetown-university.webp",
+      card: "/media/colleges/georgetown-university-card.webp",
+      title: "Healy Hall, Georgetown University, Georgetown, Washington, DC (39641791973).jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Healy_Hall,_Georgetown_University,_Georgetown,_Washington,_DC_(39641791973).jpg",
+      author: "Warren LeMay from Cincinnati, OH, United States",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
+    urls: {
+      admissions: "https://uadmissions.georgetown.edu/apply/first-year-applicants/",
+      international: "https://uadmissions.georgetown.edu/apply/international-applicants/",
+      aid: "https://finaid.georgetown.edu/",
+      cds: "https://oads.georgetown.edu/commondataset/",
+    },
+  },
+  {
+    slug: "university-of-southern-california",
+    name: "University of Southern California",
+    type: "NU",
+    city: "Los Angeles",
+    state: "California",
+    code: "CA",
+    rank: {
+      label: "#27 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 83488,
+      source: "https://oir.usc.edu/wp-content/uploads/sites/3/2026/10/CDS_2025-26_FINAL.pdf",
+    },
+    admitted: {
+      value: 9345,
+      source: "https://oir.usc.edu/wp-content/uploads/sites/3/2026/10/CDS_2025-26_FINAL.pdf",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "The 2025-26 CDS reports no Early Decision and gives no EA counts. For fall 2027, USC offers binding Early Decision and non-restrictive Early Action for most majors.",
+    sat: {
+      value: "1470-1540",
+      source: "https://oir.usc.edu/wp-content/uploads/sites/3/2026/10/CDS_2025-26_FINAL.pdf",
+    },
+    act: {
+      value: "32-35",
+      source: "https://oir.usc.edu/wp-content/uploads/sites/3/2026/10/CDS_2025-26_FINAL.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
+    },
+    testNote:
+      "Test-optional for 2027-28 entry. SAT/ACT used to show English proficiency are also counted in admission review.",
+    needBasedForIntl: {
+      value: false,
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
+    },
+    intlAidPolicy: {
+      value: "merit-only",
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
+    },
+    policyQuote: "USC does not offer need-based financial aid for international applicants.",
+    intlAided: {
+      value: 931,
+      source: "https://oir.usc.edu/wp-content/uploads/sites/3/2026/10/CDS_2025-26_FINAL.pdf",
+    },
+    intlAvgAward: {
+      value: 27577,
+      source: "https://oir.usc.edu/wp-content/uploads/sites/3/2026/10/CDS_2025-26_FINAL.pdf",
+    },
+    intlNote:
+      "All international applicants who apply by the deadline are considered for USC Merit Scholarships; no merit award covers the full cost. Proof of funding for the first year is required at application.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 75384,
+      source: "https://financialaid.usc.edu/undergraduate-financial-aid/cost-of-attendance/",
+    },
+    fees: {
+      value: 1952,
+      source: "https://financialaid.usc.edu/undergraduate-financial-aid/cost-of-attendance/",
+    },
+    roomBoard: {
+      value: 21952,
+      source: "https://financialaid.usc.edu/undergraduate-financial-aid/cost-of-attendance/",
+    },
+    costNote:
+      "USC Financial Aid 2026-27 estimate, on campus (housing $13,510 + food $8,442); add a $450 new-student fee. The CDS G1 lists a lower tuition ($66,640), so the college's own cost page is used.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: 130,
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
+    },
+    englishNote:
+      "Required for non-native speakers, no waivers. Recommended minimums: TOEFL 100 (5 on the new scale), IELTS 7, PTE 68, Cambridge 185, SAT EBRW 650 or ACT English 27; applicants below them are admissible at reduced rates. Duolingo is accepted only if you cannot sit an approved exam, with a firm minimum of 130.",
+    nationalCurriculum: {
+      value:
+        "USC reviews each application in the context of the applicant's educational system and lists expectations by country in its 'International Qualifications' tool. Official records must come directly from schools or testing agencies, with translations if not in English.",
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/first-year-students/",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/first-year-students/",
+    },
+    ea: {
+      value: "2026-11-01",
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/first-year-students/",
+    },
+    rd: {
+      value: "2027-01-10",
+      source: "https://admission.usc.edu/prospective-students/how-to-apply/first-year-students/",
+    },
+    deadlineNote:
+      "Most majors: ED and EA November 1, RD January 10. Performing arts majors: RD only, December 1. Dates given without a year; mapped to the 2026-27 cycle.",
+    highlight: "Students come from nearly 130 countries.",
+    image: {
+      src: "/media/colleges/university-of-southern-california.webp",
+      card: "/media/colleges/university-of-southern-california-card.webp",
+      title: "Bovard Auditorium side view.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Bovard_Auditorium_side_view.jpg",
+      author: "EEJCC",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
+    urls: {
+      admissions:
+        "https://admission.usc.edu/prospective-students/how-to-apply/first-year-students/",
+      international:
+        "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
+      aid: "https://financialaid.usc.edu/undergraduate-financial-aid/cost-of-attendance/",
+      cds: "https://oir.usc.edu/statistics-data-visualization/common-data-set/",
+    },
+  },
 ];
 // END GENERATED DATA
 
