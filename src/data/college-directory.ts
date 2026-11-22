@@ -1258,7 +1258,15 @@ export const COLLEGES: College[] = [
       "Table gives Nov. 15 (ED I), Jan. 5 (ED II, RD) without a year; same page references Fall 2027 applicants.",
     highlight:
       "Its Clinic Program puts student teams on real, sponsor-funded engineering and science projects.",
-    image: null,
+    image: {
+      src: "/media/colleges/harvey-mudd-college.webp",
+      card: "/media/colleges/harvey-mudd-college-card.webp",
+      title: "Harvey mudd campus photo.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Harvey_mudd_campus_photo.jpg",
+      author: "Hmc5555",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
     urls: {
       admissions: "https://www.hmc.edu/admission/apply/first-year-students/",
       international: "https://www.hmc.edu/admission/apply/international-applicants/",
@@ -2559,7 +2567,15 @@ export const COLLEGES: College[] = [
     },
     deadlineNote: "Admission and aid application deadlines are the same date per round.",
     highlight: "Davidson builds its financial aid packages without loans.",
-    image: null,
+    image: {
+      src: "/media/colleges/davidson-college.webp",
+      card: "/media/colleges/davidson-college-card.webp",
+      title: "Chambers Building, Davidson College (Davidson, North Carolina).jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Chambers_Building,_Davidson_College_(Davidson,_North_Carolina).jpg",
+      author: "Dacoslett at English Wikipedia",
+      licence: "Public domain",
+      licenceUrl: null,
+    },
     urls: {
       admissions: "https://www.davidson.edu/admission-and-financial-aid",
       international:
@@ -3291,7 +3307,15 @@ export const COLLEGES: College[] = [
       "Dates shown without years. International CSS Profile due Nov 15 / Jan 4 / Jan 15 (ED I / ED II / RD).",
     highlight:
       "Colby runs a 4-1-4 calendar with a January term called Jan Plan between the fall and spring semesters.",
-    image: null,
+    image: {
+      src: "/media/colleges/colby-college.webp",
+      card: "/media/colleges/colby-college-card.webp",
+      title: "Colby miller library.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Colby_miller_library.jpg",
+      author: "Nickline4 at English Wikipedia",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
     urls: {
       admissions: "https://afa.colby.edu/",
       international: "https://afa.colby.edu/apply/requirements/international-applicants/",
