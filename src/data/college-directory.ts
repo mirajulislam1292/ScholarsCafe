@@ -8336,6 +8336,311 @@ export const COLLEGES: College[] = [
     },
   },
   {
+    slug: "university-of-california-berkeley",
+    name: "University of California, Berkeley",
+    type: "NU",
+    city: "Berkeley",
+    state: "California",
+    code: "CA",
+    rank: {
+      label: "#20 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 126864,
+      source:
+        "https://docs.google.com/spreadsheets/d/1INsGFH6MhaO-MFMBZ1Dngcn84FeN-hc0BLS0-v8TL_k/edit",
+    },
+    admitted: {
+      value: 14524,
+      source:
+        "https://docs.google.com/spreadsheets/d/1INsGFH6MhaO-MFMBZ1Dngcn84FeN-hc0BLS0-v8TL_k/edit",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "No Early Decision or Early Action.",
+    sat: {
+      value: null,
+      source: null,
+    },
+    act: {
+      value: null,
+      source: null,
+    },
+    testPolicy: {
+      value: "test-blind",
+      source:
+        "https://docs.google.com/spreadsheets/d/1INsGFH6MhaO-MFMBZ1Dngcn84FeN-hc0BLS0-v8TL_k/edit",
+    },
+    testNote:
+      "Berkeley's CDS notes that it does not take regular SAT or ACT scores into account, so it reports no SAT/ACT ranges.",
+    needBasedForIntl: {
+      value: null,
+      source: null,
+    },
+    intlAidPolicy: {
+      value: "limited",
+      source:
+        "https://admission.universityofcalifornia.edu/tuition-financial-aid/who-can-get-financial-aid/",
+    },
+    policyQuote:
+      "International students are generally ineligible for student loans and are eligible for very few scholarships.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote: "The CDS leaves H6 blank. Nonresidents pay nonresident supplemental tuition.",
+    costYear: "2025-2026",
+    tuition: {
+      value: 53472,
+      source:
+        "https://docs.google.com/spreadsheets/d/1INsGFH6MhaO-MFMBZ1Dngcn84FeN-hc0BLS0-v8TL_k/edit",
+    },
+    fees: {
+      value: 4262,
+      source:
+        "https://docs.google.com/spreadsheets/d/1INsGFH6MhaO-MFMBZ1Dngcn84FeN-hc0BLS0-v8TL_k/edit",
+    },
+    roomBoard: {
+      value: 26028,
+      source:
+        "https://docs.google.com/spreadsheets/d/1INsGFH6MhaO-MFMBZ1Dngcn84FeN-hc0BLS0-v8TL_k/edit",
+    },
+    costNote:
+      "CDS G1 for 2025-26, nonresident tuition (includes nonresident supplemental tuition). Varies by entering cohort.",
+    ielts: {
+      value: 6.5,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    toefl: {
+      value: 80,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    duolingo: {
+      value: 115,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    englishNote:
+      "UC system minimums (TOEFL 4.5 on the new scale; AP/IB English, ACT ELA 24 or SAT Writing 31 also count). The UC page notes a campus may require higher scores for selection.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    ed2: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    rd: {
+      value: "2026-11-30",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    deadlineNote:
+      "One UC application for all campuses; filing period November 1-30, 2026. No early rounds.",
+    highlight:
+      "Applied to through the single University of California application, which also covers the other UC campuses.",
+    image: {
+      src: "/media/colleges/university-of-california-berkeley.webp",
+      card: "/media/colleges/university-of-california-berkeley-card.webp",
+      title: "Redwood trees and Sather Tower during the Sunset in Berkeley California.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Redwood_trees_and_Sather_Tower_during_the_Sunset_in_Berkeley_California.jpg",
+      author: "Wil540 art",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
+    urls: {
+      admissions: "https://admissions.berkeley.edu/",
+      international:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+      aid: "https://admission.universityofcalifornia.edu/tuition-financial-aid/who-can-get-financial-aid/",
+      cds: "https://opa.berkeley.edu/campus-data/common-data-set",
+    },
+  },
+  {
+    slug: "university-of-california-los-angeles",
+    name: "University of California, Los Angeles",
+    type: "NU",
+    city: "Los Angeles",
+    state: "California",
+    code: "CA",
+    rank: {
+      label: "#20 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 145086,
+      source: "https://apb.ucla.edu/file/d1ab04b3-ee89-4cf2-9124-8dc0471b5e5a",
+    },
+    admitted: {
+      value: 13659,
+      source: "https://apb.ucla.edu/file/d1ab04b3-ee89-4cf2-9124-8dc0471b5e5a",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "No Early Decision or Early Action.",
+    sat: {
+      value: null,
+      source: null,
+    },
+    act: {
+      value: null,
+      source: null,
+    },
+    testPolicy: {
+      value: "test-blind",
+      source: "https://apb.ucla.edu/file/d1ab04b3-ee89-4cf2-9124-8dc0471b5e5a",
+    },
+    testNote: "UCLA's CDS (C8) says SAT/ACT scores are not used in admission decisions.",
+    needBasedForIntl: {
+      value: null,
+      source: null,
+    },
+    intlAidPolicy: {
+      value: "limited",
+      source:
+        "https://admission.universityofcalifornia.edu/tuition-financial-aid/who-can-get-financial-aid/",
+    },
+    policyQuote:
+      "International students are generally ineligible for student loans and are eligible for very few scholarships.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote: "UCLA's CDS leaves H6 and G1 blank.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 54858,
+      source: "https://financialaid.ucla.edu/go/coa",
+    },
+    fees: {
+      value: 842,
+      source: "https://financialaid.ucla.edu/go/coa",
+    },
+    roomBoard: {
+      value: 19867,
+      source: "https://financialaid.ucla.edu/go/coa",
+    },
+    costNote:
+      "UCLA Financial Aid 2026-27 for new students, on campus: UC tuition $15,588 + nonresident supplemental tuition $39,270; campus fees $842; housing $12,299 + food $7,568. Health insurance ($3,885) extra. Figures may change.",
+    ielts: {
+      value: 6.5,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    toefl: {
+      value: 80,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    duolingo: {
+      value: 115,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    englishNote:
+      "UC system minimums (TOEFL 4.5 on the new scale; AP/IB English, ACT ELA 24 or SAT Writing 31 also count). The UC page notes a campus may require higher scores for selection.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    ed2: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    rd: {
+      value: "2026-11-30",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    deadlineNote:
+      "One UC application for all campuses; filing period November 1-30, 2026. No early rounds.",
+    highlight:
+      "Applied to through the single University of California application, which also covers the other UC campuses.",
+    image: {
+      src: "/media/colleges/university-of-california-los-angeles.webp",
+      card: "/media/colleges/university-of-california-los-angeles-card.webp",
+      title: "2019 UCLA Royce Hall 2.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:2019_UCLA_Royce_Hall_2.jpg",
+      author: "Beyond My Ken",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
+    urls: {
+      admissions: "https://admission.ucla.edu/",
+      international:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+      aid: "https://financialaid.ucla.edu/go/coa",
+      cds: "https://apb.ucla.edu/campus-statistics/common-data-set-undergraduate-profile",
+    },
+  },
+  {
     slug: "university-of-notre-dame",
     name: "University of Notre Dame",
     type: "NU",
@@ -8922,6 +9227,155 @@ export const COLLEGES: College[] = [
         "https://admission.usc.edu/prospective-students/how-to-apply/international-students/",
       aid: "https://financialaid.usc.edu/undergraduate-financial-aid/cost-of-attendance/",
       cds: "https://oir.usc.edu/statistics-data-visualization/common-data-set/",
+    },
+  },
+  {
+    slug: "university-of-california-san-diego",
+    name: "University of California San Diego",
+    type: "NU",
+    city: "La Jolla",
+    state: "California",
+    code: "CA",
+    rank: {
+      label: "#29 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 136750,
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    admitted: {
+      value: 39054,
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "No Early Decision or Early Action.",
+    sat: {
+      value: null,
+      source: null,
+    },
+    act: {
+      value: null,
+      source: null,
+    },
+    testPolicy: {
+      value: "test-blind",
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    testNote: "UC San Diego's CDS (C8A) says SAT/ACT scores are not used in admission decisions.",
+    needBasedForIntl: {
+      value: null,
+      source: null,
+    },
+    intlAidPolicy: {
+      value: "limited",
+      source:
+        "https://admission.universityofcalifornia.edu/tuition-financial-aid/who-can-get-financial-aid/",
+    },
+    policyQuote:
+      "International students are generally ineligible for student loans and are eligible for very few scholarships.",
+    intlAided: {
+      value: 214,
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    intlAvgAward: {
+      value: 10290,
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    intlNote: "Nonresidents pay nonresident supplemental tuition.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 53472,
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    fees: {
+      value: 3789,
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    roomBoard: {
+      value: 20443,
+      source: "https://ir.ucsd.edu/stats/undergrad/CDS-2025-2026-Final2.pdf",
+    },
+    costNote:
+      "CDS G1 for 2026-27, first-year nonresident tuition (includes nonresident supplemental tuition).",
+    ielts: {
+      value: 6.5,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    toefl: {
+      value: 80,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    duolingo: {
+      value: 115,
+      source:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+    },
+    englishNote:
+      "UC system minimums (TOEFL 4.5 on the new scale; AP/IB English, ACT ELA 24 or SAT Writing 31 also count). The UC page notes a campus may require higher scores for selection.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    ed2: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    rd: {
+      value: "2026-11-30",
+      source:
+        "https://admission.universityofcalifornia.edu/how-to-apply/applying-as-a-first-year/dates-and-deadlines.html",
+    },
+    deadlineNote:
+      "One UC application for all campuses; filing period November 1-30, 2026. No early rounds.",
+    highlight:
+      "Applied to through the single University of California application, which also covers the other UC campuses.",
+    image: {
+      src: "/media/colleges/university-of-california-san-diego.webp",
+      card: "/media/colleges/university-of-california-san-diego-card.webp",
+      title: "Geisel Library, UC San Diego.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Geisel_Library,_UC_San_Diego.jpg",
+      author: "Stephen Bay",
+      licence: "CC BY 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by/4.0",
+    },
+    urls: {
+      admissions: "https://admissions.ucsd.edu/",
+      international:
+        "https://admission.universityofcalifornia.edu/admission-requirements/international-applicants/english-language-proficiency-toefl-ielts.html",
+      aid: "https://admission.universityofcalifornia.edu/tuition-financial-aid/who-can-get-financial-aid/",
+      cds: "https://ir.ucsd.edu/stats/undergrad/common-data-set.html",
     },
   },
 ];
