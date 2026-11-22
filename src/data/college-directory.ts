@@ -3880,7 +3880,15 @@ export const COLLEGES: College[] = [
     deadlineNote:
       "Application deadlines ED I Nov 15, ED II Jan 10, RD Jan 10 (page gives no year; taken as the 2026-27 cycle). Supporting materials may follow by Nov 20 (ED I) and Jan 15 (ED II/RD).",
     highlight: "Bates has let every applicant choose whether to send SAT or ACT scores since 1984.",
-    image: null,
+    image: {
+      src: "/media/colleges/bates-college.webp",
+      card: "/media/colleges/bates-college-card.webp",
+      title: "Bates College Campus.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Bates_College_Campus.jpg",
+      author: "Josh Kuckens",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
     urls: {
       admissions: "https://www.bates.edu/admission/apply/",
       international: "https://www.bates.edu/admission/apply/international-students/",
@@ -4475,7 +4483,15 @@ export const COLLEGES: College[] = [
       "Regular Decision applicants who applied by Jan 15 may convert to ED II until Feb 1. Pages give month/day only.",
     highlight:
       "Chartered in 1826 and named for the Marquis de Lafayette, it pairs a liberal arts college with a nationally recognised engineering program.",
-    image: null,
+    image: {
+      src: "/media/colleges/lafayette-college.webp",
+      card: "/media/colleges/lafayette-college-card.webp",
+      title: "Lafayette College Easton PA 10 Scott Hall.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Lafayette_College_Easton_PA_10_Scott_Hall.jpg",
+      author: "Tomwsulcer",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
     urls: {
       admissions: "https://admissions.lafayette.edu/",
       international: "https://admissions.lafayette.edu/apply/international-students/",
@@ -7719,7 +7735,15 @@ export const COLLEGES: College[] = [
     deadlineNote:
       "The page gives November 1 and January 2 without a year; mapped to the 2026-27 cycle. Other materials are due November 13 (ED) and January 19 (RD).",
     highlight: "About 10% of students come from more than 125 countries.",
-    image: null,
+    image: {
+      src: "/media/colleges/cornell-university.webp",
+      card: "/media/colleges/cornell-university-card.webp",
+      title: "Cornell University - Arts Quadrangle, looking north.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Cornell_University_-_Arts_Quadrangle,_looking_north.jpg",
+      author: "The Corner Book Stores, Ithaca",
+      licence: "Public domain",
+      licenceUrl: null,
+    },
     urls: {
       admissions: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
       international: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
@@ -8009,12 +8033,458 @@ export const COLLEGES: College[] = [
       "The page gives Nov. 1 and Jan. 4 without a year; mapped to the 2026-27 cycle. Shepherd School of Music: Dec. 1.",
     highlight:
       "Every student belongs to one of its residential colleges, the center of student life.",
-    image: null,
+    image: {
+      src: "/media/colleges/rice-university.webp",
+      card: "/media/colleges/rice-university-card.webp",
+      title: "Rice University.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Rice_University.jpg",
+      author: "Anatol Stefanowitsch",
+      licence: "CC BY-SA 3.0",
+      licenceUrl: "http://creativecommons.org/licenses/by-sa/3.0/",
+    },
     urls: {
       admissions: "https://admission.rice.edu/apply/first-year-international-applicants",
       international: "https://admission.rice.edu/apply/first-year-international-applicants",
       aid: "https://financialaid.rice.edu/",
       cds: "https://ideas.rice.edu/reporting-analytics/common-data-set/",
+    },
+  },
+  {
+    slug: "vanderbilt-university",
+    name: "Vanderbilt University",
+    type: "NU",
+    city: "Nashville",
+    state: "Tennessee",
+    code: "TN",
+    rank: {
+      label: "#16 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 48196,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    admitted: {
+      value: 2593,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    edApplicants: {
+      value: 6202,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    edAdmitted: {
+      value: 874,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II (C21 counts combined); CDS C22 says no Early Action.",
+    sat: {
+      value: "1510-1560",
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    act: {
+      value: "34-35",
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admissions.vanderbilt.edu/apply/testing-policies/",
+    },
+    testNote:
+      "SAT/ACT optional for fall 2027 and 2028 entry; required again for fall 2029. Superscored. English proficiency is still required for international students.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admissions.vanderbilt.edu/faq/",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://admissions.vanderbilt.edu/faq/",
+    },
+    policyQuote:
+      "Note that Vanderbilt is need-aware in the admissions process for international students; we may take into consideration the student’s ability to finance a Vanderbilt education.",
+    intlAided: {
+      value: 266,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    intlAvgAward: {
+      value: 79879,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    intlNote:
+      "Admitted international students with need have 100% of demonstrated need met with grants and/or scholarships. They can also apply for merit scholarships.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 69822,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    fees: {
+      value: 3384,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    roomBoard: {
+      value: 23690,
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    costNote: "CDS G1 for 2026-27, first-year figures (housing $15,170 + food $8,520).",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "Recommended minimums (not strict cutoffs): IELTS 7.0, TOEFL iBT 5 (new scale), Duolingo 130, Cambridge 185. Not needed if English is your first language or language of instruction, or with ACT English above 26 or SAT EBRW above 630.",
+    nationalCurriculum: {
+      value:
+        "All application pieces must be in English; transcripts not originally in English must be officially translated by the school or a certified translator.",
+      source: "https://admissions.vanderbilt.edu/apply/first-year-process/",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admissions.vanderbilt.edu/apply/",
+    },
+    ed2: {
+      value: "2027-01-01",
+      source: "https://admissions.vanderbilt.edu/apply/",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://cdn.vanderbilt.edu/vu-wpfsx/wp-content/uploads/sites/70/2026/07/CDS_2025-2026.xlsx",
+    },
+    rd: {
+      value: "2027-01-01",
+      source: "https://admissions.vanderbilt.edu/apply/",
+    },
+    deadlineNote: null,
+    highlight:
+      "Takes no account of demonstrated interest: visiting or emailing does not affect your chances.",
+    image: {
+      src: "/media/colleges/vanderbilt-university.webp",
+      card: "/media/colleges/vanderbilt-university-card.webp",
+      title: "Memorial Gymnasium, Vanderbilt University, August 2023.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Memorial_Gymnasium,_Vanderbilt_University,_August_2023.jpg",
+      author: "PCN02WPS",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
+    urls: {
+      admissions: "https://admissions.vanderbilt.edu/apply/",
+      international: "https://admissions.vanderbilt.edu/apply/first-year-process/",
+      aid: "https://admissions.vanderbilt.edu/affordability/international-costs-and-finances/",
+      cds: "https://www.vanderbilt.edu/data/public-data/common-data-sets/",
+    },
+  },
+  {
+    slug: "washington-university-in-st-louis",
+    name: "Washington University in St. Louis",
+    type: "NU",
+    city: "St. Louis",
+    state: "Missouri",
+    code: "MO",
+    rank: {
+      label: "#16 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 33283,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    admitted: {
+      value: 3968,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    edApplicants: {
+      value: 4934,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    edAdmitted: {
+      value: 1333,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "ED I, ED II and a non-restrictive Early Action round; the CDS does not report EA counts.",
+    sat: {
+      value: "1500-1550",
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    act: {
+      value: "33-35",
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+    },
+    testNote: "SAT or ACT scores are optional (self-reported or official).",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+    },
+    intlAidPolicy: {
+      value: null,
+      source: null,
+    },
+    policyQuote:
+      "WashU meets 100 percent of demonstrated need for all admitted undergraduate students.",
+    intlAided: {
+      value: 30,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    intlAvgAward: {
+      value: 71003,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    intlNote:
+      "International students must request aid when applying; they cannot apply for aid later. The page does not say need-blind or need-aware for international applicants.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 71310,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    fees: {
+      value: 1412,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    roomBoard: {
+      value: 24272,
+      source: "https://washu.edu/app/uploads/2026/06/2025-2026-WashU-CDS.pdf",
+    },
+    costNote: "CDS G1 for 2026-27 (housing $15,150 + food $9,122).",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "An English test is required if English is a second language. WashU recommends at least TOEFL 100 (5.0 on the new scale), IELTS 7.0 or Duolingo 130; these are typical of competitive applicants, not strict minimums. From fall 2027, SAT/ACT scores no longer replace an English test.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-02",
+      source: "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+    },
+    ed2: {
+      value: "2027-01-04",
+      source: "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+    },
+    ea: {
+      value: "2026-11-02",
+      source: "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+    },
+    rd: {
+      value: "2027-01-04",
+      source: "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+    },
+    deadlineNote:
+      "The page gives November 2 and January 4 without a year (applying for fall 2027).",
+    highlight: "Added a non-binding Early Action round alongside its two Early Decision rounds.",
+    image: null,
+    urls: {
+      admissions: "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+      international:
+        "https://admissions.washu.edu/how-to-apply/first-year-international-applicants/",
+      aid: "https://financialaid.wustl.edu/",
+      cds: "https://washu.edu/policies/student-consumer-information/",
+    },
+  },
+  {
+    slug: "university-of-notre-dame",
+    name: "University of Notre Dame",
+    type: "NU",
+    city: "Notre Dame",
+    state: "Indiana",
+    code: "IN",
+    rank: {
+      label: "#20 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 35401,
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    admitted: {
+      value: 3320,
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "No Early Decision. Offers Restrictive Early Action (CDS C22); the CDS gives no EA counts.",
+    sat: {
+      value: "1460-1540",
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    act: {
+      value: "33-35",
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    testPolicy: {
+      value: "optional",
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    testNote:
+      "Test-optional through 2026-27; SAT/ACT required again for fall 2028 entry. Students abroad may send predicted IB, A-Level (3+) or French Bac results instead.",
+    needBasedForIntl: {
+      value: true,
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    intlAidPolicy: {
+      value: "need-blind",
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    policyQuote:
+      "The University of Notre Dame practices need-blind admissions for all students. Your ability to pay is not considered when evaluating your application for admission.",
+    intlAided: {
+      value: 363,
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    intlAvgAward: {
+      value: 68653,
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    intlNote: "International applicants requesting need-based aid submit the CSS Profile.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 69280,
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    fees: {
+      value: 514,
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    roomBoard: {
+      value: 18992,
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    costNote: "CDS G1 for 2026-27.",
+    ielts: {
+      value: 7.5,
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    toefl: {
+      value: 100,
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    duolingo: {
+      value: 125,
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    englishNote:
+      "Listed under 'We strongly recommend the following scores' in a column headed 'Required Score'. TOEFL new scale: 5.5 average. Waived with SAT EBRW 650+ or ACT English/Reading 26+. TOEFL Home Edition not accepted.",
+    nationalCurriculum: {
+      value:
+        "Applicants send an official transcript or record of secondary school achievement, including any national examination results; counselors usually include results or predicted results of exams such as A Levels or IB.",
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    ed1: {
+      value: "not-offered",
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://drive.google.com/file/d/1jFtuEmv7OPCTq9e8kD90I7CByERcMBty/view",
+    },
+    ea: {
+      value: "2026-11-01",
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    rd: {
+      value: "2027-01-04",
+      source:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+    },
+    deadlineNote:
+      "Early Action is restrictive (single-choice). The page gives November 1 and January 4 without a year; mapped to the 2026-27 cycle.",
+    highlight: "Known for the Golden Dome on its Main Building.",
+    image: {
+      src: "/media/colleges/university-of-notre-dame.webp",
+      card: "/media/colleges/university-of-notre-dame-card.webp",
+      title: "Golden Dome frontal.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Golden_Dome_frontal.jpg",
+      author: "Eccekevin",
+      licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    },
+    urls: {
+      admissions:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+      international:
+        "https://admissions.nd.edu/information-for/international-applicants/application-information/",
+      aid: "https://financialaid.nd.edu/",
+      cds: "https://iris.nd.edu/institutional-research/common-data-set-cds/",
     },
   },
 ];
