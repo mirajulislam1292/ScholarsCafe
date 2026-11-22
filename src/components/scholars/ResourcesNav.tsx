@@ -37,6 +37,12 @@ export const RESOURCE_PAGES = [
     label: "Essay Tools",
     desc: "Core values finder, Common App activity helper and official supplemental prompts.",
   },
+  {
+    id: "colleges",
+    href: "/colleges",
+    label: "College Directory",
+    desc: "67 US colleges with official admission, aid and cost figures.",
+  },
 ] as const;
 
 /** Hub: four cards linking to the sub-pages. */

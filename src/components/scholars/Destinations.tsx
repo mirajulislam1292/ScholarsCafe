@@ -30,16 +30,28 @@ export function Destinations() {
             <h2 className="max-w-[16ch] type-h2 text-neutral-900">{usa.heading}</h2>
             {usa.lead && <p className="mt-5 max-w-md type-body text-neutral-600">{usa.lead}</p>}
           </div>
-          <a
-            href="/services"
-            className="group inline-flex items-center gap-1.5 self-start type-button text-blue-700 md:self-auto"
-          >
-            <CmsText id="Destinations.cta.services">Explore our services</CmsText>
-            <ArrowUpRight
-              aria-hidden
-              className="h-4 w-4 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-            />
-          </a>
+          <div className="flex flex-wrap gap-x-6 gap-y-3 self-start md:self-auto">
+            <a
+              href="/colleges"
+              className="group inline-flex items-center gap-1.5 type-button text-blue-700"
+            >
+              <CmsText id="Destinations.cta.colleges">See all 67 colleges</CmsText>
+              <ArrowUpRight
+                aria-hidden
+                className="h-4 w-4 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </a>
+            <a
+              href="/services"
+              className="group inline-flex items-center gap-1.5 type-button text-blue-700"
+            >
+              <CmsText id="Destinations.cta.services">Explore our services</CmsText>
+              <ArrowUpRight
+                aria-hidden
+                className="h-4 w-4 transition-transform duration-500 ease-premium group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </a>
+          </div>
         </Reveal>
 
         <p className="section-body type-caption text-neutral-500">
