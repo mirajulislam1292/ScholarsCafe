@@ -7559,6 +7559,440 @@ export const COLLEGES: College[] = [
       cds: "https://www.cmu.edu/ira/CDS/previouscds.html",
     },
   },
+  {
+    slug: "cornell-university",
+    name: "Cornell University",
+    type: "NU",
+    city: "Ithaca",
+    state: "New York",
+    code: "NY",
+    rank: {
+      label: "#14 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 72523,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    admitted: {
+      value: 6077,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    edApplicants: {
+      value: 10057,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    edAdmitted: {
+      value: 1889,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "Binding Early Decision only; no Early Action.",
+    sat: {
+      value: "1490-1550",
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    act: {
+      value: "33-35",
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    testPolicy: {
+      value: "required",
+      source: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
+    },
+    testNote: "SAT or ACT scores are required.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
+    },
+    policyQuote:
+      "Cornell’s undergraduate admission process for international students is need-aware, meaning interest in or need for financial aid is one factor amongst many considered when making admission decisions.",
+    intlAided: {
+      value: 318,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    intlAvgAward: {
+      value: 88263,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    intlNote:
+      "International students must submit the aid application by the admission deadline (November 1 for ED, January 2 for RD). Five Levitan Family Scholarships go to international students each year.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 73946,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    fees: {
+      value: 1024,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    roomBoard: {
+      value: 21348,
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    costNote: "CDS G1 for 2026-27 (housing $13,744 + food $7,604).",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "An English test (TOEFL, IELTS, Duolingo or Cambridge C1/C2) is required unless English is your native language or was your main language of instruction in secondary school. Minimum scores are set by each Cornell college, not university-wide.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
+    },
+    ed2: {
+      value: "not-offered",
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://irp.cornell.edu/wp-content/uploads/2026/09/Cornell-Common-Data-Set-2025-26.pdf",
+    },
+    rd: {
+      value: "2027-01-02",
+      source: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
+    },
+    deadlineNote:
+      "The page gives November 1 and January 2 without a year; mapped to the 2026-27 cycle. Other materials are due November 13 (ED) and January 19 (RD).",
+    highlight: "About 10% of students come from more than 125 countries.",
+    image: null,
+    urls: {
+      admissions: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
+      international: "https://admissions.cornell.edu/how-to-apply/first-year-applicants",
+      aid: "https://finaid.cornell.edu/frequently-asked-questions-about-international-financial-aid",
+      cds: "https://irp.cornell.edu/common-data-set",
+    },
+  },
+  {
+    slug: "brown-university",
+    name: "Brown University",
+    type: "NU",
+    city: "Providence",
+    state: "Rhode Island",
+    code: "RI",
+    rank: {
+      label: "#16 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: null,
+    applicants: {
+      value: null,
+      source: null,
+    },
+    admitted: {
+      value: null,
+      source: null,
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Single-choice binding Early Decision; no Early Action. The number of ED applications is not published there.",
+    sat: {
+      value: null,
+      source: null,
+    },
+    act: {
+      value: null,
+      source: null,
+    },
+    testPolicy: {
+      value: "required",
+      source: "https://admission.brown.edu/first-year/application-checklist",
+    },
+    testNote:
+      "SAT or ACT required since the 2024-25 cycle; superscored. Brown's ranges are for admitted students (Class of 2029), not enrolled students as in a CDS.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admission.brown.edu/ask/international-applicants",
+    },
+    intlAidPolicy: {
+      value: "need-blind",
+      source: "https://admission.brown.edu/ask/international-applicants",
+    },
+    policyQuote:
+      "Brown meets the full demonstrated need of all admitted students who have applied for financial aid. Starting with the class of 2029 applying in the 2024-2025 admission cycle, Brown has adopted a need-blind admission process for international first-year students.",
+    intlAided: {
+      value: null,
+      source: null,
+    },
+    intlAvgAward: {
+      value: null,
+      source: null,
+    },
+    intlNote:
+      "Brown's Common Data Set page currently links no file, so CDS H6 figures are not available. Applicant figures come from Brown's 2025-26 Counselor Newsletter (Class of 2029).",
+    costYear: "2026-2027",
+    tuition: {
+      value: 74568,
+      source: "https://finaid.brown.edu/estimate-cost-aid/cost",
+    },
+    fees: {
+      value: 3084,
+      source: "https://finaid.brown.edu/estimate-cost-aid/cost",
+    },
+    roomBoard: {
+      value: 19464,
+      source: "https://finaid.brown.edu/estimate-cost-aid/cost",
+    },
+    costNote:
+      "Brown's financial aid cost page for an incoming first-year (housing $10,710 + food $8,754). Fees include a $100 one-time academic record fee.",
+    ielts: {
+      value: 8,
+      source: "https://admission.brown.edu/international/english-proficiency",
+    },
+    toefl: {
+      value: 105,
+      source: "https://admission.brown.edu/international/english-proficiency",
+    },
+    duolingo: {
+      value: 130,
+      source: "https://admission.brown.edu/international/english-proficiency",
+    },
+    englishNote:
+      "Brown says these minimums are 'expected in most cases'. TOEFL tests from January 2026: 5.5. Highly recommended when English is not your first language or language of instruction.",
+    nationalCurriculum: {
+      value:
+        "Brown says its admission officers know the school systems and exams in each region and review applications in context. Documents not in English need official translations sent with the originals.",
+      source: "https://admission.brown.edu/ask/international-applicants",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admission.brown.edu/first-year/application-checklist",
+    },
+    ed2: {
+      value: "not-offered",
+      source: "https://admission.brown.edu/ask/international-applicants",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://admission.brown.edu/ask/international-applicants",
+    },
+    rd: {
+      value: "2027-01-05",
+      source: "https://admission.brown.edu/first-year/application-checklist",
+    },
+    deadlineNote:
+      "The page gives November 1 and January 5 without a year; mapped to the 2026-27 cycle.",
+    highlight: "About fifteen percent of students come from abroad.",
+    image: {
+      src: "/media/colleges/brown-university.webp",
+      card: "/media/colleges/brown-university-card.webp",
+      title: "Brown University - Main Campus 02.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Brown_University_-_Main_Campus_02.jpg",
+      author: "P. Hughes",
+      licence: "CC BY 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by/4.0",
+    },
+    urls: {
+      admissions: "https://admission.brown.edu/first-year/application-checklist",
+      international: "https://admission.brown.edu/ask/international-applicants",
+      aid: "https://finaid.brown.edu/",
+      cds: "https://oir.brown.edu/institutional-data/common-data-set",
+    },
+  },
+  {
+    slug: "rice-university",
+    name: "Rice University",
+    type: "NU",
+    city: "Houston",
+    state: "Texas",
+    code: "TX",
+    rank: {
+      label: "#16 (tie) National Universities",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-universities",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 36791,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    admitted: {
+      value: 2948,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    edApplicants: {
+      value: 5748,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    edAdmitted: {
+      value: 647,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II (C21 counts combined); no Early Action.",
+    sat: {
+      value: "1510-1560",
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    act: {
+      value: "34-36",
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    testNote:
+      "Rice recommends sending SAT or ACT scores if available, but applicants without scores get full consideration. Section superscoring.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    intlAidPolicy: {
+      value: "need-aware",
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    policyQuote:
+      "Rice considers international applicants on a need-aware basis and offers need-based financial aid to a limited number of international first-year applicants.",
+    intlAided: {
+      value: 164,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    intlAvgAward: {
+      value: 79444,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    intlNote:
+      "Aid must be requested on the International Student Financial Statement; students admitted without requesting aid cannot apply later. Uses the CSS Profile.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 71140,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    fees: {
+      value: 984,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    roomBoard: {
+      value: 20530,
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    costNote:
+      "CDS G1 for 2026-27, tuition for students entering 2024 or later (housing $13,930 + food $6,600).",
+    ielts: {
+      value: 7,
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    toefl: {
+      value: 100,
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    duolingo: {
+      value: 130,
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    englishNote:
+      "Minimums. TOEFL tests from 21 Jan 2026: 5.0 on the new scale. IELTS Academic only. Cambridge C1/C2: 185. Waived after two years of full-time study in an English curriculum.",
+    nationalCurriculum: {
+      value:
+        "Students in an exam-based curriculum must send all transcripts, final exam results (for example IGCSE/GCSE, CBSE X) and predicted results if available. Documents not in English need an official translation.",
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    ed2: {
+      value: "2027-01-04",
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    ea: {
+      value: "not-offered",
+      source:
+        "https://ideas.rice.edu/wp-content/uploads/2026/09/CDS_2025-26_WEBSITE_Updated_9-28-2026.pdf",
+    },
+    rd: {
+      value: "2027-01-04",
+      source: "https://admission.rice.edu/apply/first-year-international-applicants",
+    },
+    deadlineNote:
+      "The page gives Nov. 1 and Jan. 4 without a year; mapped to the 2026-27 cycle. Shepherd School of Music: Dec. 1.",
+    highlight:
+      "Every student belongs to one of its residential colleges, the center of student life.",
+    image: null,
+    urls: {
+      admissions: "https://admission.rice.edu/apply/first-year-international-applicants",
+      international: "https://admission.rice.edu/apply/first-year-international-applicants",
+      aid: "https://financialaid.rice.edu/",
+      cds: "https://ideas.rice.edu/reporting-analytics/common-data-set/",
+    },
+  },
 ];
 // END GENERATED DATA
 
