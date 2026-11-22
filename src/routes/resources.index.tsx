@@ -21,7 +21,7 @@ export const Route = createFileRoute("/resources/")({
   head: () =>
     seo({
       path: "/resources",
-      title: "Free Guides to Study in the USA from Bangladesh",
+      title: "Resources | Scholars Cafe",
       description:
         "Free resources for Bangladeshi students applying to US universities: blog, ECA alerts, webinars, podcast episodes and guides on essays, scholarships, aid, tests and visas.",
     }),

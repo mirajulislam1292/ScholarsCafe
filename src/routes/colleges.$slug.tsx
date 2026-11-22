@@ -37,12 +37,12 @@ export const Route = createFileRoute("/colleges/$slug")({
     return c
       ? seo({
           path: `/colleges/${c.slug}`,
-          title: `${c.name}: Admissions and Aid for Bangladeshi Students | Scholars Cafe`,
+          title: `${c.name} | Scholars Cafe`,
           description: `${c.name} (${c.city}, ${c.code}): admit rate, SAT/ACT, English test minimums, aid for international students, deadlines and cost in taka, from official sources.`,
         })
       : seo({
           path: `/colleges/${params.slug}`,
-          title: "College profile | Scholars Cafe",
+          title: "College | Scholars Cafe",
           description:
             "A US college profile for Bangladeshi applicants, with every figure linked to its official source.",
         });

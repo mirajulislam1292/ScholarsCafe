@@ -30,7 +30,7 @@ export const Route = createFileRoute("/colleges/")({
   head: () =>
     seo({
       path: "/colleges",
-      title: "US College Directory for Bangladeshi Students | Scholars Cafe",
+      title: "Colleges | Scholars Cafe",
       description:
         "Top US liberal arts colleges and national universities: admit rates, SAT/ACT, aid for international students and costs in taka, each figure linked to its official source.",
     }),

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/links")({
   head: () =>
     seo({
       path: "/links",
-      title: "Scholars Cafe \u00b7 Links",
+      title: "Links | Scholars Cafe",
       description:
         "Scholars Cafe on YouTube, Instagram, Facebook, LinkedIn, TikTok and WhatsApp, plus our website and student portal.",
     }),

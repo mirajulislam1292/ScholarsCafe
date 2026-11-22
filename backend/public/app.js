@@ -23,6 +23,9 @@ const names = {
   resources: "Resources",
   links: "Link page",
   colleges: "College directory",
+  prompts: "Essay prompts",
+  toolValues: "Core values cards",
+  promptAngles: "Essay angles",
 };
 // Sidebar labels and one-line page descriptions for the non-content screens.
 const LABELS = {
@@ -51,6 +54,10 @@ const ABOUT = {
   links: "The short link page for Instagram, TikTok and Facebook bios.",
   colleges:
     "Colleges at scholarscafe.com/colleges. An entry here replaces the built-in college with the same slug, or adds a new one.",
+  prompts:
+    "Supplemental essay prompts on Resources → Tools. Quote each one word for word from the college's own page and add that page as the source.",
+  toolValues: "The value cards in the Core Values tool on Resources → Tools.",
+  promptAngles: "Brainstorming angles shown for each prompt type on Resources → Tools.",
   Packages: "What students buy: price, what's included, courses and features.",
   Students: "Student accounts, packages, mentors and sign-in access.",
   "Student courses": "Courses, lessons and private lesson videos.",
@@ -104,12 +111,14 @@ const ENUMS = {
     "email",
     "website",
   ],
+  list: ["lac", "nu", "other"],
+  required: ["required", "optional", "none"],
+  archetype: ["why-us", "community", "intellectual", "extracurricular", "short-answer", "other"],
 };
 const HELP = {
-  slug: "Web address: scholarscafe.com/colleges/<slug>. Use the same slug as a built-in college to replace it.",
+  slug: "Web address, lowercase-with-dashes. For a college: scholarscafe.com/colleges/<slug>; the same slug as a built-in college replaces it.",
   collegeType:
     "LAC = National Liberal Arts College · NU = National University (U.S. News category).",
-  asOf: "Date you checked these figures, YYYY-MM-DD. After 12 months the entry shows a Stale badge.",
   applicants:
     "Every figure: leave blank if the college does not publish it (the site shows Not published). Never estimate. A filled figure needs its source link below it.",
   sat: "Middle 50% composite from CDS C9, e.g. 1450-1550.",
@@ -139,6 +148,16 @@ const HELP = {
   linkedin: "Optional. Full LinkedIn profile link (https://…). Leave empty to hide the icon.",
   instagram: "Optional. Full Instagram profile link (https://…). Leave empty to hide the icon.",
   facebook: "Optional. Full Facebook profile link (https://…). Leave empty to hide the icon.",
+  source:
+    "Required. The college's own admissions or supplement page where this prompt appears (https://…). Never an essay blog.",
+  asOf: "Date you checked the source, YYYY-MM-DD. College entries show a Stale badge after 12 months.",
+  cycle: "Application cycle, e.g. 2026-27.",
+  wordLimit: "Word limit. 0 = no limit or a character limit (explain it in limit note).",
+  limitNote: "Optional, e.g. “150 characters” or “Choose one of three”.",
+  list: "lac = liberal arts college, nu = national university.",
+  required: "none = the college has no supplement (put “No supplemental essays” as the text).",
+  archetype: "Prompt type, used for the filter and the matching essay angles.",
+  hint: "One short line under the value, e.g. “Taking care of the people around you”.",
 };
 // Free-text fields with suggestions (pick one or type a new value).
 const SUGGEST = {
@@ -296,6 +315,21 @@ const defaults = {
     hidden: false,
     position: 0,
   },
+  prompts: {
+    college: "",
+    list: "lac",
+    cycle: "2026-27",
+    text: "",
+    wordLimit: 0,
+    limitNote: "",
+    required: "required",
+    archetype: "why-us",
+    source: "",
+    asOf: new Date().toISOString().slice(0, 10),
+    position: 0,
+  },
+  toolValues: { label: "", hint: "", position: 0 },
+  promptAngles: { archetype: "why-us", angle: "", position: 0 },
 };
 function node(tag, text, cls) {
   const n = document.createElement(tag);
@@ -350,6 +384,8 @@ function field(form, key, value) {
       "englishNote",
       "deadlineNote",
       "earlyNote",
+      "text",
+      "angle",
     ].includes(key) ||
     String(value).length > 100;
   if (ENUMS[key]) {
@@ -418,7 +454,8 @@ function field(form, key, value) {
     input.checked = value;
   } else input.value = Array.isArray(value) ? value.join("\n") : value;
   if (key === "body") input.className = "body-field";
-  if (["photo", "image", "linkedin", "instagram", "facebook"].includes(key)) input.type = "url";
+  if (["photo", "image", "linkedin", "instagram", "facebook", "source"].includes(key))
+    input.type = "url";
   if (key === "email") input.type = "email";
   input.id = "field-" + key;
   label.htmlFor = input.id;
@@ -6101,6 +6138,9 @@ try {
     "feedback",
     "faqs",
     "colleges",
+    "prompts",
+    "promptAngles",
+    "toolValues",
     // "countries" is hidden: the site is USA-only now. Its rows stay in the database.
     "links",
     "Media",

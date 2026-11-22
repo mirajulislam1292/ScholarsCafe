@@ -26,7 +26,7 @@ export const Route = createFileRoute("/universities/$state")({
     s
       ? seo({
           path: `/universities/${s.slug}`,
-          title: `${s.university}: International Admissions Brief (${s.state}) | Scholars Cafe`,
+          title: `${s.university} | Scholars Cafe`,
           description: `${s.university}, the top-ranked university in ${s.state}: English test scores, SAT/ACT policy, estimated cost and financial aid for international students, with official sources.`,
         })
       : { meta: [{ title: "Not found | Scholars Cafe" }] },

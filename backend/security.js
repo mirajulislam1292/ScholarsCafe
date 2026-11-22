@@ -273,6 +273,46 @@ const fields = {
     enabled: z.boolean(),
     position,
   }),
+  // /resources/tools: supplemental essay prompts (quoted from the college's own page; source required).
+  prompts: z.object({
+    college: z.string().trim().min(1).max(200),
+    list: z.enum(["lac", "nu", "other"]),
+    cycle: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .max(7),
+    text: z.string().trim().min(1).max(5000),
+    // 0 = no word limit (or a character limit, explained in limitNote).
+    wordLimit: z.number().int().min(0).max(5000),
+    limitNote: short,
+    required: z.enum(["required", "optional", "none"]),
+    archetype: z.enum([
+      "why-us",
+      "community",
+      "intellectual",
+      "extracurricular",
+      "short-answer",
+      "other",
+    ]),
+    source: safeUrl.refine((s) => s.length > 0, "A source URL is required"),
+    asOf: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    position,
+  }),
+  // /resources/tools: Core Values cards.
+  toolValues: z.object({ label: z.string().trim().min(1).max(60), hint: short, position }),
+  // /resources/tools: brainstorming angles per prompt archetype (our own wording).
+  promptAngles: z.object({
+    archetype: z.enum([
+      "why-us",
+      "community",
+      "intellectual",
+      "extracurricular",
+      "short-answer",
+      "other",
+    ]),
+    angle: z.string().trim().min(1).max(1000),
+    position,
+  }),
   seo: z.object({
     page: z
       .string()
@@ -326,6 +366,9 @@ export const recordInput = z
       "resources",
       "links",
       "colleges",
+      "prompts",
+      "toolValues",
+      "promptAngles",
     ]),
     title: z.string().min(1).max(255),
     data: z.unknown(),

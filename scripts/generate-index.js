@@ -105,6 +105,8 @@ async function generateIndexHtml() {
     "/resources/eca",
     "/resources/webinars",
     "/resources/podcast",
+    // Essay tools: core values, activity list, supplemental prompt bank (all client-side).
+    "/resources/tools",
     "/contact",
     "/privacy",
     "/terms",

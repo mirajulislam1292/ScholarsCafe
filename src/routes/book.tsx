@@ -9,7 +9,7 @@ export const Route = createFileRoute("/book")({
   head: () =>
     seo({
       path: "/book",
-      title: "Book a 1-on-1 Mentor Session | Scholars Cafe",
+      title: "Book a Meeting | Scholars Cafe",
       description:
         "Pick an open day and time for a 1-on-1 online session with a Scholars Cafe mentor. Times are shown in Bangladesh time.",
     }),

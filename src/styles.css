@@ -1046,3 +1046,13 @@ main .bg-blue-950.section-y + .bg-blue-950.section-y {
       0 28px 56px -20px rgb(4 28 49 / 0.24);
   }
 }
+
+/* /resources/tools: hide buttons and site chrome when a student prints their summary. */
+@media print {
+  .no-print,
+  body:has(.print-area) header,
+  body:has(.print-area) footer,
+  body:has(.print-area) main > :not(:has(.print-area)) {
+    display: none !important;
+  }
+}
