@@ -3992,7 +3992,15 @@ export const COLLEGES: College[] = [
       "International students have the same deadlines as all applicants. Timeline page gives no year; the international aid page dates the matching aid deadlines Nov 15, 2026 / Jan 5, 2027 / Jan 10, 2027.",
     highlight:
       "Haverford's Honor Code shapes student life from the start, and admitted students are not asked for an enrollment deposit.",
-    image: null,
+    image: {
+      src: "/media/colleges/haverford-college.webp",
+      card: "/media/colleges/haverford-college-card.webp",
+      title: "Roberts, Union, and Loyd - panoramio.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Roberts,_Union,_and_Loyd_-_panoramio.jpg",
+      author: "anonypanor",
+      licence: "CC BY 3.0",
+      licenceUrl: "https://creativecommons.org/licenses/by/3.0",
+    },
     urls: {
       admissions: "https://www.haverford.edu/admission/applying/application-timeline",
       international: "https://www.haverford.edu/admission/applying/international-students",
@@ -4894,13 +4902,458 @@ export const COLLEGES: College[] = [
       "Page lists '2026-27 Deadlines': ED I Nov 15, ED II Jan 15, RD Jan 15. RD applicants may convert to ED II by Feb 1.",
     highlight:
       "Its brownstone Long Walk and Chapel were listed in 2024 on the National Register of Historic Places as a historic district.",
-    image: null,
+    image: {
+      src: "/media/colleges/trinity-college.webp",
+      card: "/media/colleges/trinity-college-card.webp",
+      title: "TrinCollHartfordChap.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:TrinCollHartfordChap.jpg",
+      author: "ragesoss - user on Flickr.com",
+      licence: "CC BY-SA 2.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
+    },
     urls: {
       admissions:
         "https://www.trincoll.edu/admissions/undergraduate-admissions/application-process/",
       international: "https://www.trincoll.edu/admissions/international-admissions/",
       aid: "https://www.trincoll.edu/admissions/finaid/international-students/",
       cds: "https://www.trincoll.edu/asic/wp-content/uploads/sites/125/2026/06/CDS-2025-2026-Trinity-College.pdf",
+    },
+  },
+  {
+    slug: "colorado-college",
+    name: "Colorado College",
+    type: "LAC",
+    city: "Colorado Springs",
+    state: "Colorado",
+    code: "CO",
+    rank: {
+      label: "#34 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 8822,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    admitted: {
+      value: 1949,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    edApplicants: {
+      value: null,
+      source: null,
+    },
+    edAdmitted: {
+      value: null,
+      source: null,
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote:
+      "Offers ED I, ED II and Early Action, but the 2025-26 CDS leaves the C21/C22 counts blank.",
+    sat: {
+      value: "1240-1430",
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    act: {
+      value: "28-34",
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.coloradocollege.edu/admission/apply/international-students.html",
+    },
+    testNote:
+      "Test-optional; scores are used only if they strengthen the application. CDS: 28% submitted SAT, 12% ACT.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    intlAidPolicy: {
+      value: null,
+      source: null,
+    },
+    policyQuote:
+      "International applicants seeking financial aid comprise our most competitive group of applicants each year. We are only able to fully fund a handful of students out of thousands of applicants.",
+    intlAided: {
+      value: 73,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    intlAvgAward: {
+      value: 52713,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    intlNote:
+      "The international page does not say need-blind or need-aware. Aid must be requested when applying; CSS Profile or the college's ISFAA form.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 75702,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    fees: {
+      value: 528,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    roomBoard: {
+      value: 17360,
+      source: "https://www.coloradocollege.edu/offices/ipe/documents/CDS-2025-2026_PDF_Final.pdf",
+    },
+    costNote: "CDS G1 for 2026-27: housing $9,616 + food $7,744.",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "English proficiency evidence is required for non-native speakers, but no minimum is set. Students at or above TOEFL 5.0 (100 on the previous scale), IELTS 7.0 or Duolingo 130 are described as best prepared.",
+    nationalCurriculum: {
+      value:
+        "Transcripts through the second-to-last year of secondary school are needed when applying, then midyear and final grades. Transcripts not in English must be translated by a certified translator.",
+      source: "https://www.coloradocollege.edu/admission/apply/international-students.html",
+    },
+    ed1: {
+      value: "2026-11-01",
+      source: "https://www.coloradocollege.edu/admission/apply/international-students.html",
+    },
+    ed2: {
+      value: "2027-01-15",
+      source: "https://www.coloradocollege.edu/admission/apply/international-students.html",
+    },
+    ea: {
+      value: "2026-11-01",
+      source: "https://www.coloradocollege.edu/admission/apply/international-students.html",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://www.coloradocollege.edu/admission/apply/international-students.html",
+    },
+    deadlineNote:
+      "The page gives November 1 and January 15 without a year; mapped to the 2026-27 cycle. The last round is called Regular Action.",
+    highlight:
+      "Runs on the Block Plan: students take one course at a time, each lasting three and a half weeks.",
+    image: {
+      src: "/media/colleges/colorado-college.webp",
+      card: "/media/colleges/colorado-college-card.webp",
+      title:
+        "The Colorado College campus from on top of Shove Chapel, facing towards Pikes Peak..jpg",
+      page: "https://commons.wikimedia.org/wiki/File:The_Colorado_College_campus_from_on_top_of_Shove_Chapel,_facing_towards_Pikes_Peak..jpg",
+      author: "Mark Lee",
+      licence: "CC BY-SA 3.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
+    },
+    urls: {
+      admissions: "https://www.coloradocollege.edu/admission/apply/first-year-students.html",
+      international: "https://www.coloradocollege.edu/admission/apply/international-students.html",
+      aid: "https://www.coloradocollege.edu/admission/cost-and-aid/",
+      cds: "https://www.coloradocollege.edu/offices/ipe/common-data-set.html",
+    },
+  },
+  {
+    slug: "franklin-and-marshall-college",
+    name: "Franklin & Marshall College",
+    type: "LAC",
+    city: "Lancaster",
+    state: "Pennsylvania",
+    code: "PA",
+    rank: {
+      label: "#34 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 9634,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    admitted: {
+      value: 3047,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    edApplicants: {
+      value: 860,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    edAdmitted: {
+      value: 254,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II (C21 counts combined); CDS C22 says no Early Action.",
+    sat: {
+      value: "1310-1470",
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    act: {
+      value: "29-32",
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    testPolicy: {
+      value: "optional",
+      source: "https://www.fandm.edu/apply/international-student-admission/",
+    },
+    testNote:
+      "Test-optional for more than 30 years with a 'no harm' approach: scores count only if they help. Superscored.",
+    needBasedForIntl: {
+      value: true,
+      source: "https://www.fandm.edu/apply/international-student-admission/",
+    },
+    intlAidPolicy: {
+      value: null,
+      source: null,
+    },
+    policyQuote:
+      "Reflecting our commitment to a diverse student body, we are proud to offer need-based financial aid to international students. This means that if you are admitted to F&M, we will meet 100% of your institutionally determined financial need for all four years on campus.",
+    intlAided: {
+      value: 276,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    intlAvgAward: {
+      value: 56601,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    intlNote:
+      "The page adds that international aid is limited and encourages applying early. It does not say need-blind or need-aware.",
+    costYear: "2025-2026",
+    tuition: {
+      value: 72950,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    fees: {
+      value: 470,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    roomBoard: {
+      value: 16710,
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    costNote: "CDS G1 2025-26 first-year figures (housing $9,800 + food $6,910).",
+    ielts: {
+      value: null,
+      source: null,
+    },
+    toefl: {
+      value: null,
+      source: null,
+    },
+    duolingo: {
+      value: null,
+      source: null,
+    },
+    englishNote:
+      "An English test (TOEFL, IELTS, Duolingo or PTE Academic) is required for non-native speakers; no minimum score is published. Waived after 3+ years at an English-medium school.",
+    nationalCurriculum: {
+      value: null,
+      source: null,
+    },
+    ed1: {
+      value: "2026-11-15",
+      source: "https://www.fandm.edu/apply/international-student-admission/",
+    },
+    ed2: {
+      value: "2027-01-15",
+      source: "https://www.fandm.edu/apply/international-student-admission/",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://drive.google.com/file/d/1CpyIXEDF-2bMSlt8qXimtThANg0xsUlw/view",
+    },
+    rd: {
+      value: "2027-01-15",
+      source: "https://www.fandm.edu/apply/international-student-admission/",
+    },
+    deadlineNote:
+      "The page gives November 15 and January 15 without a year; mapped to the 2026-27 cycle.",
+    highlight:
+      "Has been test-optional for more than 30 years and looks at scores only when they help an applicant.",
+    image: {
+      src: "/media/colleges/franklin-and-marshall-college.webp",
+      card: "/media/colleges/franklin-and-marshall-college-card.webp",
+      title: "Diagnothian Hall FnM La PA.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Diagnothian_Hall_FnM_La_PA.jpg",
+      author: "Smallbones",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
+    urls: {
+      admissions: "https://www.fandm.edu/apply/international-student-admission/",
+      international: "https://www.fandm.edu/apply/international-student-admission/",
+      aid: "https://www.fandm.edu/financial-aid/",
+      cds: "https://www.fandm.edu/institutional-research/",
+    },
+  },
+  {
+    slug: "mount-holyoke-college",
+    name: "Mount Holyoke College",
+    type: "LAC",
+    city: "South Hadley",
+    state: "Massachusetts",
+    code: "MA",
+    rank: {
+      label: "#34 (tie) National Liberal Arts Colleges",
+      edition: "U.S. News 2027",
+      source: "https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges",
+    },
+    asOf: "2026-11-22",
+    cdsYear: "2025-2026",
+    applicants: {
+      value: 4619,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    admitted: {
+      value: 1774,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    edApplicants: {
+      value: 411,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    edAdmitted: {
+      value: 208,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    eaApplicants: {
+      value: null,
+      source: null,
+    },
+    eaAdmitted: {
+      value: null,
+      source: null,
+    },
+    earlyNote: "ED I and ED II (C21 counts combined); CDS C22 says no Early Action.",
+    sat: {
+      value: "1365-1485",
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    act: {
+      value: "30-32",
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    testPolicy: {
+      value: "optional",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission",
+    },
+    testNote: "SAT/ACT optional; scores reported on the Common App are considered.",
+    needBasedForIntl: {
+      value: true,
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/international-admission-faq",
+    },
+    intlAidPolicy: {
+      value: null,
+      source: null,
+    },
+    policyQuote:
+      "Need-based financial assistance is awarded to admitted international applicants (non-US citizens) based on their financial eligibility as determined through review of the CSS Profile. Applicants must apply for financial aid at the same time they apply for admission.",
+    intlAided: {
+      value: 257,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    intlAvgAward: {
+      value: 53460,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    intlNote:
+      "The FAQ says Mount Holyoke promises to meet demonstrated need for each admitted student, but no page says need-blind or need-aware for international applicants. All applicants are also considered for merit scholarships. The CDS H6 policy boxes could not be read.",
+    costYear: "2026-2027",
+    tuition: {
+      value: 71178,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    fees: {
+      value: 272,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    roomBoard: {
+      value: 21596,
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    costNote: "CDS G1 for 2026-27 (housing $10,836 + food $10,760).",
+    ielts: {
+      value: "none",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/english-proficiency-requirements",
+    },
+    toefl: {
+      value: "none",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/english-proficiency-requirements",
+    },
+    duolingo: {
+      value: "none",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/english-proficiency-requirements",
+    },
+    englishNote:
+      "No minimum score (except Cambridge, 185). Average scores: IELTS over 7.0, TOEFL iBT 100 (5.5 on the new scale), Duolingo over 130. Scores entered in the Common App don't count; upload the score report to the portal.",
+    nationalCurriculum: {
+      value:
+        "Students in a national curriculum must submit their national/external exam results by the round deadline, along with transcripts showing day-to-day secondary school performance and predicted grades. Documents not in English need professional translation.",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/international-admission-faq",
+    },
+    ed1: {
+      value: "2026-11-15",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/international-admission-faq",
+    },
+    ed2: {
+      value: "2027-01-05",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/international-admission-faq",
+    },
+    ea: {
+      value: "not-offered",
+      source: "https://drive.google.com/file/d/1YBj1g21DRKEMSV0WHaiIT6paJg1qruX9/view",
+    },
+    rd: {
+      value: "2027-01-15",
+      source:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission/international-admission-faq",
+    },
+    deadlineNote:
+      "The FAQ table gives November 15, January 5 and January 15 without a year; mapped to the 2026-27 cycle. English test results may arrive until November 26 for ED I.",
+    highlight:
+      "International students make up more than 20% of the student body, from over 70 countries.",
+    image: {
+      src: "/media/colleges/mount-holyoke-college.webp",
+      card: "/media/colleges/mount-holyoke-college-card.webp",
+      title: "Mount Holyoke College Upper Dam, South Hadley MA.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Mount_Holyoke_College_Upper_Dam,_South_Hadley_MA.jpg",
+      author: "John Phelan",
+      licence: "CC BY 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by/4.0",
+    },
+    urls: {
+      admissions:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process",
+      international:
+        "https://www.mtholyoke.edu/admission/apply-undergraduate-first-year/application-process/international-admission",
+      aid: "https://www.mtholyoke.edu/admission/financial-aid",
+      cds: "https://www.mtholyoke.edu/directory/departments-offices-centers/institutional-planning-and-research/common-data-set",
     },
   },
   {
@@ -6650,7 +7103,15 @@ export const COLLEGES: College[] = [
       "ED and QuestBridge Match Nov 1; ED financial aid application Nov 15; RD Friday, January 1, 2027 (11:59 p.m. applicant's local time); RD financial aid Feb 15.",
     highlight:
       "Every Columbia College student takes the Core Curriculum, a shared set of seminars on great works and ideas that has run for over a century.",
-    image: null,
+    image: {
+      src: "/media/colleges/columbia-university.webp",
+      card: "/media/colleges/columbia-university-card.webp",
+      title: "Low Memorial Library - Columbia University.jpg",
+      page: "https://commons.wikimedia.org/wiki/File:Low_Memorial_Library_-_Columbia_University.jpg",
+      author: "Spaghet-Ti",
+      licence: "CC0",
+      licenceUrl: "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    },
     urls: {
       admissions: "https://undergrad.admissions.columbia.edu/apply/first-year",
       international: "https://undergrad.admissions.columbia.edu/apply/international",
