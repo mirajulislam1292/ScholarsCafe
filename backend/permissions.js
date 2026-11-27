@@ -89,6 +89,7 @@ export const CONTENT_KIND_PERMISSION = {
   sections: "site.manage",
   courses: "site.manage",
   team: "site.manage",
+  teamSections: "site.manage",
   mentors: "site.manage",
   feedback: "site.manage",
   faqs: "site.manage",

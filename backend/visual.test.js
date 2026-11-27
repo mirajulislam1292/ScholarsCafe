@@ -210,15 +210,17 @@ const teamDb =
     (q.includes("kind='team'") ? people : q.includes("LIKE 'team-section-%'") ? sections : []);
 const layout = (sections) => ({ sections });
 
-test("Team layout: refused for anyone but the Super Admin", async () => {
-  const t = app({ role: "owner", email: "other.owner@gmail.com" }, teamDb());
-  await t
-    .post(
-      layout([{ id: "team-section-leadership", name: "Leadership", members: [] }]),
-      "/api/visual/team",
-    )
-    .expect(403);
-  assert.equal(t.sql.length, 0);
+test("Team layout: Owner and Admins only; executives and mentors refused before any query", async () => {
+  for (const role of ["editor", "mentor"]) {
+    const t = app({ role, email: SUPER }, teamDb());
+    await t
+      .post(
+        layout([{ id: "team-section-leadership", name: "Leadership", members: [] }]),
+        "/api/visual/team",
+      )
+      .expect(403);
+    assert.equal(t.sql.length, 0);
+  }
 });
 
 test("Team layout: sections are created, people placed and ordered, nothing else changes", async () => {
