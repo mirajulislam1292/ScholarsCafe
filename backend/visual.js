@@ -1,10 +1,9 @@
-// Visual editor: the Super Admin clicks a text on the real website (shown in a frame) and changes it.
+// Visual editor: the Owner or an Admin clicks a text on the real website (shown in a frame) and changes it.
 // Each change is saved AND published at once (live in about a minute, no deploy), with a revision kept
-// for undo. Only the one Super Admin account may use it: role owner AND the configured SUPER_ADMIN_EMAIL.
+// for undo. Who may use it comes from permissions.js ("site.manage").
 import { z } from "zod";
-import { contentValid, KINDS, isSuperAdmin, superAdminEmail } from "./security.js";
-
-export { isSuperAdmin, superAdminEmail };
+import { contentValid, KINDS } from "./security.js";
+import { can, canEditKind } from "./permissions.js";
 
 const key = z.string().regex(/^[A-Za-z0-9_.~-]{1,200}$/);
 const editInput = z
@@ -52,11 +51,11 @@ const teamInput = z
   .strict();
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-export function installVisualRoutes(app, { store, fail, config }) {
+export function installVisualRoutes(app, { store, fail }) {
   const q = (sql, args, c) => store.query(sql, args, c);
   const only = (req) => {
-    if (!isSuperAdmin(req.actor, config))
-      throw fail(403, "The visual editor is only available to the Super Admin account.");
+    if (!can(req.actor, "site.manage"))
+      throw fail(403, "The visual editor is for the Owner and Admins.");
   };
 
   // Re-read the account inside the transaction: a revoked owner can't keep editing.
@@ -66,7 +65,7 @@ export function installVisualRoutes(app, { store, fail, config }) {
       [req.actor.id],
       c,
     );
-    if (!actor?.active || !isSuperAdmin(actor, config)) throw fail(403, "Your access was removed.");
+    if (!actor?.active || !can(actor, "site.manage")) throw fail(403, "Your access was removed.");
   };
 
   // Team sections and order (About page). Saved and published at once, with a revision kept for
@@ -174,8 +173,7 @@ export function installVisualRoutes(app, { store, fail, config }) {
         [req.actor.id],
         c,
       );
-      if (!actor?.active || !isSuperAdmin(actor, config))
-        throw fail(403, "Your access was removed.");
+      if (!actor?.active || !can(actor, "site.manage")) throw fail(403, "Your access was removed.");
       let row;
       if (target.type === "copy") {
         const rows = await q(
@@ -231,6 +229,7 @@ export function installVisualRoutes(app, { store, fail, config }) {
       );
       if (!row || !row.published || row.kind === "copy" || !KINDS.includes(row.kind))
         throw fail(404, "That item isn't on the website.");
+      if (!canEditKind(actor, row.kind)) throw fail(403, "Only the Owner can change this item.");
       const live = json(row.published);
       const [name, index] = target.field.split(".");
       const put = (data) => {

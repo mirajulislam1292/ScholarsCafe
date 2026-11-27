@@ -12,7 +12,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import express from "express";
 import { z } from "zod";
-import { canReachStudent, requireCan } from "./access.js";
+import { can, canReachStudent, requireCan } from "./access.js";
 import { makeToken, readToken } from "./tokens.js";
 
 export const MAX_FILE = 10 * 1024 * 1024;
@@ -177,7 +177,7 @@ export function installFileRoutes(app, { store, fail, config }) {
     if (!f || !(await canReachStudent(actor, f.student_id, store.query.bind(store), c)))
       return null;
     // A file attached to a message an admin removed is hidden from everyone but staff.
-    if (actor.role !== "owner" && actor.role !== "admin") {
+    if (!can(actor, "message.moderate")) {
       const [hidden] = await q(
         "SELECT 1 FROM messages WHERE file_id=? AND deleted_at IS NOT NULL LIMIT 1",
         [fileId],

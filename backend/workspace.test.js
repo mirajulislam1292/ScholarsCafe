@@ -31,8 +31,13 @@ const people = {
 
 /** A small in-memory stand-in for the workspace tables (answers the queries workspace.js sends). */
 function fakeStore(actor) {
-  const db = { messages: [], tasks: [], assignees: [], outbox: [], sql: [] };
+  const db = { messages: [], tasks: [], assignees: [], outbox: [], push: [], sql: [] };
   const users = Object.values(people).map((u) => ({ ...u, active: 1 }));
+  // A task is someone's when they're assigned, and everyone's when it has no assignees (shared).
+  const mineOrShared = (taskId, userId) => {
+    const on = db.assignees.filter((x) => x.task_id === taskId);
+    return !on.length || on.some((x) => x.user_id === userId);
+  };
   const store = {
     db,
     session: async () => ({ ...actor, csrf: "c" }),
@@ -45,25 +50,39 @@ function fakeStore(actor) {
       if (q.startsWith("INSERT INTO staff_messages")) {
         db.messages.push({
           id: db.messages.length + 1,
-          sender_id: a[0],
-          body: a[1],
+          channel: a[0],
+          sender_id: a[1],
+          body: a[2],
           pinned_at: null,
         });
         return { affectedRows: 1 };
+      }
+      // Push recipients by permission (push.js idsWith): roles..., then the person to leave out.
+      if (q.startsWith("SELECT id FROM users WHERE active=1 AND role IN (")) {
+        const except = a[a.length - 1];
+        return users
+          .filter((u) => a.slice(0, -1).includes(u.role) && u.id !== except)
+          .map((u) => ({ id: u.id }));
+      }
+      if (q.startsWith("INSERT INTO push_outbox")) {
+        for (let i = 0; i < a.length; i += 2)
+          db.push.push({ user_id: a[i], ...JSON.parse(a[i + 1]) });
+        return {};
       }
       if (q.startsWith("UPDATE staff_messages SET pinned_at=?")) {
         const m = db.messages.find((m) => m.id === a[2] && !m.deleted_at);
         if (m) m.pinned_at = a[0];
         return { affectedRows: m ? 1 : 0 };
       }
-      if (q.startsWith("SELECT sender_id FROM staff_messages"))
+      if (q.startsWith("SELECT id,channel,sender_id,body FROM staff_messages"))
         return db.messages.filter((m) => m.id === a[0] && !m.deleted_at);
       if (q.startsWith("UPDATE staff_messages SET deleted_at")) {
         db.messages.find((m) => m.id === a[0]).deleted_at = new Date();
         return { affectedRows: 1 };
       }
       if (q.includes("FROM staff_messages m")) {
-        const live = db.messages.filter((m) => !m.deleted_at);
+        assert.match(q, /m\.channel=\?/, "every chat read names its channel");
+        const live = db.messages.filter((m) => !m.deleted_at && m.channel === a[0]);
         const rows = (q.includes("pinned_at IS NOT NULL") ? live.filter((m) => m.pinned_at) : live)
           .map((m) => ({ ...m, sender_email: users.find((u) => u.id === m.sender_id)?.email }))
           .reverse();
@@ -98,6 +117,7 @@ function fakeStore(actor) {
       if (q.includes("FROM staff_tasks t LEFT JOIN users u"))
         return db.tasks
           .filter((t) => !t.deleted_at)
+          .filter((t) => !q.includes("a1.user_id=?") || mineOrShared(t.id, a[0]))
           .map((t) => ({ ...t, creator_email: users.find((u) => u.id === t.created_by)?.email }));
       if (q.startsWith("SELECT a.task_id,u.id,u.email FROM staff_task_assignees"))
         return db.assignees
@@ -107,10 +127,8 @@ function fakeStore(actor) {
         db.tasks.find((t) => t.id === a[0]).deleted_at = new Date();
         return { affectedRows: 1 };
       }
-      if (q.startsWith("SELECT 1 AS ok FROM staff_task_assignees"))
-        return db.assignees
-          .filter((x) => x.task_id === a[0] && x.user_id === a[1])
-          .map(() => ({ ok: 1 }));
+      if (q.startsWith("SELECT 1 AS ok FROM staff_tasks t"))
+        return mineOrShared(a[0], a[1]) ? [{ ok: 1 }] : [];
       if (q.startsWith("UPDATE staff_tasks SET status=?")) {
         db.tasks.find((t) => t.id === a[2]).status = a[0];
         return { affectedRows: 1 };
@@ -148,23 +166,20 @@ function client(actor, extra = {}) {
   };
 }
 
-test("Audit log: only the Super Admin (owner + SUPER_ADMIN_EMAIL), not other owners or admins", async () => {
-  for (const who of [people.owner2, people.admin, people.editor, people.mentor]) {
+test("Audit log: the Owner role only (no email check); admins, executives and mentors refused", async () => {
+  for (const who of [people.admin, people.editor, people.mentor]) {
     const t = client(who);
     await t.get("/audit").expect(403);
-    assert.equal((await t.get("/me")).body.super_admin, undefined);
+    assert.equal((await t.get("/me")).body.permissions.includes("audit.view"), false);
   }
-  const t = client(people.super);
-  assert.equal((await t.get("/audit").expect(200)).body.items.length, 1);
-  assert.equal((await t.get("/me")).body.super_admin, true);
-  // A different configured Super Admin email moves the access with it.
-  await client(people.super, { SUPER_ADMIN_EMAIL: "someone@else.com" }).get("/audit").expect(403);
-  await client(people.owner2, { SUPER_ADMIN_EMAIL: "Second.Owner@gmail.com" })
-    .get("/audit")
-    .expect(200);
+  for (const who of [people.super, people.owner2]) {
+    const t = client(who);
+    assert.equal((await t.get("/audit").expect(200)).body.items.length, 1);
+    assert.equal((await t.get("/me")).body.permissions.includes("audit.view"), true);
+  }
 });
 
-test("Staff chat: every staff role can read and post; students never reach it", async () => {
+test("Team SC: every staff role can read and post; students never reach it", async () => {
   for (const who of [people.super, people.admin, people.editor, people.mentor]) {
     const t = client(who);
     await t.post("/workspace/chat", { body: "Hello <b>team</b>" }).expect(201);
@@ -185,7 +200,66 @@ test("Staff chat: every staff role can read and post; students never reach it", 
   await t.post("/workspace/chat", { body: "   " }).expect(400);
 });
 
-test("Staff chat: pin shows in the pinned bar; delete own only, Super Admin can delete any", async () => {
+test("SC Board: Owner and Admins only; executives and mentors get no messages, API or push", async () => {
+  const boss = client(people.super);
+  const store = boss.store;
+  await boss.post("/workspace/chat", { body: "Salaries next week", channel: "board" }).expect(201);
+  // Push and bell alerts go to the other owner and the admin only.
+  assert.deepEqual(
+    store.db.push.map((p) => p.user_id).sort(),
+    [people.owner2.id, people.admin.id].sort(),
+  );
+  assert.equal(store.db.push[0].title, "SC Board");
+  assert.equal(store.db.push[0].open, "SC Board");
+  // Board messages never show in Team SC.
+  assert.equal((await boss.get("/workspace/chat").expect(200)).body.items.length, 0);
+  const board = await boss.get("/workspace/chat?channel=board").expect(200);
+  assert.equal(board.body.items[0].body, "Salaries next week");
+  const as = (who) => {
+    const app = createApp({ ...store, session: async () => ({ ...who, csrf: "c" }) }, config);
+    return {
+      get: (p) =>
+        request(app)
+          .get("/api" + p)
+          .set("Cookie", cookie),
+      post: (p, body = {}) =>
+        request(app)
+          .post("/api" + p)
+          .set("Cookie", cookie)
+          .set("Origin", ADMIN)
+          .set("X-CSRF-Token", "c")
+          .send(body),
+    };
+  };
+  assert.equal(
+    (await as(people.admin).get("/workspace/chat?channel=board").expect(200)).body.items.length,
+    1,
+  );
+  for (const who of [people.editor, people.mentor]) {
+    const t = as(who);
+    const before = store.db.sql.length;
+    await t.get("/workspace/chat?channel=board").expect(403);
+    await t.post("/workspace/chat", { body: "let me in", channel: "board" }).expect(403);
+    const read = store.db.sql.slice(before).some(([q]) => q.includes("FROM staff_messages"));
+    assert.equal(read, false, "refused before reading any message");
+    // The board message can't be pinned or deleted by id either (looks like it doesn't exist).
+    await t.post("/workspace/chat/1/pin", { pinned: true }).expect(404);
+    await t.post("/workspace/chat/1/delete").expect(404);
+    const channels = (await t.get("/workspace/channels").expect(200)).body.items.map((c) => c.id);
+    assert.deepEqual(channels, ["team"]);
+    const me = (await t.get("/me").expect(200)).body;
+    assert.equal(me.permissions.includes("chat.board"), false);
+  }
+  assert.deepEqual(
+    (await as(people.admin).get("/workspace/channels")).body.items.map((c) => c.name),
+    ["SC Board", "Team SC"],
+  );
+  // Unknown channels are refused.
+  await boss.get("/workspace/chat?channel=__proto__").expect(403);
+  await boss.post("/workspace/chat", { body: "x", channel: "all" }).expect(403);
+});
+
+test("Team SC: pin shows in the pinned bar; delete own only, the Owner can delete any", async () => {
   const t = client(people.editor);
   await t.post("/workspace/chat", { body: "Office closed Friday" }).expect(201);
   await t.post("/workspace/chat/1/pin", { pinned: true }).expect(200);
@@ -196,9 +270,9 @@ test("Staff chat: pin shows in the pinned bar; delete own only, Super Admin can 
   assert.equal((await t.get("/workspace/chat")).body.pinned.length, 0);
   await t.post("/workspace/chat/99/pin", { pinned: true }).expect(404);
 
-  // Someone else's message: an admin (or another owner) can't delete it, the Super Admin can.
+  // Someone else's message: an admin or executive can't delete it, the Owner can.
   const store = t.store;
-  for (const who of [people.admin, people.owner2]) {
+  for (const who of [people.admin, people.mentor]) {
     const app = createApp({ ...store, session: async () => ({ ...who, csrf: "c" }) }, config);
     await request(app)
       .post("/api/workspace/chat/1/delete")
@@ -257,7 +331,7 @@ test("Tasks: owners/admins create and assign; assigning queues exactly one email
   await t.post("/workspace/tasks/" + id, { assignees: [people.student.id] }).expect(400);
 });
 
-test("Tasks: an assignee can change the status of their own task only", async () => {
+test("Tasks: an assignee can change the status of their own task only; others don't see it", async () => {
   const t = client(people.admin);
   const { body } = await t.post("/workspace/tasks", { title: "A", assignees: [people.mentor.id] });
   const store = t.store;
@@ -273,6 +347,15 @@ test("Tasks: an assignee can change the status of their own task only", async ()
   assert.equal(store.db.tasks[0].status, "doing");
   await post(people.mentor, { title: "Renamed" }).expect(400);
   await post(people.editor, { status: "done" }).expect(403);
+  // Shared tasks (no assignee) are for everyone: anyone may move them along.
+  const shared = await t.post("/workspace/tasks", { title: "Tidy the drive" }).expect(201);
+  await request(as(people.editor))
+    .post("/api/workspace/tasks/" + shared.body.id)
+    .set("Cookie", cookie)
+    .set("Origin", ADMIN)
+    .set("X-CSRF-Token", "c")
+    .send({ status: "doing" })
+    .expect(200);
 });
 
 test("Reminders: 24h and 2h before the deadline, each queued once per assignee", async () => {
@@ -347,18 +430,20 @@ test("Activity ping counts at most one minute per ~minute and is staff only", as
   assert.equal(args[0], people.editor.id);
   assert.equal(args[1], dhakaDay());
   await t.post("/workspace/ping", { minutes: 50 }).expect(400);
-  // Team view: every staff member (not students), with each person's streak, days in and time.
-  for (const who of ["admin", "editor", "mentor", "super"]) {
+  // Team performance: the Owner and Admins only.
+  for (const who of ["admin", "super"]) {
     const team = await client(people[who]).get("/workspace/team").expect(200);
     const first = team.body.items[0];
     for (const key of ["streak", "today_minutes", "week_minutes", "days"]) assert.ok(key in first);
   }
+  for (const who of ["editor", "mentor"])
+    await client(people[who]).get("/workspace/team").expect(403);
   await client(people.student).get("/workspace/team").expect(401);
   const mine = await client(people.mentor).get("/workspace/progress").expect(200);
   assert.equal(mine.body.me.streak, 0);
 });
 
-test("Tasks: every staff member sees all tasks; only the assigner, an assignee or an admin can change them", async () => {
+test("Tasks: executives and mentors see only their own and shared tasks; only owners and admins manage them", async () => {
   // One store shared by several people, so they all see the same tasks.
   const store = fakeStore(people.admin);
   let actor = people.admin;
@@ -388,39 +473,52 @@ test("Tasks: every staff member sees all tasks; only the assigner, an assignee o
     })
     .expect(201);
   const id = created.body.id;
-  // An editor who has nothing to do with it still sees it, with who it's for, the deadline and the status.
+  await as("admin").post("/workspace/tasks", { title: "Team clean-up" }).expect(201);
+  // The admin sees everything.
+  assert.equal((await as("admin").get("/workspace/tasks")).body.items.length, 2);
+  // An executive with nothing to do with the first task only sees the shared one.
   const seen = (await as("editor").get("/workspace/tasks").expect(200)).body.items;
-  assert.equal(seen.length, 1);
-  assert.equal(seen[0].title, "Write the FAQ");
-  assert.deepEqual(seen[0].assignees, [{ id: people.mentor.id, name: "mentor" }]);
-  assert.equal(seen[0].assigned_by, "admin");
-  assert.ok(seen[0].due_at);
-  assert.equal(seen[0].status, "todo");
+  assert.deepEqual(
+    seen.map((t) => t.title),
+    ["Team clean-up"],
+  );
+  assert.equal(seen[0].shared, true);
   assert.equal(seen[0].can_edit, false);
-  assert.equal(seen[0].can_status, false);
-  // ...but can't change or delete it.
+  assert.equal(seen[0].can_status, true);
+  // ...and can't change or delete someone else's task, or get the list of people to assign.
   await as("editor")
     .post("/workspace/tasks/" + id, { status: "done" })
     .expect(403);
   await as("editor").post(`/workspace/tasks/${id}/delete`).expect(403);
-  // The assignee may move it along (status only).
-  const forMentor = (await as("mentor").get("/workspace/tasks").expect(200)).body.items[0];
-  assert.equal(forMentor.can_status, true);
-  assert.equal(forMentor.can_edit, false);
+  await as("editor").get("/workspace/staff").expect(403);
+  // The assignee sees their task with who it's for, and may move it along (status only).
+  const forMentor = (await as("mentor").get("/workspace/tasks").expect(200)).body.items;
+  assert.equal(forMentor.length, 2);
+  const mine = forMentor.find((t) => t.id === id);
+  assert.deepEqual(mine.assignees, [{ id: people.mentor.id, name: "mentor" }]);
+  assert.equal(mine.assigned_by, "admin");
+  assert.equal(mine.can_status, true);
+  assert.equal(mine.can_edit, false);
   await as("mentor")
     .post("/workspace/tasks/" + id, { status: "doing" })
     .expect(200);
+  // No reassigning, renaming or new deadlines for non-admins, even on their own task.
   await as("mentor")
     .post("/workspace/tasks/" + id, { title: "Renamed" })
     .expect(400);
-  // Whoever assigned it may edit it fully, even without the admin role.
+  await as("mentor")
+    .post("/workspace/tasks/" + id, { assignees: [] })
+    .expect(400);
+  await as("mentor").post("/workspace/tasks", { title: "Mine" }).expect(403);
+  // Creating a task earlier didn't make an executive able to edit it: only owners and admins can.
   store.db.tasks[0].created_by = people.editor.id;
-  assert.equal((await as("editor").get("/workspace/tasks")).body.items[0].can_edit, true);
   await as("editor")
     .post("/workspace/tasks/" + id, { title: "Write the FAQ page" })
+    .expect(403);
+  await as("admin")
+    .post("/workspace/tasks/" + id, { title: "Write the FAQ page" })
     .expect(200);
-  assert.equal(store.db.tasks[0].title, "Write the FAQ page");
-  await as("editor").post(`/workspace/tasks/${id}/delete`).expect(200);
+  await as("admin").post(`/workspace/tasks/${id}/delete`).expect(200);
   // Students never reach the team's tasks (the admin portal refuses their session outright).
   await as("student").get("/workspace/tasks").expect(401);
 });

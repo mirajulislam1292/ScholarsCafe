@@ -78,7 +78,7 @@ export function installVideoRoutes(app, { store, fail, config, allowed }) {
 
   // Ready videos, for the lesson and resource pickers.
   app.get("/api/videos", async (req, res) => {
-    requireCan(req.actor, "resource.write");
+    requireCan(req.actor, "resource.view");
     res.json({
       items: await q(
         "SELECT id,name,mime,size,created_at FROM videos WHERE status='ready' ORDER BY created_at DESC LIMIT 500",
@@ -176,7 +176,7 @@ export function installVideoRoutes(app, { store, fail, config, allowed }) {
     res.json({ ok: true });
   });
   app.post("/api/videos/:id/delete", async (req, res) => {
-    requireCan(req.actor, "resource.write");
+    requireCan(req.actor, "resource.delete");
     const videoId = id(req);
     await store.transaction(async (c) => {
       const [v] = await q("SELECT * FROM videos WHERE id=? FOR UPDATE", [videoId], c);

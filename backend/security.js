@@ -11,24 +11,13 @@ export function equal(a, b) {
     timingSafeEqual(Buffer.from(a), Buffer.from(b))
   );
 }
-// Roles: owner (Super Admin) > admin > editor | mentor | student. Admins may manage editors, mentors and students only.
-const ADMIN_MANAGED = ["editor", "mentor", "student"];
-export function canManage(actor, targetRole, newRole) {
-  return (
-    actor === "owner" ||
-    (actor === "admin" && ADMIN_MANAGED.includes(targetRole) && ADMIN_MANAGED.includes(newRole))
-  );
+import { can } from "./permissions.js";
+// Roles and what they may do live in permissions.js. Only the Owner manages users and roles.
+export function canManage(actor, _targetRole, _newRole) {
+  return can(actor, "users.manage");
 }
-export const canEditContent = (role) => role === "owner" || role === "admin" || role === "editor";
-export const canPublish = (role) => role === "owner" || role === "admin";
-// The single Super Admin: role owner AND the configured SUPER_ADMIN_EMAIL (fallback OWNER_EMAIL).
-// Used for the visual editor and the audit log; other owners and admins are refused.
-export const superAdminEmail = (config) =>
-  (config.SUPER_ADMIN_EMAIL || config.OWNER_EMAIL || "contact.scholarscafe@gmail.com")
-    .trim()
-    .toLowerCase();
-export const isSuperAdmin = (actor, config) =>
-  actor?.role === "owner" && String(actor.email || "").toLowerCase() === superAdminEmail(config);
+export const canEditContent = (role) => can(role, "content.write");
+export const canPublish = (role) => can(role, "content.publish");
 export function trustedGoogleIdentity(payload, nonce) {
   return (
     !!payload &&

@@ -19,25 +19,30 @@ import { installVisualRoutes } from "./visual.js";
 import { installWorkspaceRoutes } from "./workspace.js";
 import { installEcaAdminRoutes, installEcaPublicRoutes } from "./eca.js";
 import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
-import { installPushRoutes, queuePush, inboxReaderIds } from "./push.js";
+import { installPushRoutes, queuePush, idsWith } from "./push.js";
 import { installInboxRoutes } from "./inbox.js";
 import { installEmailPreviewRoutes } from "./email-previews.js";
 import { installAgreementPublicRoutes, installAgreementAdminRoutes } from "./agreements.js";
+import {
+  can,
+  canEditKind,
+  kindsFor,
+  mayCallApi,
+  permissionsOf,
+  ROLE_LABELS,
+} from "./permissions.js";
 import {
   token,
   hash,
   equal,
   trustedGoogleIdentity,
   canManage,
-  canPublish,
-  canEditContent,
   leadUpdate,
   LEAD_STATUSES,
   csvCell,
   userInput,
   recordInput,
   verifyTurnstile,
-  isSuperAdmin,
 } from "./security.js";
 
 const fail = (status, message) => Object.assign(new Error(message), { status });
@@ -280,7 +285,7 @@ export function createApp(
         [randomUUID(), data.name, data.email, data.phone, data.message],
         c,
       );
-      await queuePush(store, c, await inboxReaderIds(store, c), {
+      await queuePush(store, c, await idsWith(store, c, "leads.view"), {
         title: "New website inquiry",
         body: data.name,
         open: "Leads",
@@ -574,28 +579,32 @@ export function createApp(
   app.get("/api/me", async (req, res) => {
     // Renewal is best effort; the current session stays valid either way.
     await renewSession(cookie(req, sessionCookie), res).catch(() => {});
-    // The Super Admin also gets the visual editor (and the website address to show in it).
-    res.json(
-      isSuperAdmin(req.actor, config)
-        ? { ...req.actor, visual: true, super_admin: true, public_origin: config.PUBLIC_ORIGIN }
-        : req.actor,
-    );
+    // The dashboard builds its menu, screens and buttons from `permissions` (see permissions.js).
+    // The server still checks every request; this list only decides what is shown.
+    const role = req.actor.role;
+    res.json({
+      ...req.actor,
+      role_label: ROLE_LABELS[role] || role,
+      permissions: role === "student" ? [] : permissionsOf(role),
+      kinds: role === "student" ? [] : kindsFor(role),
+      ...(can(req.actor, "site.manage")
+        ? { visual: true, public_origin: config.PUBLIC_ORIGIN }
+        : {}),
+    });
   });
-  // Mentors only reach their own leads; every other admin API is closed to them.
-  // Mentors reach their leads and the student dashboard API (/lms); students reach only /lms.
-  // Every other admin API is closed to them. Row-level rules for /lms live in access.js.
+  // The outer wall: every /api path needs the permission permissions.js gives it (default deny).
+  // Routes then check their own finer rules and row scopes.
   app.use("/api", (req, _res, next) => {
-    const own = ["/me", "/logout", "/password"].includes(req.path) || req.path.startsWith("/lms/");
-    // Mentors are staff too: they share the team workspace (chat, tasks, progress). Students never do.
-    const team =
-      portal === "admin" && (req.path.startsWith("/workspace/") || /^\/push(\/|$)/.test(req.path));
-    if (req.actor.role === "mentor" && (own || team || req.path.startsWith("/leads")))
-      return next();
-    if (req.actor.role === "student" && own) return next();
-    if (req.actor.role === "mentor") throw fail(403, "Mentors can only open their assigned leads.");
-    if (req.actor.role === "student") throw fail(403, "This area is for staff only.");
+    if (!mayCallApi(req.actor, req.path))
+      throw fail(
+        403,
+        req.actor.role === "student"
+          ? "This area is for staff only."
+          : "You don't have access to this part of SC Studio.",
+      );
     next();
   });
+  const inboxAdmin = (role) => can(role, "inbox.admin");
   if (portal === "student")
     installAccountRoutes(app, { store, fail, currentToken: (req) => cookie(req, sessionCookie) });
   installStudentRoutes(app, { store, fail, sendBytes });
@@ -605,14 +614,15 @@ export function createApp(
   installResourceRoutes(app, { store, fail });
   installFileRoutes(app, { store, fail, config });
   installDocumentRoutes(app, { store, fail });
-  installFormAdminRoutes(app, { store, fail, canPublish, config });
-  installBookingAdminRoutes(app, { store, fail, canPublish });
+  installFormAdminRoutes(app, { store, fail, canPublish: inboxAdmin, config });
+  installBookingAdminRoutes(app, { store, fail });
   installVisualRoutes(app, { store, fail, config });
   installMessageRoutes(app, { store, fail });
   // Team workspace (staff chat, tasks, activity). Admin portal only; never mounted on the student portal.
   if (portal === "admin") installWorkspaceRoutes(app, { store, fail, config });
   // ECA alerts list and "send to everyone" (owners and admins, team admin only).
-  if (portal === "admin") installEcaAdminRoutes(app, { store, fail, canPublish, config });
+  if (portal === "admin")
+    installEcaAdminRoutes(app, { store, fail, canPublish: inboxAdmin, config });
   // Push notifications for staff devices, and the contact@ mailbox (owners and admins). Team admin only.
   if (portal === "admin") installPushRoutes(app, { store, fail, config });
   if (portal === "admin")
@@ -620,7 +630,7 @@ export function createApp(
   if (portal === "admin") installEmailPreviewRoutes(app, { store, fail, config });
   // Owner-only: shows how the server sees the client address, to verify TRUST_PROXY before enabling it.
   app.get("/api/diagnostics/client-ip", (req, res) => {
-    if (req.actor.role !== "owner") throw fail(403, "Diagnostics are restricted to owners.");
+    if (!can(req.actor, "settings.system")) throw fail(403, "Diagnostics are for the Owner.");
     res.json({
       ip: req.ip,
       socket: req.socket.remoteAddress,
@@ -630,15 +640,20 @@ export function createApp(
   });
   // Agreements: templates, sending, and signed records with their PDF (owners and admins, team admin only).
   if (portal === "admin")
-    installAgreementAdminRoutes(app, { store, fail, config, canPublish, mailer });
+    installAgreementAdminRoutes(app, {
+      store,
+      fail,
+      config,
+      canPublish: (role) => can(role, "agreements.manage"),
+      mailer,
+    });
   installMedia(app, store, config, sharedLimit("media", 30, 3600));
   serveMedia(app, store);
   // ---------- Leads CRM (website inquiries) ----------
-  // Row-level scoping: owners/admins see every lead; mentors only rows assigned to them; editors none.
+  // Owners, admins and executives see every lead (permissions.js "leads.view"); mentors none.
   const leadScope = (actor) => {
-    if (canPublish(actor.role)) return { where: "1=1", args: [] };
-    if (actor.role === "mentor") return { where: "i.assigned_to=?", args: [actor.id] };
-    throw fail(403, "Leads are restricted to admins, owners and assigned mentors.");
+    if (can(actor, "leads.view")) return { where: "1=1", args: [] };
+    throw fail(403, "Leads are for the Owner, Admins and Executives.");
   };
   const leadFilter = (req, actor) => {
     const scope = leadScope(actor);
@@ -660,7 +675,7 @@ export function createApp(
       where.push("i.form_id=?");
       args.push(req.query.form);
     }
-    if (canPublish(actor.role) && typeof req.query.assigned === "string") {
+    if (can(actor, "leads.assign") && typeof req.query.assigned === "string") {
       if (req.query.assigned === "none") where.push("i.assigned_to IS NULL");
       else if (/^[0-9a-f-]{36}$/.test(req.query.assigned)) {
         where.push("i.assigned_to=?");
@@ -681,6 +696,8 @@ export function createApp(
     });
   });
   app.get("/api/leads.csv", async (req, res) => {
+    if (!can(req.actor, "leads.export"))
+      throw fail(403, "Exporting leads is for the Owner and Admins.");
     const f = leadFilter(req, req.actor);
     const rows = await store.query(
       `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to LEFT JOIN forms fm ON fm.id=i.form_id WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 5000`,
@@ -725,8 +742,8 @@ export function createApp(
     const input = leadUpdate.parse(req.body);
     const actor = req.actor;
     const scope = leadScope(actor);
-    if (actor.role === "mentor" && input.assigned_to !== undefined)
-      throw fail(403, "Only admins can assign leads.");
+    if (input.assigned_to !== undefined && !can(actor, "leads.assign"))
+      throw fail(403, "Only the Owner and Admins can assign leads.");
     await store.transaction(async (c) => {
       const [row] = await store.query(
         `SELECT i.id FROM inquiries i WHERE i.id=? AND ${scope.where} FOR UPDATE`,
@@ -760,7 +777,7 @@ export function createApp(
     res.json({ ok: true });
   });
   app.get("/api/mentors", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Restricted.");
+    if (!can(req.actor, "leads.assign")) throw fail(403, "Restricted.");
     res.json({
       items: await store.query(
         "SELECT id,email FROM users WHERE role='mentor' AND active=1 ORDER BY email",
@@ -768,7 +785,7 @@ export function createApp(
     });
   });
   app.get("/api/inquiries", async (req, res) => {
-    if (!canPublish(req.actor.role))
+    if (!can(req.actor, "inbox.admin"))
       throw fail(403, "Messages are restricted to admins and owners.");
     res.json({
       items: await store.query(
@@ -777,7 +794,7 @@ export function createApp(
     });
   });
   app.get("/api/submissions", async (req, res) => {
-    if (!canPublish(req.actor.role))
+    if (!can(req.actor, "inbox.admin"))
       throw fail(403, "Submissions are restricted to admins and owners.");
     res.json({
       items: await store.query(
@@ -786,7 +803,7 @@ export function createApp(
     });
   });
   app.post("/api/submissions/:id/unsubscribe", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Subscriber management is restricted.");
+    if (!can(req.actor, "inbox.admin")) throw fail(403, "Subscriber management is restricted.");
     await store.transaction(async (c) => {
       await store.query(
         "UPDATE submissions SET unsubscribed_at=UTC_TIMESTAMP() WHERE id=? AND kind='newsletter'",
@@ -798,7 +815,7 @@ export function createApp(
     res.json({ ok: true });
   });
   app.get("/api/mail-status", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Mail status is restricted.");
+    if (!can(req.actor, "inbox.admin")) throw fail(403, "Mail status is restricted.");
     res.json({
       configured: Boolean(config.SMTP_PASSWORD),
       items: await store.query(
@@ -813,19 +830,29 @@ export function createApp(
     res.clearCookie(sessionCookie, cookieOptions);
     res.json({ ok: true });
   });
-  const requireContentRole = (actor) => {
-    if (!canEditContent(actor.role)) throw fail(403, "Content editing is restricted.");
+  // Each kind of website content has its own permission (permissions.js CONTENT_KIND_PERMISSION).
+  const requireKind = (actor, kind) => {
+    if (!canEditKind(actor, kind))
+      throw fail(403, "You don't have access to this part of the website.");
   };
-  app.get("/api/content", async (_req, res) =>
+  const kindOf = async (id, c) =>
+    (await store.query("SELECT kind FROM content WHERE id=?", [id], c))[0]?.kind;
+  app.get("/api/content", async (req, res) => {
+    const kinds = kindsFor(req.actor.role);
+    // The visual editor matches page text to entries, so its users read every live entry's text.
+    const all = can(req.actor, "site.manage");
     res.json({
-      items: await store.query(
-        "SELECT id,kind,title,draft AS data,version,published IS NOT NULL AS published FROM content WHERE deleted_at IS NULL ORDER BY kind,title",
-      ),
-    }),
-  );
+      items: kinds.length
+        ? await store.query(
+            `SELECT id,kind,title,draft AS data,version,published IS NOT NULL AS published FROM content WHERE deleted_at IS NULL${all ? "" : ` AND kind IN (${kinds.map(() => "?").join(",")})`} ORDER BY kind,title`,
+            all ? [] : kinds,
+          )
+        : [],
+    });
+  });
   app.post("/api/content", async (req, res) => {
-    requireContentRole(req.actor);
     const input = recordInput.parse(req.body);
+    requireKind(req.actor, input.kind);
     await store.transaction(async (c) => {
       const actor = (
         await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c)
@@ -861,11 +888,8 @@ export function createApp(
     res.json({ ok: true });
   });
   // ---------- Content history, restore and delete ----------
-  const requireEditor = (actor) => {
-    if (!canEditContent(actor.role)) throw fail(403, "Content editing is restricted.");
-  };
   app.get("/api/content/:id/revisions", async (req, res) => {
-    requireEditor(req.actor);
+    requireKind(req.actor, await kindOf(req.params.id));
     res.json({
       items: await store.query(
         "SELECT r.id,r.created_at,u.email FROM revisions r LEFT JOIN users u ON u.id=r.actor_id WHERE r.content_id=? ORDER BY r.id DESC LIMIT 50",
@@ -874,7 +898,7 @@ export function createApp(
     });
   });
   app.post("/api/content/:id/restore", async (req, res) => {
-    requireEditor(req.actor);
+    requireKind(req.actor, await kindOf(req.params.id));
     const revision = Number(req.body?.revision);
     const version = req.body?.version;
     if (!Number.isInteger(revision) || !Number.isInteger(version))
@@ -916,7 +940,8 @@ export function createApp(
     res.json({ ok: true });
   });
   app.post("/api/content/:id/delete", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Only admins and owners can delete.");
+    if (!can(req.actor, "content.delete")) throw fail(403, "Only admins and owners can delete.");
+    requireKind(req.actor, await kindOf(req.params.id));
     if (!Number.isInteger(req.body?.version)) throw fail(400, "Version required.");
     await store.transaction(async (c) => {
       // Soft delete: hidden everywhere, kept for the audit trail and so startup seeding never revives it.
@@ -931,14 +956,15 @@ export function createApp(
     res.json({ ok: true });
   });
   app.post("/api/content/:id/:action", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Only admins and owners can publish.");
+    if (!can(req.actor, "content.publish")) throw fail(403, "Only admins and owners can publish.");
+    requireKind(req.actor, await kindOf(req.params.id));
     if (!["publish", "unpublish"].includes(req.params.action)) throw fail(404, "Unknown action.");
     if (!Number.isInteger(req.body.version)) throw fail(400, "Version required.");
     await store.transaction(async (c) => {
       const actor = (
         await store.query("SELECT role,active FROM users WHERE id=? FOR UPDATE", [req.actor.id], c)
       )[0];
-      if (!actor?.active || !canPublish(actor.role))
+      if (!actor?.active || !can(actor, "content.publish"))
         throw fail(403, "Your publishing access was removed.");
       const result = await store.query(
         req.params.action === "publish"
@@ -952,14 +978,14 @@ export function createApp(
     });
     res.json({ ok: true });
   });
-  // Security settings: everyone on the team except editors may read them; only the owner (Super Admin) changes them.
+  // System settings: the Owner only (permissions.js "settings.system").
   app.get("/api/settings", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Settings are restricted.");
+    if (!can(req.actor, "settings.system")) throw fail(403, "Settings are for the Owner.");
     res.json({ student_signup: (await signupOpen(store)) ? "open" : "invite" });
   });
   app.post("/api/settings", async (req, res) => {
-    if (req.actor.role !== "owner")
-      throw fail(403, "Only the Super Admin can change security settings.");
+    if (!can(req.actor, "settings.system"))
+      throw fail(403, "Only the Owner can change security settings.");
     const { student_signup } = z
       .object({ student_signup: z.enum(["open", "invite"]) })
       .strict()
@@ -975,10 +1001,11 @@ export function createApp(
     res.json({ ok: true });
   });
   app.get("/api/users", async (req, res) => {
-    if (req.actor.role === "editor") throw fail(403, "Access management is restricted.");
+    if (!can(req.actor, "users.manage")) throw fail(403, "Users and roles are for the Owner.");
     res.json({ items: await store.query("SELECT id,email,role,active FROM users ORDER BY email") });
   });
   app.post("/api/users", async (req, res) => {
+    if (!can(req.actor, "users.manage")) throw fail(403, "Users and roles are for the Owner.");
     const input = userInput.parse(req.body);
     await store.transaction(async (c) => {
       // Serialize owner changes so concurrent requests cannot remove the last owner.
@@ -1027,7 +1054,7 @@ export function createApp(
     res.json({ ok: true });
   });
   app.get("/api/links/clicks", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Restricted to owners and admins.");
+    if (!can(req.actor, "site.manage")) throw fail(403, "Restricted to owners and admins.");
     res.json({
       items: await store.query(
         `SELECT link_id,SUM(clicks) AS total,
@@ -1036,10 +1063,9 @@ export function createApp(
       ),
     });
   });
-  // The audit log is for the single Super Admin only (not other owners or admins).
+  // The audit log is for the Owner only.
   app.get("/api/audit", async (req, res) => {
-    if (!isSuperAdmin(req.actor, config))
-      throw fail(403, "The audit log is only available to the Super Admin account.");
+    if (!can(req.actor, "audit.view")) throw fail(403, "The audit log is for the Owner.");
     res.json({
       items: await store.query(
         "SELECT a.action,a.target,a.created_at,u.email FROM audit a LEFT JOIN users u ON u.id=a.actor_id ORDER BY a.id DESC LIMIT 200",

@@ -38,7 +38,7 @@ test("Play links: signed, user-bound and short-lived", () => {
   assert.equal(readLink("garbage"), null);
 });
 
-test("Resource scope: students need a package that unlocks it; mentors and editors refused", () => {
+test("Resource scope: students need a package that unlocks it; staff read all; unknown roles refused", () => {
   const s = resourceScope({ id: ME, role: "student" });
   assert.match(s.sql, /r\.published=1/);
   assert.match(s.sql, /deleted_at IS NULL/);
@@ -46,7 +46,8 @@ test("Resource scope: students need a package that unlocks it; mentors and edito
   assert.deepEqual(s.params, [ME, ME]);
   assert.deepEqual(resourceScope({ id: ME, role: "admin" }), { sql: "1=1", params: [] });
   for (const role of ["mentor", "editor"])
-    assert.throws(() => resourceScope({ id: ME, role }), { status: 403 });
+    assert.deepEqual(resourceScope({ id: ME, role }), { sql: "1=1", params: [] });
+  assert.throws(() => resourceScope({ id: ME, role: "nobody" }), { status: 403 });
 });
 
 function app(role, query, extra = {}) {
@@ -78,23 +79,42 @@ function app(role, query, extra = {}) {
   };
 }
 
-test("Only owners and admins manage videos and student resources", async () => {
-  for (const role of ["editor", "mentor", "student"]) {
+test("Videos and student resources: staff read; executives write; only owners and admins delete", async () => {
+  const tries = async (role, expect) => {
     const { get, post, sql } = app(role);
-    await get("/api/videos").expect(403);
-    await post("/api/videos").send({ name: "a.mp4", size: 100, mime: "video/mp4" }).expect(403);
+    await get("/api/videos").expect(expect.read);
+    await get("/api/resources").expect(expect.read);
+    sql.length = 0;
+    await post("/api/videos")
+      .send({ name: "a.mp4", size: 100, mime: "video/mp4" })
+      .expect(expect.write);
     await post("/api/videos/" + VID + "/chunk")
       .set("Content-Type", "application/octet-stream")
       .set("X-Offset", "0")
       .send(Buffer.alloc(20))
-      .expect(403);
+      .expect(expect.write);
+    await post("/api/resources").send({ type: "guide", title: "x" }).expect(expect.write);
+    if (expect.write === 403) assert.deepEqual(sql, [], role + " write refused before any query");
+    sql.length = 0;
     await post("/api/videos/" + VID + "/delete")
       .send({})
       .expect(403);
-    await get("/api/resources").expect(403);
-    await post("/api/resources").send({ type: "guide", title: "x" }).expect(403);
-    assert.deepEqual(sql, [], role + " refused before any query");
-  }
+    await post("/api/resources/" + VID + "/delete")
+      .send({})
+      .expect(403);
+    assert.deepEqual(sql, [], role + " delete refused before any query");
+  };
+  await tries("student", { read: 403, write: 403 });
+  await tries("mentor", { read: 200, write: 403 });
+  // Executives may write (the fake database has nothing, so the write itself goes on to fail later).
+  const { post, sql } = app("editor");
+  await post("/api/videos/" + VID + "/delete")
+    .send({})
+    .expect(403);
+  await post("/api/resources/" + VID + "/delete")
+    .send({})
+    .expect(403);
+  assert.deepEqual(sql, []);
 });
 
 test("Resource links must be https (no javascript: or http:)", async () => {

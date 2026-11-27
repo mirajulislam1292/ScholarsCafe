@@ -44,7 +44,7 @@ MySQL has no RLS. Instead, every query goes through `access.js` scopes, which fi
 - `link_items` and `link_clicks`: the `/links` page.
 - `settings`: signup on/off, session timeouts.
 
-**Roles:** `owner` = Super Admin, `admin`, `editor`, `mentor`, `student` (already in the code). `SUPER_ADMIN_EMAIL` replaces `OWNER_EMAIL`, and the old name stays as a fallback.
+**Roles:** `owner`, `admin`, `editor` (shown as Executive), `mentor`, `student`. What each role may do is defined once in `backend/permissions.js`, which every API route, row scope, push recipient list and the dashboard menu reads. Only the Owner manages users and roles; access never depends on an email address. `SUPER_ADMIN_EMAIL` (fallback `OWNER_EMAIL`) only names the first owner of a brand-new, empty database.
 
 ## Video storage (risk)
 

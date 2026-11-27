@@ -1,7 +1,7 @@
 import { createApi } from "./net.js";
 let me,
   items = [],
-  section = "Overview";
+  section = "";
 let catalog = {};
 // Old website text the public site no longer shows (see cms-retired-keys.json). Hidden in the editor;
 // saved values are kept untouched in the database.
@@ -29,15 +29,26 @@ const names = {
 };
 // Sidebar labels and one-line page descriptions for the non-content screens.
 const LABELS = {
+  "Team chat": "Team SC",
+  Tasks: "My tasks",
+  Progress: "Team performance",
+  Mail: "Email",
+  Website: "Website management",
+  Media: "Media library",
+  Students: "Student portal",
+  "Student courses": "Courses & videos",
+  Packages: "Course packages",
+  Advanced: "Advanced settings",
   Access: "Users & roles",
   Activity: "Audit log",
-  "Student courses": "Courses & videos",
-  Media: "Media library",
   Account: "Profile",
-  Mail: "Mail (contact@)",
 };
 const ABOUT = {
-  Overview: "Everything on the website, at a glance.",
+  "SC Board": "Private channel for the Owner and Admins.",
+  Website: "Website sections, programmes, team, testimonials, FAQs, colleges and links.",
+  Advanced: "Website text and images, SEO titles and hero videos. Owner only.",
+  "System settings": "Student sign-up and other system settings. Owner only.",
+  "Task management": "Create and assign tasks, set deadlines and follow everyone's progress.",
   Media: "Images and videos for the website. Lesson videos stay private.",
   copy: "Every heading, paragraph and image on the public website.",
   sections: "Show, hide and reorder the sections of each page.",
@@ -64,11 +75,9 @@ const ABOUT = {
   Messages: "Conversations between students and mentors.",
   Reviews: "Approve or reject student reviews.",
   Leads: "Enquiries from the website contact form and your forms.",
-  "Visual editor":
-    "Click any text on your website and change it. Only for the Super Admin account.",
+  "Visual editor": "Click any text on your website and change it. Owner and Admins.",
   Forms: "Your own forms at scholarscafe.com/forms/…, replacing Google Forms. Answers go to Leads.",
-  Bookings:
-    "1-on-1 mentor sessions booked at scholarscafe.com/book (one per day), and when people can book.",
+  Bookings: "1-on-1 sessions booked at scholarscafe.com/book, one per day.",
   Agreements:
     "Agreements people sign online at scholarscafe.com/sign/…: templates, sending, and signed copies.",
   "Private feedback": "Private feedback sent from the website.",
@@ -77,14 +86,14 @@ const ABOUT = {
     "People who asked to hear about new ECAs. Write one email and it goes to all of them.",
   Access: "Who can sign in to this workspace, and with which role.",
   "Email delivery": "Outgoing notification emails and their status.",
-  Mail: "The contact@scholarscafe.com inbox: read, search and reply.",
+  Mail: "Email from contact@scholarscafe.com: write, and (with access) read and reply.",
   "Preview emails":
     "Every automatic email and a contact@ reply, with sample data. Nothing is sent.",
   Notifications: "Get notified on your phone or computer, and install the app.",
-  Activity: "Every change, who made it and when. Only the Super Admin sees this.",
-  "Team chat": "One group chat for the whole team. Pin important messages.",
-  Tasks: "Team to-dos with deadlines. People get an email when assigned and before the deadline.",
-  Progress: "Your streak, approximate hours and tasks done.",
+  Activity: "Every change, who made it and when. Owner only.",
+  "Team chat": "Team SC: one chat for the whole team. Pin important messages.",
+  Tasks: "Your tasks and shared team tasks. Update the status as you go.",
+  Progress: "Tasks done and approximate active time in SC Studio, per person.",
   Account: "Your password and sign-in details.",
   "My courses": "Your courses and lessons.",
   Home: "",
@@ -94,7 +103,17 @@ const ABOUT = {
     "Resources and announcements for students, by package. Lesson and resource videos.",
 };
 const label = (key) => names[key] || LABELS[key] || key;
-const canPublishRole = (role) => role === "owner" || role === "admin";
+// What this person may do, from the server's permission map (backend/permissions.js via /api/me).
+// It only decides what is shown: the server checks every request again.
+const can = (permission) => Boolean(me?.permissions?.includes(permission));
+const ROLE_LABELS = {
+  owner: "Owner",
+  admin: "Admin",
+  editor: "Executive",
+  mentor: "Mentor",
+  student: "Student",
+};
+const roleLabel = (role) => ROLE_LABELS[role] || role;
 const ENUMS = {
   device: ["desktop", "mobile"],
   collegeType: ["LAC", "NU"],
@@ -348,6 +367,17 @@ function button(text, fn, cls) {
 function report(e) {
   $("notice").textContent = e.message;
   $("notice").className = "error";
+  // A screen that failed while loading gets a clear error state instead of staying blank.
+  const screen = $("screen");
+  if (settling && screen && ![...screen.children].some((c) => !c.dataset.placeholder)) {
+    settling.stop();
+    const box = node("div", undefined, "empty error-state");
+    box.append(
+      node("p", "This screen couldn't load."),
+      button("Try again", () => render()),
+    );
+    screen.append(box);
+  }
 }
 function notice(text) {
   $("notice").textContent = text;
@@ -463,7 +493,7 @@ function field(form, key, value) {
   label.htmlFor = input.id;
   form.append(label, input);
   if (HELP[key]) form.append(node("small", HELP[key], "muted"));
-  if (/^(mp4|webm)$/.test(key) && canPublishRole(me.role)) {
+  if (/^(mp4|webm)$/.test(key) && can("site.manage")) {
     const file = node("input");
     file.type = "file";
     file.accept = key === "mp4" ? "video/mp4" : "video/webm";
@@ -491,7 +521,7 @@ function field(form, key, value) {
       ),
     );
   }
-  if (/(?:photo|image|mobileImage|logo|poster)$/i.test(key) && me.role !== "editor") {
+  if (/(?:photo|image|mobileImage|logo|poster)$/i.test(key) && can("site.manage")) {
     const file = node("input");
     file.type = "file";
     file.accept = "image/png,image/jpeg,image/webp";
@@ -527,19 +557,58 @@ function field(form, key, value) {
             .filter(Boolean)
         : input.value;
 }
+// Calm redraws: a screen redrawn after a save keeps its height (and the scroll position) until the new
+// content is in, so nothing jumps; a quiet "Loading…" shows only if loading takes a moment.
+let shownSection = null;
+let settling = null;
+function holdScreen(screen, keepHeight) {
+  settling?.stop();
+  const timers = [];
+  const placeholder = () => screen.querySelector(":scope > [data-placeholder]");
+  const release = () => {
+    observer.disconnect();
+    timers.forEach(clearTimeout);
+    placeholder()?.remove();
+    screen.style.minHeight = "";
+    screen.removeAttribute("aria-busy");
+    settling = null;
+  };
+  const observer = new MutationObserver(() => {
+    if (![...screen.children].some((c) => !c.dataset.placeholder)) return;
+    placeholder()?.remove();
+    clearTimeout(timers[0]);
+    timers[0] = setTimeout(release, 250);
+  });
+  screen.style.minHeight = keepHeight ? screen.offsetHeight + "px" : "";
+  screen.setAttribute("aria-busy", "true");
+  observer.observe(screen, { childList: true });
+  timers[0] = setTimeout(release, 5000);
+  timers[1] = setTimeout(() => {
+    if (screen.childElementCount) return;
+    const p = node("p", "Loading…", "loading");
+    p.dataset.placeholder = "1";
+    p.setAttribute("role", "status");
+    screen.append(p);
+  }, 300);
+  settling = { stop: release };
+}
 function render() {
   $("heading").textContent = label(section);
   $("subtitle").textContent = ABOUT[section] || "";
   const screen = $("screen");
+  const changed = section !== shownSection;
+  shownSection = section;
+  holdScreen(screen, !changed);
   screen.replaceChildren();
+  const active = menuKeyFor(section);
   for (const b of document.querySelectorAll("#nav button, #tabbar button"))
-    b.classList.toggle("active", b.dataset.section === section);
-  if ($("nav-more-list")?.querySelector("button.active")) setMoreOpen(true, false);
-  // Gentle fade-in between screens (skipped when reduced motion is preferred, see style.css).
-  screen.classList.remove("enter");
-  void screen.offsetWidth;
-  screen.classList.add("enter");
-  window.scrollTo(0, 0);
+    b.classList.toggle("active", b.dataset.section === active);
+  // A short fade only when moving to another screen (none with reduced motion, see style.css).
+  if (changed) {
+    screen.classList.remove("enter");
+    void screen.offsetWidth;
+    screen.classList.add("enter");
+  }
   if (section === "Packages") {
     renderPackages().catch(report);
     return;
@@ -548,25 +617,24 @@ function render() {
     renderMedia().catch(report);
     return;
   }
-  if (section === "Overview") {
-    const grid = node("div", undefined, "grid");
-    for (const [kind, label] of Object.entries(names)) {
-      const card = node("div", undefined, "card stat");
-      card.append(
-        node("p", label),
-        node("strong", String(items.filter((i) => i.kind === kind).length)),
-        button("Manage →", () => navigate(kind)),
-      );
-      grid.append(card);
-    }
-    screen.append(
-      grid,
-      node(
-        "p",
-        "Save drafts while you work. Owners and admins can publish when content is ready.",
-        "muted",
-      ),
+  if (section === "Website") {
+    renderHub(WEBSITE_MODULES);
+    return;
+  }
+  if (section === "Advanced") {
+    renderHub(
+      ADVANCED_MODULES,
+      "Sensitive settings for the Owner: the full website text and images editor, SEO titles and the home page videos. For everyday text changes, use the visual editor.",
     );
+    return;
+  }
+  if (section === "System settings") {
+    renderSignupSetting(screen).catch(report);
+    return;
+  }
+  // A content screen this person can't open (e.g. an old link): say so instead of an empty list.
+  if (names[section] && !me.kinds?.includes(section)) {
+    screen.append(node("p", "You don't have access to this part of the website.", "empty"));
     return;
   }
   if (section === "Access") {
@@ -574,8 +642,7 @@ function render() {
     return;
   }
   if (section === "Activity") {
-    if (!me.super_admin)
-      return report(Error("The audit log is only available to the Super Admin."));
+    if (!can("audit.view")) return report(Error("The audit log is for the Owner."));
     renderAudit().catch(report);
     return;
   }
@@ -613,8 +680,7 @@ function render() {
     return;
   }
   if (section === "Visual editor") {
-    if (!me.visual)
-      return report(Error("The visual editor is only available to the Super Admin account."));
+    if (!can("site.manage")) return report(Error("The visual editor is for the Owner and Admins."));
     renderVisual();
     return;
   }
@@ -725,7 +791,7 @@ function render() {
     .filter((i) => i.kind !== "copy" || Object.keys(i.data).some((k) => !isRetired(k)))
     .sort((a, b) => pos(a) - pos(b) || a.title.localeCompare(b.title));
   const orderable =
-    list.length > 1 && "position" in (defaults[section] || {}) && canPublishRole(me.role);
+    list.length > 1 && "position" in (defaults[section] || {}) && can("content.publish");
   if (!list.length)
     screen.append(
       node(
@@ -842,7 +908,7 @@ function edit(item) {
   const save = node("button", "Save draft", "primary");
   save.type = "submit";
   actions.append(save);
-  if (item.version && me.role !== "editor")
+  if (item.version && can("content.publish"))
     for (const action of ["publish", "unpublish"])
       actions.append(
         button(action === "publish" ? "Publish saved draft" : "Unpublish", async () => {
@@ -858,9 +924,17 @@ function edit(item) {
           );
         }),
       );
-  actions.append(node("span", "Save your changes before publishing.", "muted"));
+  actions.append(
+    node(
+      "span",
+      can("content.publish")
+        ? "Save your changes before publishing."
+        : "An Owner or Admin reviews and publishes your saved draft.",
+      "muted",
+    ),
+  );
   form.append(actions);
-  if (item.version && item.kind !== "copy" && canPublishRole(me.role))
+  if (item.version && item.kind !== "copy" && can("content.delete"))
     form.append(
       button(
         "Delete entry",
@@ -987,7 +1061,9 @@ async function renderLmsCourses(openId) {
       "Courses students take in their dashboard (separate from the public pricing list).",
       "muted",
     ),
-    button("+ New course", () => renderLmsCourse(null), "primary"),
+    ...(can("course.write")
+      ? [button("+ New course", () => renderLmsCourse(null), "primary")]
+      : []),
   );
   if (!courses.length) screen.append(node("p", "No courses yet.", "empty"));
   for (const c of courses) {
@@ -996,7 +1072,7 @@ async function renderLmsCourses(openId) {
       node("h3", c.title),
       node("span", c.status, "badge"),
       node("p", `${c.lessons} lessons · ${c.students} students`, "muted"),
-      button("Edit →", () => renderLmsCourse(c)),
+      ...(can("course.write") ? [button("Edit →", () => renderLmsCourse(c))] : []),
     );
     screen.append(card);
   }
@@ -1034,18 +1110,19 @@ async function renderLmsCourse(course) {
   };
   screen.append(form);
   if (!course) return;
-  form.append(
-    button(
-      "Delete course",
-      async () => {
-        if (!confirm("Delete this course? Students lose access at once.")) return;
-        await api("lms/courses/" + course.id + "/delete", {});
-        notice("Course deleted.");
-        render();
-      },
-      "danger",
-    ),
-  );
+  if (can("course.delete"))
+    form.append(
+      button(
+        "Delete course",
+        async () => {
+          if (!confirm("Delete this course? Students lose access at once.")) return;
+          await api("lms/courses/" + course.id + "/delete", {});
+          notice("Course deleted.");
+          render();
+        },
+        "danger",
+      ),
+    );
   const lessons = (await api("lms/courses/" + course.id + "/lessons")).items;
   screen.append(
     node("h2", "Lessons"),
@@ -1100,7 +1177,7 @@ function lessonCard(course, lesson, count) {
     remove,
     save,
   );
-  if (lesson)
+  if (lesson && can("course.delete"))
     card.append(
       button(
         "Delete lesson",
@@ -1137,7 +1214,8 @@ function lessonCard(course, lesson, count) {
 }
 async function renderStudents() {
   const screen = $("screen");
-  const staff = canPublishRole(me.role);
+  // Packages, access and mentor controls: Owner and Admins. Everyone else adds notes.
+  const staff = can("package.write");
   const [students, courses, mentors, pk] = await Promise.all([
     api("lms/students").then((r) => r.items),
     api("lms/courses").then((r) => r.items),
@@ -1152,7 +1230,9 @@ async function renderStudents() {
       "p",
       staff
         ? "Student accounts, their courses and mentors. Students sign in at student.scholarscafe.com (Google, an email code or a password)."
-        : "Students assigned to you. You can keep notes.",
+        : me.role === "mentor"
+          ? "Students assigned to you. You can keep notes."
+          : "Every student, their courses and mentors. You can keep notes.",
       "muted",
     ),
   );
@@ -1428,14 +1508,18 @@ async function renderPackages(openId) {
   const bar = node("div", undefined, "toolbar");
   bar.append(
     node("p", packages.length + " package" + (packages.length === 1 ? "" : "s"), "muted"),
-    button("+ New package", () => renderPackages(null), "primary"),
+    ...(can("package.write")
+      ? [button("+ New package", () => renderPackages(null), "primary")]
+      : []),
   );
   screen.append(bar);
   if (!packages.length)
     screen.append(
       node(
         "p",
-        "No packages yet. Create one, then assign it to students from the Students page.",
+        can("package.write")
+          ? "No packages yet. Create one, then assign it to students from the Students page."
+          : "No packages yet.",
         "empty",
       ),
     );
@@ -1457,10 +1541,14 @@ async function renderPackages(openId) {
     row.append(
       info,
       node("span", p.active ? "Active" : "Inactive", "badge"),
-      button("Edit", () => {
-        $("screen").replaceChildren();
-        renderPackages(p.id).catch(report);
-      }),
+      ...(can("package.write")
+        ? [
+            button("Edit", () => {
+              $("screen").replaceChildren();
+              renderPackages(p.id).catch(report);
+            }),
+          ]
+        : []),
     );
     screen.append(row);
   }
@@ -1959,14 +2047,18 @@ async function renderStudentResources(openId) {
   const bar = node("div", undefined, "toolbar");
   bar.append(
     node("p", items.length + " item" + (items.length === 1 ? "" : "s"), "muted"),
-    button(
-      "+ New",
-      () => {
-        screen.replaceChildren();
-        renderStudentResources(null).catch(report);
-      },
-      "primary",
-    ),
+    ...(can("resource.write")
+      ? [
+          button(
+            "+ New",
+            () => {
+              screen.replaceChildren();
+              renderStudentResources(null).catch(report);
+            },
+            "primary",
+          ),
+        ]
+      : []),
   );
   screen.append(bar);
   if (!items.length)
@@ -1997,10 +2089,14 @@ async function renderStudentResources(openId) {
     row.append(
       info,
       node("span", r.published ? "Published" : "Draft", "badge"),
-      button("Edit", () => {
-        screen.replaceChildren();
-        renderStudentResources(r.id).catch(report);
-      }),
+      ...(can("resource.write")
+        ? [
+            button("Edit", () => {
+              screen.replaceChildren();
+              renderStudentResources(r.id).catch(report);
+            }),
+          ]
+        : []),
     );
     screen.append(row);
   }
@@ -2011,19 +2107,20 @@ async function renderStudentResources(openId) {
   lib.append(node("p", (total / 1024 ** 3).toFixed(2) + " GB of 30 GB used.", "muted"));
   for (const v of videos) {
     const row = node("div", undefined, "row");
-    row.append(
-      node("span", v.name + " · " + (Number(v.size) / 1024 ** 2).toFixed(0) + " MB"),
-      button(
-        "Delete",
-        async () => {
-          if (!confirm("Delete " + v.name + "? This can't be undone.")) return;
-          await api("videos/" + v.id + "/delete", {});
-          notice("Video deleted.");
-          render();
-        },
-        "danger",
-      ),
-    );
+    row.append(node("span", v.name + " · " + (Number(v.size) / 1024 ** 2).toFixed(0) + " MB"));
+    if (can("resource.delete"))
+      row.append(
+        button(
+          "Delete",
+          async () => {
+            if (!confirm("Delete " + v.name + "? This can't be undone.")) return;
+            await api("videos/" + v.id + "/delete", {});
+            notice("Video deleted.");
+            render();
+          },
+          "danger",
+        ),
+      );
     lib.append(row);
   }
   screen.append(lib);
@@ -2112,7 +2209,7 @@ function resourceForm(r, packages, videos) {
   const save = node("button", "Save", "primary");
   save.type = "submit";
   actions.append(save);
-  if (r.id)
+  if (r.id && can("resource.delete"))
     actions.append(
       button(
         "Delete",
@@ -2535,7 +2632,7 @@ async function renderBookings() {
   lead.append(link);
   bar.append(lead);
   screen.append(bar);
-  if (!settings.link)
+  if (!settings.link && can("bookings.settings"))
     screen.append(
       node(
         "p",
@@ -2589,7 +2686,8 @@ async function renderBookings() {
     list.append(card);
   }
   if (!items.length) screen.append(node("p", "No bookings yet.", "empty"));
-  screen.append(list, bookingSettingsForm(settings));
+  screen.append(list);
+  if (can("bookings.settings")) screen.append(bookingSettingsForm(settings));
 }
 function bookingSettingsForm(s) {
   const wrap = node("details", undefined, "card");
@@ -3835,13 +3933,13 @@ async function renderThread(studentId, title, back) {
     for (const m of messages) {
       const bubble = node("article", undefined, "message" + (m.mine ? " mine" : ""));
       bubble.append(node("p", `${senderLabel(m)} · ${when(m.created_at)}`, "muted"));
-      if (m.removed && me.role !== "owner" && me.role !== "admin")
+      if (m.removed && !can("message.moderate"))
         bubble.append(node("p", "This message was removed by the Scholars Cafe team.", "muted"));
       else {
         if (m.removed) bubble.append(node("span", "Removed (only admins see this)", "badge"));
         if (m.body) bubble.append(node("p", m.body, "lesson-body"));
         if (m.file_id) bubble.append(fileChip(m.file_id, m.file_name));
-        if (!m.removed && (me.role === "owner" || me.role === "admin"))
+        if (!m.removed && can("message.moderate"))
           bubble.append(
             button(
               "Remove",
@@ -4017,7 +4115,7 @@ async function renderReviews() {
           "badge",
         ),
       );
-      if (r.status === "approved" && r.public_consent && !r.featured)
+      if (r.status === "approved" && r.public_consent && !r.featured && can("review.feature"))
         card.append(
           button("Add to website testimonials", async () => {
             await api("lms/reviews/" + r.id + "/feature", {});
@@ -4031,7 +4129,7 @@ async function renderReviews() {
         ["Approve", "approved"],
         ["Reject", "rejected"],
       ])
-        if (r.status !== status)
+        if (r.status !== status && can("review.moderate"))
           card.append(
             button(
               label,
@@ -4058,7 +4156,7 @@ async function renderMedia() {
       "muted",
     ),
   );
-  if (me.role !== "editor") {
+  if (can("site.manage")) {
     const file = node("input");
     file.type = "file";
     file.accept = "image/png,image/jpeg,image/webp,video/mp4,video/webm";
@@ -4110,10 +4208,8 @@ async function renderMedia() {
   }
   if (!result.items.length) screen.append(node("p", "No uploaded images yet.", "empty"));
 }
-async function renderAccess() {
-  const users = (await api("users")).items;
-  const screen = $("screen");
-  // Student sign-up switch: everyone sees it, only the Super Admin (owner) can change it.
+// System settings (Owner only): student sign-up mode.
+async function renderSignupSetting(screen) {
   const settings = await api("settings");
   const signup = node("form", undefined, "card");
   signup.append(
@@ -4151,17 +4247,38 @@ async function renderAccess() {
         report(err);
       }
     };
-  } else signup.append(node("p", "Only the Super Admin can change this.", "muted"));
+  } else signup.append(node("p", "Only the Owner can change this.", "muted"));
   screen.append(signup);
+}
+async function renderAccess() {
+  const users = (await api("users")).items;
+  const screen = $("screen");
+  const roles = node("section", undefined, "card");
+  roles.append(node("h2", "Roles"));
+  const dl = node("dl", undefined, "role-list");
+  for (const [role, text] of [
+    ["owner", "Everything, including users, roles, system settings and Advanced Configuration."],
+    [
+      "admin",
+      "SC Board, task assignment, team performance, website management and the media library.",
+    ],
+    [
+      "editor",
+      "Team SC, own tasks, leads, bookings, email, blog and resources writing, and student operations.",
+    ],
+    ["mentor", "Team SC, own tasks, bookings, email, blog writing, and their own students."],
+    ["student", "The student portal only."],
+  ])
+    dl.append(node("dt", roleLabel(role)), node("dd", text));
+  roles.append(dl);
+  screen.append(roles);
   const card = node("form", undefined, "card");
   card.append(node("h2", "Approve a Google account"));
   const email = field(card, "email", "");
   const label = node("label", "Role");
   const select = node("select");
-  for (const role of me.role === "owner"
-    ? ["student", "editor", "mentor", "admin", "owner"]
-    : ["student", "editor", "mentor"]) {
-    const option = node("option", role);
+  for (const role of ["student", "mentor", "editor", "admin", "owner"]) {
+    const option = node("option", roleLabel(role));
     option.value = role;
     select.append(option);
   }
@@ -4194,12 +4311,9 @@ async function renderAccess() {
     const row = node("div", undefined, "card row");
     row.append(
       node("span", user.email),
-      node("span", user.role + (user.active ? "" : " · revoked"), "badge"),
+      node("span", roleLabel(user.role) + (user.active ? "" : " · revoked"), "badge"),
     );
-    if (
-      user.id !== me.id &&
-      (me.role === "owner" || ["editor", "mentor", "student"].includes(user.role))
-    )
+    if (user.id !== me.id)
       row.append(
         button(user.active ? "Revoke access" : "Restore access", async () => {
           if (!confirm("Change access for " + user.email + "?")) return;
@@ -4231,7 +4345,7 @@ async function renderAudit() {
 }
 async function renderLeads() {
   const screen = $("screen");
-  const admin = canPublishRole(me.role);
+  const admin = can("leads.assign");
   const mentors = admin ? (await api("mentors")).items : [];
   const filters = node("form", undefined, "card toolbar");
   const q = node("input");
@@ -4277,14 +4391,20 @@ async function renderLeads() {
   go.type = "submit";
   const csv = node("a", "Export CSV");
   csv.className = "button";
-  filters.append(q, status, ...(admin ? [assigned, source] : []), go, csv);
+  filters.append(
+    q,
+    status,
+    ...(admin ? [assigned, source] : []),
+    go,
+    ...(can("leads.export") ? [csv] : []),
+  );
   const list = node("div");
   screen.append(
     node(
       "p",
       admin
         ? "Every website enquiry. Assign a mentor, track status and keep notes."
-        : "Leads assigned to you.",
+        : "Every website enquiry. Track status and keep notes.",
       "muted",
     ),
     filters,
@@ -4693,8 +4813,10 @@ function renderAccount() {
 // ---------- Team workspace: staff chat, tasks, progress (staff only; see backend/workspace.js) ----------
 const STAFF = ["owner", "admin", "editor", "mentor"];
 const WORKSPACE = {
-  "Team chat": () => renderTeamChat(),
-  Tasks: () => renderTasks(),
+  "SC Board": () => renderTeamChat("board"),
+  "Team chat": () => renderTeamChat("team"),
+  Tasks: () => renderTasks(false),
+  "Task management": () => renderTasks(true),
   Progress: () => renderProgress(),
 };
 const DHAKA = "Asia/Dhaka";
@@ -4715,8 +4837,11 @@ const dueText = (t) =>
 const hours = (minutes) =>
   minutes < 60 ? `~${minutes}m` : `~${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 
-async function renderTeamChat() {
+// Two channels: SC Board (Owner and Admins) and Team SC (all staff). The server checks every request;
+// a channel this person can't open is never asked for.
+async function renderTeamChat(channel = "team") {
   const screen = $("screen");
+  const who = channel === "board" ? "the board" : "the team";
   const pins = node("div", undefined, "pin-bar");
   pins.hidden = true;
   const list = node("div", undefined, "team-chat");
@@ -4725,8 +4850,8 @@ async function renderTeamChat() {
   const text = node("textarea");
   text.maxLength = 2000;
   text.rows = 1;
-  text.placeholder = "Message the team";
-  text.setAttribute("aria-label", "Message the team");
+  text.placeholder = "Message " + who;
+  text.setAttribute("aria-label", "Message " + who);
   const send = node("button", "Send", "primary");
   send.type = "submit";
   form.append(text, send);
@@ -4791,7 +4916,7 @@ async function renderTeamChat() {
     }
   };
   const draw = async () => {
-    data = await api("workspace/chat");
+    data = await api("workspace/chat?channel=" + channel);
     const key = JSON.stringify([
       data.items.map((m) => [m.id, m.pinned]),
       data.pinned.map((m) => m.id),
@@ -4871,7 +4996,7 @@ async function renderTeamChat() {
     if (!body) return;
     try {
       send.disabled = true;
-      await api("workspace/chat", { body });
+      await api("workspace/chat", { body, channel });
       text.value = "";
       grow();
       await draw();
@@ -4891,31 +5016,38 @@ async function renderTeamChat() {
 }
 
 let taskView = "Mine";
-async function renderTasks() {
+let manageView = "All";
+// "My tasks" (everyone: own and shared tasks) and "Task management" (Owner and Admins: everything,
+// create, assign, deadlines). The server sends each person only the tasks they may see.
+async function renderTasks(manage) {
   const screen = $("screen");
-  const admin = canPublishRole(me.role);
+  const admin = manage && can("tasks.manage");
+  const here = manage ? "Task management" : "Tasks";
   const [{ items, now, week_start }, staff] = await Promise.all([
     api("workspace/tasks"),
-    api("workspace/staff"),
+    admin ? api("workspace/staff") : Promise.resolve({ items: [] }),
   ]);
   const nowMs = new Date(now).getTime();
   const weekFrom = Date.parse(week_start + "T00:00:00Z") - 6 * 3600000;
   const weekTo = weekFrom + 7 * 86400000;
   const overdue = (t) => t.status !== "done" && t.due_at && new Date(t.due_at).getTime() < nowMs;
   const mine = (t) => t.assignees.some((a) => a.id === me.id);
-  const views = {
-    Mine: { label: "My tasks", pick: mine },
-    Week: {
-      label: "This week",
-      pick: (t) =>
-        t.due_at &&
-        new Date(t.due_at).getTime() >= weekFrom &&
-        new Date(t.due_at).getTime() < weekTo,
-    },
-    Overdue: { label: "Overdue", pick: overdue },
-    All: { label: "Everyone", pick: () => true },
-  };
-  if (!views[taskView]) taskView = "Mine";
+  const week = (t) =>
+    t.due_at && new Date(t.due_at).getTime() >= weekFrom && new Date(t.due_at).getTime() < weekTo;
+  const views = manage
+    ? {
+        All: { label: "Everyone", pick: () => true },
+        Week: { label: "This week", pick: week },
+        Overdue: { label: "Overdue", pick: overdue },
+        Shared: { label: "Shared", pick: (t) => !t.assignees.length },
+      }
+    : {
+        Mine: { label: "Mine", pick: mine },
+        Shared: { label: "Shared", pick: (t) => !t.assignees.length },
+        Overdue: { label: "Overdue", pick: overdue },
+      };
+  const current = manage ? manageView : taskView;
+  const view = views[current] ? current : Object.keys(views)[0];
   const bar = node("div", undefined, "task-bar");
   const chips = node("div", undefined, "chips");
   chips.setAttribute("role", "group");
@@ -4925,26 +5057,27 @@ async function renderTasks() {
       (t) => v.pick(t) && (key === "Overdue" || t.status !== "done"),
     ).length;
     const b = button(`${v.label}${open ? " " + open : ""}`, () => {
-      taskView = key;
-      navigate("Tasks");
+      if (manage) manageView = key;
+      else taskView = key;
+      render();
     });
-    b.setAttribute("aria-pressed", String(key === taskView));
+    b.setAttribute("aria-pressed", String(key === view));
     if (key === "Overdue" && open) b.classList.add("warn");
     chips.append(b);
   }
   bar.append(chips);
   if (admin) bar.append(button("+ New task", () => taskForm(null, staff.items), "primary"));
   screen.append(bar);
-  const shown = items.filter(views[taskView].pick);
+  const shown = items.filter(views[view].pick);
   const open = shown.filter((t) => t.status !== "done");
   const done = shown.filter((t) => t.status === "done");
   if (!open.length)
     screen.append(
       node(
         "p",
-        taskView === "Overdue"
+        view === "Overdue"
           ? "Nothing overdue. Nice work."
-          : taskView === "Mine"
+          : view === "Mine"
             ? "No open tasks for you right now."
             : "No open tasks here.",
         "empty",
@@ -4984,7 +5117,7 @@ function taskCard(t, { admin, overdue, staff }) {
       try {
         await api("workspace/tasks/" + t.id, { status: status.value });
         if (status.value === "done") notice("Marked done.");
-        navigate("Tasks");
+        render();
       } catch (e) {
         report(e);
       }
@@ -5010,7 +5143,7 @@ function taskCard(t, { admin, overdue, staff }) {
     meta.append(node("span", "From " + (t.created_by === me.id ? "you" : t.assigned_by), "muted"));
   card.append(meta);
   if (t.details) card.append(node("p", t.details, "task-details"));
-  if (t.can_edit ?? admin) {
+  if (admin && t.can_edit) {
     const actions = node("div", undefined, "task-actions");
     actions.append(
       button("Edit", () => taskForm(t, staff), "small"),
@@ -5019,7 +5152,7 @@ function taskCard(t, { admin, overdue, staff }) {
         async () => {
           if (!confirm(`Delete the task "${t.title}"?`)) return;
           await api(`workspace/tasks/${t.id}/delete`, {});
-          navigate("Tasks");
+          render();
         },
         "small danger",
       ),
@@ -5083,7 +5216,7 @@ function taskForm(task, staff) {
   save.type = "submit";
   actions.append(
     save,
-    button("Cancel", () => navigate("Tasks")),
+    button("Cancel", () => render()),
   );
   form.append(actions);
   form.onsubmit = async (e) => {
@@ -5098,7 +5231,7 @@ function taskForm(task, staff) {
     try {
       save.disabled = true;
       await api(task ? "workspace/tasks/" + task.id : "workspace/tasks", body);
-      navigate("Tasks");
+      render();
       notice(task ? "Task saved." : "Task created.");
     } catch (err) {
       report(err);
@@ -5144,8 +5277,8 @@ async function renderProgress() {
       `${s.streak} ${s.streak === 1 ? "day" : "days"}`,
       s.today_minutes ? "In today" : s.streak ? "Open the dashboard today to keep it" : "",
     ),
-    statTile("Today", hours(s.today_minutes)),
-    statTile("This week", hours(s.week_minutes)),
+    statTile("Active today", hours(s.today_minutes)),
+    statTile("Active this week", hours(s.week_minutes)),
     statTile("Tasks done", String(s.tasks_done_week), "this week"),
   );
   const mine = node("section", undefined, "card");
@@ -5154,7 +5287,7 @@ async function renderProgress() {
     dayStrip(s.days, today, 14),
     node(
       "p",
-      "Hours are approximate: they count while this dashboard is open and being used. Weeks start on Sunday.",
+      "Active time is approximate. It counts only while SC Studio is open, on screen and in use (no idle, hidden-tab or offline time), and it is not a measure of productivity. Weeks start on Sunday.",
       "muted",
     ),
   );
@@ -5190,19 +5323,19 @@ async function renderProgress() {
     node(
       "p",
       (inToday.length ? "In today: " + inToday.join(", ") : "Nobody has been in yet today") +
-        ". Each square is a day, today on the right; darker means more time.",
+        ". Each square is a day, today on the right; darker means more active time in SC Studio.",
       "muted",
     ),
   );
   for (const u of team.items) {
     const card = node("article", undefined, "card person");
     const top = node("div", undefined, "task-top");
-    top.append(node("h3", u.name), node("span", u.role, "badge"));
+    top.append(node("h3", u.name), node("span", roleLabel(u.role), "badge"));
     card.append(
       top,
       node(
         "p",
-        `Streak ${u.streak} · Today ${hours(u.today_minutes)} · This week ${hours(u.week_minutes)} · Tasks done ${u.tasks_done}/${u.tasks_assigned}` +
+        `Tasks done ${u.tasks_done}/${u.tasks_assigned} · Streak ${u.streak} · Active today ${hours(u.today_minutes)} · This week ${hours(u.week_minutes)}` +
           (u.tasks_overdue ? ` · ${u.tasks_overdue} overdue` : ""),
         "task-meta",
       ),
@@ -5212,15 +5345,19 @@ async function renderProgress() {
   }
   screen.append(section);
 }
-// Approximate active time: about once a minute, while this tab is visible AND was used in the last minute.
+// Approximate active time in SC Studio only: about once a minute, while this tab is visible, online AND
+// was used in the last minute. Hiding the tab resets it, so time away never counts.
 function startHeartbeat() {
   if (!STAFF.includes(me.role)) return;
   let lastInput = Date.now();
   const mark = () => (lastInput = Date.now());
   for (const type of ["pointerdown", "keydown", "wheel", "touchstart", "scroll"])
     addEventListener(type, mark, { passive: true, capture: true });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) lastInput = 0;
+  });
   const beat = () => {
-    if (document.hidden || Date.now() - lastInput > 60000) return;
+    if (document.hidden || !navigator.onLine || Date.now() - lastInput > 60000) return;
     api("workspace/ping", {}).catch(() => {});
   };
   beat();
@@ -5296,9 +5433,12 @@ function bannerState() {
   if (!standalone() && phoneLike() && installPrompt) return "install";
   return null;
 }
+// A dismissal is remembered on this device, so nobody is asked again; Settings → Notifications still
+// has the button for later.
 const DISMISS_KEY = {
   "ios-install": "install-hint",
   install: "install-hint",
+  enable: "push-later",
   denied: "push-denied",
 };
 let enableLater = false;
@@ -5342,14 +5482,17 @@ function showAlertsBanner() {
         () => enableFromTap(Notification.requestPermission()),
         "primary",
       ),
-      button("Later", () => {
+      button("Not now", () => {
         enableLater = true;
+        try {
+          localStorage.setItem("push-later", "dismissed");
+        } catch {}
         bar.remove();
       }),
     );
   if (state === "ios-install") bar.append(button("How", () => navigate("Notifications")));
   if (state === "install") bar.append(button("Install", () => promptInstall(), "primary"));
-  if (DISMISS_KEY[state]) {
+  if (DISMISS_KEY[state] && state !== "enable") {
     const close = button(
       "×",
       () => {
@@ -5632,14 +5775,24 @@ async function syncPush() {
 async function renderNotifications() {
   const screen = $("screen");
   const data = await api("push");
-  const sub = await currentSubscription().catch(() => null);
-  const on = Boolean(sub) && Notification.permission === "granted";
+  // Four states: unsupported here (e.g. iPhone in a Safari tab), not decided, allowed, blocked.
+  const permission = pushSupported() ? Notification.permission : "unsupported";
+  const sub = permission === "unsupported" ? null : await currentSubscription().catch(() => null);
+  const on = Boolean(sub) && permission === "granted";
   const card = node("article", undefined, "card");
   card.append(
     node("h2", "This device"),
     node(
       "p",
-      on ? "Notifications are on for this device." : "Notifications are off for this device.",
+      on
+        ? "Notifications are on for this device."
+        : permission === "unsupported"
+          ? isIos
+            ? "To get notifications on iPhone or iPad, add SC Studio to your Home Screen first."
+            : "This browser can't show notifications."
+          : permission === "denied"
+            ? "Notifications are blocked for this device."
+            : "Notifications are off for this device.",
     ),
   );
   const actions = node("div", undefined, "actions");
@@ -5655,15 +5808,17 @@ async function renderNotifications() {
         render();
       }),
     );
-  else
+  else if (permission === "default" || permission === "granted")
     actions.append(
+      // The browser asks for permission only now, inside this tap (iOS ignores it otherwise).
       button(
-        "Turn on notifications",
-        async () => {
-          await turnOnPush();
-          notice("Notifications are on for this device.");
-          render();
-        },
+        "Enable notifications",
+        () =>
+          enableFromTap(
+            permission === "granted"
+              ? Promise.resolve("granted")
+              : Notification.requestPermission(),
+          ),
         "primary",
       ),
     );
@@ -5671,7 +5826,7 @@ async function renderNotifications() {
   const results = node("div", undefined, "push-results");
   results.setAttribute("aria-live", "polite");
   card.append(results);
-  if (Notification?.permission === "denied") card.append(node("p", deniedHelp(), "muted"));
+  if (permission === "denied") card.append(node("p", deniedHelp(), "muted"));
   if (isIos || !pushSupported()) card.append(node("p", IOS_PUSH_NOTE, "muted"));
   screen.append(card);
 
@@ -5698,11 +5853,11 @@ async function renderNotifications() {
   const what = node("article", undefined, "card");
   const list = node("ul");
   for (const t of [
-    "A new team chat message (pinned messages are marked 📌).",
+    ...(can("chat.board") ? ["A new SC Board message."] : []),
+    "A new Team SC message (pinned messages are marked 📌).",
     "A task assigned to you, and reminders before its deadline.",
-    ...(canPublishRole(me.role)
-      ? ["A new email to contact@scholarscafe.com.", "A new form submission or website inquiry."]
-      : []),
+    ...(can("mail.inbox") ? ["A new email to contact@scholarscafe.com."] : []),
+    ...(can("leads.view") ? ["A new form submission or website inquiry."] : []),
   ])
     list.append(node("li", t));
   what.append(
@@ -5893,6 +6048,9 @@ function setMailBadge(unread) {
 }
 async function renderContactMail() {
   const screen = $("screen");
+  // Without inbox access, Email is for writing: Compose and the emails you sent yourself.
+  const canRead = can("mail.inbox");
+  if (!canRead) mailState.folder = "sent";
   const sent = mailState.folder === "sent";
   const data = await api(
     "inbox?" +
@@ -5902,7 +6060,7 @@ async function renderContactMail() {
         folder: mailState.folder,
       }),
   );
-  setMailBadge(data.unread);
+  if (canRead) setMailBadge(data.unread);
   if (!data.connected)
     screen.append(
       node(
@@ -5941,7 +6099,8 @@ async function renderContactMail() {
     b.setAttribute("aria-pressed", String(mailState.folder === key));
     return b;
   };
-  bar.append(compose, folder("inbox", "Inbox"), folder("sent", "Sent"), search);
+  if (canRead) bar.append(compose, folder("inbox", "Inbox"), folder("sent", "Sent"), search);
+  else bar.append(compose, search);
   if (!sent) {
     const unreadChip = button(`Unread${data.unread ? " " + data.unread : ""}`, () => {
       mailState.unread = !mailState.unread;
@@ -5950,7 +6109,7 @@ async function renderContactMail() {
     unreadChip.setAttribute("aria-pressed", String(mailState.unread));
     bar.append(unreadChip);
   }
-  if (data.connected)
+  if (data.connected && canRead)
     bar.append(
       button("Check now", async () => {
         const r = await api("inbox/sync", {});
@@ -6298,7 +6457,10 @@ const TAB_ICONS = {
   Documents: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6",
   Messages: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
   Account: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
-  Overview: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+  Website: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+  "SC Board": "M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6z",
+  "Task management": "M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9",
+  Mail: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6",
   Leads:
     "M22 12h-6l-2 3h-4l-2-3H2M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
   Students:
@@ -6314,8 +6476,10 @@ const TAB_ICONS = {
 const TAB_LABELS = {
   "My courses": "Courses",
   Account: "Profile",
-  Overview: "Website",
-  "Team chat": "Chat",
+  "Team chat": "Team SC",
+  "SC Board": "Board",
+  Tasks: "Tasks",
+  "Task management": "Tasks",
 };
 function icon(path) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -6333,8 +6497,9 @@ function setMenu(open) {
 function buildTabbar(keys) {
   const priority = {
     student: ["Home", "My courses", "Resources", "Messages", "Documents", "Account"],
-    mentor: ["Leads", "Students", "Documents", "Messages"],
-  }[me.role] || ["Team chat", "Tasks", "Progress", "Leads", "Bookings", "Overview"];
+    mentor: ["Team chat", "Tasks", "Students", "Messages"],
+    editor: ["Team chat", "Tasks", "Leads", "Bookings"],
+  }[me.role] || ["SC Board", "Team chat", "Tasks", "Leads"];
   const tabs =
     keys.length <= 5 ? keys : [...priority.filter((k) => keys.includes(k)).slice(0, 4), "More"];
   const bar = node("nav", undefined, "tabbar");
@@ -6363,50 +6528,141 @@ function buildTabbar(keys) {
   document.body.append(backdrop, bar);
   return tabs.filter((k) => k !== "More");
 }
-// Desktop sidebar: show or fold the rarely used screens. Phones always list them in the "More" sheet.
-function setMoreOpen(open, remember = true) {
-  $("nav").querySelector(".nav-more")?.setAttribute("aria-expanded", String(open));
-  $("nav-more-list")?.classList.toggle("open", open);
-  if (remember)
-    try {
-      localStorage.setItem("nav-more", open ? "open" : "closed");
-    } catch {}
+// ---------- Staff menu, built from the permission map ----------
+// [screen key, permission]. Website modules open from the Website hub; advanced ones from Advanced.
+const STAFF_MENU = [
+  [
+    "Workspace",
+    [
+      ["SC Board", "chat.board"],
+      ["Team chat", "chat.team"],
+      ["Tasks", "tasks.view"],
+      ["Task management", "tasks.manage"],
+      ["Progress", "team.performance"],
+      ["Notifications", "studio.use"],
+    ],
+  ],
+  [
+    "Operations",
+    [
+      ["Leads", "leads.view"],
+      ["Bookings", "bookings.view"],
+      ["Messages", "students.view"],
+      ["Mail", "mail.send"],
+      ["Forms", "inbox.admin"],
+      ["Private feedback", "inbox.admin"],
+      ["Newsletter", "inbox.admin"],
+      ["ECA alerts", "inbox.admin"],
+      ["Agreements", "agreements.manage"],
+    ],
+  ],
+  [
+    "Content",
+    [
+      ["blogs", "content.write"],
+      ["resources", "content.write"],
+      ["universities", "content.write"],
+      ["Website", "site.manage"],
+      ["Media", "site.manage"],
+    ],
+  ],
+  [
+    "Student management",
+    [
+      ["Students", "students.view"],
+      ["Documents", "students.view"],
+      ["Student resources", "resource.view"],
+      ["Student courses", "students.view"],
+      ["Packages", "package.view"],
+      ["Reviews", "review.view"],
+    ],
+  ],
+  [
+    "Administration",
+    [
+      ["Advanced", "site.advanced"],
+      ["Access", "users.manage"],
+      ["System settings", "settings.system"],
+      ["Activity", "audit.view"],
+      ["Email delivery", "inbox.admin"],
+      ["Preview emails", "inbox.admin"],
+    ],
+  ],
+];
+// Website management (Owner, Admins) and Advanced Configuration (Owner): the content kinds each hub opens.
+const WEBSITE_MODULES = [
+  "sections",
+  "courses",
+  "team",
+  "feedback",
+  "faqs",
+  "colleges",
+  "toolValues",
+  "prompts",
+  "promptAngles",
+  "links",
+];
+const ADVANCED_MODULES = ["copy", "seo", "hero"];
+function staffMenu() {
+  return STAFF_MENU.map(([group, entries]) => [
+    group,
+    entries.filter(([, permission]) => can(permission)).map(([key]) => key),
+  ]).filter(([, keys]) => keys.length);
+}
+/** A useful first screen for each role. */
+function landingFor(navFor) {
+  const keys = navFor.flatMap(([, k]) => k);
+  const wish = { student: "Home", mentor: "Students", editor: "Leads" }[me.role] || "Team chat";
+  return keys.includes(wish) ? wish : keys[0];
+}
+/** The menu item to highlight: website modules live under Website, advanced ones under Advanced. */
+const menuKeyFor = (key) =>
+  WEBSITE_MODULES.includes(key) || key === "Visual editor"
+    ? "Website"
+    : ADVANCED_MODULES.includes(key)
+      ? "Advanced"
+      : key;
+/** A hub: one card per module with how many entries it has (the visual editor first on Website). */
+function renderHub(modules, intro) {
+  const screen = $("screen");
+  if (intro) screen.append(node("p", intro, "muted"));
+  const grid = node("div", undefined, "hub");
+  const card = (key, title, about, count) => {
+    const b = node("button", undefined, "card hub-item");
+    b.type = "button";
+    b.append(node("strong", title), node("span", about, "muted"));
+    if (count !== undefined)
+      b.append(node("span", count + (count === 1 ? " entry" : " entries"), "badge"));
+    b.onclick = () => navigate(key);
+    grid.append(b);
+  };
+  if (modules === WEBSITE_MODULES && can("site.manage"))
+    card("Visual editor", "Visual editor", ABOUT["Visual editor"]);
+  for (const kind of modules)
+    if (me.kinds?.includes(kind))
+      card(kind, names[kind], ABOUT[kind] || "", items.filter((i) => i.kind === kind).length);
+  screen.append(grid);
 }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 try {
   me = await whoAmI();
   if (!me) throw Object.assign(Error("Please sign in."), { signedOut: true });
-  const catalogResponse = await fetch("/cms-copy-catalog.json");
-  if (catalogResponse.ok) catalog = await catalogResponse.json();
-  const retiredResponse = await fetch("/cms-retired-keys.json").catch(() => null);
-  if (retiredResponse?.ok) retired = new Set(await retiredResponse.json());
-  if (!["mentor", "student"].includes(me.role)) await refresh();
+  // The website text catalog is only needed by those who edit website text.
+  if (can("site.manage") || can("site.advanced")) {
+    const [catalogResponse, retiredResponse] = await Promise.all([
+      fetch("/cms-copy-catalog.json").catch(() => null),
+      fetch("/cms-retired-keys.json").catch(() => null),
+    ]);
+    if (catalogResponse?.ok) catalog = await catalogResponse.json();
+    if (retiredResponse?.ok) retired = new Set(await retiredResponse.json());
+  }
+  if (me.kinds?.length) await refresh();
   if (me.role === "student") myFeatures = await api("lms/my/features").catch(() => ({}));
   $("boot").hidden = true;
   $("login").hidden = true;
   $("workspace").hidden = false;
-  $("identity").textContent = me.email + " · " + me.role;
-  // Sidebar: [group heading, sections]. Editors only see the website; mentors and students get short lists.
-  const website = [
-    "copy",
-    "sections",
-    "seo",
-    "hero",
-    "blogs",
-    "resources",
-    "courses",
-    "universities",
-    "team",
-    "feedback",
-    "faqs",
-    "colleges",
-    "prompts",
-    "promptAngles",
-    "toolValues",
-    // "countries" is hidden: the site is USA-only now. Its rows stay in the database.
-    "links",
-    "Media",
-  ];
+  $("identity").textContent = me.email + " · " + roleLabel(me.role);
+  // Sidebar: [group heading, sections]. Staff menus come from the permission map; empty groups are hidden.
   const navFor =
     me.role === "student"
       ? [
@@ -6422,81 +6678,15 @@ try {
             ],
           ],
         ]
-      : me.role === "mentor"
-        ? [
-            ["", ["Leads", "Students", "Documents", "Messages"]],
-            ["Team", ["Team chat", "Tasks", "Progress"]],
-            ["Settings", ["Notifications"]],
-          ]
-        : [
-            // Daily screens first; everything else sits under "More" (see DAILY below).
-            [
-              "",
-              [
-                "Team chat",
-                "Tasks",
-                "Progress",
-                ...(me.role === "editor" ? [] : ["Leads", "Bookings"]),
-              ],
-            ],
-            [
-              "Website",
-              me.visual ? ["Overview", "Visual editor", ...website] : ["Overview", ...website],
-            ],
-            ...(me.role === "editor"
-              ? [["Settings", ["Notifications"]]]
-              : [
-                  [
-                    "Students",
-                    [
-                      "Students",
-                      "Packages",
-                      "Student courses",
-                      "Student resources",
-                      "Documents",
-                      "Messages",
-                      "Reviews",
-                    ],
-                  ],
-                  [
-                    "Inbox",
-                    ["Mail", "Forms", "Private feedback", "Newsletter", "ECA alerts", "Agreements"],
-                  ],
-                  // The audit log is for the Super Admin only.
-                  [
-                    "Settings",
-                    [
-                      "Access",
-                      "Email delivery",
-                      "Preview emails",
-                      "Notifications",
-                      ...(me.super_admin ? ["Activity"] : []),
-                    ],
-                  ],
-                ]),
-          ];
-  if (!["mentor", "student"].includes(me.role)) section = "Team chat";
-  if (me.role === "mentor") section = "Leads";
-  if (me.role === "student") section = "Home";
+      : staffMenu();
+  section = landingFor(navFor);
   if (me.role === "student") {
     document.querySelector("aside .eyebrow").textContent = "STUDENT DASHBOARD";
     document.querySelector("main header .eyebrow").textContent = "SCHOLARS CAFE / STUDENT";
   }
-  // Staff: the first (unnamed) group is the daily list; the rest folds under a "More" toggle on desktop.
-  const staffNav = !["mentor", "student"].includes(me.role);
   const tabKeys = buildTabbar(navFor.flatMap(([, keys]) => keys));
-  let target = $("nav");
-  navFor.forEach(([group, keys], index) => {
-    if (staffNav && index === 1) {
-      const toggle = node("button", "More", "nav-more");
-      toggle.type = "button";
-      toggle.setAttribute("aria-expanded", "false");
-      toggle.setAttribute("aria-controls", "nav-more-list");
-      toggle.onclick = () => setMoreOpen(toggle.getAttribute("aria-expanded") !== "true");
-      target = node("div", undefined, "nav-more-list");
-      target.id = "nav-more-list";
-      $("nav").append(toggle, target);
-    }
+  const target = $("nav");
+  for (const [group, keys] of navFor) {
     // On phones, the "More" sheet skips what the bottom bar already shows.
     const groupInTabbar = keys.every((k) => tabKeys.includes(k));
     if (group) {
@@ -6513,13 +6703,6 @@ try {
       if (tabKeys.includes(key)) b.classList.add("in-tabbar");
       target.append(b);
     }
-  });
-  if (staffNav) {
-    let saved = null;
-    try {
-      saved = localStorage.getItem("nav-more");
-    } catch {}
-    setMoreOpen(saved === "open");
   }
   if (me.role === "student")
     api("lms/my/unread")
@@ -6554,7 +6737,7 @@ try {
     syncPush().catch(() => {});
     showInstallHint();
   }
-  if (canPublishRole(me.role))
+  if (can("mail.inbox"))
     api("inbox")
       .then((r) => setMailBadge(r.unread))
       .catch(() => {});

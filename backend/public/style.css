@@ -202,11 +202,6 @@ header {
   font-size: 12px;
   color: var(--ice-700);
 }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
-}
 .card {
   background: var(--white);
   border: 1px solid var(--ice-200);
@@ -577,10 +572,6 @@ progress {
     margin-bottom: 14px;
     overflow-wrap: anywhere;
   }
-  .grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
   .card {
     padding: 16px;
   }
@@ -860,14 +851,70 @@ button.small {
 }
 
 /* ---------- Phase 6: app-like mobile layout ---------- */
+/* A short fade when moving to another screen; nothing moves, so the layout never shifts. */
 #screen.enter {
-  animation: screen-in 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: screen-in 160ms ease-out;
 }
 @keyframes screen-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
+}
+/* Shown only when a screen takes a moment to load (see holdScreen in app.js). */
+#screen > .loading {
+  padding: 35px;
+  text-align: center;
+  color: var(--ice-700);
+}
+.error-state button {
+  margin-top: 12px;
+}
+/* Website management and Advanced configuration: one card per module. */
+.hub {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.card.hub-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  margin: 0;
+  padding: 14px 16px;
+  min-height: 0;
+  width: 100%;
+  border-radius: 14px;
+  text-align: left;
+  font: inherit;
+  line-height: 1.4;
+  color: inherit;
+  cursor: pointer;
+}
+.card.hub-item .badge {
+  margin-top: 4px;
+}
+.card.hub-item:hover,
+.card.hub-item:focus-visible {
+  border-color: var(--ice-700);
+}
+.card.hub-item strong {
+  margin: 0;
+  font-size: 16px;
+}
+.role-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 0;
+}
+.role-list dt {
+  font-weight: 600;
+}
+.role-list dd {
+  margin: 0;
+  color: var(--ice-700);
 }
 @media (prefers-reduced-motion: reduce) {
   #screen.enter {
@@ -1235,22 +1282,6 @@ header {
 }
 
 /* ---------- App polish (phones, and the admin opened from the home screen) ---------- */
-/* Overview tiles: label on top, number, then the button, all lined up across a row. */
-.card.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-bottom: 0;
-}
-.card.stat p {
-  margin: 0;
-}
-.card.stat strong {
-  margin: 8px 0 16px;
-}
-.card.stat button {
-  margin-top: auto;
-}
 @media (max-width: 800px) {
   /* No grey flash on tap; a small press effect instead. */
   * {
@@ -1277,28 +1308,24 @@ header {
   header {
     margin-bottom: 20px;
   }
-  /* Overview tiles: compact, equal height, button pinned to the bottom. */
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    align-items: stretch;
+  /* Screen descriptions differ in length: reserve two lines so the content below doesn't jump. */
+  #subtitle {
+    line-height: 1.4;
+    min-height: 2.8em;
   }
-  .card.stat {
-    padding: 14px;
+  .hub {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
-  .card.stat p {
-    font-size: 13px;
-    line-height: 1.35;
-    min-height: 2.7em;
+  .card.hub-item {
+    padding: 12px 14px;
   }
-  .card.stat strong {
-    font-size: 28px;
-    margin: 4px 0 12px;
+  .role-list {
+    grid-template-columns: 1fr;
+    gap: 2px;
   }
-  .card.stat button {
-    width: 100%;
-    padding: 8px 10px;
-    font-size: 14px;
+  .role-list dd {
+    margin-bottom: 8px;
   }
   /* Toolbars: actions share the row evenly and wrap neatly. */
   .toolbar {
@@ -1988,43 +2015,10 @@ fieldset.assignees label.check {
     width: 100%;
   }
 }
-/* Sidebar "More": daily screens on top, the rest folded underneath (desktop). */
-nav .nav-more {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-  border-top: 1px solid var(--ice-200);
-  border-radius: 0;
-  padding-top: 14px;
-}
-nav .nav-more::after {
-  content: "▾";
-  font-size: 12px;
-  transition: transform 200ms ease;
-}
-nav .nav-more[aria-expanded="true"]::after {
-  transform: rotate(180deg);
-}
-.nav-more-list {
-  display: none;
-  gap: 6px;
-}
-.nav-more-list.open {
-  display: grid;
-}
+/* Phones: the menu sheet skips what the bottom bar already shows. */
 @media (max-width: 800px) {
-  /* Phones: the bottom bar holds the daily screens; the "More" sheet lists everything else. */
-  body.menu-open aside nav .nav-more,
   body.menu-open aside nav .in-tabbar {
     display: none;
-  }
-  body.menu-open aside nav .nav-more-list {
-    display: grid;
-    gap: 2px;
-  }
-  body.menu-open aside nav .nav-more-list > .nav-group:first-child {
-    margin-top: 0;
   }
 }
 
