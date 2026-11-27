@@ -200,6 +200,7 @@ export function previewMails(config, transport, theme = "light") {
             name: agreement.name,
             email: booking.email,
             url: "https://scholarscafe.com/sign/sample",
+            theme,
           }),
         },
       },
@@ -209,7 +210,7 @@ export function previewMails(config, transport, theme = "light") {
         message: {
           from: `Scholars Cafe <${transport.sender}>`,
           to: booking.email,
-          ...codeEmail({ title: agreement.title, code: "731406", minutes: 10 }),
+          ...codeEmail({ title: agreement.title, code: "731406", minutes: 10, theme }),
         },
       },
       {
