@@ -142,8 +142,8 @@ export function checkValue(field, raw) {
 /** The sample wording from the approved prototype. Staff must review it before use. */
 export const SAMPLE_TEMPLATE = Object.freeze({
   title: "Mentorship Services Agreement",
-  subtitle: "Between Scholars' Cafe and the student named below",
-  body: `This agreement is made between Scholars' Cafe ("we") and {{name}}, holder of NID or passport number {{id_number}}, reachable at {{email}} and {{phone}} ("you"), joining as {{cohort}}.
+  subtitle: "Between Scholars Cafe and the student named below",
+  body: `This agreement is made between Scholars Cafe ("we") and {{name}}, holder of NID or passport number {{id_number}}, reachable at {{email}} and {{phone}} ("you"), joining as {{cohort}}.
 
 ## 1. What we will do
 We will give you one-to-one mentorship for your US applications: building a college list, planning and reviewing essays, preparing financial aid forms such as the CSS Profile and ISFAA, and preparing for your F-1 visa interview.

@@ -706,3 +706,80 @@ test("outbox delivery attaches the signed PDF", async () => {
   assert.equal(sentMail[0].attachments[0].filename, "SC-AGR-2026-0001-ABC123.pdf");
   assert.equal(sentMail[0].attachments[0].contentType, "application/pdf");
 });
+
+test('the brand is always "Scholars Cafe", never "Scholars\' Cafe" in any agreement output', async () => {
+  const { readFileSync } = await import("node:fs");
+  const { inflateSync } = await import("node:zlib");
+  const { codeEmail, signedCopyText, signedCopyLayout, teamSignedText, teamSignedLayout } =
+    await import("./agreements-mail.js");
+  const { renderEmail } = await import("./email-template.js");
+  const bad = /Scholars['’]/;
+  const check = (label, s) => assert.doesNotMatch(String(s), bad, label);
+  const a = {
+    title: "Mentorship Services Agreement",
+    ref: "SC-AGR-2026-0001",
+    name: "Nusrat Jahan",
+    email: "n@example.com",
+    docId: "SC-AGR-2026-0001-ABC123",
+    signedAt: "27 November 2026",
+    sha: "f".repeat(64),
+  };
+  // Emails: invite, code, the signer's copy and the team copy.
+  const invite = inviteEmail({ ...a, issued: "x", expires: "y", url: "https://x" });
+  const code = codeEmail({ title: a.title, code: "123456", minutes: 10 });
+  for (const [label, m] of [
+    ["invite", invite],
+    ["code", code],
+    ["signed copy", renderEmail({ subject: "s", ...signedCopyLayout(a) })],
+    ["team copy", renderEmail({ subject: "s", ...teamSignedLayout(a) })],
+  ])
+    check(label, m.subject + m.html + m.text);
+  check("signed copy text", signedCopyText(a));
+  check("team copy text", teamSignedText(a));
+  // The sample template and the rendered agreement text.
+  check("sample template", JSON.stringify(SAMPLE_TEMPLATE));
+  check(
+    "rendered text",
+    renderAgreementText({ ...SAMPLE_TEMPLATE, ref: a.ref, issued: "x", values: { name: a.name } }),
+  );
+  // The PDF: metadata and every line of text drawn on the pages.
+  const pdf = (
+    await agreementPdf({
+      ...SAMPLE_TEMPLATE,
+      ref: a.ref,
+      issued: "x",
+      values: { name: a.name },
+      signature: signaturePng(PNG),
+      method: "type",
+      signer: a.name,
+      email: a.email,
+      docId: a.docId,
+      signedAt: new Date(),
+      sha: a.sha,
+      verificationLabel: "code",
+      consent: "I agree",
+    })
+  ).toString("latin1");
+  let drawn = "";
+  for (const m of pdf.matchAll(/stream\r?\n([\s\S]*?)endstream/g))
+    try {
+      const page = inflateSync(Buffer.from(m[1], "latin1")).toString("latin1");
+      for (const h of page.matchAll(/<([0-9a-fA-F]+)>/g))
+        drawn += Buffer.from(h[1], "hex").toString("latin1");
+    } catch {
+      // Not a compressed text stream (e.g. the logo image).
+    }
+  assert.match(drawn, /Scholars Cafe/, "the PDF text was read");
+  check("PDF text", drawn);
+  check("PDF metadata", pdf);
+  // Messages and labels in the API, the admin screen and the signing page.
+  for (const file of [
+    "./agreements.js",
+    "./agreements-text.js",
+    "./agreements-mail.js",
+    "./agreements-pdf.js",
+    "./public/agreements-ui.js",
+    "../src/routes/sign.$token.tsx",
+  ])
+    check(file, readFileSync(new URL(file, import.meta.url), "utf8"));
+});

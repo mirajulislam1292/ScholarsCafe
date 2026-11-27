@@ -479,7 +479,7 @@ function compose(data, draft = {}) {
     values.date = { v: "Signing date", label: "Date" };
     preview.replaceChildren();
     const head = h.node("header", undefined, "agr-paper-head");
-    const brand = h.node("span", "Scholars' Cafe", "agr-brand");
+    const brand = h.node("span", "Scholars Cafe", "agr-brand");
     head.append(brand, h.node("span", "REF assigned on save", "agr-ref"));
     preview.append(head, h.node("h2", t.title));
     if (t.subtitle) preview.append(h.node("p", t.subtitle, "muted"));

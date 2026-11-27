@@ -30,7 +30,7 @@ export function agreementPdf(a) {
       bufferPages: true,
       info: {
         Title: pdfSafe(`${a.title} (${a.docId})`),
-        Author: "Scholars' Cafe",
+        Author: "Scholars Cafe",
         Subject: "Signed agreement",
         CreationDate: new Date(a.signedAt),
         ModDate: new Date(a.signedAt),
@@ -59,7 +59,7 @@ function draw(doc, a) {
     .font("Helvetica-Bold")
     .fontSize(14)
     .fillColor(NAVY)
-    .text("Scholars' Cafe", left + 40, top + 7);
+    .text("Scholars Cafe", left + 40, top + 7);
   doc
     .font("Courier")
     .fontSize(9)

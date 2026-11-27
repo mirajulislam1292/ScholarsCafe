@@ -190,10 +190,10 @@ export function installAgreementPublicRoutes(
     if (s === "revoked")
       throw fail(
         410,
-        "This agreement was withdrawn. Please contact Scholars' Cafe if you need a new link.",
+        "This agreement was withdrawn. Please contact Scholars Cafe if you need a new link.",
       );
     if (s === "expired")
-      throw fail(410, "This link has expired. Ask Scholars' Cafe to send you a new one.");
+      throw fail(410, "This link has expired. Ask Scholars Cafe to send you a new one.");
     if (s === "missing" || s === "draft")
       throw fail(404, "This link is not valid. It may have been replaced by a newer link.");
   };
@@ -248,7 +248,7 @@ export function installAgreementPublicRoutes(
     const a = await findByToken(req.params.token);
     gone(a);
     if (!mailer && !devLog)
-      throw fail(503, "Email is not set up yet. Please contact Scholars' Cafe.");
+      throw fail(503, "Email is not set up yet. Please contact Scholars Cafe.");
     await codeLimit(a.recipient_email);
     const code = newCode();
     await store.transaction(async (c) => {

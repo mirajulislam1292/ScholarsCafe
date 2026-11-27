@@ -26,7 +26,7 @@ export function inviteEmail({ title, ref, issued, expires, name, email, url }) {
     heading: title,
     firstName: firstName(name),
     greeting: "Hello,",
-    text: `Your ${title} with Scholars' Cafe is ready. Please read it and sign online. It takes about five minutes, and you can sign on your phone.\n\nIf anything in the agreement is unclear, reply to this email and your mentor will walk you through it before you sign.`,
+    text: `Your ${title} with Scholars Cafe is ready. Please read it and sign online. It takes about five minutes, and you can sign on your phone.\n\nIf anything in the agreement is unclear, reply to this email and your mentor will walk you through it before you sign.`,
     details: [
       ["Document", title],
       ["Status", "Awaiting your signature"],

@@ -268,7 +268,7 @@ function Wordmark() {
     <span className="inline-flex items-center gap-2.5">
       <img src="/brand/mark-blue.png" alt="" width={28} height={25} className="h-auto w-7" />
       <span className="text-[17px] font-semibold tracking-[-0.01em] text-blue-950">
-        Scholars' Cafe
+        Scholars Cafe
       </span>
     </span>
   );
