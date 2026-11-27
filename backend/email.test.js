@@ -457,3 +457,90 @@ test("Formatting (Compose/replies only): bold and https links, everything else e
   const { text } = renderEmail({ text: "**Hi** [site](https://x.co/a)", format: true });
   assert.ok(text.startsWith("Hi site (https://x.co/a)"));
 });
+
+test("Email theme: dark bakes the dark palette in, light stays the default", async () => {
+  const { typedLayout } = await import("./inbox.js");
+  const { previewMails } = await import("./email-previews.js");
+  const input = {
+    subject: "Your plan",
+    label: "Booking confirmed",
+    ref: "SC-12",
+    heading: "See you soon",
+    firstName: "Rafi",
+    text: "Read **this** and [the guide](https://scholarscafe.com/resources).\n\n- one\n- two",
+    format: true,
+    details: [["When", "Mon 24 Nov"]],
+    code: "482913",
+    button: { label: "Join the session", url: "https://meet.google.com/abc" },
+    note: "Small print.",
+    quote: { by: "Rafi wrote:", text: "Hello" },
+    unsubscribeUrl: "https://admin.scholarscafe.com/u?t=1",
+  };
+  const light = renderEmail(input);
+  const dark = renderEmail({ ...input, theme: "dark" });
+  // Default (no theme, or anything unknown) is the light email, unchanged.
+  assert.equal(renderEmail({ ...input, theme: "light" }).html, light.html);
+  assert.equal(renderEmail({ ...input, theme: "neon" }).html, light.html);
+  assert.match(light.html, /<body class="sc-body" style="margin:0;padding:0;background:#f1f5f8;">/);
+  assert.match(light.html, /<meta name="color-scheme" content="light dark">/);
+  // Dark: dark page, card and footer in the inline styles; dark-only colour scheme; no swap CSS.
+  assert.match(dark.html, /<body class="sc-body" style="margin:0;padding:0;background:#0b1622;">/);
+  assert.match(dark.html, /class="sc-bg" bgcolor="#0b1622"/);
+  assert.match(dark.html, /class="sc-card" bgcolor="#13202d" style="[^"]*background:#13202d;/);
+  assert.match(
+    dark.html,
+    /class="sc-foot" align="center" bgcolor="#0f1b27" style="background:#0f1b27;/,
+  );
+  assert.match(dark.html, /<meta name="color-scheme" content="dark">/);
+  assert.match(dark.html, /<meta name="supported-color-schemes" content="dark">/);
+  assert.doesNotMatch(dark.html, /prefers-color-scheme|data-ogsc/);
+  // No light colours left inline: navy text only on the light-blue button.
+  assert.doesNotMatch(dark.html, /#f1f5f8|#ffffff|#e8f3f9|#0b426d|#2b6da6/i);
+  assert.equal(dark.html.match(/#041c31/g).length, 2, "button text only (VML and link)");
+  // Button: light blue with navy text, also in Outlook's VML button.
+  assert.match(dark.html, /fillcolor="#8cc2f0"><w:anchorlock\/><center style="color:#041c31;/);
+  assert.match(dark.html, /background:#8cc2f0;color:#041c31;/);
+  // Logo: the ice mark only.
+  assert.doesNotMatch(dark.html, /mark-blue\.png|sc-logo-l/);
+  assert.equal(dark.html.match(/mark-ice\.png/g).length, 2);
+  // Same words in both: the visible text and the plain-text part match.
+  const words = (h) =>
+    h
+      .replace(/<head>[\s\S]*<\/head>/, "")
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  assert.equal(words(dark.html), words(light.html));
+  assert.equal(dark.text, light.text);
+  assert.doesNotMatch(dark.html + dark.text, /Scholars' Cafe|Scholars&#39; Cafe|—/);
+
+  // Compose / Reply store the theme in the layout; the outbox renders it; old rows stay light.
+  assert.equal(typedLayout("Hi").theme, undefined);
+  assert.equal(typedLayout("Hi", { theme: "dark" }).theme, "dark");
+  const row = (layout) => ({
+    id: "x",
+    subject: "S",
+    body: "Hi",
+    to_email: "a@b.co",
+    from_contact: 1,
+    layout: layout && JSON.stringify(layout),
+  });
+  const t = { contact: { sender: CONTACT }, sender: CONTACT };
+  assert.match(
+    outboxMessage(row(typedLayout("Hi", { theme: "dark" })), t).html,
+    /class="sc-bg" bgcolor="#0b1622"/,
+  );
+  assert.match(outboxMessage(row(typedLayout("Hi")), t).html, /class="sc-bg" bgcolor="#f1f5f8"/);
+  assert.match(outboxMessage(row(null), t).html, /class="sc-bg" bgcolor="#f1f5f8"/);
+
+  // Preview emails page: every email in both styles.
+  const lightAll = previewMails({}, t);
+  const darkAll = previewMails({}, t, "dark");
+  assert.equal(darkAll.length, lightAll.length);
+  for (const p of darkAll) {
+    assert.match(p.message.html, /<meta name="color-scheme" content="dark">/, p.id);
+    assert.doesNotMatch(p.message.html, /mark-blue\.png/, p.id);
+  }
+  for (const p of lightAll) assert.match(p.message.html, /content="light dark"/, p.id);
+});

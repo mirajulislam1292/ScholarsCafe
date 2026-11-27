@@ -55,21 +55,30 @@ function resolveButton(button, adminOrigin) {
   return url ? { label: button.label, url } : null;
 }
 
-/** The nodemailer message for one outbox row: shared HTML template + plain-text alternative. */
-export function outboxMessage(row, transport) {
+/** Light or dark: the email style picked in Compose / Reply (stored as layout.theme). */
+export const emailTheme = (t) => (t === "dark" ? "dark" : "light");
+
+/**
+ * The nodemailer message for one outbox row: shared HTML template + plain-text alternative.
+ * The theme comes from the row's layout (layout.theme); `opts.theme` overrides it (Preview emails page).
+ */
+export function outboxMessage(row, transport, opts = {}) {
   const fromContact = Boolean(row.from_contact);
   const from = fromContact ? transport.contact?.sender || CONTACT : transport.sender || CONTACT;
   const layout = rowLayout(row);
+  const theme = emailTheme(opts.theme || layout?.theme);
   const { html, text } = layout
     ? renderEmail({
         ...layout,
         subject: row.subject,
+        theme,
         button: resolveButton(layout.button, transport.adminOrigin),
         unsubscribeUrl: row.unsubscribe_url || null,
       })
     : renderEmail({
         subject: row.subject,
         text: row.body,
+        theme,
         unsubscribeUrl: row.unsubscribe_url || null,
         // Mail typed in the dashboard gets no automatic button; automatic mail gets one main button.
         button: fromContact
@@ -161,10 +170,11 @@ export async function deliverMail(store, transport) {
 }
 
 /** Sign-in code + magic link (sent straight to the account's own address, not via the outbox). */
-export function loginEmail(transport, to, code, url, minutes) {
+export function loginEmail(transport, to, code, url, minutes, theme = "light") {
   const subject = "Your Scholars Cafe sign-in code";
   const { html, text } = renderEmail({
     subject,
+    theme: emailTheme(theme),
     preheader: `Your sign-in code is ${code}. It expires in ${minutes} minutes.`,
     label: "Sign-in code",
     heading: "Your sign-in code",

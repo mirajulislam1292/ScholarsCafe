@@ -15,16 +15,17 @@ import { z } from "zod";
 import { canPublish } from "./security.js";
 import { escapeHtml, CONTACT } from "./email-template.js";
 import { queuePush, inboxReaderIds, preview } from "./push.js";
-import { sender, outboxMessage, emailTagline } from "./mail.js";
+import { sender, outboxMessage, emailTheme } from "./mail.js";
 
 // Email layout for mail typed in the Mail screen: the team's own words with simple formatting, a greeting
 // when the message doesn't already start with one, and, for replies, the original message quoted below.
 const GREETING_RE = /^\s*(hi|hello|hey|dear|assalamu|salam|good (morning|afternoon|evening))\b/i;
-export function typedLayout(body, { name = "", quote = null } = {}) {
+export function typedLayout(body, { name = "", quote = null, theme = "light" } = {}) {
   const own = GREETING_RE.test(body);
   return {
     text: body,
     format: true,
+    ...(emailTheme(theme) === "dark" ? { theme: "dark" } : {}),
     ...(own ? {} : name ? { firstName: name } : { greeting: "Hello," }),
     ...(quote ? { quote } : {}),
   };
@@ -196,6 +197,7 @@ const composeSchema = z
     to: z.string().max(1000),
     subject: z.string().trim().min(1, "Add a subject.").max(160),
     body: z.string().trim().min(1, "Write a message.").max(20000),
+    theme: z.enum(["light", "dark"]).default("light"),
   })
   .strict();
 const cleanSubject = (s) => s.replace(/[\x00-\x1f\x7f]+/g, " ").trim();
@@ -422,6 +424,7 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
         to: z.string().max(1000).default(""),
         subject: z.string().max(160).default(""),
         body: z.string().max(20000).default(""),
+        theme: z.enum(["light", "dark"]).default("light"),
       })
       .strict()
       .parse(req.body);
@@ -435,10 +438,9 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
         body: previewBody,
         to_email: to.joined || "",
         from_contact: 1,
-        layout: typedLayout(previewBody, { name }),
+        layout: typedLayout(previewBody, { name, theme: input.theme }),
       },
       { contact: { sender: CONTACT }, sender: CONTACT },
-      await emailTagline(store),
     );
     res.json({ url: `/api/inbox/compose/preview?t=${keepPreview(req.actor.id, message.html)}` });
   });
@@ -461,7 +463,7 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
         400,
         "Sending needs the contact@ mailbox password (CONTACT_IMAP_PASSWORD) in hPanel.",
       );
-    const { to, subject, body } = await composed(req);
+    const { to, subject, body, theme } = await composed(req);
     if (
       store.checkRateLimit &&
       !(await store.checkRateLimit("inbox_compose", req.actor.id, 20, 600))
@@ -472,7 +474,7 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
       const name = to.list.length === 1 ? await knownName(store, to.list[0], c) : "";
       await store.query(
         "INSERT INTO mail_outbox (id,subject,body,to_email,from_contact,layout) VALUES (?,?,?,?,1,?)",
-        [outId, subject, body, to.joined, JSON.stringify(typedLayout(body, { name }))],
+        [outId, subject, body, to.joined, JSON.stringify(typedLayout(body, { name, theme }))],
         c,
       );
       await store.query(
@@ -557,8 +559,11 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
     res.json({ ok: true });
   });
   app.post("/api/inbox/:id/reply", async (req, res) => {
-    const { body } = z
-      .object({ body: z.string().trim().min(1).max(20000) })
+    const { body, theme } = z
+      .object({
+        body: z.string().trim().min(1).max(20000),
+        theme: z.enum(["light", "dark"]).default("light"),
+      })
       .strict()
       .parse(req.body);
     if (!canReplyFrom(config))
@@ -578,6 +583,7 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
     await store.transaction(async (c) => {
       const layout = typedLayout(body, {
         name: m.from_name || "",
+        theme,
         quote: {
           by: `On ${quoteDate(m.received_at)}, ${m.from_name || m.from_email} wrote:`,
           text: String(m.body_text || m.snippet || "").slice(0, 2000),
