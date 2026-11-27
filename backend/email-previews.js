@@ -41,7 +41,7 @@ const answers = [
 const json = (l) => JSON.stringify(l);
 
 /** Every email the app sends, with made-up sample data, rendered exactly as it would be sent. */
-export function previewMails(config, transport) {
+export function previewMails(config, transport, theme = "light") {
   const admin = config.ADMIN_ORIGIN || "https://admin.scholarscafe.com";
   const meet = "https://meet.google.com/abc-defg-hij";
   const unsub = unsubscribeUrl({ ADMIN_ORIGIN: admin }, "sample-token");
@@ -190,7 +190,7 @@ export function previewMails(config, transport) {
       }),
     }),
   ]
-    .map((p) => ({ ...p, message: outboxMessage(p.row, transport) }))
+    .map((p) => ({ ...p, message: outboxMessage(p.row, transport, { theme }) }))
     .concat([
       {
         id: "sign-in-code",
@@ -201,6 +201,7 @@ export function previewMails(config, transport) {
           "482913",
           "https://student.scholarscafe.com/auth/email?t=sample",
           10,
+          theme,
         ),
       },
     ]);
@@ -212,14 +213,16 @@ export function installEmailPreviewRoutes(app, { store, fail, config }) {
     adminOrigin: config.ADMIN_ORIGIN || "",
     contact: { sender: "contact@scholarscafe.com" },
   };
-  const all = async () => previewMails(config, transport);
+  // ?theme=dark shows every email in the dark style (the Light / Dark switch on the page).
+  const all = async (req) =>
+    previewMails(config, transport, req.query.theme === "dark" ? "dark" : "light");
   app.use("/api/email-previews", (req, _res, next) => {
     if (!canPublish(req.actor.role)) throw fail(403, "Email previews are for owners and admins.");
     next();
   });
-  app.get("/api/email-previews", async (_req, res) =>
+  app.get("/api/email-previews", async (req, res) =>
     res.json({
-      items: (await all()).map((p) => ({
+      items: (await all(req)).map((p) => ({
         id: p.id,
         label: p.label,
         subject: p.message.subject,
@@ -232,7 +235,7 @@ export function installEmailPreviewRoutes(app, { store, fail, config }) {
   );
   // The HTML as its own page for a sandboxed frame: no scripts at all; images only from https.
   app.get("/api/email-previews/:id", async (req, res) => {
-    const p = (await all()).find((x) => x.id === req.params.id);
+    const p = (await all(req)).find((x) => x.id === req.params.id);
     if (!p) throw fail(404, "No such email.");
     res
       .set({

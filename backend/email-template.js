@@ -27,6 +27,38 @@ export const LOGO_ICE = LOGO.dark;
 /** The footer tagline (fixed: set in email-brand.js). */
 export const DEFAULT_TAGLINE = TAGLINE;
 
+// The two palettes. "light" (default) adapts to the reader's dark mode through the CSS below; "dark" bakes
+// the dark colours into the inline styles so mail apps that repaint light emails (Outlook iOS, Gmail apps)
+// leave it alone.
+const PALETTES = {
+  light: {
+    page: C.page,
+    card: C.card,
+    foot: C.ice,
+    line: C.line,
+    text: C.navy,
+    muted: C.muted,
+    link: C.link,
+    btn: C.blue,
+    btnText: "#ffffff",
+    chip: C.blue,
+  },
+  dark: {
+    page: D.page,
+    card: D.card,
+    foot: D.footer,
+    line: D.line,
+    text: D.text,
+    muted: D.muted,
+    link: D.link,
+    btn: D.link,
+    btnText: C.navy,
+    chip: D.link,
+  },
+};
+export const THEMES = Object.keys(PALETTES);
+const palette = (theme) => PALETTES[theme === "dark" ? "dark" : "light"];
+
 const HEAD = FONTS.heading;
 const BODY = FONTS.body;
 const MONO = FONTS.mono;
@@ -39,26 +71,26 @@ export const escapeHtml = (s) =>
 
 // Bare https:// links become clickable; trailing punctuation stays outside the link.
 const URL_RE = /https?:\/\/[^\s<>"']+[^\s<>"'.,;:!?)\]]/g;
-const linkStyle = `color:${C.link};text-decoration:underline;word-break:break-word;`;
-function linkify(escaped) {
+const linkStyle = (k) => `color:${k.link};text-decoration:underline;word-break:break-word;`;
+function linkify(escaped, k = PALETTES.light) {
   return escaped.replace(URL_RE, (url) => {
     const href = url.replace(/&amp;/g, "&");
-    return `<a href="${escapeHtml(href)}" class="sc-a" style="${linkStyle}">${url}</a>`;
+    return `<a href="${escapeHtml(href)}" class="sc-a" style="${linkStyle(k)}">${url}</a>`;
   });
 }
 
 // Simple formatting for mail typed by the team (Mail screen, ECA alerts): **bold** and [label](https://…).
 const MD_LINK = /\[([^\]\n]{1,200})\]\((https:\/\/[^\s()<>"']{1,2000})\)/g;
 const BOLD = /\*\*([^*\n]{1,500}?)\*\*/g;
-function rich(escaped) {
+function rich(escaped, k) {
   const links = [];
   const held = escaped.replace(MD_LINK, (_m, label, url) => {
     links.push(
-      `<a href="${escapeHtml(url.replace(/&amp;/g, "&"))}" class="sc-a" style="${linkStyle}">${label}</a>`,
+      `<a href="${escapeHtml(url.replace(/&amp;/g, "&"))}" class="sc-a" style="${linkStyle(k)}">${label}</a>`,
     );
     return `\u0000${links.length - 1}\u0000`;
   });
-  return linkify(held)
+  return linkify(held, k)
     .replace(BOLD, '<strong style="font-weight:700;">$1</strong>')
     .replace(/\u0000(\d+)\u0000/g, (_m, i) => links[Number(i)]);
 }
@@ -72,17 +104,19 @@ const clean = (s) =>
   String(s ?? "")
     .replace(/\r\n?/g, "\n")
     .trim();
-const inline = (s, format) => (format ? rich : linkify)(escapeHtml(s));
+const inline = (s, format, k) => (format ? rich : linkify)(escapeHtml(s), k);
 const paragraphs = (s) =>
   clean(s)
     .split(/\n\s*\n/)
     .map((p) => p.replace(/\s+$/, ""))
     .filter((p) => p.trim());
 
-const P = `margin:0 0 16px 0;font-family:${BODY};font-size:16px;line-height:26px;color:${C.navy};`;
+const pStyle = (k) =>
+  `margin:0 0 16px 0;font-family:${BODY};font-size:16px;line-height:26px;color:${k.text};`;
 
 /** Plain text → HTML paragraphs and bullet lists (lines starting with "- "). */
-export function textToHtml(text, { format = false } = {}) {
+export function textToHtml(text, { format = false, theme = "light" } = {}) {
+  const k = palette(theme);
   return paragraphs(text)
     .map((para) => {
       const lines = para.split("\n");
@@ -92,12 +126,12 @@ export function textToHtml(text, { format = false } = {}) {
           lines
             .map(
               (l) =>
-                `<li class="sc-t" style="margin:0 0 8px 0;font-family:${BODY};font-size:16px;line-height:26px;color:${C.navy};">${inline(l.replace(/^\s*-\s+/, ""), format)}</li>`,
+                `<li class="sc-t" style="margin:0 0 8px 0;font-family:${BODY};font-size:16px;line-height:26px;color:${k.text};">${inline(l.replace(/^\s*-\s+/, ""), format, k)}</li>`,
             )
             .join("") +
           `</ul>`
         );
-      return `<p class="sc-t" style="${P}">${lines.map((l) => inline(l, format)).join("<br>")}</p>`;
+      return `<p class="sc-t" style="${pStyle(k)}">${lines.map((l) => inline(l, format, k)).join("<br>")}</p>`;
     })
     .join("\n");
 }
@@ -147,46 +181,48 @@ export function signatureText() {
 // ---------------------------------------------------------------------------------------------------------
 // HTML pieces (from the approved design)
 
-function buttonHtml({ label, url }) {
+function buttonHtml({ label, url }, k) {
   const w = Math.max(180, Math.round(label.length * 8.6 + 64));
   const href = escapeHtml(url);
   const text = escapeHtml(label);
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;">
-<tr><td align="left" class="sc-btn" style="border-radius:8px;background:${C.blue};">
-<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${href}" style="height:48px;v-text-anchor:middle;width:${w}px;" arcsize="17%" stroke="f" fillcolor="${C.blue}"><w:anchorlock/><center style="color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;font-size:16px;font-weight:600;">${text}</center></v:roundrect><![endif]-->
-<!--[if !mso]><!--><a href="${href}" class="sc-btn" style="display:inline-block;background:${C.blue};color:#ffffff;font-family:${BODY};font-size:16px;font-weight:600;line-height:48px;padding:0 28px;border-radius:8px;text-decoration:none;mso-hide:all;">${text}</a><!--<![endif]-->
+<tr><td align="left" class="sc-btn" style="border-radius:8px;background:${k.btn};">
+<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${href}" style="height:48px;v-text-anchor:middle;width:${w}px;" arcsize="17%" stroke="f" fillcolor="${k.btn}"><w:anchorlock/><center style="color:${k.btnText};font-family:'Segoe UI',Arial,sans-serif;font-size:16px;font-weight:600;">${text}</center></v:roundrect><![endif]-->
+<!--[if !mso]><!--><a href="${href}" class="sc-btn" style="display:inline-block;background:${k.btn};color:${k.btnText};font-family:${BODY};font-size:16px;font-weight:600;line-height:48px;padding:0 28px;border-radius:8px;text-decoration:none;mso-hide:all;">${text}</a><!--<![endif]-->
 </td></tr></table>`;
 }
 
-function detailsHtml(rows, stacked) {
+function detailsHtml(rows, stacked, k) {
   if (!rows.length) return "";
   const cell = ([label, value], i) => {
-    const top = i ? `border-top:1px solid ${C.line};` : "";
+    const top = i ? `border-top:1px solid ${k.line};` : "";
     const v = escapeHtml(value).replace(/\n/g, "<br>");
     if (stacked)
       return `<tr><td class="sc-line" style="${top}padding:14px 18px;">
-<div class="sc-m" style="font-family:${BODY};font-size:13px;line-height:18px;color:${C.muted};margin:0 0 4px 0;">${escapeHtml(label)}</div>
-<div class="sc-t" style="font-family:${BODY};font-size:15px;line-height:23px;color:${C.navy};word-break:break-word;">${linkify(v)}</div></td></tr>`;
-    return `<tr><td class="sc-line sc-m" width="38%" valign="top" style="${top}padding:12px 0 12px 18px;font-family:${BODY};font-size:14px;line-height:22px;color:${C.muted};">${escapeHtml(label)}</td>
-<td class="sc-line sc-t" valign="top" style="${top}padding:12px 18px 12px 12px;font-family:${BODY};font-size:15px;line-height:22px;font-weight:600;color:${C.navy};word-break:break-word;">${linkify(v)}</td></tr>`;
+<div class="sc-m" style="font-family:${BODY};font-size:13px;line-height:18px;color:${k.muted};margin:0 0 4px 0;">${escapeHtml(label)}</div>
+<div class="sc-t" style="font-family:${BODY};font-size:15px;line-height:23px;color:${k.text};word-break:break-word;">${linkify(v, k)}</div></td></tr>`;
+    return `<tr><td class="sc-line sc-m" width="38%" valign="top" style="${top}padding:12px 0 12px 18px;font-family:${BODY};font-size:14px;line-height:22px;color:${k.muted};">${escapeHtml(label)}</td>
+<td class="sc-line sc-t" valign="top" style="${top}padding:12px 18px 12px 12px;font-family:${BODY};font-size:15px;line-height:22px;font-weight:600;color:${k.text};word-break:break-word;">${linkify(v, k)}</td></tr>`;
   };
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="sc-box" style="width:100%;border:1px solid ${C.line};border-radius:10px;border-collapse:separate;margin:4px 0 24px 0;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="sc-box" style="width:100%;border:1px solid ${k.line};border-radius:10px;border-collapse:separate;margin:4px 0 24px 0;">
 ${rows.map(cell).join("\n")}
 </table>`;
 }
 
-function codeHtml(code) {
+function codeHtml(code, k) {
   const spaced = String(code).replace(/\s/g, "").split("").join(" ");
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 24px 0;">
-<tr><td align="center" class="sc-panel" style="background:${C.ice};border-radius:10px;padding:22px 12px;">
-<div class="sc-h" style="font-family:${HEAD};font-size:34px;line-height:40px;font-weight:600;letter-spacing:6px;color:${C.navy};">${escapeHtml(spaced)}</div>
+<tr><td align="center" class="sc-panel" style="background:${k.foot};border-radius:10px;padding:22px 12px;">
+<div class="sc-h" style="font-family:${HEAD};font-size:34px;line-height:40px;font-weight:600;letter-spacing:6px;color:${k.text};">${escapeHtml(spaced)}</div>
 </td></tr></table>`;
 }
 
-function logoImgs(size) {
+function logoImgs(size, dark) {
   const h = Math.round(size / LOGO.ratio);
   const img = (src, cls) =>
     `<img src="${src}" width="${size}" height="${h}" alt="${BRAND_NAME}"${cls ? ` class="${cls}"` : ""} style="display:block;border:0;outline:none;text-decoration:none;width:${size}px;height:${h}px;">`;
+  // Dark theme: the ice logo only. Light theme: blue logo, swapped for the ice one in dark mode.
+  if (dark) return img(LOGO.dark, "");
   return `${img(LOGO.light, "sc-logo-l")}<!--[if !mso]><!--><div class="sc-logo-d" style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${img(LOGO.dark, "")}</div><!--<![endif]-->`;
 }
 
@@ -246,10 +282,13 @@ const httpsOnly = (b) =>
  * @param {{label:string,url:string}} [input.action]  Older name for `button`.
  * @param {string} [input.note]            Small print under the button.
  * @param {{by:string,text:string}} [input.quote]     The original message, for replies.
+ * @param {"light"|"dark"} [input.theme]  "dark" bakes the dark palette into the inline styles (default "light").
  * @param {string} [input.unsubscribeUrl]  Newsletters and alerts only: adds the subscription line.
  */
 export function renderEmail(input) {
   const t = { ...input };
+  const dark = t.theme === "dark";
+  const k = palette(t.theme);
   const message = clean(t.text);
   const button = httpsOnly(t.button || t.action);
   const rows = detailRows(t.details);
@@ -271,38 +310,42 @@ export function renderEmail(input) {
 
   // "Hi {first name}," or an explicit greeting such as "Hello," (mail to someone whose name we don't know).
   const greeting = firstName ? `Hi ${firstName},` : String(t.greeting ?? "").trim();
-  const greet = greeting ? `<p class="sc-t" style="${P}">${escapeHtml(greeting)}</p>` : "";
+  const greet = greeting ? `<p class="sc-t" style="${pStyle(k)}">${escapeHtml(greeting)}</p>` : "";
   const ref = t.ref
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 14px 0;"><tr><td class="sc-chip" style="background:${C.ice};border:1px solid ${C.line};border-radius:6px;padding:4px 10px;font-family:${MONO};font-size:12px;line-height:18px;letter-spacing:1px;color:${C.blue};">REF ${escapeHtml(t.ref)}</td></tr></table>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 14px 0;"><tr><td class="sc-chip" style="background:${k.foot};border:1px solid ${k.line};border-radius:6px;padding:4px 10px;font-family:${MONO};font-size:12px;line-height:18px;letter-spacing:1px;color:${k.chip};">REF ${escapeHtml(t.ref)}</td></tr></table>`
     : "";
   const heading = t.heading
-    ? `<h1 class="sc-h sc-h1" style="margin:0 0 18px 0;font-family:${HEAD};font-size:26px;line-height:33px;font-weight:600;letter-spacing:-0.2px;color:${C.navy};">${escapeHtml(t.heading)}</h1>`
+    ? `<h1 class="sc-h sc-h1" style="margin:0 0 18px 0;font-family:${HEAD};font-size:26px;line-height:33px;font-weight:600;letter-spacing:-0.2px;color:${k.text};">${escapeHtml(t.heading)}</h1>`
     : "";
   const noteHtml = note
     ? paragraphs(note)
         .map(
           (p) =>
-            `<p class="sc-m" style="margin:0 0 16px 0;font-family:${BODY};font-size:14px;line-height:22px;color:${C.muted};">${p
+            `<p class="sc-m" style="margin:0 0 16px 0;font-family:${BODY};font-size:14px;line-height:22px;color:${k.muted};">${p
               .split("\n")
-              .map((l) => linkify(escapeHtml(l)))
+              .map((l) => linkify(escapeHtml(l), k))
               .join("<br>")}</p>`,
         )
         .join("\n")
     : "";
   const quoteHtml = quote
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0;"><tr><td class="sc-quote" style="border-left:3px solid ${C.line};padding:2px 0 2px 14px;">
-${quote.by ? `<p class="sc-m" style="margin:0 0 6px 0;font-family:${BODY};font-size:13px;line-height:20px;color:${C.muted};">${escapeHtml(quote.by)}</p>` : ""}
-<p class="sc-m" style="margin:0;font-family:${BODY};font-size:15px;line-height:23px;color:${C.muted};">${escapeHtml(clean(quote.text)).replace(/\n/g, "<br>")}</p></td></tr></table>`
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0;"><tr><td class="sc-quote" style="border-left:3px solid ${k.line};padding:2px 0 2px 14px;">
+${quote.by ? `<p class="sc-m" style="margin:0 0 6px 0;font-family:${BODY};font-size:13px;line-height:20px;color:${k.muted};">${escapeHtml(quote.by)}</p>` : ""}
+<p class="sc-m" style="margin:0;font-family:${BODY};font-size:15px;line-height:23px;color:${k.muted};">${escapeHtml(clean(quote.text)).replace(/\n/g, "<br>")}</p></td></tr></table>`
     : "";
   const label = t.label
-    ? `<td align="right" valign="middle" class="sc-m" style="font-family:${BODY};font-size:12px;line-height:16px;letter-spacing:1px;text-transform:uppercase;font-weight:600;color:${C.muted};">${escapeHtml(t.label)}</td>`
+    ? `<td align="right" valign="middle" class="sc-m" style="font-family:${BODY};font-size:12px;line-height:16px;letter-spacing:1px;text-transform:uppercase;font-weight:600;color:${k.muted};">${escapeHtml(t.label)}</td>`
     : "";
-  const sep = `<span class="sc-m" style="color:${C.muted};">&nbsp;&middot; </span>`;
+  const sep = `<span class="sc-m" style="color:${k.muted};">&nbsp;&middot; </span>`;
   const fl = (href, text) =>
-    `<a href="${escapeHtml(href)}" class="sc-a" style="color:${C.link};text-decoration:none;">${escapeHtml(text)}</a>`;
+    `<a href="${escapeHtml(href)}" class="sc-a" style="color:${k.link};text-decoration:none;">${escapeHtml(text)}</a>`;
   const unsub = unsubscribeUrl
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;"><tr><td align="center" class="sc-m" style="padding:20px 24px 0 24px;font-family:${BODY};font-size:12px;line-height:18px;color:${C.muted};">You are getting this email because you subscribed to ${BRAND_NAME} updates.<br><a href="${escapeHtml(unsubscribeUrl)}" class="sc-a" style="color:${C.muted};text-decoration:underline;">Unsubscribe</a></td></tr></table>`
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;"><tr><td align="center" class="sc-m" style="padding:20px 24px 0 24px;font-family:${BODY};font-size:12px;line-height:18px;color:${k.muted};">You are getting this email because you subscribed to ${BRAND_NAME} updates.<br><a href="${escapeHtml(unsubscribeUrl)}" class="sc-a" style="color:${k.muted};text-decoration:underline;">Unsubscribe</a></td></tr></table>`
     : "";
+
+  // Light: "light dark" plus the dark-mode CSS swap. Dark: already dark, so no swap is needed.
+  const scheme = dark ? "dark" : "light dark";
+  const darkCss = dark ? "" : `@media (prefers-color-scheme: dark){${DARK_CSS}\n}${OGSC_CSS}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -312,13 +355,13 @@ ${quote.by ? `<p class="sc-m" style="margin:0 0 6px 0;font-family:${BODY};font-s
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
-<meta name="color-scheme" content="light dark">
-<meta name="supported-color-schemes" content="light dark">
+<meta name="color-scheme" content="${scheme}">
+<meta name="supported-color-schemes" content="${scheme}">
 <title>${escapeHtml(t.subject)}</title>
 <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>body,table,td,p,a,li,h1,div{font-family:'Segoe UI',Arial,sans-serif!important;}</style><![endif]-->
 <!--[if !mso]><!--><link href="${FONTS.googleCss}" rel="stylesheet"><!--<![endif]-->
 <style>
-:root{color-scheme:light dark;supported-color-schemes:light dark;}
+:root{color-scheme:${scheme};supported-color-schemes:${scheme};}
 body{margin:0!important;padding:0!important;width:100%!important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
 table,td{border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;}
 img{-ms-interpolation-mode:bicubic;}
@@ -330,33 +373,32 @@ a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important
 .sc-foot{border-radius:0!important;}
 .sc-h1{font-size:23px!important;line-height:30px!important;}
 }
-@media (prefers-color-scheme: dark){${DARK_CSS}
-}${OGSC_CSS}
+${darkCss}
 </style>
 </head>
-<body class="sc-body" style="margin:0;padding:0;background:${C.page};">
+<body class="sc-body" style="margin:0;padding:0;background:${k.page};">
 <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">${escapeHtml(preText)}${filler}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="sc-bg" bgcolor="${C.page}" style="width:100%;background:${C.page};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="sc-bg" bgcolor="${k.page}" style="width:100%;background:${k.page};">
 <tr><td align="center" class="sc-outer" style="padding:32px 12px;">
 <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="sc-card" bgcolor="${C.card}" style="width:100%;max-width:600px;background:${C.card};border:1px solid ${C.line};border-radius:14px;border-collapse:separate;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="sc-card" bgcolor="${k.card}" style="width:100%;max-width:600px;background:${k.card};border:1px solid ${k.line};border-radius:14px;border-collapse:separate;">
 <tr><td class="sc-pad" style="padding:30px 40px 6px 40px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-<td width="40" valign="middle" style="width:40px;">${logoImgs(40)}</td>
-<td valign="middle" class="sc-h" style="padding-left:12px;font-family:${HEAD};font-size:18px;line-height:22px;font-weight:600;color:${C.navy};">${BRAND_NAME}</td>
+<td width="40" valign="middle" style="width:40px;">${logoImgs(40, dark)}</td>
+<td valign="middle" class="sc-h" style="padding-left:12px;font-family:${HEAD};font-size:18px;line-height:22px;font-weight:600;color:${k.text};">${BRAND_NAME}</td>
 ${label}
 </tr></table>
 </td></tr>
 <tr><td class="sc-pad" style="padding:26px 40px 12px 40px;">
-${ref}${heading}${greet}${textToHtml(message, { format: Boolean(t.format) })}
-${detailsHtml(rows, Boolean(t.stacked))}${t.code ? codeHtml(t.code) : ""}${button ? buttonHtml(button) : ""}${noteHtml}${quoteHtml}
+${ref}${heading}${greet}${textToHtml(message, { format: Boolean(t.format), theme: t.theme })}
+${detailsHtml(rows, Boolean(t.stacked), k)}${t.code ? codeHtml(t.code, k) : ""}${button ? buttonHtml(button, k) : ""}${noteHtml}${quoteHtml}
 </td></tr>
-<tr><td class="sc-foot" align="center" style="background:${C.ice};border-top:1px solid ${C.line};border-radius:0 0 13px 13px;padding:30px 24px 28px 24px;">
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center">${logoImgs(34)}</td></tr></table>
-<p class="sc-h" style="margin:12px 0 4px 0;font-family:${HEAD};font-size:18px;line-height:24px;font-weight:600;color:${C.navy};">${BRAND_NAME}</p>
-<p class="sc-m" style="margin:0 0 16px 0;font-family:${BODY};font-size:13px;line-height:20px;color:${C.muted};">${escapeHtml(TAGLINE)}</p>
+<tr><td class="sc-foot" align="center"${dark ? ` bgcolor="${k.foot}"` : ""} style="background:${k.foot};border-top:1px solid ${k.line};border-radius:0 0 13px 13px;padding:30px 24px 28px 24px;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center">${logoImgs(34, dark)}</td></tr></table>
+<p class="sc-h" style="margin:12px 0 4px 0;font-family:${HEAD};font-size:18px;line-height:24px;font-weight:600;color:${k.text};">${BRAND_NAME}</p>
+<p class="sc-m" style="margin:0 0 16px 0;font-family:${BODY};font-size:13px;line-height:20px;color:${k.muted};">${escapeHtml(TAGLINE)}</p>
 <p style="margin:0 0 20px 0;font-family:${BODY};font-size:13px;line-height:22px;">${SOCIAL.map(([n, u]) => fl(u, n)).join(sep)}<br>${fl("mailto:" + CONTACT, CONTACT)}</p>
-<p class="sc-m" style="margin:0;font-family:${BODY};font-size:13px;line-height:20px;color:${C.muted};">Questions? Just reply to this email.<br>${fl(SITE, SITE_LABEL)}</p>
+<p class="sc-m" style="margin:0;font-family:${BODY};font-size:13px;line-height:20px;color:${k.muted};">Questions? Just reply to this email.<br>${fl(SITE, SITE_LABEL)}</p>
 </td></tr>
 </table>
 <!--[if mso]></td></tr></table><![endif]-->

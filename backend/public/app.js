@@ -5569,10 +5569,55 @@ async function sha16(text) {
     .slice(0, 16);
 }
 
-const previewState = { id: null, phone: false, text: false };
+const previewState = { id: null, phone: false, text: false, theme: "light" };
+
+// "Email style: Light / Dark" for mail sent from the dashboard. Dark mail keeps its colours in phone dark
+// mode (Outlook and Gmail repaint light mail grey). The last choice is remembered per user on this device.
+const emailThemeKey = () => `email-theme:${me?.id || ""}`;
+function savedEmailTheme() {
+  try {
+    return localStorage.getItem(emailThemeKey()) === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+}
+function emailThemeSwitch(onChange, { value = savedEmailTheme(), remember = true } = {}) {
+  const box = node("div", undefined, "email-theme");
+  box.setAttribute("role", "group");
+  box.setAttribute("aria-label", "Email style");
+  let current = value;
+  const opts = [
+    ["light", "Light"],
+    ["dark", "Dark"],
+  ].map(([v, text]) => [v, button(text, () => pick(v))]);
+  const paint = () => {
+    for (const [v, b] of opts) b.setAttribute("aria-pressed", String(v === current));
+  };
+  function pick(v) {
+    if (v === current) return;
+    current = v;
+    if (remember)
+      try {
+        localStorage.setItem(emailThemeKey(), v);
+      } catch {
+        /* private mode: the choice just isn't remembered */
+      }
+    paint();
+    onChange?.(v);
+  }
+  box.append(node("span", "Email style", "email-theme-label"), ...opts.map(([, b]) => b));
+  paint();
+  return {
+    el: box,
+    get value() {
+      return current;
+    },
+  };
+}
 async function renderEmailPreviews() {
   const screen = $("screen");
-  const { items } = await api("email-previews");
+  const dark = previewState.theme === "dark" ? "?theme=dark" : "";
+  const { items } = await api("email-previews" + dark);
   const current = items.find((p) => p.id === previewState.id) || items[0];
   previewState.id = current.id;
   const bar = node("div", undefined, "mail-bar");
@@ -5594,7 +5639,14 @@ async function renderEmailPreviews() {
     b.setAttribute("aria-pressed", String(previewState[key]));
     return b;
   };
-  bar.append(pick, toggle("Phone width", "phone"), toggle("Plain text", "text"));
+  const style = emailThemeSwitch(
+    (v) => {
+      previewState.theme = v;
+      render();
+    },
+    { value: previewState.theme, remember: false },
+  );
+  bar.append(pick, toggle("Phone width", "phone"), toggle("Plain text", "text"), style.el);
   screen.append(bar);
   const meta = node("div", undefined, "card preview-meta");
   for (const [k, v] of [
@@ -5620,7 +5672,7 @@ async function renderEmailPreviews() {
   frame.setAttribute("sandbox", "allow-popups allow-popups-to-escape-sandbox");
   frame.setAttribute("referrerpolicy", "no-referrer");
   frame.title = "Email preview";
-  frame.src = "/api/email-previews/" + encodeURIComponent(current.id);
+  frame.src = "/api/email-previews/" + encodeURIComponent(current.id) + dark;
   screen.append(frame);
 }
 
@@ -5835,7 +5887,8 @@ async function renderMailMessage(reader, canReply) {
   body.required = true;
   const send = node("button", "Send reply", "primary");
   send.type = "submit";
-  form.append(bl, node("p", "Sent from contact@scholarscafe.com.", "muted"), send);
+  const replyStyle = emailThemeSwitch();
+  form.append(bl, node("p", "Sent from contact@scholarscafe.com.", "muted"), replyStyle.el, send);
   if (!canReply) {
     send.disabled = true;
     form.append(node("p", "Replies need CONTACT_IMAP_PASSWORD in hPanel.", "muted"));
@@ -5844,7 +5897,7 @@ async function renderMailMessage(reader, canReply) {
     e.preventDefault();
     send.disabled = true;
     try {
-      await api(`inbox/${m.id}/reply`, { body: body.value });
+      await api(`inbox/${m.id}/reply`, { body: body.value, theme: replyStyle.value });
       notice("Reply queued. It goes out from contact@ within a minute.");
       render();
     } catch (err) {
@@ -5924,7 +5977,10 @@ function openComposer(canSend) {
   frame.setAttribute("sandbox", "allow-popups allow-popups-to-escape-sandbox");
   frame.setAttribute("referrerpolicy", "no-referrer");
   frame.title = "Email preview";
-  previewPane.append(frame);
+  const style = emailThemeSwitch(() => refresh());
+  const previewHead = node("div", undefined, "compose-preview-head");
+  previewHead.append(style.el);
+  previewPane.append(previewHead, frame);
 
   const panes = node("div", undefined, "compose-panes");
   panes.append(form, previewPane);
@@ -5954,6 +6010,7 @@ function openComposer(canSend) {
         to: to.value,
         subject: subject.value,
         body: body.value,
+        theme: style.value,
       });
       if (n === seq) frame.src = r.url;
     } catch {
@@ -6006,6 +6063,7 @@ function openComposer(canSend) {
         to: to.value,
         subject: subject.value,
         body: body.value,
+        theme: style.value,
       });
       close(true);
       notice(`Sent to ${r.to.join(", ")}. It goes out from contact@ within a minute.`);

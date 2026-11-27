@@ -2294,13 +2294,54 @@ body.compose-open {
 }
 .compose-preview {
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--ice-100);
   border-left: 1px solid var(--ice-200);
+}
+.compose-preview-head {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ice-200);
+}
+/* Email style: Light / Dark (Compose, Reply, Preview emails). */
+.email-theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 3px 3px 12px;
+  border-radius: 999px;
+  background: var(--ice-100);
+  border: 1px solid var(--ice-200);
+}
+.email-theme-label {
+  margin-right: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue-950);
+}
+.email-theme button {
+  border: 0;
+  padding: 6px 14px;
+  min-height: 32px;
+  border-radius: 999px;
+  background: transparent;
+}
+.email-theme button[aria-pressed="true"] {
+  background: var(--white);
+  color: var(--blue-950);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgb(4 28 49 / 0.15);
+}
+.mail-compose .email-theme {
+  margin: 0 12px 12px 0;
 }
 .compose-frame {
   display: block;
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   border: 0;
   background: var(--ice-100);
 }
