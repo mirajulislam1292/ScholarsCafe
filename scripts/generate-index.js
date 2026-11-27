@@ -55,7 +55,7 @@ function writeSitemap(clientDir, pages) {
     "/colleges": "0.8",
   };
   const urls = pages
-    .filter((p) => !p.startsWith("/forms/"))
+    .filter((p) => !p.startsWith("/forms/") && !p.startsWith("/sign/"))
     .map(
       (p) =>
         `  <url><loc>${site}${p === "/" ? "/" : p}</loc><lastmod>${today}</lastmod>` +
@@ -118,6 +118,9 @@ async function generateIndexHtml() {
     "/forms",
     // Shell for every form: .htaccess serves it at /forms/<slug>; the form loads in the browser.
     "/forms/_",
+    // Shell for every agreement link: .htaccess serves it at /sign/<token> (noindex, nothing pre-rendered
+    // per token); the agreement loads in the browser after the identity check.
+    "/sign/_",
   ];
   // One international-student brief per US state (src/data/state-universities.ts).
   const stateData = readFileSync(

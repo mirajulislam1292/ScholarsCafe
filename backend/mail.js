@@ -123,6 +123,22 @@ export async function deliverMail(store, transport) {
       const via = row.from_contact ? transport.contact : transport;
       if (!via) throw new Error("contact mailbox not configured");
       const message = outboxMessage(row, transport);
+      // Agreements: the signed PDF goes with the signer's and the team's copy.
+      if (row.attach_agreement_id) {
+        const [signed] = await store.query(
+          "SELECT doc_id,pdf FROM agreement_signatures WHERE agreement_id=?",
+          [row.attach_agreement_id],
+          c,
+        );
+        if (signed)
+          message.attachments = [
+            {
+              filename: signed.doc_id + ".pdf",
+              content: Buffer.from(signed.pdf),
+              contentType: "application/pdf",
+            },
+          ];
+      }
       await via.sendMail(message);
       if (row.from_contact) sentFromContact = message;
       await store.query(

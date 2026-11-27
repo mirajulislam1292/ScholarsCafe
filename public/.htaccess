@@ -30,6 +30,11 @@ AddType font/woff2 .woff2
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
+  # Agreement signing links (/sign/<token>): never indexed, no referrer to other sites.
+  <If "%{REQUEST_URI} =~ m#^/sign/#">
+    Header always set X-Robots-Tag "noindex, nofollow"
+    Header always set Referrer-Policy "no-referrer"
+  </If>
 </IfModule>
 
 <IfModule mod_rewrite.c>
@@ -55,6 +60,9 @@ AddType font/woff2 .woff2
 
   # Native forms: every /forms/<slug> uses the one pre-rendered form shell
   RewriteRule ^forms/[a-z0-9-]+/?$ /forms/_/index.html [L]
+
+  # Agreement signing links: every /sign/<token> uses the one pre-rendered signing shell (never indexed)
+  RewriteRule ^sign/[0-9a-f]{64}/?$ /sign/_/index.html [L]
 
   # Fallback all SPA routes to /index.html
   RewriteRule ^ /index.html [L]

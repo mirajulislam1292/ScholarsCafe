@@ -69,6 +69,8 @@ const ABOUT = {
   Forms: "Your own forms at scholarscafe.com/forms/…, replacing Google Forms. Answers go to Leads.",
   Bookings:
     "1-on-1 mentor sessions booked at scholarscafe.com/book (one per day), and when people can book.",
+  Agreements:
+    "Agreements people sign online at scholarscafe.com/sign/…: templates, sending, and signed copies.",
   "Private feedback": "Private feedback sent from the website.",
   Newsletter: "Newsletter sign-ups.",
   "ECA alerts":
@@ -662,6 +664,12 @@ function render() {
   }
   if (section === "ECA alerts") {
     renderEcaAlerts().catch(report);
+    return;
+  }
+  if (section === "Agreements") {
+    import("./agreements-ui.js")
+      .then((m) => m.renderAgreements({ api, node, button, input, select, notice, report, render }))
+      .catch(report);
     return;
   }
   const bar = node("div", undefined, "toolbar");
@@ -6196,7 +6204,10 @@ try {
                       "Reviews",
                     ],
                   ],
-                  ["Inbox", ["Mail", "Forms", "Private feedback", "Newsletter", "ECA alerts"]],
+                  [
+                    "Inbox",
+                    ["Mail", "Forms", "Private feedback", "Newsletter", "ECA alerts", "Agreements"],
+                  ],
                   // The audit log is for the Super Admin only.
                   [
                     "Settings",

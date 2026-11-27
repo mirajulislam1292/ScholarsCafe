@@ -17,6 +17,7 @@ import { receiptText, receiptLayout, responseLayout } from "./forms.js";
 import { alertBody, unsubscribeUrl } from "./eca.js";
 import { taskMail, taskLayout } from "./workspace.js";
 import { typedLayout } from "./inbox.js";
+import { inviteEmail, codeEmail, signedCopyText, signedCopyLayout } from "./agreements-mail.js";
 
 const at = (h) => new Date(Date.UTC(2026, 10, 24, 4 + h, 0));
 const booking = {
@@ -52,6 +53,16 @@ export function previewMails(config, transport) {
     "Here is what to focus on this month so your applications stay on track.\n\n- Finish the first draft of your **Common App personal essay**\n- Ask two teachers for recommendation letters\n- Book your IELTS or Duolingo test date\n\nIf anything is unclear, read [our free guides](https://scholarscafe.com/resources) or reply to this email.\n\nBest,\nThe Scholars Cafe team";
   const ecaBody =
     "Model UN 2026 is open for applications until **5 December**. It is a good fit for students interested in international relations and public speaking.\n\nApply here: https://scholarscafe.com/resources/eca";
+  // Agreements (sample values). The invite and the code go straight to the recipient (see below).
+  const agreement = {
+    name: "Rafi Ahmed",
+    email: booking.email,
+    title: "Mentorship Services Agreement",
+    ref: "SC-AGR-2026-0142",
+    docId: "SC-AGR-2026-0142-3F9A1C",
+    signedAt: "27 November 2026, 8:15 PM (Dhaka time)",
+    sha: "9f2c4e1a7b3d5f6081a2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6a7b8",
+  };
   return [
     row("contact-reply", "1. Reply from contact@ (Mail screen)", {
       subject: "Re: Question about the USA package",
@@ -113,29 +124,12 @@ export function previewMails(config, transport) {
         }),
       ),
     }),
-    row(
-      "agreement-invite",
-      "9. Agreement invite (sample: the Agreements feature is not built yet)",
-      {
-        subject: "Please review and sign your mentoring agreement",
-        body: "Please review and sign your mentoring agreement.",
-        to_email: booking.email,
-        layout: json({
-          label: "Agreement",
-          ref: "SC-AGR-2026-0142",
-          heading: "Your mentoring agreement is ready",
-          firstName: "Rafi Ahmed",
-          text: "Please review and sign your mentoring agreement. It sets out the services and timeline we discussed.",
-          details: [
-            ["Agreement", "Mentorship Services Agreement"],
-            ["Prepared for", "Rafi Ahmed"],
-            ["Link expires", "Thursday, 4 December 2026"],
-          ],
-          button: { label: "Review & Sign Agreement", url: "https://scholarscafe.com/sign/sample" },
-          note: "This is a private link made for you. Please do not forward this email. If you have questions before signing, just reply.",
-        }),
-      },
-    ),
+    row("agreement-signed", "9. Agreement signed: the signer's copy (PDF attached)", {
+      subject: "Your signed copy: Mentorship Services Agreement",
+      body: signedCopyText(agreement),
+      to_email: booking.email,
+      layout: json(signedCopyLayout(agreement)),
+    }),
     row("eca-alert", "10. ECA alert (newsletter layout, with Unsubscribe)", {
       subject: "New ECA open: Model UN 2026",
       body: alertBody(ecaBody, unsub),
@@ -192,6 +186,32 @@ export function previewMails(config, transport) {
   ]
     .map((p) => ({ ...p, message: outboxMessage(p.row, transport) }))
     .concat([
+      {
+        id: "agreement-invite",
+        label: "9. Agreement invite (private link, sent directly)",
+        message: {
+          from: `Scholars Cafe <${transport.sender}>`,
+          to: booking.email,
+          ...inviteEmail({
+            title: agreement.title,
+            ref: agreement.ref,
+            issued: "27 November 2026",
+            expires: "4 December 2026",
+            name: agreement.name,
+            email: booking.email,
+            url: "https://scholarscafe.com/sign/sample",
+          }),
+        },
+      },
+      {
+        id: "agreement-code",
+        label: "9. Agreement code (identity check before signing)",
+        message: {
+          from: `Scholars Cafe <${transport.sender}>`,
+          to: booking.email,
+          ...codeEmail({ title: agreement.title, code: "731406", minutes: 10 }),
+        },
+      },
       {
         id: "sign-in-code",
         label: "8. Sign-in code (student portal)",
