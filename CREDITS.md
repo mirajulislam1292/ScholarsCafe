@@ -26,6 +26,7 @@ Downloaded at 2400 px, saved as WebP at 1920 px (and 960/720 px `-sm` versions).
 ## Fonts (`public/fonts/`)
 - Funnel Display (variable): SIL Open Font License 1.1 (`LICENSE-FunnelDisplay.txt`). Replace with the designer's files when supplied.
 - Inter (variable): SIL Open Font License 1.1 (`LICENSE-Inter.txt`).
+- Mrs Saint Delafield (latin, 400), the typed signature on /sign: SIL Open Font License 1.1 (`LICENSE-MrsSaintDelafield.txt`), from @fontsource/mrs-saint-delafield 5.3.0.
 
 ## Fonts: Bangla
 - Hind Siliguri (Bengali subset, 300/400/500/600): SIL Open Font License 1.1 (`public/fonts/LICENSE-HindSiliguri.txt`). Downloaded only when Bangla text appears.

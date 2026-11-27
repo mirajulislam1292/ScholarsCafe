@@ -230,3 +230,16 @@ Students without a feature don't see that menu item, and the server refuses the 
 **Mobile:** under 800 px wide, the menu becomes a bottom tab bar (up to four main screens plus **More**, which opens the full menu as a sheet). The layout respects the iPhone notch and home bar, tap targets are at least 44 px, and screens fade in gently (off when "Reduce motion" is on). Checked at 360, 390 and 430 px with no sideways scrolling.
 
 Screenshots (sample data): `docs/screenshots/` (student and admin, desktop and mobile).
+
+## 15. Agreements (sign online)
+
+**Where:** admin → **Inbox → Agreements** (owners and admins only).
+
+1. **Templates:** write the agreement text once. A blank line starts a paragraph, `## ` starts a heading, and fields fill in: `{{name}}`, `{{email}}`, `{{phone}}`, `{{id_number}}`, `{{cohort}}`, `{{date}}` (signing date), plus your own fields. **Insert sample wording** adds the sample from the design; have any wording reviewed for Bangladesh law before you send it.
+2. **New agreement:** pick a template, enter the person's name and email, fill in what you know, tick **Recipient fills in** for the rest, check the preview, then **Send**.
+3. They get an email with a private link to `scholarscafe.com/sign/…`. They confirm it's them with a 6-digit code sent to that email (or by being signed in to the student portal with it), fill in their details, sign (draw or type) and submit.
+4. Both of you get the signed PDF by email (the team copy goes to contact@). **View signed copy** shows the full record and the PDF.
+
+**Rules:** the link works for 7 days (change it per agreement, or for all with `AGREEMENT_LINK_DAYS` in hPanel → environment variables, 1 to 30) and signs once. **Resend** and **Copy link** make a new link, and the old one stops working. **Revoke** stops the link. A signed agreement can't be changed or revoked. NID and passport numbers are masked everywhere except the signed record.
+
+**What the record proves:** a simple electronic signature with an email-code identity check and an audit trail (sent, opened, code, verified, signed, revoked, with time and IP), the exact text signed and its SHA-256 hash. The PDF prints Latin letters only; Bangla text shows as `?` in the PDF but is kept exactly in the online record.

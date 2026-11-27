@@ -141,6 +141,26 @@ export class Store {
     await add("push_subscriptions", "last_error", "last_error VARCHAR(300) NULL");
     // Team workspace tables (staff_messages, staff_tasks, staff_task_assignees, staff_activity) are new
     // CREATE TABLE IF NOT EXISTS statements in schema.sql, which initialize() runs on every start.
+    // Agreements: the signed copy (PDF) goes out as an email attachment through the outbox.
+    await add("mail_outbox", "attach_agreement_id", "attach_agreement_id CHAR(36) NULL");
+    // Agreements: the database itself refuses to change or delete a signed record. Best effort: some MySQL
+    // hosts don't allow triggers, and the app never updates or deletes these rows anyway.
+    for (const [name, when] of [
+      ["agreement_signatures_no_update", "UPDATE"],
+      ["agreement_signatures_no_delete", "DELETE"],
+    ])
+      try {
+        const exists = await this.query(
+          "SELECT 1 FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND TRIGGER_NAME=?",
+          [name],
+        );
+        if (!exists.length)
+          await this.pool.query(
+            `CREATE TRIGGER ${name} BEFORE ${when} ON agreement_signatures FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Signed agreements are locked'`,
+          );
+      } catch {
+        console.error("Agreement lock trigger not created (the host may not allow triggers).");
+      }
   }
   async audit(actor, action, target, c = this.pool) {
     await this.query(

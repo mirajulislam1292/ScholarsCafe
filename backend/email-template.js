@@ -165,6 +165,10 @@ export function renderEmail({
   action = null,
   tagline = DEFAULT_TAGLINE,
   format = false,
+  // Optional: a letterhead row instead of the navy bar, and ready HTML instead of the text paragraphs
+  // (the agreement invitation uses both). The footer stays the shared one.
+  headerHtml = null,
+  bodyHtml = null,
 }) {
   const body = String(text ?? "")
     .replace(/\r\n?/g, "\n")
@@ -213,15 +217,21 @@ export function renderEmail({
 <tr><td align="center" style="padding:24px 12px">
 <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%">
-<tr><td bgcolor="${NAVY}" class="sc-pad" style="background:${NAVY};padding:18px 28px;border-radius:14px 14px 0 0">
+${
+  headerHtml ||
+  `<tr><td bgcolor="${NAVY}" class="sc-pad" style="background:${NAVY};padding:18px 28px;border-radius:14px 14px 0 0">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
 <td valign="middle" style="padding-right:10px"><img src="${LOGO_ICE}" width="32" height="29" alt="" style="display:block;border:0;outline:none;width:32px;height:29px"></td>
 <td valign="middle" style="font-family:${FONT};font-size:18px;font-weight:700;letter-spacing:.2px;color:#ffffff">Scholars Cafe</td>
 </tr></table>
-</td></tr>
+</td></tr>`
+}
 <tr><td bgcolor="#ffffff" class="sc-card sc-pad" style="background:#ffffff;padding:28px 28px 8px;border-left:1px solid ${LINE};border-right:1px solid ${LINE}">
-${textToHtml(body, { format })}
-${action ? button(action) : ""}
+${
+  bodyHtml ??
+  `${textToHtml(body, { format })}
+${action ? button(action) : ""}`
+}
 </td></tr>
 <tr><td bgcolor="#ffffff" class="sc-card" style="background:#ffffff;padding:8px 0 0;border:1px solid ${LINE};border-top:0;border-radius:0 0 14px 14px">
 ${footerHtml(tagline)}

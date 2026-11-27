@@ -30,6 +30,7 @@ import { Route as ResourcesEcaRouteImport } from './routes/resources.eca'
 import { Route as ResourcesPodcastRouteImport } from './routes/resources.podcast'
 import { Route as ResourcesToolsRouteImport } from './routes/resources.tools'
 import { Route as ResourcesWebinarsRouteImport } from './routes/resources.webinars'
+import { Route as SignTokenRouteImport } from './routes/sign.$token'
 import { Route as UniversitiesStateRouteImport } from './routes/universities.$state'
 
 const IndexRoute = IndexRouteImport.update({
@@ -137,6 +138,11 @@ const ResourcesWebinarsRoute = ResourcesWebinarsRouteImport.update({
   path: '/resources/webinars',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignTokenRoute = SignTokenRouteImport.update({
+  id: '/sign/$token',
+  path: '/sign/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UniversitiesStateRoute = UniversitiesStateRouteImport.update({
   id: '/universities/$state',
   path: '/universities/$state',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/resources/podcast': typeof ResourcesPodcastRoute
   '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
+  '/sign/$token': typeof SignTokenRoute
   '/universities/$state': typeof UniversitiesStateRoute
   '/colleges/': typeof CollegesIndexRoute
   '/forms/': typeof FormsIndexRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/resources/podcast': typeof ResourcesPodcastRoute
   '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
+  '/sign/$token': typeof SignTokenRoute
   '/universities/$state': typeof UniversitiesStateRoute
   '/colleges': typeof CollegesIndexRoute
   '/forms': typeof FormsIndexRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/resources/podcast': typeof ResourcesPodcastRoute
   '/resources/tools': typeof ResourcesToolsRoute
   '/resources/webinars': typeof ResourcesWebinarsRoute
+  '/sign/$token': typeof SignTokenRoute
   '/universities/$state': typeof UniversitiesStateRoute
   '/colleges/': typeof CollegesIndexRoute
   '/forms/': typeof FormsIndexRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/resources/podcast'
     | '/resources/tools'
     | '/resources/webinars'
+    | '/sign/$token'
     | '/universities/$state'
     | '/colleges/'
     | '/forms/'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/resources/podcast'
     | '/resources/tools'
     | '/resources/webinars'
+    | '/sign/$token'
     | '/universities/$state'
     | '/colleges'
     | '/forms'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/resources/podcast'
     | '/resources/tools'
     | '/resources/webinars'
+    | '/sign/$token'
     | '/universities/$state'
     | '/colleges/'
     | '/forms/'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   ResourcesPodcastRoute: typeof ResourcesPodcastRoute
   ResourcesToolsRoute: typeof ResourcesToolsRoute
   ResourcesWebinarsRoute: typeof ResourcesWebinarsRoute
+  SignTokenRoute: typeof SignTokenRoute
   UniversitiesStateRoute: typeof UniversitiesStateRoute
   CollegesIndexRoute: typeof CollegesIndexRoute
   FormsIndexRoute: typeof FormsIndexRoute
@@ -465,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesWebinarsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sign/$token': {
+      id: '/sign/$token'
+      path: '/sign/$token'
+      fullPath: '/sign/$token'
+      preLoaderRoute: typeof SignTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/universities/$state': {
       id: '/universities/$state'
       path: '/universities/$state'
@@ -494,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcesPodcastRoute: ResourcesPodcastRoute,
   ResourcesToolsRoute: ResourcesToolsRoute,
   ResourcesWebinarsRoute: ResourcesWebinarsRoute,
+  SignTokenRoute: SignTokenRoute,
   UniversitiesStateRoute: UniversitiesStateRoute,
   CollegesIndexRoute: CollegesIndexRoute,
   FormsIndexRoute: FormsIndexRoute,

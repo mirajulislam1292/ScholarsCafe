@@ -22,6 +22,7 @@ import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking
 import { installPushRoutes, queuePush, inboxReaderIds } from "./push.js";
 import { installInboxRoutes } from "./inbox.js";
 import { installEmailPreviewRoutes } from "./email-previews.js";
+import { installAgreementPublicRoutes, installAgreementAdminRoutes } from "./agreements.js";
 import {
   token,
   hash,
@@ -350,6 +351,21 @@ export function createApp(
   // ECA alerts sign-up and its unsubscribe link (the student portal 404s every /public route above).
   installEcaPublicRoutes(app, { store, sharedLimit, config });
   installPublicBookingRoutes(app, { store, fail, config, sharedLimit });
+  // Agreements: the signing page's API (admin deployment) and the student portal's "skip the code" check.
+  installAgreementPublicRoutes(app, {
+    store,
+    fail,
+    config,
+    sharedLimit,
+    mailer,
+    portal,
+    sessionOf: async (req) => {
+      const raw = cookie(req, sessionCookie);
+      if (!raw || raw.length !== 64) return null;
+      const actor = await store.session(hash(raw));
+      return actor && actor.role === "student" ? actor : null;
+    },
+  });
   // /links page click counts: one counter per link per day, nothing about the visitor is stored.
   app.post(
     "/public/links/:id/click",
@@ -577,6 +593,9 @@ export function createApp(
       trustProxy: Boolean(config.TRUST_PROXY),
     });
   });
+  // Agreements: templates, sending, and signed records with their PDF (owners and admins, team admin only).
+  if (portal === "admin")
+    installAgreementAdminRoutes(app, { store, fail, config, canPublish, mailer });
   installMedia(app, store, config, sharedLimit("media", 30, 3600));
   serveMedia(app, store);
   // ---------- Leads CRM (website inquiries) ----------

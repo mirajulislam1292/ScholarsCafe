@@ -376,6 +376,83 @@ CREATE TABLE IF NOT EXISTS booking_settings (
   data JSON NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+-- ---------- Agreements (agreements.js): staff send an agreement, the recipient signs it at
+-- scholarscafe.com/sign/<token>. Templates hold the wording with {{placeholders}}.
+CREATE TABLE IF NOT EXISTS agreement_templates (
+  id CHAR(36) PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  subtitle VARCHAR(300) NOT NULL DEFAULT '',
+  body MEDIUMTEXT NOT NULL,
+  fields JSON NULL,
+  created_by CHAR(36) NULL,
+  updated_at DATETIME NULL,
+  deleted_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+-- One agreement per recipient. The private link token is stored only as a SHA-256 hash (token_hash), and so
+-- are the 6-digit email code (code_hash) and the short-lived proof of a passed identity check (proof_hash).
+CREATE TABLE IF NOT EXISTS agreements (
+  id CHAR(36) PRIMARY KEY,
+  ref VARCHAR(40) NOT NULL UNIQUE,
+  template_id CHAR(36) NULL,
+  title VARCHAR(200) NOT NULL,
+  subtitle VARCHAR(300) NOT NULL DEFAULT '',
+  body MEDIUMTEXT NOT NULL,
+  fields JSON NOT NULL,
+  recipient_name VARCHAR(160) NOT NULL,
+  recipient_email VARCHAR(254) NOT NULL,
+  status ENUM('draft','sent','viewed','signed','revoked') NOT NULL DEFAULT 'draft',
+  link_days INT NOT NULL DEFAULT 7,
+  token_hash CHAR(64) NULL UNIQUE,
+  expires_at DATETIME NULL,
+  code_hash CHAR(64) NULL,
+  code_attempts INT NOT NULL DEFAULT 0,
+  code_expires_at DATETIME NULL,
+  proof_hash CHAR(64) NULL,
+  proof_expires_at DATETIME NULL,
+  verified_at DATETIME NULL,
+  verify_method VARCHAR(20) NULL,
+  created_by CHAR(36) NULL,
+  sent_by CHAR(36) NULL,
+  issued_at DATETIME NULL,
+  sent_at DATETIME NULL,
+  viewed_at DATETIME NULL,
+  signed_at DATETIME NULL,
+  revoked_at DATETIME NULL,
+  updated_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX agreements_list (status, created_at)
+);
+-- The signed record. Written once when the recipient signs, never updated or deleted by the app.
+CREATE TABLE IF NOT EXISTS agreement_signatures (
+  agreement_id CHAR(36) PRIMARY KEY,
+  doc_id VARCHAR(60) NOT NULL UNIQUE,
+  field_values JSON NOT NULL,
+  signature_png MEDIUMBLOB NOT NULL,
+  signature_method ENUM('draw','type') NOT NULL,
+  consent_text TEXT NOT NULL,
+  rendered_text MEDIUMTEXT NOT NULL,
+  text_sha256 CHAR(64) NOT NULL,
+  signed_at DATETIME NOT NULL,
+  ip VARCHAR(64) NOT NULL DEFAULT '',
+  user_agent VARCHAR(400) NOT NULL DEFAULT '',
+  verification JSON NOT NULL,
+  pdf MEDIUMBLOB NOT NULL,
+  pdf_sha256 CHAR(64) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (agreement_id) REFERENCES agreements(id)
+);
+-- Audit trail per agreement: created, sent, resent, link, viewed, code, verified, signed, revoked.
+CREATE TABLE IF NOT EXISTS agreement_events (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  agreement_id CHAR(36) NOT NULL,
+  event VARCHAR(20) NOT NULL,
+  actor_id CHAR(36) NULL,
+  detail VARCHAR(300) NOT NULL DEFAULT '',
+  ip VARCHAR(64) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX agreement_events_doc (agreement_id, id)
+);
 -- Team workspace (admin dashboard, staff only): one staff group chat, a shared to-do list and activity streaks.
 CREATE TABLE IF NOT EXISTS staff_messages (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
