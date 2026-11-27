@@ -17,6 +17,37 @@ import { escapeHtml, CONTACT } from "./email-template.js";
 import { queuePush, inboxReaderIds, preview } from "./push.js";
 import { sender, outboxMessage, emailTagline } from "./mail.js";
 
+// Email layout for mail typed in the Mail screen: the team's own words with simple formatting, a greeting
+// when the message doesn't already start with one, and, for replies, the original message quoted below.
+const GREETING_RE = /^\s*(hi|hello|hey|dear|assalamu|salam|good (morning|afternoon|evening))\b/i;
+export function typedLayout(body, { name = "", quote = null } = {}) {
+  const own = GREETING_RE.test(body);
+  return {
+    text: body,
+    format: true,
+    ...(own ? {} : name ? { firstName: name } : { greeting: "Hello," }),
+    ...(quote ? { quote } : {}),
+  };
+}
+/** The name we know for an address from mail it sent us, or "". */
+async function knownName(store, email, c) {
+  if (!email) return "";
+  const [r] = await store.query(
+    "SELECT from_name FROM contact_mail WHERE direction='in' AND from_email=? AND from_name<>'' ORDER BY received_at DESC LIMIT 1",
+    [email],
+    c,
+  );
+  return String(r?.from_name || "").trim();
+}
+const quoteDate = (d) =>
+  new Date(d).toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Dhaka",
+  });
+
 const MAX_SOURCE = 15 * 1024 * 1024; // bigger messages: headers only
 const FIRST_IMPORT = 50; // on first connect, only the latest messages
 const clip = (s, n) => String(s ?? "").slice(0, n);
@@ -395,13 +426,16 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
       .strict()
       .parse(req.body);
     const to = parseRecipients(input.to);
+    const previewBody = input.body.trim() || "Your message appears here.";
+    const name = to.list?.length === 1 ? await knownName(store, to.list[0]) : "";
     const message = outboxMessage(
       {
         id: "preview",
         subject: cleanSubject(input.subject) || "(no subject)",
-        body: input.body.trim() || "Your message appears here.",
+        body: previewBody,
         to_email: to.joined || "",
         from_contact: 1,
+        layout: typedLayout(previewBody, { name }),
       },
       { contact: { sender: CONTACT }, sender: CONTACT },
       await emailTagline(store),
@@ -435,9 +469,10 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
       throw fail(429, "Too many emails in a short time. Wait a few minutes.");
     const outId = randomUUID();
     await store.transaction(async (c) => {
+      const name = to.list.length === 1 ? await knownName(store, to.list[0], c) : "";
       await store.query(
-        "INSERT INTO mail_outbox (id,subject,body,to_email,from_contact) VALUES (?,?,?,?,1)",
-        [outId, subject, body, to.joined],
+        "INSERT INTO mail_outbox (id,subject,body,to_email,from_contact,layout) VALUES (?,?,?,?,1,?)",
+        [outId, subject, body, to.joined, JSON.stringify(typedLayout(body, { name }))],
         c,
       );
       await store.query(
@@ -541,9 +576,24 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
       .slice(0, 160);
     const references = [m.references_hdr, m.message_id].filter(Boolean).join(" ").slice(-4000);
     await store.transaction(async (c) => {
+      const layout = typedLayout(body, {
+        name: m.from_name || "",
+        quote: {
+          by: `On ${quoteDate(m.received_at)}, ${m.from_name || m.from_email} wrote:`,
+          text: String(m.body_text || m.snippet || "").slice(0, 2000),
+        },
+      });
       await store.query(
-        "INSERT INTO mail_outbox (id,subject,body,to_email,from_contact,in_reply_to,references_hdr) VALUES (?,?,?,?,1,?,?)",
-        [outId, subject, body, m.from_email, m.message_id, references || null],
+        "INSERT INTO mail_outbox (id,subject,body,to_email,from_contact,in_reply_to,references_hdr,layout) VALUES (?,?,?,?,1,?,?,?)",
+        [
+          outId,
+          subject,
+          body,
+          m.from_email,
+          m.message_id,
+          references || null,
+          JSON.stringify(layout),
+        ],
         c,
       );
       await store.query(

@@ -11,11 +11,12 @@ import {
 } from "./email-template.js";
 import { createMailer, deliverMail, outboxMessage, loginEmail, emailTagline } from "./mail.js";
 
-test("Email template: branded card, escaped body, links, signature, plain-text alternative", () => {
+test("Email template: branded card, escaped text, links, dark mode, Outlook, plain-text part", () => {
   const body = "Hi <b>Rafi</b> & team\n\nOpen: https://admin.scholarscafe.com/?a=1&b=2.\nThanks";
   const { html, text } = renderEmail({ subject: "Hello", text: body });
-  // Wording is kept exactly; the plain part is the body, then the signature and a short footer.
-  assert.ok(text.startsWith(body + "\n\n—\n" + BRAND_NAME + "\n" + DEFAULT_TAGLINE));
+  // Plain part: the message as written, then the brand footer.
+  assert.ok(text.startsWith(body + "\n\n--\n" + BRAND_NAME + "\n" + DEFAULT_TAGLINE));
+  assert.equal(BRAND_NAME, "Scholars Cafe");
   assert.match(text, /contact@scholarscafe\.com/);
   for (const [, url] of SOCIAL) assert.ok(text.includes(url) && html.includes(url));
   // Never trusted as markup.
@@ -24,28 +25,97 @@ test("Email template: branded card, escaped body, links, signature, plain-text a
   // Links are clickable, trailing punctuation stays outside, & is escaped once in href.
   assert.match(html, /href="https:\/\/admin\.scholarscafe\.com\/\?a=1&amp;b=2"/);
   assert.match(html, /b=2<\/a>\./);
-  // Logo from the website's brand files (absolute https), header, card, signature, footer.
-  assert.match(html, /<img src="https:\/\/scholarscafe\.com\/brand\/mark-ice\.png"/);
+  // Logos: absolute PNGs, blue for light mode and ice swapped in for dark mode.
   assert.match(
     html,
-    /<img class="sc-light-img" src="https:\/\/scholarscafe\.com\/brand\/mark-blue\.png"/,
+    /<img src="https:\/\/scholarscafe\.com\/brand\/mark-blue\.png"[^>]+class="sc-logo-l"/,
   );
-  // Dark mode (Apple Mail): the light logo swaps for the ice one, links get a lighter blue.
   assert.match(
     html,
-    /<img class="sc-dark-img" src="https:\/\/scholarscafe\.com\/brand\/mark-ice\.png"/,
+    /class="sc-logo-d"[^>]*><img src="https:\/\/scholarscafe\.com\/brand\/mark-ice\.png"/,
   );
-  assert.match(html, /\.sc-link \{ color:#8cc2f0 !important; \}/);
-  assert.match(html, /class="sc-foot"/);
-  // Gmail/Outlook/mobile basics: tables, inline styles, 600px, MSO wrapper; dark-mode styles for Apple Mail.
-  assert.match(html, /max-width:600px/);
-  assert.match(html, /<!--\[if mso\]>/);
-  assert.match(html, /role="presentation"/);
+  assert.match(html, /\.sc-logo-l\{display:none!important;\}/);
+  // Dark mode: meta tags, media query, Outlook.com rules, button colours.
+  assert.match(html, /<meta name="color-scheme" content="light dark">/);
+  assert.match(html, /<meta name="supported-color-schemes" content="light dark">/);
   assert.match(html, /prefers-color-scheme: dark/);
-  assert.match(html, /bgcolor="#041c31"/);
-  assert.doesNotMatch(html, /<script/);
+  assert.match(html, /\[data-ogsc\] \.sc-t/);
+  assert.match(html, /\.sc-btn\{background:#8cc2f0!important;color:#041c31!important;\}/);
+  // Gmail/Outlook/mobile basics: tables, 600px card, Outlook wrapper and DPI fix, mobile rules.
+  assert.match(html, /max-width:600px/);
+  assert.match(html, /<!--\[if mso\]><table role="presentation" width="600"/);
+  assert.match(html, /<o:PixelsPerInch>96<\/o:PixelsPerInch>/);
+  assert.match(html, /@media only screen and \(max-width:620px\)/);
+  assert.match(html, /\.sc-h1\{font-size:23px!important/);
+  assert.match(html, /role="presentation"/);
+  assert.doesNotMatch(html, /<script|display:\s*(flex|grid)|var\(--|<svg|\.webp/);
   assert.doesNotMatch(html, /Unsubscribe/);
-  assert.doesNotMatch(html, /sc-btn/, "no button without an action");
+  assert.doesNotMatch(html, /sc-btn" style="display:inline-block/, "no button without an action");
+  // No em dashes anywhere in the template.
+  assert.doesNotMatch(html + text, /\u2014/);
+});
+
+test("Email layout: label, REF, heading, greeting, details, code, button, note and quote", () => {
+  const { html, text } = renderEmail({
+    subject: "S",
+    label: "Booking confirmed",
+    ref: "SC-1",
+    heading: "Your <session>",
+    firstName: "Nusrat Jahan",
+    text: "Message",
+    details: [
+      ["When", "Tue 2 Dec"],
+      ["Empty", ""],
+    ],
+    code: "482 913",
+    button: { label: "Join the session", url: "https://meet.example/x" },
+    note: "Small print",
+    quote: { by: "On Mon, X wrote:", text: "Original <q>" },
+  });
+  assert.match(html, />Booking confirmed<\/td>/);
+  assert.match(html, />REF SC-1<\/td>/);
+  assert.match(html, /<h1 class="sc-h sc-h1"[^>]*>Your &lt;session&gt;<\/h1>/);
+  assert.match(html, />Hi Nusrat,<\/p>/);
+  assert.match(html, />Tue 2 Dec<\/td>/);
+  assert.doesNotMatch(html, />Empty</, "empty rows are dropped");
+  assert.match(html, />4 8 2 9 1 3<\/div>/);
+  assert.match(html, /<v:roundrect[^>]+href="https:\/\/meet\.example\/x"/);
+  assert.match(html, /Original &lt;q&gt;/);
+  const order = [
+    "REF SC-1",
+    "Your &lt;session&gt;",
+    "Hi Nusrat,",
+    "Message",
+    "Tue 2 Dec",
+    "4 8 2 9 1 3",
+    ">Join the session<",
+    "Small print",
+    "Original",
+  ].map((n) => html.indexOf(n, html.indexOf('class="sc-card"')));
+  assert.deepEqual(
+    [...order].sort((x, y) => x - y),
+    order,
+  );
+  assert.ok(order.every((i) => i > 0));
+  assert.match(
+    text,
+    /^REF SC-1\n\nYour <session>\n\nHi Nusrat,\n\nMessage\n\nWhen: Tue 2 Dec\n\nYour code: 482913\n\nJoin the session:\nhttps:\/\/meet\.example\/x\n\nSmall print\n\nOn Mon, X wrote:\n> Original <q>\n\n--\nScholars Cafe/,
+  );
+  // Stacked rows for form answers; a plain greeting when the name is unknown.
+  const stacked = renderEmail({
+    text: "x",
+    details: [["Question?", "Answer"]],
+    stacked: true,
+    greeting: "Hello,",
+  });
+  assert.match(stacked.html, />Question\?<\/div>/);
+  assert.match(stacked.html, />Hello,<\/p>/);
+  assert.match(stacked.text, /Question\?:\nAnswer/);
+  // Only https buttons.
+  assert.doesNotMatch(
+    renderEmail({ text: "x", button: { label: "B", url: "javascript:alert(1)" } }).html,
+    /javascript/,
+  );
 });
 
 test("Main action button: derived from the mail, Outlook-safe", () => {
@@ -53,7 +123,7 @@ test("Main action button: derived from the mail, Outlook-safe", () => {
   const cases = [
     [
       { subject: "Your session is booked", text: "Join here: https://meet.google.com/abc-defg" },
-      "Join session",
+      "Join the session",
       "https://meet.google.com/abc-defg",
     ],
     [
@@ -74,7 +144,7 @@ test("Main action button: derived from the mail, Outlook-safe", () => {
         subject: "Your Scholars Cafe session was cancelled",
         text: "Pick another time at https://scholarscafe.com/book, or reply.",
       },
-      "Book another time",
+      "Book a new time",
       "https://scholarscafe.com/book",
     ],
     [
@@ -101,23 +171,17 @@ test("Main action button: derived from the mail, Outlook-safe", () => {
     action: { label: "Open task", url: "https://a.example/t" },
   });
   assert.match(html, /<v:roundrect[^>]+href="https:\/\/a\.example\/t"/);
-  assert.match(html, /class="sc-btn" href="https:\/\/a\.example\/t"[^>]*>Open task<\/a>/);
-  assert.match(text, /Open task: https:\/\/a\.example\/t/);
+  assert.match(html, /<a href="https:\/\/a\.example\/t" class="sc-btn"[^>]*>Open task<\/a>/);
+  assert.match(text, /Open task:\nhttps:\/\/a\.example\/t/);
 });
 
-test("Signature tagline comes from the CMS when set, with a safe default", async () => {
-  const store = (rows) => ({ query: async () => rows });
-  assert.equal(await emailTagline(store([]), 1e12), DEFAULT_TAGLINE);
+test("Tagline is fixed in the brand file (no longer taken from the website CMS)", async () => {
+  assert.equal(DEFAULT_TAGLINE, "A Cafe to Ease Your Study Abroad Journey");
   assert.equal(
-    await emailTagline(
-      store([{ published: JSON.stringify({ "Links.tagline": " Study abroad, simply. " }) }]),
-      2e12,
-    ),
-    "Study abroad, simply.",
+    await emailTagline({ query: async () => [{ published: '{"Links.tagline":"x"}' }] }),
+    DEFAULT_TAGLINE,
   );
-  // Cached for 10 minutes.
-  assert.equal(await emailTagline(store([]), 2e12 + 1000), "Study abroad, simply.");
-  assert.match(renderEmail({ text: "x", tagline: "T <x>" }).html, /T &lt;x&gt;/);
+  assert.match(renderEmail({ text: "x" }).html, />A Cafe to Ease Your Study Abroad Journey<\/p>/);
 });
 
 test("Email template: unsubscribe link only on list mail", () => {
@@ -128,6 +192,10 @@ test("Email template: unsubscribe link only on list mail", () => {
     /href="https:\/\/admin\.scholarscafe\.com\/public\/unsubscribe\/eca\?t=abc"[^>]*>Unsubscribe/,
   );
   assert.match(text, /Unsubscribe: https:\/\/admin/);
+  assert.match(
+    html,
+    /You are getting this email because you subscribed to Scholars Cafe updates\./,
+  );
   // Not repeated when the body already carries the link.
   const again = renderEmail({ text: "Bye " + url, unsubscribeUrl: url }).text;
   assert.equal(again.split(url).length, 2);
@@ -174,7 +242,22 @@ test("Outbox mail: From name, Reply-To contact@ on no-reply mail, threading, lis
   assert.equal(reply.references, "<m0@x.co> <m1@x.co>");
   // Dashboard replies carry the same footer, but no button.
   assert.match(reply.html, /class="sc-foot"/);
-  assert.doesNotMatch(reply.html, /sc-btn/);
+  assert.doesNotMatch(reply.html, /<v:roundrect/);
+  // A stored layout is used when present, with admin screens turned into links.
+  const laid = outboxMessage(
+    {
+      id: "l",
+      subject: "New booking",
+      body: "plain",
+      layout: JSON.stringify({
+        heading: "New booking",
+        button: { label: "View booking", screen: "Bookings" },
+      }),
+    },
+    { ...transport, adminOrigin: "https://admin.scholarscafe.com" },
+  );
+  assert.match(laid.html, /href="https:\/\/admin\.scholarscafe\.com\/\?open=Bookings"/);
+  assert.match(laid.text, /^New booking/);
   const eca = outboxMessage(
     { id: "e", subject: "ECA", body: "b", to_email: "s@x.co", unsubscribe_url: "https://u/x" },
     transport,
@@ -237,7 +320,7 @@ test("Mailer: contact@ transport reused or signed in separately", () => {
   );
 });
 
-test("Sign-in code email uses the shared template", () => {
+test("Sign-in code email: code box, expiry note, link as small print, no button", () => {
   const m = loginEmail(
     { sender: "no-reply@scholarscafe.com" },
     "a@b.co",
@@ -247,10 +330,11 @@ test("Sign-in code email uses the shared template", () => {
   );
   assert.equal(m.from, "Scholars Cafe <no-reply@scholarscafe.com>");
   assert.equal(m.replyTo, "contact@scholarscafe.com");
-  assert.match(m.text, /^Your sign-in code is 123456/);
-  assert.match(m.html, /123456/);
-  assert.match(m.html, /class="sc-btn" href="https:\/\/s\/x"[^>]*>Sign in</);
+  assert.match(m.text, /Your code: 123456/);
+  assert.match(m.text, /expires in 10 minutes/);
+  assert.match(m.html, />1 2 3 4 5 6<\/div>/);
   assert.match(m.html, /href="https:\/\/s\/x"/);
+  assert.doesNotMatch(m.html, /<v:roundrect/);
 });
 
 test("Preview emails: owners/admins only, every template renders, nothing is sent", async () => {
@@ -291,6 +375,8 @@ test("Preview emails: owners/admins only, every template renders, nothing is sen
     "contact-reply",
     "contact-compose",
     "sign-in-code",
+    "agreement-invite",
+    "form-team",
   ])
     assert.ok(ids.includes(id), id);
   const byId = Object.fromEntries(body.items.map((p) => [p.id, p]));
@@ -308,56 +394,58 @@ test("Preview emails: owners/admins only, every template renders, nothing is sen
   const confirmed = await request(app)
     .get("/api/email-previews/booking-confirmed")
     .set("Cookie", cookie);
-  assert.match(confirmed.text, />Join session<\/a>/);
+  assert.match(confirmed.text, />Join the session<\/a>/);
   const eca = await request(app).get("/api/email-previews/eca-alert").set("Cookie", cookie);
   assert.match(eca.text, />Unsubscribe<\/a>/);
   await request(app).get("/api/email-previews/nope").set("Cookie", cookie).expect(404);
 });
 
-test("Footer: divider, logo, name, tagline, socials + contact, then the website once", () => {
+test("Footer: logo, name, tagline, socials, contact, reply line, then the website once", () => {
   const { html, text } = renderEmail({ subject: "Hi", text: "Hello" });
+  const foot = html.slice(html.indexOf('class="sc-foot"'));
   const at = (needle) => {
-    const i = html.indexOf(needle);
+    const i = foot.indexOf(needle);
     assert.ok(i > 0, needle);
     return i;
   };
   const order = [
-    at('class="sc-line"'),
-    at('class="sc-light-img" src="https://scholarscafe.com/brand/mark-blue.png"'),
-    at("Scholars&#39; Cafe</div>"),
-    at(DEFAULT_TAGLINE + "</div>"),
+    at('src="https://scholarscafe.com/brand/mark-blue.png" width="34"'),
+    at(">Scholars Cafe</p>"),
+    at(">" + DEFAULT_TAGLINE + "</p>"),
     at(">Facebook</a>"),
     at(">Instagram</a>"),
     at(">LinkedIn</a>"),
+    at(">YouTube</a>"),
+    at(">TikTok</a>"),
     at(`href="mailto:${CONTACT}"`),
+    at("Questions? Just reply to this email."),
     at('href="https://scholarscafe.com"'),
   ];
   assert.deepEqual(
     [...order].sort((a, b) => a - b),
     order,
   );
-  assert.equal(DEFAULT_TAGLINE, "Mentor-led guidance for studying abroad from Bangladesh");
-  // Heading font with web-safe fallbacks; brand colours.
   assert.match(html, /font-family:'Funnel Display','Segoe UI',Helvetica,Arial,sans-serif/);
-  assert.match(html, /bgcolor="#e8f3f9"/);
+  assert.match(foot, /background:#e8f3f9;border-top:1px solid #e3e8ee/);
   // Every image is an absolute https PNG (no SVG/webp: many mail apps don't show them).
   const imgs = [...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(imgs.length >= 2);
+  assert.ok(imgs.length >= 4);
   for (const src of imgs) assert.match(src, /^https:\/\/scholarscafe\.com\/brand\/[\w-]+\.png$/);
   // The website appears exactly once, in HTML (link and visible text) and in the plain text.
   assert.equal(html.split('href="https://scholarscafe.com"').length - 1, 1);
   assert.equal(html.split(">scholarscafe.com</a>").length - 1, 1);
   assert.equal(text.match(/(^|[^@/.])scholarscafe\.com/gm).length, 1);
-  assert.ok(text.trimEnd().endsWith("scholarscafe.com"));
+  assert.ok(text.trimEnd().endsWith("Questions? Just reply to this email.\nscholarscafe.com"));
   for (const [n, u] of SOCIAL) assert.ok(text.includes(`${n}: ${u}`));
   assert.ok(text.includes(`Email: ${CONTACT}`));
+  assert.doesNotMatch(html + text, /Scholars' Cafe|Scholars&#39; Cafe/, "no apostrophe");
 });
 
 test("Formatting (Compose/replies only): bold and https links, everything else escaped", () => {
   const src =
     'Hi **Rafi** <img src=x onerror=alert(1)>\n\nRead [the guide](https://scholarscafe.com/resources?a=1&b=2) and [bad](javascript:alert(1)) **[x](https://e.co/"onmouseover=1)**';
   const html = textToHtml(src, { format: true });
-  assert.match(html, /Hi <strong>Rafi<\/strong> &lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.match(html, /Hi <strong[^>]*>Rafi<\/strong> &lt;img src=x onerror=alert\(1\)&gt;/);
   assert.match(
     html,
     /<a href="https:\/\/scholarscafe\.com\/resources\?a=1&amp;b=2"[^>]*>the guide<\/a>/,

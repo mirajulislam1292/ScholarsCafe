@@ -264,7 +264,9 @@ test("Reply: from contact@, threaded, logged; refused without the mailbox passwo
   assert.equal(inReplyTo, "<q1@example.com>");
   assert.equal(refs, "<q0@example.com> <q1@example.com>");
   assert.ok(
-    store.db.sql.some(([q]) => q.includes("from_contact") && q.includes("VALUES (?,?,?,?,1,?,?)")),
+    store.db.sql.some(
+      ([q]) => q.includes("from_contact") && q.includes("VALUES (?,?,?,?,1,?,?,?)"),
+    ),
   );
   assert.ok(store.db.sql.some(([q]) => q.startsWith("UPDATE contact_mail SET replied_at")));
 });
@@ -356,7 +358,7 @@ test("Compose: queued from contact@ (no real sending), stored for Sent, subject 
   assert.equal(body, "Secret body text");
   assert.equal(to, "rafi@example.com, mim@example.org");
   assert.ok(
-    store.db.sql.some(([q]) => q.includes("VALUES (?,?,?,?,1)")),
+    store.db.sql.some(([q]) => q.includes("VALUES (?,?,?,?,1,?)")),
     "from contact@",
   );
   assert.ok(
@@ -377,7 +379,7 @@ test("Compose preview: rendered card on its own sandboxed page, only for the sam
     .expect(200);
   assert.match(r.body.url, /^\/api\/inbox\/compose\/preview\?t=[\w-]+$/);
   const page = await request(app).get(r.body.url).set("Cookie", cookie).expect(200);
-  assert.match(page.text, /Hello <strong>there<\/strong>/);
+  assert.match(page.text, /Hello <strong[^>]*>there<\/strong>/);
   assert.match(page.text, /class="sc-foot"/);
   const csp = page.headers["content-security-policy"];
   assert.match(csp, /default-src 'none'/);

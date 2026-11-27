@@ -76,13 +76,26 @@ const taskInput = z
 const taskEdit = z.object(taskFields).partial().strict();
 
 /** Queues one email per person through the outbox (mail_outbox); the mail timer delivers it. */
-async function queueMail(store, c, to, subject, body) {
+async function queueMail(store, c, to, subject, body, layout = null) {
   await store.query(
-    "INSERT INTO mail_outbox (id,subject,body,to_email) VALUES (?,?,?,?)",
-    [randomUUID(), subject.slice(0, 160), body, to],
+    "INSERT INTO mail_outbox (id,subject,body,to_email,layout) VALUES (?,?,?,?,?)",
+    [randomUUID(), subject.slice(0, 160), body, to, layout ? JSON.stringify(layout) : null],
     c,
   );
 }
+/** The email layout for a task mail: label, heading, task details and an "Open task" button. */
+export const taskLayout = (task, { label, heading, text }) => ({
+  label,
+  heading,
+  text,
+  details: [
+    ["Task", task.title],
+    ["Details", task.details || ""],
+    ["Deadline", task.due_at ? dhakaText(task.due_at) : "None"],
+  ],
+  button: { label: "Open task", screen: "Tasks" },
+  note: "This is an automatic message from the Scholars Cafe team workspace.",
+});
 export const taskMail = (config, task, intro) =>
   [
     intro,
@@ -139,6 +152,14 @@ export async function queueTaskReminders(store, config, now = new Date()) {
             ? "Reminder: this task is due in about 2 hours."
             : "Reminder: this task is due in about 24 hours.",
         ),
+        taskLayout(r, {
+          label: kind === "2h" ? "Due soon" : "Due tomorrow",
+          heading: kind === "2h" ? "A task is due in about 2 hours" : "A task is due tomorrow",
+          text:
+            kind === "2h"
+              ? "Reminder: this task is due in about 2 hours."
+              : "Reminder: this task is due in about 24 hours.",
+        }),
       );
       await queuePush(store, c, [r.user_id], {
         title: kind === "2h" ? "Due in about 2 hours" : "Due tomorrow",
@@ -337,6 +358,11 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
           p.email,
           "New task for you: " + task.title,
           taskMail(config, task, `${nameOf(actor.email)} assigned you a task.`),
+          taskLayout(task, {
+            label: "New task",
+            heading: "A task has been assigned to you",
+            text: `${nameOf(actor.email)} assigned you a task in the team workspace.`,
+          }),
         );
     await queuePush(
       store,

@@ -141,7 +141,7 @@ test("Broadcast queues one paced outbox row per active subscriber, with an unsub
   const insert = store.queries.find((q) => q.sql.startsWith("INSERT INTO mail_outbox"));
   assert.match(insert.sql, /to_email,unsubscribe_url,next_attempt_at/);
   const rows = [];
-  for (let i = 0; i < insert.args.length; i += 7) rows.push(insert.args.slice(i, i + 7));
+  for (let i = 0; i < insert.args.length; i += 8) rows.push(insert.args.slice(i, i + 8));
   assert.equal(rows.length, 2);
   for (const [n, [, subject, body, replyTo, to, url, delay]] of rows.entries()) {
     assert.equal(subject, "New ECA open: Debate club");
