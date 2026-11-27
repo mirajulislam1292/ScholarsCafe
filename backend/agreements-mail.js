@@ -16,7 +16,7 @@ const from = (transport) => {
 };
 
 /** The invitation: REF badge, the document card, "Review & Sign Agreement" and the private-link note. */
-export function inviteEmail({ title, ref, issued, expires, name, email, url }) {
+export function inviteEmail({ title, ref, issued, expires, name, email, url, theme }) {
   const subject = `Please review and sign: ${title}`;
   const { html, text } = renderEmail({
     subject,
@@ -35,6 +35,7 @@ export function inviteEmail({ title, ref, issued, expires, name, email, url }) {
     ],
     button: { label: "Review & Sign Agreement", url },
     note: `This is a private, single-use link generated only for ${email}. It expires on ${expires}. Please don't forward this email.`,
+    theme,
   });
   return { subject, html, text };
 }
@@ -43,7 +44,7 @@ export async function sendInvite(transport, input) {
 }
 
 /** The 6-digit identity check code for the signing page. */
-export function codeEmail({ title, code, minutes }) {
+export function codeEmail({ title, code, minutes, theme }) {
   const subject = `Your code to sign: ${title}`;
   const { html, text } = renderEmail({
     subject,
@@ -53,6 +54,7 @@ export function codeEmail({ title, code, minutes }) {
     text: `Use this code to open and sign "${title}". Your code is ${code}`,
     code,
     note: `It expires in ${minutes} minutes and works once. If you did not ask for this, ignore this email. Nobody can sign without the code.`,
+    theme,
   });
   return { subject, html, text };
 }
