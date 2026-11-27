@@ -18,12 +18,6 @@ export function canManage(actor, _targetRole, _newRole) {
 }
 export const canEditContent = (role) => can(role, "content.write");
 export const canPublish = (role) => can(role, "content.publish");
-// Kept for older callers: the Owner role (no email check). Owner-only rules use permissions.js.
-export const superAdminEmail = (config) =>
-  (config.SUPER_ADMIN_EMAIL || config.OWNER_EMAIL || "contact.scholarscafe@gmail.com")
-    .trim()
-    .toLowerCase();
-export const isSuperAdmin = (actor, _config) => actor?.role === "owner";
 export function trustedGoogleIdentity(payload, nonce) {
   return (
     !!payload &&

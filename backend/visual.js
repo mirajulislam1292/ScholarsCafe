@@ -65,7 +65,7 @@ export function installVisualRoutes(app, { store, fail }) {
       [req.actor.id],
       c,
     );
-    if (!actor?.active || !isSuperAdmin(actor, config)) throw fail(403, "Your access was removed.");
+    if (!actor?.active || !can(actor, "site.manage")) throw fail(403, "Your access was removed.");
   };
 
   // Team sections and order (About page). Saved and published at once, with a revision kept for

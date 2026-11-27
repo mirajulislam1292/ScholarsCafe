@@ -292,12 +292,17 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     if (pinned) {
       // A pinned message is marked as such in the notification, sent to that channel only.
       const info = CHANNELS[m.channel];
-      await queuePush(store, undefined, await idsWith(store, undefined, info.permission, req.actor.id), {
-        title: "📌 Pinned in " + info.name,
-        body: `${nameOf(req.actor.email)} pinned: ${m.body || ""}`,
-        open: info.screen,
-        tag: "chat-pin-" + m.channel,
-      });
+      await queuePush(
+        store,
+        undefined,
+        await idsWith(store, undefined, info.permission, req.actor.id),
+        {
+          title: "📌 Pinned in " + info.name,
+          body: `${nameOf(req.actor.email)} pinned: ${m.body || ""}`,
+          open: info.screen,
+          tag: "chat-pin-" + m.channel,
+        },
+      );
     }
     res.json({ ok: true });
   });

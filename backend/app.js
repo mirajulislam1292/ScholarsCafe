@@ -621,7 +621,8 @@ export function createApp(
   // Team workspace (staff chat, tasks, activity). Admin portal only; never mounted on the student portal.
   if (portal === "admin") installWorkspaceRoutes(app, { store, fail, config });
   // ECA alerts list and "send to everyone" (owners and admins, team admin only).
-  if (portal === "admin") installEcaAdminRoutes(app, { store, fail, canPublish: inboxAdmin, config });
+  if (portal === "admin")
+    installEcaAdminRoutes(app, { store, fail, canPublish: inboxAdmin, config });
   // Push notifications for staff devices, and the contact@ mailbox (owners and admins). Team admin only.
   if (portal === "admin") installPushRoutes(app, { store, fail, config });
   if (portal === "admin")
@@ -639,7 +640,13 @@ export function createApp(
   });
   // Agreements: templates, sending, and signed records with their PDF (owners and admins, team admin only).
   if (portal === "admin")
-    installAgreementAdminRoutes(app, { store, fail, config, canPublish, mailer });
+    installAgreementAdminRoutes(app, {
+      store,
+      fail,
+      config,
+      canPublish: (role) => can(role, "agreements.manage"),
+      mailer,
+    });
   installMedia(app, store, config, sharedLimit("media", 30, 3600));
   serveMedia(app, store);
   // ---------- Leads CRM (website inquiries) ----------
@@ -689,7 +696,8 @@ export function createApp(
     });
   });
   app.get("/api/leads.csv", async (req, res) => {
-    if (!can(req.actor, "leads.export")) throw fail(403, "Exporting leads is for the Owner and Admins.");
+    if (!can(req.actor, "leads.export"))
+      throw fail(403, "Exporting leads is for the Owner and Admins.");
     const f = leadFilter(req, req.actor);
     const rows = await store.query(
       `SELECT ${LEAD_COLUMNS} FROM inquiries i LEFT JOIN users u ON u.id=i.assigned_to LEFT JOIN forms fm ON fm.id=i.form_id WHERE ${f.sql} ORDER BY i.created_at DESC LIMIT 5000`,

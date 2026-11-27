@@ -45,7 +45,13 @@ test("Mentors have no access to leads at all (list, export, update)", async () =
 
 test("Mentors are locked out of website management, users, audit and inbox admin APIs", async () => {
   const app = asRole("mentor", async () => []);
-  for (const path of ["/api/users", "/api/audit", "/api/inquiries", "/api/mentors", "/api/settings"])
+  for (const path of [
+    "/api/users",
+    "/api/audit",
+    "/api/inquiries",
+    "/api/mentors",
+    "/api/settings",
+  ])
     await get(app, path).expect(403);
   // Mentors may write blog drafts but not website sections or FAQs.
   await post(app, "/api/content", {

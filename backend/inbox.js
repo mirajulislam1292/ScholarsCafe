@@ -355,9 +355,19 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
     req.path === "/compose" ||
     req.path === "/compose/preview" ||
     (req.method === "GET" && req.path === "/" && req.query.folder === "sent");
-  app.use("/api/inbox", (req, _res, next) => {
+  // Opening one message without inbox access: only an email this person sent themselves.
+  const ownSent = async (req) => {
+    const m = req.method === "GET" && /^\/([0-9a-f-]{36})(\/view)?$/.exec(req.path);
+    if (!m) return false;
+    const [row] = await store.query(
+      "SELECT 1 AS ok FROM contact_mail WHERE id=? AND direction='out' AND sent_by=?",
+      [m[1], req.actor.id],
+    );
+    return Boolean(row);
+  };
+  app.use("/api/inbox", async (req, _res, next) => {
     if (can(req.actor, "mail.inbox")) return next();
-    if (can(req.actor, "mail.send") && sendOnly(req)) return next();
+    if (can(req.actor, "mail.send") && (sendOnly(req) || (await ownSent(req)))) return next();
     throw fail(403, "The contact@ inbox is for the Owner, Admins and Executives.");
   });
   const id = (req) => z.string().uuid().parse(req.params.id);

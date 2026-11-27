@@ -210,7 +210,10 @@ test("Access: owners, admins and executives read the inbox; mentors only see wha
   const mentor = createApp(fakeStore({ id: "u", role: "mentor", email: "x@x.com" }), base);
   await request(mentor).get("/api/inbox").set("Cookie", cookie).expect(403);
   await request(mentor).get(`/api/inbox/${MID}`).set("Cookie", cookie).expect(403);
-  const sent = await request(mentor).get("/api/inbox?folder=sent").set("Cookie", cookie).expect(200);
+  const sent = await request(mentor)
+    .get("/api/inbox?folder=sent")
+    .set("Cookie", cookie)
+    .expect(200);
   assert.equal(sent.body.can_read_inbox, false);
   assert.equal(sent.body.total, 0);
   await request(createApp(fakeStore({ id: "u", role: "editor", email: "x@x.com" }), base))

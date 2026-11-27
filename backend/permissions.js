@@ -35,6 +35,7 @@ export const PERMISSIONS = {
   "mail.send": ALL, // compose from contact@ (rate limited, logged)
   "mail.inbox": NOT_MENTOR, // read and reply to the contact@ inbox
   "inbox.admin": LEADERS, // forms, private feedback, newsletter, ECA alerts, delivery log, previews
+  "agreements.manage": LEADERS, // agreement templates, sending, signed copies
   // Content: drafts by anyone with access; publishing and deleting stay with owners and admins.
   "content.write": ALL, // blog, resources, universities
   "content.publish": LEADERS,
@@ -130,6 +131,7 @@ export const API_ROUTES = [
   ["/resources", "resource.view"],
   ["/videos", "resource.view"],
   ["/forms", "inbox.admin"],
+  ["/agreements", "agreements.manage"],
   ["/eca/", "inbox.admin"],
   ["/email-previews", "inbox.admin"],
   ["/inquiries", "inbox.admin"],

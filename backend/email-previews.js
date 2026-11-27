@@ -238,7 +238,8 @@ export function installEmailPreviewRoutes(app, { store, fail, config }) {
   const all = async (req) =>
     previewMails(config, transport, req.query.theme === "dark" ? "dark" : "light");
   app.use("/api/email-previews", (req, _res, next) => {
-    if (!can(req.actor, "inbox.admin")) throw fail(403, "Email previews are for owners and admins.");
+    if (!can(req.actor, "inbox.admin"))
+      throw fail(403, "Email previews are for owners and admins.");
     next();
   });
   app.get("/api/email-previews", async (req, res) =>

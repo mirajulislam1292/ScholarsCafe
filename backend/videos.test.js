@@ -85,7 +85,9 @@ test("Videos and student resources: staff read; executives write; only owners an
     await get("/api/videos").expect(expect.read);
     await get("/api/resources").expect(expect.read);
     sql.length = 0;
-    await post("/api/videos").send({ name: "a.mp4", size: 100, mime: "video/mp4" }).expect(expect.write);
+    await post("/api/videos")
+      .send({ name: "a.mp4", size: 100, mime: "video/mp4" })
+      .expect(expect.write);
     await post("/api/videos/" + VID + "/chunk")
       .set("Content-Type", "application/octet-stream")
       .set("X-Offset", "0")

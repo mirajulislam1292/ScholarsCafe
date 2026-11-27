@@ -205,7 +205,10 @@ test("SC Board: Owner and Admins only; executives and mentors get no messages, A
   const store = boss.store;
   await boss.post("/workspace/chat", { body: "Salaries next week", channel: "board" }).expect(201);
   // Push and bell alerts go to the other owner and the admin only.
-  assert.deepEqual(store.db.push.map((p) => p.user_id).sort(), [people.owner2.id, people.admin.id].sort());
+  assert.deepEqual(
+    store.db.push.map((p) => p.user_id).sort(),
+    [people.owner2.id, people.admin.id].sort(),
+  );
   assert.equal(store.db.push[0].title, "SC Board");
   assert.equal(store.db.push[0].open, "SC Board");
   // Board messages never show in Team SC.
@@ -215,7 +218,10 @@ test("SC Board: Owner and Admins only; executives and mentors get no messages, A
   const as = (who) => {
     const app = createApp({ ...store, session: async () => ({ ...who, csrf: "c" }) }, config);
     return {
-      get: (p) => request(app).get("/api" + p).set("Cookie", cookie),
+      get: (p) =>
+        request(app)
+          .get("/api" + p)
+          .set("Cookie", cookie),
       post: (p, body = {}) =>
         request(app)
           .post("/api" + p)

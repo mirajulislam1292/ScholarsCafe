@@ -34,7 +34,8 @@ export function installMedia(app, store, config, limit) {
   app.post(
     "/api/media",
     (req, _res, next) => {
-      if (!can(req.actor, "site.manage")) throw fail(403, "Only owners and admins can upload media.");
+      if (!can(req.actor, "site.manage"))
+        throw fail(403, "Only owners and admins can upload media.");
       const type = req.get("Content-Type") || "";
       if (![...IMAGE_TYPES, ...VIDEO_TYPES].includes(type))
         throw fail(415, "Choose a PNG, JPEG or WebP image, or an MP4 or WebM video.");

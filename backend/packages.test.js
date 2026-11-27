@@ -65,7 +65,10 @@ test("Only owners and admins change packages and per-student controls", async ()
   const mentor = appFor("mentor");
   await mentor.get("/api/packages").expect(200);
   const assigned = mentor.sql.find((q) => q.includes("FROM user_packages k"));
-  assert.match(assigned, /k\.user_id IN \(SELECT e2\.user_id FROM enrollments e2 WHERE e2\.mentor_id=\?\)/);
+  assert.match(
+    assigned,
+    /k\.user_id IN \(SELECT e2\.user_id FROM enrollments e2 WHERE e2\.mentor_id=\?\)/,
+  );
 });
 
 test("Package input is validated (unknown fields, bad course ids, unknown features)", async () => {
