@@ -136,6 +136,8 @@ export class Store {
     await add("mail_outbox", "from_contact", "from_contact BOOLEAN NOT NULL DEFAULT FALSE");
     await add("mail_outbox", "in_reply_to", "in_reply_to VARCHAR(255) NULL");
     await add("mail_outbox", "references_hdr", "references_hdr TEXT NULL");
+    // Email layout (heading, details, button, code…) for the shared template; NULL = plain message.
+    await add("mail_outbox", "layout", "layout JSON NULL");
     // Push diagnostics: the push service's last answer for each device (e.g. 403 from Apple).
     await add("push_subscriptions", "last_status", "last_status INT NULL");
     await add("push_subscriptions", "last_error", "last_error VARCHAR(300) NULL");

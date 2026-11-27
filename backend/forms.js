@@ -303,12 +303,35 @@ export function answerText(v) {
 }
 /** Plain-text summary for the CRM and the notification email. */
 export function summarize(definition, clean) {
-  const lines = [];
-  for (const step of definition.steps)
-    for (const f of step.fields)
-      if (f.id in clean) lines.push(`${f.label}: ${answerText(clean[f.id])}`);
-  return lines.join("\n");
+  return summaryPairs(definition, clean)
+    .map(([label, answer]) => `${label}: ${answer}`)
+    .join("\n");
 }
+/** The answers as [question, answer] pairs, in form order (for the email details box). */
+export function summaryPairs(definition, clean) {
+  const pairs = [];
+  for (const step of definition.steps)
+    for (const f of step.fields) if (f.id in clean) pairs.push([f.label, answerText(clean[f.id])]);
+  return pairs;
+}
+/** Email layout: the copy of someone's answers sent to them. */
+export const receiptLayout = (title, name, pairs) => ({
+  label: "Form receipt",
+  heading: "We received your answers",
+  firstName: name && name !== "(no name)" ? name : "",
+  text: `Thank you for filling in "${title}". Here is a copy of your answers.`,
+  details: pairs,
+  stacked: true,
+  note: "If anything needs to change, reply to this email or write to contact@scholarscafe.com.\n\nYou are getting this automatic email because this address was entered on a form at scholarscafe.com.",
+});
+/** Email layout: a new form response, to the team inbox. */
+export const responseLayout = (title, pairs) => ({
+  label: "New response",
+  heading: "New response: " + title,
+  details: pairs,
+  stacked: true,
+  button: { label: "View lead", screen: "Leads" },
+});
 
 const json = (v) => (typeof v === "string" ? JSON.parse(v) : v);
 
@@ -808,6 +831,7 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
           clean[k] = { file: u.id, name: u.name, size: Number(u.size) };
           await q("UPDATE form_uploads SET inquiry_id=? WHERE id=?", [inquiryId, u.id], c);
         }
+        const pairs = summaryPairs(def, clean);
         const message = summarize(def, clean);
         await q(
           "INSERT INTO inquiries (id,name,email,phone,message,form_id,data) VALUES (?,?,?,?,?,?,?)",
@@ -823,19 +847,26 @@ export function installPublicFormRoutes(app, { store, fail, config, sharedLimit 
         });
         if (form.notify)
           await q(
-            "INSERT INTO mail_outbox (id,subject,body,reply_to) VALUES (?,?,?,?)",
-            [randomUUID(), "New form submission: " + form.title, message, email || null],
+            "INSERT INTO mail_outbox (id,subject,body,reply_to,layout) VALUES (?,?,?,?,?)",
+            [
+              randomUUID(),
+              "New form submission: " + form.title,
+              message,
+              email || null,
+              JSON.stringify(responseLayout(form.title, pairs)),
+            ],
             c,
           );
         if (sendReceipt)
           await q(
-            "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email) VALUES (?,?,?,?,?)",
+            "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,layout) VALUES (?,?,?,?,?,?)",
             [
               randomUUID(),
               ("Your response: " + form.title).slice(0, 160),
               receiptText(form.title, name, message),
               "contact@scholarscafe.com",
               email,
+              JSON.stringify(receiptLayout(form.title, name, pairs)),
             ],
             c,
           );

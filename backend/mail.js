@@ -1,25 +1,10 @@
 import nodemailer from "nodemailer";
-import { renderEmail, actionFor, CONTACT, DEFAULT_TAGLINE } from "./email-template.js";
+import { renderEmail, actionFor, adminScreen, CONTACT, DEFAULT_TAGLINE } from "./email-template.js";
 
-// The signature tagline comes from the website CMS (Links.tagline) when it has been edited there.
-let tagline = { value: DEFAULT_TAGLINE, at: 0 };
-export async function emailTagline(store, now = Date.now()) {
-  if (now - tagline.at < 10 * 60 * 1000) return tagline.value;
-  let value = DEFAULT_TAGLINE;
-  try {
-    const rows = await store.query(
-      "SELECT published FROM content WHERE kind='copy' AND published IS NOT NULL AND deleted_at IS NULL",
-    );
-    for (const r of rows) {
-      const data = typeof r.published === "string" ? JSON.parse(r.published) : r.published;
-      const v = data?.["Links.tagline"] ?? data?.["links.tagline"];
-      if (typeof v === "string" && v.trim()) value = v.trim().slice(0, 160);
-    }
-  } catch {
-    /* keep the default */
-  }
-  tagline = { value, at: now };
-  return value;
+// The email footer tagline is fixed in email-brand.js (it no longer follows the website's Links.tagline).
+// Kept as a function so existing callers keep working.
+export async function emailTagline() {
+  return DEFAULT_TAGLINE;
 }
 
 // The mailbox that sends (and signs in to SMTP). Set SMTP_USER=no-reply@scholarscafe.com once that mailbox exists.
@@ -53,25 +38,49 @@ export function createMailer(config) {
   return transport;
 }
 
+/** The layout stored with an outbox row (JSON), or null for older rows and plain mail. */
+function rowLayout(row) {
+  if (!row.layout) return null;
+  try {
+    const l = typeof row.layout === "string" ? JSON.parse(row.layout) : row.layout;
+    return l && typeof l === "object" ? l : null;
+  } catch {
+    return null;
+  }
+}
+/** A layout button may name an admin screen ({ label, screen }) instead of a URL: resolved here. */
+function resolveButton(button, adminOrigin) {
+  if (!button) return null;
+  const url = button.url || (button.screen ? adminScreen(adminOrigin, button.screen) : null);
+  return url ? { label: button.label, url } : null;
+}
+
 /** The nodemailer message for one outbox row: shared HTML template + plain-text alternative. */
-export function outboxMessage(row, transport, line = tagline.value) {
+export function outboxMessage(row, transport) {
   const fromContact = Boolean(row.from_contact);
   const from = fromContact ? transport.contact?.sender || CONTACT : transport.sender || CONTACT;
-  const { html, text } = renderEmail({
-    subject: row.subject,
-    text: row.body,
-    unsubscribeUrl: row.unsubscribe_url || null,
-    // Replies typed in the dashboard get the signature only; automatic mails also get one main button.
-    action: fromContact
-      ? null
-      : actionFor(
-          { subject: row.subject, text: row.body, toTeam: !row.to_email },
-          transport.adminOrigin,
-        ),
-    tagline: line,
-    // Mail typed in the dashboard (compose, replies) may use **bold** and [label](https://…) links.
-    format: fromContact,
-  });
+  const layout = rowLayout(row);
+  const { html, text } = layout
+    ? renderEmail({
+        ...layout,
+        subject: row.subject,
+        button: resolveButton(layout.button, transport.adminOrigin),
+        unsubscribeUrl: row.unsubscribe_url || null,
+      })
+    : renderEmail({
+        subject: row.subject,
+        text: row.body,
+        unsubscribeUrl: row.unsubscribe_url || null,
+        // Mail typed in the dashboard gets no automatic button; automatic mail gets one main button.
+        button: fromContact
+          ? null
+          : actionFor(
+              { subject: row.subject, text: row.body, toTeam: !row.to_email },
+              transport.adminOrigin,
+            ),
+        // Mail typed in the dashboard (compose, replies) may use **bold** and [label](https://…) links.
+        format: fromContact,
+      });
   return {
     from: `Scholars Cafe <${from}>`,
     // Team notifications go to the inbox; a form receipt goes to the person who filled in the form.
@@ -110,11 +119,10 @@ export async function deliverMail(store, transport) {
     );
     if (!rows.length) return;
     const row = rows[0];
-    const line = await emailTagline(store);
     try {
       const via = row.from_contact ? transport.contact : transport;
       if (!via) throw new Error("contact mailbox not configured");
-      const message = outboxMessage(row, transport, line);
+      const message = outboxMessage(row, transport);
       await via.sendMail(message);
       if (row.from_contact) sentFromContact = message;
       await store.query(
@@ -139,12 +147,14 @@ export async function deliverMail(store, transport) {
 /** Sign-in code + magic link (sent straight to the account's own address, not via the outbox). */
 export function loginEmail(transport, to, code, url, minutes) {
   const subject = "Your Scholars Cafe sign-in code";
-  const body = `Your sign-in code is ${code}\n\nOr open this link to sign in:\n${url}\n\nThe code and link expire in ${minutes} minutes and work once. If you did not ask for this, ignore this email; nobody can sign in without the code.`;
   const { html, text } = renderEmail({
     subject,
-    text: body,
-    action: actionFor({ subject, text: body }),
-    tagline: tagline.value,
+    preheader: `Your sign-in code is ${code}. It expires in ${minutes} minutes.`,
+    label: "Sign-in code",
+    heading: "Your sign-in code",
+    text: "Use this code to sign in to Scholars Cafe.",
+    code,
+    note: `The code expires in ${minutes} minutes and works once. If you did not ask for this, you can ignore this email; nobody can sign in without the code.\n\nOr sign in with this link: ${url}`,
   });
   const from = transport.sender || CONTACT;
   return {

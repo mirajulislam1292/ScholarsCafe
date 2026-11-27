@@ -135,7 +135,7 @@ test("Email code: same reply for unknown emails, 10-minute expiry, one use", asy
   await new Promise((r) => setImmediate(r));
   assert.equal(state.sent.length, 1);
   assert.equal(state.sent[0].to, USER.email);
-  const code = state.sent[0].text.match(/code is (\d{6})/)[1];
+  const code = state.sent[0].text.match(/Your code: (\d{6})/)[1];
   assert.equal(state.code.code_hash, hash(USER.id + ":" + code)); // only the hash is stored
   await post(app, "/auth/email/verify", { email: USER.email, code }).expect(200);
   await post(app, "/auth/email/verify", { email: USER.email, code }).expect(401); // used up
@@ -146,7 +146,7 @@ test("Email code is destroyed after five wrong guesses", async () => {
   const app = createApp(store, config, undefined, mailer(state));
   await post(app, "/auth/email/start", { email: USER.email }).expect(200);
   await new Promise((r) => setImmediate(r));
-  const code = state.sent[0].text.match(/code is (\d{6})/)[1];
+  const code = state.sent[0].text.match(/Your code: (\d{6})/)[1];
   const wrong = code === "000000" ? "111111" : "000000";
   for (let i = 0; i < CODE_ATTEMPTS; i++)
     await post(app, "/auth/email/verify", { email: USER.email, code: wrong }).expect(401);
@@ -244,7 +244,7 @@ test("Forgot password: emailed code sets a new password once and signs out every
   const app = createApp(store, config, undefined, mailer(state));
   await post(app, "/auth/email/start", { email: USER.email }).expect(200);
   await new Promise((r) => setImmediate(r));
-  const code = state.sent[0].text.match(/code is (\d{6})/)[1];
+  const code = state.sent[0].text.match(/Your code: (\d{6})/)[1];
   await post(app, "/auth/password/reset", { email: USER.email, code, password: "short" }).expect(
     400,
   );
