@@ -827,6 +827,8 @@ function edit(item) {
   const kept = {};
   for (const [key, value] of Object.entries(data))
     if (item.kind === "copy" && isRetired(key)) kept[key] = value;
+    // A person's section and order are set in the visual editor (About page); saving here keeps them.
+    else if (item.kind === "team" && (key === "section" || key === "rank")) kept[key] = value;
     else getters[key] = field(form, key, value);
   const actions = node("div", undefined, "actions");
   const save = node("button", "Save draft", "primary");
@@ -3291,6 +3293,20 @@ function renderVisual() {
         "muted",
       ),
     );
+    if (visualPage === "/about")
+      panel.append(
+        button(
+          "Arrange team sections",
+          () =>
+            renderTeamLayout(panel, {
+              done: idle,
+              saved: () => {
+                frame.src = origin + visualPage + "?sc-edit=1";
+              },
+            }),
+          "primary",
+        ),
+      );
   };
   const load = () => {
     visualPage = page.value;
@@ -3435,6 +3451,186 @@ function renderVisual() {
     }
   };
   window.addEventListener("message", message);
+}
+// ---------- Visual editor: team sections (About page) ----------
+// Same rules as the website (src/components/page/Team.tsx): people without a section sit in the
+// first one; inside a section, people with an order come first, the rest keep their earlier order
+// (founders, mentors, executive members, then other groups, each by position).
+const TEAM_DEFAULT_SECTION = { id: "team-section-leadership", name: "Leadership" };
+const TEAM_GROUP_ORDER = ["founders", "mentors", "executive members"];
+function teamLayout() {
+  const live = (kind) => items.filter((i) => i.kind === kind && i.published);
+  const pos = (d) => (typeof d.position === "number" ? d.position : 1e9);
+  const byPosition = (a, b) =>
+    pos(a.data) - pos(b.data) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  const stored = live("teamSections").sort(byPosition);
+  const sections = (
+    stored.length
+      ? stored.map((s) => ({ id: s.id, name: String(s.data.name || "") }))
+      : [{ ...TEAM_DEFAULT_SECTION }]
+  ).map((s) => ({ ...s, members: [] }));
+  const legacy = { founder: "founders", mentor: "mentors" };
+  const group = (m) => {
+    const g = String(m.data.group || "")
+      .trim()
+      .toLowerCase();
+    return legacy[g] || g;
+  };
+  const people = live("team")
+    .filter((m) => String(m.data.name || "").trim())
+    .sort(byPosition);
+  const seen = [];
+  for (const m of people) if (!seen.includes(group(m))) seen.push(group(m));
+  const rank = (k) =>
+    TEAM_GROUP_ORDER.includes(k)
+      ? TEAM_GROUP_ORDER.indexOf(k)
+      : TEAM_GROUP_ORDER.length + seen.indexOf(k);
+  const before = [...people].sort((a, b) => rank(group(a)) - rank(group(b)));
+  for (const m of before) {
+    const home = sections.find((s) => s.id === m.data.section) || sections[0];
+    home.members.push({
+      id: m.id,
+      name: String(m.data.name).trim(),
+      role: String(m.data.role || ""),
+      order: typeof m.data.rank === "number" ? m.data.rank : 1e9,
+    });
+  }
+  for (const s of sections) s.members.sort((a, b) => a.order - b.order); // stable: earlier order kept
+  return sections;
+}
+function renderTeamLayout(panel, { done, saved }) {
+  const sections = teamLayout();
+  const move = (list, i, by) => {
+    const j = i + by;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    draw();
+  };
+  const small = (text, fn, label, disabled) => {
+    const b = button(text, fn, "small");
+    b.setAttribute("aria-label", label);
+    b.title = label;
+    b.disabled = !!disabled;
+    return b;
+  };
+  const draw = () => {
+    const form = node("form", undefined, "team-layout");
+    form.append(
+      node("h2", "Team sections"),
+      node(
+        "p",
+        "Each section is its own block on the About page, in this order. Put people in a section and order them top to bottom (for example Founder, Co-Founder, CEO, CTO). Empty sections are hidden on the website.",
+        "muted",
+      ),
+    );
+    if (!sections.some((s) => s.members.length))
+      form.append(
+        node("p", "No published team members yet. Add people under Our Team first.", "empty"),
+      );
+    sections.forEach((s, si) => {
+      const box = node("fieldset", undefined, "team-section");
+      const head = node("div", undefined, "team-row");
+      const name = node("input");
+      name.value = s.name;
+      name.maxLength = 60;
+      name.required = true;
+      name.placeholder = "Section name, e.g. Leadership";
+      name.setAttribute("aria-label", "Section name");
+      name.oninput = () => (s.name = name.value);
+      head.append(
+        name,
+        small("↑", () => move(sections, si, -1), "Move section up", si === 0),
+        small("↓", () => move(sections, si, 1), "Move section down", si === sections.length - 1),
+        small(
+          "✕",
+          () => {
+            sections.splice(si, 1);
+            draw();
+          },
+          s.members.length ? "Move its people to another section first" : "Delete section",
+          s.members.length > 0 || sections.length === 1,
+        ),
+      );
+      box.append(head);
+      if (!s.members.length)
+        box.append(node("p", "Nobody here yet (hidden on the website).", "muted"));
+      s.members.forEach((m, mi) => {
+        const row = node("div", undefined, "team-person");
+        const who = node("strong", m.name);
+        const role = node("input");
+        role.value = m.role;
+        role.maxLength = 300;
+        role.placeholder = "Position, e.g. Co-Founder & CEO";
+        role.setAttribute("aria-label", "Position of " + m.name);
+        role.oninput = () => (m.role = role.value);
+        const where = node("select");
+        where.setAttribute("aria-label", "Section of " + m.name);
+        for (const t of sections) {
+          const o = node("option", t.name.trim() || "Untitled section");
+          o.value = t.id;
+          where.append(o);
+        }
+        where.value = s.id;
+        where.onchange = () => {
+          s.members.splice(mi, 1);
+          sections.find((t) => t.id === where.value).members.push(m);
+          draw();
+        };
+        const tools = node("div", undefined, "team-row");
+        tools.append(
+          where,
+          small("↑", () => move(s.members, mi, -1), "Move " + m.name + " up", mi === 0),
+          small(
+            "↓",
+            () => move(s.members, mi, 1),
+            "Move " + m.name + " down",
+            mi === s.members.length - 1,
+          ),
+        );
+        row.append(who, role, tools);
+        box.append(row);
+      });
+      form.append(box);
+    });
+    const add = button("+ Add section", () => {
+      sections.push({
+        id: "team-section-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: "",
+        members: [],
+      });
+      draw();
+      panel.querySelector(".team-section:last-of-type input")?.focus();
+    });
+    const save = node("button", "Save & publish", "primary");
+    save.type = "submit";
+    const actions = node("div", undefined, "actions");
+    actions.append(save, button("Cancel", done));
+    form.append(add, actions);
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      if (sections.some((s) => !s.name.trim())) return report(Error("Give every section a name."));
+      save.disabled = true;
+      try {
+        await api("visual/team", {
+          sections: sections.map((s) => ({
+            id: s.id,
+            name: s.name.trim(),
+            members: s.members.map((m) => ({ id: m.id, role: m.role })),
+          })),
+        });
+        await refresh();
+        saved();
+        notice("Saved and published. The website shows it within about a minute.");
+        done();
+      } catch (err) {
+        report(err);
+      } finally {
+        save.disabled = false;
+      }
+    };
+    panel.replaceChildren(form);
+  };
+  draw();
 }
 // ---------- Student dashboard: student screens ----------
 async function renderMyCourses() {

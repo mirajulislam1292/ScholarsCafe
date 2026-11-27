@@ -1138,6 +1138,38 @@ header {
 .visual-panel textarea {
   min-height: 96px;
 }
+/* Visual editor: team sections (About page) */
+.team-section {
+  border: 1px solid var(--ice-200);
+  border-radius: 12px;
+  padding: 10px;
+  margin: 0 0 12px;
+  display: grid;
+  gap: 10px;
+}
+.team-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.team-row input,
+.team-row select {
+  flex: 1;
+  min-width: 0;
+}
+.team-section > .team-row input {
+  font-weight: 600;
+}
+.team-row button.small {
+  min-width: 40px;
+  min-height: 40px;
+}
+.team-person {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ice-200);
+}
 .audit-list {
   padding-left: 18px;
   display: grid;
