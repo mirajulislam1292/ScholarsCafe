@@ -31,50 +31,43 @@ const post = (app, path, body) =>
     .set("X-CSRF-Token", "abc")
     .send(body);
 
-test("Mentors only see leads assigned to them (row-level scoping in SQL)", async () => {
-  let seen;
-  const app = asRole("mentor", async (sql, args) => {
-    seen = { sql, args };
-    return [];
-  });
-  await get(app, "/api/leads?q=ana&assigned=" + LEAD).expect(200);
-  assert.match(seen.sql, /i\.assigned_to=\?/);
-  assert.equal(seen.args[0], MENTOR); // the mentor's own id, never a client-supplied one
-  assert.equal(seen.args.includes(LEAD), false); // assignment filter ignored for mentors
-});
-
-test("Mentors are locked out of content, users, media and audit APIs", async () => {
-  const app = asRole("mentor", async () => []);
-  for (const path of [
-    "/api/content",
-    "/api/users",
-    "/api/media",
-    "/api/audit",
-    "/api/inquiries",
-    "/api/mentors",
-  ])
-    await get(app, path).expect(403);
-  await post(app, "/api/content", {}).expect(403);
-});
-
-test("Editors cannot read leads; mentors cannot reassign or touch others' leads", async () => {
-  await get(
-    asRole("editor", async () => []),
-    "/api/leads",
-  ).expect(403);
-  await post(
-    asRole("mentor", async () => []),
-    "/api/leads/" + LEAD,
-    { assigned_to: MENTOR },
-  ).expect(403);
-  // Lead not in the mentor's scope -> 404 (no information leak), and nothing is written.
+test("Mentors have no access to leads at all (list, export, update)", async () => {
   const writes = [];
   const app = asRole("mentor", async (sql) => {
-    if (!sql.startsWith("SELECT")) writes.push(sql);
+    writes.push(sql);
     return [];
   });
-  await post(app, "/api/leads/" + LEAD, { status: "contacted" }).expect(404);
-  assert.equal(writes.length, 0);
+  await get(app, "/api/leads").expect(403);
+  await get(app, "/api/leads.csv").expect(403);
+  await post(app, "/api/leads/" + LEAD, { status: "contacted" }).expect(403);
+  assert.equal(writes.length, 0, "refused before any query");
+});
+
+test("Mentors are locked out of website management, users, audit and inbox admin APIs", async () => {
+  const app = asRole("mentor", async () => []);
+  for (const path of ["/api/users", "/api/audit", "/api/inquiries", "/api/mentors", "/api/settings"])
+    await get(app, path).expect(403);
+  // Mentors may write blog drafts but not website sections or FAQs.
+  await post(app, "/api/content", {
+    id: "faq-x",
+    kind: "faqs",
+    title: "Q",
+    data: { q: "Q", a: "A", position: 1 },
+    version: 0,
+  }).expect(403);
+});
+
+test("Executives read and update leads but cannot assign or export them", async () => {
+  let seen;
+  const exec = asRole("editor", async (sql, args) => {
+    seen = { sql, args };
+    return sql.includes("FROM inquiries") ? [{ id: LEAD }] : [];
+  });
+  await get(exec, "/api/leads?assigned=" + LEAD).expect(200);
+  assert.equal(seen.args.includes(LEAD), false, "assignment filter is for owners and admins");
+  await post(exec, "/api/leads/" + LEAD, { status: "contacted" }).expect(200);
+  await post(exec, "/api/leads/" + LEAD, { assigned_to: MENTOR }).expect(403);
+  await get(exec, "/api/leads.csv").expect(403);
 });
 
 test("Lead updates are validated and only assign active mentors", async () => {
@@ -87,32 +80,27 @@ test("Lead updates are validated and only assign active mentors", async () => {
   await post(admin, "/api/leads/not-a-uuid", { status: "new" }).expect(404);
 });
 
-test("CSV export neutralises spreadsheet formulas and is scoped", async () => {
+test("CSV export neutralises spreadsheet formulas (owners and admins)", async () => {
   assert.equal(csvCell('=HYPERLINK("x")'), '"\'=HYPERLINK(""x"")"');
   assert.equal(csvCell("+1 555"), '"\'+1 555"');
   assert.equal(csvCell(null), '""');
-  let seen;
-  const app = asRole("mentor", async (sql, args) => {
-    seen = { sql, args };
-    return [{ name: "=cmd", email: "a@b.c" }];
-  });
+  const app = asRole("admin", async () => [{ name: "=cmd", email: "a@b.c" }]);
   const res = await get(app, "/api/leads.csv")
     .expect(200)
     .expect("Content-Type", /text\/csv/);
   assert.match(res.text, /"'=cmd"/);
-  assert.equal(seen.args[0], MENTOR);
 });
 
-test("Admins may manage mentors and editors but not owners or admins", () => {
-  assert.equal(canManage("admin", "mentor", "mentor"), true);
-  assert.equal(canManage("admin", "editor", "mentor"), true);
-  assert.equal(canManage("admin", "mentor", "admin"), false);
-  assert.equal(canManage("admin", "admin", "mentor"), false);
+test("Only the Owner manages users and roles", () => {
+  assert.equal(canManage("owner", "mentor", "admin"), true);
+  assert.equal(canManage("admin", "mentor", "mentor"), false);
+  assert.equal(canManage("admin", "editor", "mentor"), false);
   assert.equal(canManage("mentor", "editor", "editor"), false);
 });
 
 test("Restore validates the old snapshot and requires the current version", async () => {
-  const app = asRole("editor", async (sql) => {
+  const app = asRole("admin", async (sql) => {
+    if (sql.startsWith("SELECT kind FROM content")) return [{ kind: "faqs" }];
     if (sql.startsWith("SELECT * FROM content"))
       return [{ id: "faq-01", kind: "faqs", title: "Q", version: 3, draft: {} }];
     if (sql.startsWith("SELECT snapshot")) return [{ snapshot: { q: "x", a: "y", position: 10 } }];
@@ -120,6 +108,10 @@ test("Restore validates the old snapshot and requires the current version", asyn
   });
   await post(app, "/api/content/faq-01/restore", { revision: 7, version: 2 }).expect(409);
   await post(app, "/api/content/faq-01/restore", { revision: 7, version: 3 }).expect(200);
-  // Editors cannot delete
-  await post(app, "/api/content/faq-01/delete", { version: 3 }).expect(403);
+  // Executives can't restore or delete website FAQs (website management is for owners and admins).
+  const exec = asRole("editor", async (sql) =>
+    sql.startsWith("SELECT kind FROM content") ? [{ kind: "faqs" }] : [],
+  );
+  await post(exec, "/api/content/faq-01/restore", { revision: 7, version: 3 }).expect(403);
+  await post(exec, "/api/content/faq-01/delete", { version: 3 }).expect(403);
 });

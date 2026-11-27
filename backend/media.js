@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
 import express from "express";
-import { canPublish } from "./security.js";
+import { can } from "./permissions.js";
 
 const fail = (status, message) => Object.assign(new Error(message), { status });
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -34,7 +34,7 @@ export function installMedia(app, store, config, limit) {
   app.post(
     "/api/media",
     (req, _res, next) => {
-      if (!canPublish(req.actor.role)) throw fail(403, "Only owners and admins can upload media.");
+      if (!can(req.actor, "site.manage")) throw fail(403, "Only owners and admins can upload media.");
       const type = req.get("Content-Type") || "";
       if (![...IMAGE_TYPES, ...VIDEO_TYPES].includes(type))
         throw fail(415, "Choose a PNG, JPEG or WebP image, or an MP4 or WebM video.");
@@ -91,7 +91,7 @@ export function installMedia(app, store, config, limit) {
           [req.actor.id],
           c,
         );
-        if (!actor?.active || !canPublish(actor.role))
+        if (!actor?.active || !can(actor, "site.manage"))
           throw fail(403, "Upload access was removed.");
         // A single locked quota row serializes concurrent uploads across all admins.
         const [quota] = await store.query(

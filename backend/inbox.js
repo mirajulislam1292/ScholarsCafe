@@ -12,7 +12,7 @@ import MailComposer from "nodemailer/lib/mail-composer";
 import { simpleParser } from "mailparser";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
-import { canPublish } from "./security.js";
+import { can } from "./permissions.js";
 import { escapeHtml, CONTACT } from "./email-template.js";
 import { queuePush, inboxReaderIds, preview } from "./push.js";
 import { sender, outboxMessage, emailTheme } from "./mail.js";
@@ -349,12 +349,16 @@ export const viewCsp = (images) =>
   ].join("; ");
 
 export function installInboxRoutes(app, { store, fail, config, connect }) {
-  const owners = (req) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "The mail inbox is for owners and admins.");
-  };
+  // Every staff member may write a new email from contact@ ("mail.send"); reading and answering the
+  // contact@ inbox is for owners, admins and executives ("mail.inbox"). Others see only what they sent.
+  const sendOnly = (req) =>
+    req.path === "/compose" ||
+    req.path === "/compose/preview" ||
+    (req.method === "GET" && req.path === "/" && req.query.folder === "sent");
   app.use("/api/inbox", (req, _res, next) => {
-    owners(req);
-    next();
+    if (can(req.actor, "mail.inbox")) return next();
+    if (can(req.actor, "mail.send") && sendOnly(req)) return next();
+    throw fail(403, "The contact@ inbox is for the Owner, Admins and Executives.");
   });
   const id = (req) => z.string().uuid().parse(req.params.id);
   const one = async (req) => {
@@ -365,7 +369,10 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
   app.get("/api/inbox", async (req, res) => {
     const q = typeof req.query.q === "string" ? req.query.q.trim().slice(0, 100) : "";
     const sent = req.query.folder === "sent";
-    const filter = !sent && req.query.filter === "unread" ? " AND read_at IS NULL" : "";
+    const reader = can(req.actor, "mail.inbox");
+    const filter =
+      (!sent && req.query.filter === "unread" ? " AND read_at IS NULL" : "") +
+      (reader ? "" : " AND sent_by=?");
     const like = "%" + q.replace(/[\\%_]/g, (c) => "\\" + c) + "%";
     const items = await store.query(
       `SELECT id,from_name,from_email,to_text,subject,snippet,received_at,read_at,replied_at,
@@ -373,7 +380,7 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
          FROM contact_mail WHERE direction='${sent ? "out" : "in"}'${filter}
          ${q ? `AND (subject LIKE ? OR ${sent ? "to_text" : "from_email"} LIKE ? OR from_name LIKE ? OR body_text LIKE ?)` : ""}
         ORDER BY received_at DESC LIMIT 100`,
-      q ? [like, like, like, like] : [],
+      [...(reader ? [] : [req.actor.id]), ...(q ? [like, like, like, like] : [])],
     );
     const [counts] = await store.query(
       "SELECT COUNT(*) AS total, SUM(read_at IS NULL) AS unread FROM contact_mail WHERE direction='in'",
@@ -389,8 +396,9 @@ export function installInboxRoutes(app, { store, fail, config, connect }) {
       can_reply: canReplyFrom(config),
       mailbox: imapConfigured(config) ? config.CONTACT_IMAP_USER.trim() : CONTACT,
       status: parsed,
-      unread: Number(counts?.unread || 0),
-      total: Number(counts?.total || 0),
+      unread: reader ? Number(counts?.unread || 0) : 0,
+      total: reader ? Number(counts?.total || 0) : 0,
+      can_read_inbox: reader,
       items: items.map((m) => ({
         id: m.id,
         from_name: m.from_name,

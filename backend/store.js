@@ -141,6 +141,12 @@ export class Store {
     // Push diagnostics: the push service's last answer for each device (e.g. 403 from Apple).
     await add("push_subscriptions", "last_status", "last_status INT NULL");
     await add("push_subscriptions", "last_error", "last_error VARCHAR(300) NULL");
+    // Chat channels: existing messages stay in Team SC; SC Board is for the Owner and Admins.
+    await add(
+      "staff_messages",
+      "channel",
+      "channel ENUM('team','board') NOT NULL DEFAULT 'team' AFTER id",
+    );
     // Team workspace tables (staff_messages, staff_tasks, staff_task_assignees, staff_activity) are new
     // CREATE TABLE IF NOT EXISTS statements in schema.sql, which initialize() runs on every start.
     // Agreements: the signed copy (PDF) goes out as an email attachment through the outbox.

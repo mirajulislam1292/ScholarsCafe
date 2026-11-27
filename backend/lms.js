@@ -112,7 +112,7 @@ export function installLmsRoutes(app, { store, fail }) {
   });
   // Soft delete: hides the course from students at once; enrollments and progress are kept.
   app.post("/api/lms/courses/:id/delete", async (req, res) => {
-    requireCan(req.actor, "course.write");
+    requireCan(req.actor, "course.delete");
     const courseId = id(req);
     await store.transaction(async (c) => {
       const r = await q(
@@ -179,7 +179,7 @@ export function installLmsRoutes(app, { store, fail }) {
   app.post("/api/lms/lessons", (req, res) => saveLesson(req, res, null));
   app.post("/api/lms/lessons/:id", (req, res) => saveLesson(req, res, id(req)));
   app.post("/api/lms/lessons/:id/delete", async (req, res) => {
-    requireCan(req.actor, "lesson.write");
+    requireCan(req.actor, "course.delete");
     const lessonId = id(req);
     await store.transaction(async (c) => {
       const r = await q("DELETE FROM lms_lessons WHERE id=?", [lessonId], c);
@@ -498,7 +498,7 @@ export function installMessageRoutes(app, { store, fail }) {
       );
     });
     // Removed messages: staff still see them (marked); everyone else sees only that something was removed.
-    const staff = isStaff(req.actor);
+    const staff = can(req.actor, "message.moderate");
     res.json({
       items: messages.map((m) => ({
         ...m,
@@ -601,14 +601,16 @@ export function installMessageRoutes(app, { store, fail }) {
     res.json({ ok: true, status: "pending" });
   });
   app.get("/api/lms/reviews", async (req, res) => {
-    requireCan(req.actor, "review.moderate");
+    // All staff see reviews; mentors only their own students' (studentScope).
+    requireCan(req.actor, "review.view");
     const status = moderation.shape.status.safeParse(req.query.status).data;
+    const s = studentScope(req.actor, "r.user_id");
     const items = await q(
       `SELECT r.id,r.rating,r.body,r.status,r.created_at,r.public_consent,r.featured,c.title AS course,u.email,p.full_name
        FROM reviews r JOIN lms_courses c ON c.id=r.course_id JOIN users u ON u.id=r.user_id
        LEFT JOIN student_profiles p ON p.user_id=r.user_id
-       ${status ? "WHERE r.status=?" : ""} ORDER BY r.created_at DESC LIMIT 500`,
-      status ? [status] : [],
+       WHERE ${s.sql}${status ? " AND r.status=?" : ""} ORDER BY r.created_at DESC LIMIT 500`,
+      [...s.params, ...(status ? [status] : [])],
     );
     res.json({ items });
   });
@@ -626,7 +628,7 @@ export function installMessageRoutes(app, { store, fail }) {
   // Approved review with the student's consent → a draft testimonial on the website (first name only).
   // An admin still reviews and publishes it from Website → Testimonials.
   app.post("/api/lms/reviews/:id/feature", async (req, res) => {
-    requireCan(req.actor, "review.moderate");
+    requireCan(req.actor, "review.feature");
     const reviewId = uuid.parse(req.params.id);
     const contentId = await store.transaction(async (c) => {
       const [r] = await q(

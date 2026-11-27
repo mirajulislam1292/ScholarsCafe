@@ -63,14 +63,11 @@ function fakeStore(actor, extra = () => undefined) {
         });
         return { affectedRows: 1 };
       }
-      if (
-        q.startsWith(
-          "SELECT id FROM users WHERE active=1 AND role IN ('owner','admin','editor','mentor') AND id<>?",
-        )
-      )
+      // Staff with a permission (push.js idsWith): roles..., then the person to leave out.
+      if (q.startsWith("SELECT id FROM users WHERE active=1 AND role IN ("))
         return [1, 2, 3]
           .map(ID)
-          .filter((id) => id !== a[0])
+          .filter((id) => id !== a[a.length - 1])
           .map((id) => ({ id }));
       if (q.startsWith("SELECT id,device")) return [];
       return q.startsWith("SELECT") ? [] : { affectedRows: 1 };
@@ -230,7 +227,8 @@ test("Triggers: chat (not the sender), pinned marked, task assignee, deadline re
   const actor = { id: ID(1), role: "owner", email: "boss@x.com" };
   const store = fakeStore(actor, (q, a) => {
     if (q.startsWith("UPDATE staff_messages SET pinned_at")) return { affectedRows: 1 };
-    if (q.startsWith("SELECT body FROM staff_messages")) return [{ body: "Office closed Friday" }];
+    if (q.startsWith("SELECT id,channel,sender_id,body FROM staff_messages"))
+      return [{ id: 7, channel: "team", sender_id: ID(2), body: "Office closed Friday" }];
     if (q.startsWith("SELECT id,email FROM users WHERE active=1"))
       return a.map((id) => ({ id, email: "p@x.com" }));
     if (q.startsWith("SELECT user_id FROM staff_task_assignees")) return [];
@@ -366,10 +364,12 @@ test("Bell: recent alerts and unread count; reading clears all or one screen", a
   );
 });
 
-test("Trigger: a new website inquiry alerts owners and admins", async () => {
-  const store = fakeStore(null, (q) => {
-    if (q.startsWith("SELECT id FROM users WHERE active=1 AND role IN ('owner','admin')"))
+test("Trigger: a new website inquiry alerts the people who work leads", async () => {
+  const store = fakeStore(null, (q, a) => {
+    if (q.startsWith("SELECT id FROM users WHERE active=1 AND role IN (?,?,?)")) {
+      assert.deepEqual(a.slice(0, 3), ["owner", "admin", "editor"]);
       return [{ id: ID(1) }, { id: ID(2) }];
+    }
   });
   await request(createApp(store, config))
     .post("/public/inquiries")

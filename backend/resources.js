@@ -83,7 +83,7 @@ export function installResourceRoutes(app, { store, fail }) {
 
   // ---------- Staff: resources and announcements ----------
   app.get("/api/resources", async (req, res) => {
-    requireCan(req.actor, "resource.write");
+    requireCan(req.actor, "resource.view");
     const items = await q(
       `SELECT r.*,v.name AS video_name FROM student_resources r LEFT JOIN videos v ON v.id=r.video_id
        WHERE r.deleted_at IS NULL ORDER BY r.pinned DESC,r.created_at DESC LIMIT 1000`,
@@ -161,7 +161,7 @@ export function installResourceRoutes(app, { store, fail }) {
   app.post("/api/resources", (req, res) => save(req, res, null));
   app.post("/api/resources/:id", (req, res) => save(req, res, id(req)));
   app.post("/api/resources/:id/delete", async (req, res) => {
-    requireCan(req.actor, "resource.write");
+    requireCan(req.actor, "resource.delete");
     const resourceId = id(req);
     const r = await q(
       "UPDATE student_resources SET deleted_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",

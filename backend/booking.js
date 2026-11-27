@@ -1,3 +1,4 @@
+import { can } from "./permissions.js";
 // 1-on-1 mentor session booking (like Calendly). The team sets the open hours in the admin app; visitors pick
 // a time on scholarscafe.com/book. At most one booking per day: the `day` column is UNIQUE, so two people
 // booking the same day at the same moment can't both get it. Times are stored in UTC and shown in Bangladesh
@@ -460,9 +461,10 @@ export function installPublicBookingRoutes(app, { store, fail, config, sharedLim
 }
 
 /** Admin: availability settings and the bookings list (owners and admins). */
-export function installBookingAdminRoutes(app, { store, fail, canPublish }) {
+export function installBookingAdminRoutes(app, { store, fail }) {
+  // All staff see and cancel bookings; only the Owner and Admins change when people can book.
   const staffOnly = (req) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Bookings are managed by owners and admins.");
+    if (!can(req.actor, "bookings.view")) throw fail(403, "Bookings are for staff.");
   };
   app.get("/api/booking", async (req, res) => {
     staffOnly(req);
@@ -485,7 +487,8 @@ export function installBookingAdminRoutes(app, { store, fail, canPublish }) {
     });
   });
   app.post("/api/booking/settings", async (req, res) => {
-    staffOnly(req);
+    if (!can(req.actor, "bookings.settings"))
+      throw fail(403, "Only the Owner and Admins change when people can book.");
     const parsed = settingsSchema.safeParse(req.body);
     if (!parsed.success) throw fail(400, parsed.error.issues[0]?.message || "Check the settings.");
     const s = parsed.data;

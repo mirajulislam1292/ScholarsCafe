@@ -456,6 +456,8 @@ CREATE TABLE IF NOT EXISTS agreement_events (
 -- Team workspace (admin dashboard, staff only): one staff group chat, a shared to-do list and activity streaks.
 CREATE TABLE IF NOT EXISTS staff_messages (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  -- 'team' = Team SC (all staff), 'board' = SC Board (Owner and Admins only).
+  channel ENUM('team','board') NOT NULL DEFAULT 'team',
   sender_id CHAR(36) NOT NULL,
   body TEXT NOT NULL,
   pinned_at DATETIME NULL,

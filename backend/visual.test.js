@@ -40,21 +40,23 @@ const live = (q) =>
     ? [{ role: "owner", active: 1, email: SUPER }]
     : null;
 
-test("Only the Super Admin Gmail may use the visual editor (other owners and admins are refused)", async () => {
+test("The Owner and Admins use the visual editor; executives and mentors are refused (no email check)", async () => {
   for (const actor of [
-    { role: "owner", email: "other.owner@gmail.com" },
-    { role: "admin", email: SUPER },
-    { role: "editor", email: "e@x.com" },
+    { role: "editor", email: SUPER },
+    { role: "mentor", email: "m@x.com" },
   ]) {
     const t = app(actor);
     await t.post({ target: { type: "copy", key: "About.x" }, value: "Hi" }).expect(403);
     assert.equal(t.sql.length, 0, "refused before any query");
     const me = await t.me().expect(200);
     assert.equal(me.body.visual, undefined);
+    assert.equal(me.body.permissions.includes("site.manage"), false);
   }
-  const me = await app(superUser).me().expect(200);
-  assert.equal(me.body.visual, true);
-  assert.equal(me.body.public_origin, "https://scholarscafe.com");
+  for (const role of ["owner", "admin"]) {
+    const me = await app({ role, email: "anyone@example.com" }).me().expect(200);
+    assert.equal(me.body.visual, true);
+    assert.equal(me.body.public_origin, "https://scholarscafe.com");
+  }
 });
 
 test("Editing a text updates the entry that holds it, publishes it and keeps a revision", async () => {

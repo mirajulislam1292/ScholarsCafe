@@ -3,7 +3,7 @@
 // Rows are scoped with studentScope (staff: all, mentor: their students, student: own).
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { canReachStudent, isStaff, requireCan, studentScope } from "./access.js";
+import { canReachStudent, requireCan, studentScope } from "./access.js";
 import { featuresOf } from "./files.js";
 
 const uuid = z.string().uuid();
@@ -146,7 +146,7 @@ export function installDocumentRoutes(app, { store, fail }) {
   });
   // Staff can withdraw a document (e.g. uploaded by mistake). Files stay for the audit trail.
   app.post("/api/lms/documents/:id/delete", async (req, res) => {
-    if (!isStaff(req.actor)) throw fail(403, "Only owners and admins can remove documents.");
+    requireCan(req.actor, "document.delete");
     const r = await q("DELETE FROM documents WHERE id=?", [id(req)]);
     if (!r.affectedRows) throw fail(404, "Document not found.");
     await store.audit(req.actor.id, "document_delete", req.params.id);

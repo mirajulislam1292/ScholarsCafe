@@ -108,7 +108,7 @@ function fakeStore(actor) {
         });
         return { affectedRows: 1 };
       }
-      if (q.startsWith("SELECT id FROM users WHERE active=1 AND role IN ('owner','admin')"))
+      if (q.startsWith("SELECT id FROM users WHERE active=1 AND role IN (?,?,?)"))
         return [{ id: "owner-1" }, { id: "admin-1" }];
       if (q.startsWith("INSERT INTO push_outbox")) {
         for (let i = 0; i < a.length; i += 2)
@@ -168,7 +168,7 @@ test("Parser: headers, plain text and sanitised HTML", async () => {
   assert.equal(m.has_remote_images, true);
 });
 
-test("Polling: imports new mail once, remembers its place, notifies owners/admins", async () => {
+test("Polling: imports new mail once, remembers its place, notifies inbox readers", async () => {
   const store = fakeStore();
   const box = [1, 2, 3].map((uid) => ({ uid, source: raw(uid) }));
   let client = fakeImap(box);
@@ -206,12 +206,17 @@ test("Polling: not configured does nothing; a failed sign-in is recorded without
   assert.doesNotMatch(store.db.settings.imap_status, /pw/);
 });
 
-test("Access: owners and admins only", async () => {
-  for (const role of ["editor", "mentor"])
-    await request(createApp(fakeStore({ id: "u", role, email: "x@x.com" }), base))
-      .get("/api/inbox")
-      .set("Cookie", cookie)
-      .expect(403);
+test("Access: owners, admins and executives read the inbox; mentors only see what they sent", async () => {
+  const mentor = createApp(fakeStore({ id: "u", role: "mentor", email: "x@x.com" }), base);
+  await request(mentor).get("/api/inbox").set("Cookie", cookie).expect(403);
+  await request(mentor).get(`/api/inbox/${MID}`).set("Cookie", cookie).expect(403);
+  const sent = await request(mentor).get("/api/inbox?folder=sent").set("Cookie", cookie).expect(200);
+  assert.equal(sent.body.can_read_inbox, false);
+  assert.equal(sent.body.total, 0);
+  await request(createApp(fakeStore({ id: "u", role: "editor", email: "x@x.com" }), base))
+    .get("/api/inbox")
+    .set("Cookie", cookie)
+    .expect(200);
   const res = await request(
     createApp(fakeStore({ id: "u", role: "admin", email: "a@x.com" }), base),
   )
@@ -285,12 +290,15 @@ const good = {
   body: "Hi **Rafi**",
 };
 
-test("Compose: owners/admins only, CSRF and origin checked", async () => {
+test("Compose: every staff member may send from contact@; students can't; CSRF and origin checked", async () => {
   for (const role of ["editor", "mentor"]) {
     const store = fakeStore({ id: "u", role, email: "x@x.com" });
-    await composeReq(createApp(store, SEND_CFG), good).expect(403);
-    assert.equal(store.db.outbox.length, 0);
+    await composeReq(createApp(store, SEND_CFG), good).expect(201);
+    assert.equal(store.db.outbox.length, 1);
   }
+  const student = fakeStore({ id: "u", role: "student", email: "s@x.com" });
+  await composeReq(createApp(student, { ...SEND_CFG, PORTAL: "student" }), good).expect(403);
+  assert.equal(student.db.outbox.length, 0);
   const store = fakeStore({ id: "u", role: "owner", email: "o@x.com" });
   const app = createApp(store, SEND_CFG);
   await composeReq(app, good, { csrf: "wrong" }).expect(403);

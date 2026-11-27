@@ -289,10 +289,17 @@ test("Reminder is queued once, 60–90 minutes before the start", async () => {
   assert.match(store.outbox[0].body, /meet\.google\.com\/x/);
 });
 
-test("Admin: owners/admins only; save settings; cancel frees the day and emails the person", async () => {
+test("Admin: all staff see bookings; only owners/admins change settings; cancel frees the day", async () => {
   for (const role of ["editor", "mentor"]) {
     const app = createApp(fakeStore({ role }), config);
-    await request(app).get("/api/booking").set("Cookie", COOKIE).expect(403);
+    await request(app).get("/api/booking").set("Cookie", COOKIE).expect(200);
+    await request(app)
+      .post("/api/booking/settings")
+      .set("Cookie", COOKIE)
+      .set("X-CSRF-Token", "c")
+      .set("Origin", config.ADMIN_ORIGIN)
+      .send({ ...BOOKING_DEFAULTS })
+      .expect(403);
   }
   const store = fakeStore();
   const app = createApp(store, config);

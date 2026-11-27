@@ -8,7 +8,8 @@ import { createHash, randomUUID } from "node:crypto";
 import * as webpush from "web-push";
 import { z } from "zod";
 
-export const STAFF = ["owner", "admin", "editor", "mentor"];
+export { STAFF_ROLES as STAFF } from "./permissions.js";
+import { PERMISSIONS, STAFF_ROLES } from "./permissions.js";
 const PREVIEW = 90;
 export const preview = (s, n = PREVIEW) => {
   const t = String(s ?? "")
@@ -102,15 +103,19 @@ export async function staffIds(store, c, except) {
   );
   return rows.map((r) => r.id);
 }
-/** Owners and admins: the only people who may read the contact@ inbox (and every lead). */
-export async function inboxReaderIds(store, c) {
+/** Active staff whose role holds `permission` (permissions.js), except `except`. */
+export async function idsWith(store, c, permission, except) {
+  const roles = PERMISSIONS[permission] || [];
+  if (!roles.length) return [];
   const rows = await store.query(
-    "SELECT id FROM users WHERE active=1 AND role IN ('owner','admin')",
-    [],
+    `SELECT id FROM users WHERE active=1 AND role IN (${roles.map(() => "?").join(",")}) AND id<>?`,
+    [...roles, except || ""],
     c,
   );
   return rows.map((r) => r.id);
 }
+/** The people who may read the contact@ inbox ("mail.inbox"): new mail alerts go only to them. */
+export const inboxReaderIds = (store, c) => idsWith(store, c, "mail.inbox");
 
 /** Unread alert counts per user (the number on the app icon). */
 async function unreadCounts(store, users) {
@@ -253,7 +258,7 @@ const endpointHash = (e) => createHash("sha256").update(e).digest("hex");
 
 export function installPushRoutes(app, { store, fail, config }) {
   const staffOnly = (req) => {
-    if (!STAFF.includes(req.actor.role)) throw fail(403, "Notifications are for staff only.");
+    if (!STAFF_ROLES.includes(req.actor.role)) throw fail(403, "Notifications are for staff only.");
   };
   app.get("/api/push", async (req, res) => {
     staffOnly(req);

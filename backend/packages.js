@@ -4,7 +4,7 @@
 // Also: per-student sign-in access and "same mentor for all courses".
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
-import { requireCan } from "./access.js";
+import { requireCan, studentScope } from "./access.js";
 
 const uuid = z.string().uuid();
 export const FEATURES = ["messaging", "uploads", "reviews", "live"];
@@ -79,14 +79,17 @@ export function installPackageRoutes(app, { store, fail }) {
   };
 
   app.get("/api/packages", async (req, res) => {
-    requireCan(req.actor, "package.write");
+    requireCan(req.actor, "package.view");
+    // Who holds which package: mentors only see their own students (studentScope).
+    const own = studentScope(req.actor, "k.user_id");
     const rows = await q(
       `SELECT p.*,(SELECT COUNT(*) FROM user_packages up WHERE up.package_id=p.id) AS students
        FROM packages p WHERE p.deleted_at IS NULL ORDER BY p.position,p.name`,
     );
     const links = await q("SELECT package_id,course_id FROM package_courses");
     const assigned = await q(
-      "SELECT up.user_id,up.package_id,up.granted_at FROM user_packages up JOIN packages p ON p.id=up.package_id WHERE p.deleted_at IS NULL",
+      `SELECT k.user_id,k.package_id,k.granted_at FROM user_packages k JOIN packages p ON p.id=k.package_id WHERE p.deleted_at IS NULL AND ${own.sql}`,
+      own.params,
     );
     res.json({
       items: rows.map((p) => ({

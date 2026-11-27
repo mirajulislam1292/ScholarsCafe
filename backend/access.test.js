@@ -19,12 +19,12 @@ const ME = "11111111-1111-4111-8111-111111111111";
 const OTHER = "22222222-2222-4222-8222-222222222222";
 const as = (role) => ({ id: ME, role });
 
-test("Staff see everything; editors and unknown roles see nothing", () => {
-  for (const role of ["owner", "admin"]) {
+test("Owners, admins and executives see every student; unknown roles see nothing", () => {
+  for (const role of ["owner", "admin", "editor"]) {
     assert.deepEqual(courseScope(as(role)), { sql: "1=1", params: [] });
     assert.deepEqual(studentScope(as(role), "m.student_id"), { sql: "1=1", params: [] });
   }
-  for (const actor of [as("editor"), as("nobody"), null, { role: "student" }]) {
+  for (const actor of [as("nobody"), null, { role: "student" }]) {
     assert.throws(() => courseScope(actor), { status: 403 });
     assert.throws(() => lessonScope(actor), { status: 403 });
     assert.throws(() => studentScope(actor, "e.user_id"), { status: 403 });
@@ -71,10 +71,14 @@ test("Write permissions follow the role table", () => {
   assert.equal(can(as("student"), "review.moderate"), false);
   assert.equal(can(as("student"), "review.write"), true);
   assert.equal(can(as("admin"), "course.write"), true);
-  assert.equal(can(as("editor"), "message.send"), false);
+  assert.equal(can(as("editor"), "message.send"), true);
+  assert.equal(can(as("editor"), "package.write"), false);
+  assert.equal(can(as("editor"), "course.delete"), false);
+  assert.equal(can(as("mentor"), "course.write"), false);
   assert.equal(can(as("mentor"), "progress.write"), false);
-  // Admins may create students; only owners make admins.
-  assert.equal(canManage("admin", "student", "student"), true);
+  // Only the Owner manages users and roles (admins can't even add students' accounts as users).
+  assert.equal(canManage("owner", "admin", "admin"), true);
+  assert.equal(canManage("admin", "student", "student"), false);
   assert.equal(canManage("admin", "student", "admin"), false);
 });
 
@@ -150,7 +154,7 @@ test("Course and student writes are refused for students and mentors before touc
   }
 });
 
-test("Lesson video: login required, editors refused, query scoped to the student and private files", async () => {
+test("Lesson video: login required, unknown roles refused, query scoped to the student and private files", async () => {
   const config = {
     ADMIN_ORIGIN: "https://admin.scholarscafe.com",
     PUBLIC_ORIGIN: "https://scholarscafe.com",
@@ -166,7 +170,7 @@ test("Lesson video: login required, editors refused, query scoped to the student
       { session: async () => ({ id: ME, role, csrf: "abc" }), query },
       forRole(config, role),
     );
-  await request(appFor("editor", async () => []))
+  await request(appFor("nobody", async () => []))
     .get(path)
     .set("Cookie", cookie)
     .expect(403);
@@ -224,7 +228,8 @@ test("Messages: a student cannot read or post in another student's thread; mento
     .expect(404);
   assert.deepEqual(writes, []);
   const mentor = createApp(store("mentor"), config);
-  await request(mentor).get("/api/lms/reviews").set("Cookie", cookie).expect(403);
+  // Mentors see reviews (their own students only) but never approve or reject them.
+  await request(mentor).get("/api/lms/reviews").set("Cookie", cookie).expect(200);
   await request(mentor)
     .post("/api/lms/reviews/" + OTHER)
     .set("Cookie", cookie)
@@ -325,7 +330,7 @@ test("Google sign-in on the wrong portal is refused with a friendly redirect and
   assert.equal(res2.headers.location, "/?signin=other-portal");
 });
 
-test("Security settings: only the Super Admin changes them; editors, mentors and students can't read them", async () => {
+test("Security settings: only the Owner reads and changes them", async () => {
   const base = {
     ADMIN_ORIGIN: "https://admin.scholarscafe.com",
     PUBLIC_ORIGIN: "https://scholarscafe.com",
@@ -366,7 +371,8 @@ test("Security settings: only the Super Admin changes them; editors, mentors and
   await set("owner", { student_signup: "maybe" }).expect(400);
   await set("owner", { student_signup: "invite" }).expect(200);
   assert.deepEqual(writes, [["invite"]]);
-  await request(appAs("admin")).get("/api/settings").set("Cookie", cookie).expect(200);
+  await request(appAs("owner")).get("/api/settings").set("Cookie", cookie).expect(200);
+  await request(appAs("admin")).get("/api/settings").set("Cookie", cookie).expect(403);
   await request(appAs("editor")).get("/api/settings").set("Cookie", cookie).expect(403);
   await request(appAs("mentor")).get("/api/settings").set("Cookie", cookie).expect(403);
 });

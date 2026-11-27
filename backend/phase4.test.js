@@ -78,11 +78,11 @@ test("File content checks: real types pass, disguised or active content is refus
   assert.match(checkFile("application/x-msdownload", Buffer.from("MZ")), /Use PDF/);
 });
 
-test("Uploads: editors refused; students need the feature; content is checked before storing", async () => {
+test("Uploads: unknown roles refused; students need the feature; content is checked before storing", async () => {
   const dir = await mkdtemp(join(tmpdir(), "sc-files-"));
   try {
-    const editor = app("editor", null, { FILE_DIR: dir });
-    await editor
+    const unknown = app("nobody", null, { FILE_DIR: dir });
+    await unknown
       .post(`/api/lms/files?student=${ME}&purpose=document`)
       .set("Content-Type", PDF)
       .send(Buffer.from("%PDF-1.4"))
@@ -219,7 +219,7 @@ test("Moderation: only owners/admins remove messages; removed content is hidden 
   );
 });
 
-test("Documents: students can't set a status; mentors can't reach other students; editors refused", async () => {
+test("Documents: students can't set a status; mentors can't reach other students; unknown roles refused", async () => {
   const student = app("student");
   await student
     .post("/api/lms/documents/" + DOC + "/comments")
@@ -233,7 +233,7 @@ test("Documents: students can't set a status; mentors can't reach other students
     .expect(404);
   const scoped = mentor.sql.find(([q]) => q.includes("FROM documents d WHERE d.id=?"));
   assert.match(scoped[0], /e2\.mentor_id=\?/);
-  await app("editor").get("/api/lms/documents").expect(403);
+  await app("nobody").get("/api/lms/documents").expect(403);
   // Students submit only with the right feature.
   const noReview = app("student", async (q) =>
     q.includes("p.features") ? features({ uploads: true }) : [],

@@ -2,16 +2,19 @@
 // on student data must take its WHERE clause from here. Rules use the signed-in user's id from the
 // session, never an id sent by the browser. Anything not listed is denied.
 //
-//            | courses/lessons      | enrollments, profiles, progress, messages, reviews
-// owner/admin| all (read + write)   | all
-// mentor     | read (not deleted)   | only students enrolled with them as mentor
-// student    | published + enrolled | only their own rows (staff notes hidden)
-// editor     | none                 | none
+//                  | courses/lessons      | enrollments, profiles, progress, messages, reviews
+// owner/admin      | all (read + write)   | all
+// executive(editor)| all (read + write)   | all (no deleting, moderating or package access changes)
+// mentor           | read (not deleted)   | only students enrolled with them as mentor
+// student          | published + enrolled | only their own rows (staff notes hidden)
+// Who may write what comes from permissions.js; this file only adds the row scopes.
+
+import { can as hasPermission } from "./permissions.js";
 
 const fail = (status, message) => Object.assign(new Error(message), { status });
-const STAFF = new Set(["owner", "admin"]);
-const ROLES = new Set(["owner", "admin", "mentor", "student"]);
-export const isStaff = (actor) => STAFF.has(actor?.role);
+const ROLES = new Set(["owner", "admin", "editor", "mentor", "student"]);
+/** Staff whose row scope is every student (permissions.js "students.all"). */
+export const isStaff = (actor) => hasPermission(actor, "students.all");
 
 function check(actor) {
   if (!actor?.id || !ROLES.has(actor.role))
@@ -56,11 +59,12 @@ export function studentScope(actor, column) {
  * WHERE fragment for `student_resources r` (resources and announcements).
  * Students: published, not deleted, and they hold a package that unlocks it. A resource with no package rows
  * is for every student who has at least one package; a student with no package sees nothing.
- * Staff see everything; mentors and editors are refused.
+ * Staff see everything; mentors may read the list (writes are checked by each route).
  */
 export function resourceScope(actor) {
   check(actor);
   if (isStaff(actor)) return ALL;
+  if (hasPermission(actor, "resource.view")) return ALL; // mentors: read only (routes check writes)
   if (actor.role !== "student") throw fail(403, "Resources are managed by owners and admins.");
   return scoped(
     `r.published=1 AND r.deleted_at IS NULL
@@ -77,25 +81,10 @@ export const profileColumns = (actor) =>
     ? "p.user_id,p.full_name,p.phone,p.target_intake"
     : "p.user_id,p.full_name,p.phone,p.target_intake,p.staff_notes";
 
-// Write permissions. Row ownership is still checked with the scopes above inside the same transaction.
-const WRITE = {
-  "course.write": ["owner", "admin"],
-  "lesson.write": ["owner", "admin"],
-  "enrollment.write": ["owner", "admin"],
-  "package.write": ["owner", "admin"], // packages, assigning them, student access and mentor
-  "resource.write": ["owner", "admin"], // student resources, announcements and videos
-  "file.upload": ["owner", "admin", "mentor", "student"], // into a reachable student's space; students need the feature
-  "document.review": ["owner", "admin", "mentor"], // mentors: their own students only
-  "message.moderate": ["owner", "admin"],
-  "profile.write": ["owner", "admin", "student"], // student: own row, not staff_notes
-  "profile.notes": ["owner", "admin", "mentor"], // mentor: own students only
-  "progress.write": ["student"], // own lessons in open courses only
-  "message.send": ["owner", "admin", "mentor", "student"], // within studentScope
-  "review.write": ["student"], // own, enrolled course, one per course
-  "review.moderate": ["owner", "admin"],
-};
+// Write permissions come from permissions.js. Row ownership is still checked with the scopes above
+// inside the same transaction.
 export function can(actor, action) {
-  return Boolean(actor && WRITE[action]?.includes(actor.role));
+  return hasPermission(actor, action);
 }
 export function requireCan(actor, action) {
   check(actor);

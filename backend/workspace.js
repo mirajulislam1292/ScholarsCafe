@@ -1,12 +1,18 @@
-// Team workspace inside the admin dashboard: one staff group chat, a shared to-do list with email
-// reminders, and activity streaks. Staff only (owner, admin, editor, mentor); never on the student portal.
+// Team workspace inside the admin dashboard: two staff chat channels (Team SC for everyone, SC Board for
+// the Owner and Admins), a to-do list with email reminders, and active-time streaks. Staff only; never on
+// the student portal. Who may do what comes from permissions.js.
 // Days and deadlines use Bangladesh time (Asia/Dhaka, UTC+6 all year, no daylight saving).
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { canPublish, isSuperAdmin } from "./security.js";
-import { queuePush, staffIds } from "./push.js";
+import { queuePush, idsWith } from "./push.js";
+import { can, STAFF_ROLES } from "./permissions.js";
 
-export const STAFF_ROLES = ["owner", "admin", "editor", "mentor"];
+export { STAFF_ROLES };
+/** Chat channels and the permission each needs. SC Board is listed first for those who have it. */
+export const CHANNELS = {
+  board: { name: "SC Board", permission: "chat.board", screen: "SC Board" },
+  team: { name: "Team SC", permission: "chat.team", screen: "Team chat" },
+};
 export const TASK_STATUSES = ["todo", "doing", "done"];
 const DHAKA_MS = 6 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -189,9 +195,18 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     next();
   });
 
-  // ---------- Staff group chat ----------
+  // ---------- Staff chat: Team SC and SC Board ----------
+  // Every read and write names its channel and is checked against permissions.js, so SC Board messages
+  // never reach executives or mentors (not by URL, API, polling or push).
+  const channelOf = (req, value) => {
+    const key = value === undefined ? "team" : value;
+    const channel = CHANNELS[key];
+    if (!Object.hasOwn(CHANNELS, key) || !can(req.actor, channel.permission))
+      throw fail(403, "You don't have access to this chat.");
+    return key;
+  };
   const chatColumns =
-    "m.id,m.body,m.created_at,m.pinned_at,m.sender_id,u.email AS sender_email,u.role AS sender_role";
+    "m.id,m.channel,m.body,m.created_at,m.pinned_at,m.sender_id,u.email AS sender_email,u.role AS sender_role";
   const shape = (req) => (m) => ({
     id: Number(m.id),
     body: m.body,
@@ -201,34 +216,51 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     sender: nameOf(m.sender_email),
     sender_role: m.sender_role,
     mine: m.sender_id === req.actor.id,
-    can_delete: m.sender_id === req.actor.id || isSuperAdmin(req.actor, config),
+    can_delete: m.sender_id === req.actor.id || can(req.actor, "chat.moderate"),
+  });
+  app.get("/api/workspace/channels", (req, res) => {
+    res.json({
+      items: Object.entries(CHANNELS)
+        .filter(([, c]) => can(req.actor, c.permission))
+        .map(([id, c]) => ({ id, name: c.name, screen: c.screen })),
+    });
   });
   app.get("/api/workspace/chat", async (req, res) => {
+    const channel = channelOf(req, req.query.channel);
     const [recent, pinned] = await Promise.all([
       q(
-        `SELECT ${chatColumns} FROM staff_messages m LEFT JOIN users u ON u.id=m.sender_id WHERE m.deleted_at IS NULL ORDER BY m.id DESC LIMIT 150`,
+        `SELECT ${chatColumns} FROM staff_messages m LEFT JOIN users u ON u.id=m.sender_id WHERE m.channel=? AND m.deleted_at IS NULL ORDER BY m.id DESC LIMIT 150`,
+        [channel],
       ),
       q(
-        `SELECT ${chatColumns} FROM staff_messages m LEFT JOIN users u ON u.id=m.sender_id WHERE m.deleted_at IS NULL AND m.pinned_at IS NOT NULL ORDER BY m.pinned_at DESC LIMIT 20`,
+        `SELECT ${chatColumns} FROM staff_messages m LEFT JOIN users u ON u.id=m.sender_id WHERE m.channel=? AND m.deleted_at IS NULL AND m.pinned_at IS NOT NULL ORDER BY m.pinned_at DESC LIMIT 20`,
+        [channel],
       ),
     ]);
     // Newest at the bottom, like a messenger.
     res.json({ items: recent.reverse().map(shape(req)), pinned: pinned.map(shape(req)) });
   });
   app.post("/api/workspace/chat", async (req, res) => {
-    const { body } = z
-      .object({ body: z.string().trim().min(1).max(2000) })
+    const input = z
+      .object({ body: z.string().trim().min(1).max(2000), channel: z.string().max(20).optional() })
       .strict()
       .parse(req.body);
+    const channel = channelOf(req, input.channel);
+    const { body } = input;
     await limited(req, "staff_chat", 20, 60);
     await store.transaction(async (c) => {
-      await q("INSERT INTO staff_messages (sender_id,body) VALUES (?,?)", [req.actor.id, body], c);
-      // Everyone else in the team chat gets a short preview.
-      await queuePush(store, c, await staffIds(store, c, req.actor.id), {
-        title: "Team chat",
+      await q(
+        "INSERT INTO staff_messages (channel,sender_id,body) VALUES (?,?,?)",
+        [channel, req.actor.id, body],
+        c,
+      );
+      // Everyone else in this channel (and only them) gets a short preview.
+      const info = CHANNELS[channel];
+      await queuePush(store, c, await idsWith(store, c, info.permission, req.actor.id), {
+        title: info.name,
         body: `${nameOf(req.actor.email)}: ${body}`,
-        open: "Team chat",
-        tag: "chat",
+        open: info.screen,
+        tag: "chat-" + channel,
       });
     });
     res.status(201).json({ ok: true });
@@ -238,21 +270,33 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     if (!Number.isSafeInteger(id) || id < 1) throw fail(404, "Message not found.");
     return id;
   };
+  /** The message's channel, refusing (as "not found") a message in a channel this person can't open. */
+  const visibleMessage = async (req, c) => {
+    const [m] = await q(
+      `SELECT id,channel,sender_id,body FROM staff_messages WHERE id=? AND deleted_at IS NULL${c ? " FOR UPDATE" : ""}`,
+      [messageId(req)],
+      c,
+    );
+    if (!m || !CHANNELS[m.channel] || !can(req.actor, CHANNELS[m.channel].permission))
+      throw fail(404, "Message not found.");
+    return m;
+  };
   app.post("/api/workspace/chat/:id/pin", async (req, res) => {
     const { pinned } = z.object({ pinned: z.boolean() }).strict().parse(req.body);
+    const m = await visibleMessage(req);
     const result = await q(
       "UPDATE staff_messages SET pinned_at=?,pinned_by=? WHERE id=? AND deleted_at IS NULL",
-      [pinned ? new Date() : null, pinned ? req.actor.id : null, messageId(req)],
+      [pinned ? new Date() : null, pinned ? req.actor.id : null, m.id],
     );
     if (result.affectedRows !== 1) throw fail(404, "Message not found.");
     if (pinned) {
-      // A pinned message is marked as such in the notification.
-      const [m] = await q("SELECT body FROM staff_messages WHERE id=?", [messageId(req)]);
-      await queuePush(store, undefined, await staffIds(store, undefined, req.actor.id), {
-        title: "📌 Pinned in team chat",
-        body: `${nameOf(req.actor.email)} pinned: ${m?.body || ""}`,
-        open: "Team chat",
-        tag: "chat-pin",
+      // A pinned message is marked as such in the notification, sent to that channel only.
+      const info = CHANNELS[m.channel];
+      await queuePush(store, undefined, await idsWith(store, undefined, info.permission, req.actor.id), {
+        title: "📌 Pinned in " + info.name,
+        body: `${nameOf(req.actor.email)} pinned: ${m.body || ""}`,
+        open: info.screen,
+        tag: "chat-pin-" + m.channel,
       });
     }
     res.json({ ok: true });
@@ -260,14 +304,9 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
   app.post("/api/workspace/chat/:id/delete", async (req, res) => {
     const id = messageId(req);
     await store.transaction(async (c) => {
-      const [m] = await q(
-        "SELECT sender_id FROM staff_messages WHERE id=? AND deleted_at IS NULL FOR UPDATE",
-        [id],
-        c,
-      );
-      if (!m) throw fail(404, "Message not found.");
-      // Your own message, or any message for the Super Admin.
-      if (m.sender_id !== req.actor.id && !isSuperAdmin(req.actor, config))
+      const m = await visibleMessage(req, c);
+      // Your own message, or any message for the Owner.
+      if (m.sender_id !== req.actor.id && !can(req.actor, "chat.moderate"))
         throw fail(403, "You can only delete your own messages.");
       await q(
         "UPDATE staff_messages SET deleted_at=UTC_TIMESTAMP(),pinned_at=NULL WHERE id=?",
@@ -281,7 +320,9 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
   });
 
   // ---------- To-do list ----------
-  app.get("/api/workspace/staff", async (_req, res) => {
+  app.get("/api/workspace/staff", async (req, res) => {
+    // The people a task can be assigned to: only those who assign tasks need the list.
+    if (!can(req.actor, "tasks.manage")) throw fail(403, "Only the Owner and Admins assign tasks.");
     const rows = await q(
       "SELECT id,email,role FROM users WHERE active=1 AND role IN ('owner','admin','editor','mentor') ORDER BY email",
     );
@@ -308,20 +349,27 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
         .map((p) => ({ id: p.id, name: nameOf(p.email) })),
     }));
   };
+  // Owners and admins see and manage every task. Everyone else sees their own tasks (assigned to them)
+  // and shared tasks (assigned to nobody in particular, for the whole team), and may move those between
+  // to do, doing and done. Only owners and admins create, assign, reassign, set deadlines or delete.
+  const MINE_OR_SHARED = `(EXISTS (SELECT 1 FROM staff_task_assignees a1 WHERE a1.task_id=t.id AND a1.user_id=?)
+     OR NOT EXISTS (SELECT 1 FROM staff_task_assignees a2 WHERE a2.task_id=t.id))`;
+  const taskScope = (actor) =>
+    can(actor, "tasks.manage") ? ["1=1", []] : [MINE_OR_SHARED, [actor.id]];
   app.get("/api/workspace/tasks", async (req, res) => {
-    // Every staff member sees every task (who it's for, the deadline, the status). Editing is limited:
-    // owners/admins and whoever assigned it may change anything; an assignee may change the status.
-    const items = (await loadTasks("1=1", [])).map((t) => {
-      const can_edit = canEditTask(req.actor, t);
+    const items = (await loadTasks(...taskScope(req.actor))).map((t) => {
+      const can_edit = canEditTask(req.actor);
       return {
         ...t,
+        shared: t.assignees.length === 0,
         can_edit,
-        can_status: can_edit || t.assignees.some((a) => a.id === req.actor.id),
+        can_status:
+          can_edit || !t.assignees.length || t.assignees.some((a) => a.id === req.actor.id),
       };
     });
     res.json({ items, now: new Date(), week_start: weekStart(dhakaDay()) });
   });
-  const canEditTask = (actor, task) => canPublish(actor.role) || task.created_by === actor.id;
+  const canEditTask = (actor) => can(actor, "tasks.manage");
   /** Sets the assignee list; returns the people newly assigned (they get an email). */
   const setAssignees = async (c, taskId, ids) => {
     const wanted = [...new Set(ids)];
@@ -377,7 +425,7 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     );
   };
   app.post("/api/workspace/tasks", async (req, res) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Only owners and admins can create tasks.");
+    if (!can(req.actor, "tasks.manage")) throw fail(403, "Only the Owner and Admins create tasks.");
     const input = taskInput.parse(req.body);
     const id = randomUUID();
     const task = { ...input, due_at: input.due ? fromDhaka(input.due) : null };
@@ -408,22 +456,18 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
         c,
       );
       if (!current) throw fail(404, "Task not found.");
-      if (!canEditTask(req.actor, current)) {
-        // Anyone assigned may move their task between to do, doing and done.
+      if (!canEditTask(req.actor)) {
+        // Assignees (and anyone, on a shared task) may move it between to do, doing and done.
+        const [mine] = await q(
+          `SELECT 1 AS ok FROM staff_tasks t WHERE t.id=? AND ${MINE_OR_SHARED}`,
+          [id, req.actor.id],
+          c,
+        );
+        if (!mine) throw fail(403, "You can only update your own and shared tasks.");
         const { status } = z
           .object({ status: z.enum(TASK_STATUSES) })
           .strict()
           .parse(req.body);
-        const [mine] = await q(
-          "SELECT 1 AS ok FROM staff_task_assignees WHERE task_id=? AND user_id=?",
-          [id, req.actor.id],
-          c,
-        );
-        if (!mine)
-          throw fail(
-            403,
-            "Only the person who assigned it, its assignees or an admin can change it.",
-          );
         await q(
           "UPDATE staff_tasks SET status=?,completed_at=?,updated_at=UTC_TIMESTAMP() WHERE id=?",
           [status, status === "done" ? current.completed_at || new Date() : null, id],
@@ -471,8 +515,7 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
       [id],
     );
     if (!task) throw fail(404, "Task not found.");
-    if (!canEditTask(req.actor, task))
-      throw fail(403, "Only the person who assigned it or an admin can delete a task.");
+    if (!canEditTask(req.actor)) throw fail(403, "Only the Owner and Admins delete tasks.");
     const result = await q(
       "UPDATE staff_tasks SET deleted_at=UTC_TIMESTAMP() WHERE id=? AND deleted_at IS NULL",
       [id],
@@ -555,9 +598,10 @@ export function installWorkspaceRoutes(app, { store, fail, config }) {
     const [me] = await statsFor([req.actor], 14);
     res.json({ me, today: dhakaDay(), week_start: weekStart(dhakaDay()) });
   });
-  // Everyone's streak, days in and approximate time, for every staff member (the audit log stays Super
-  // Admin only). Staff only: the /api/workspace guard above refuses students and the public.
+  // Everyone's streak, tasks and approximate active time: the Owner and Admins only ("team.performance").
   app.get("/api/workspace/team", async (req, res) => {
+    if (!can(req.actor, "team.performance"))
+      throw fail(403, "Team performance is for the Owner and Admins.");
     const days = req.query.days === "28" ? 28 : 14;
     const users = await q(
       "SELECT id,email,role FROM users WHERE active=1 AND role IN ('owner','admin','editor','mentor') ORDER BY email",

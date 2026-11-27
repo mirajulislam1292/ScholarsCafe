@@ -1,7 +1,7 @@
 // "Preview emails" (owners and admins, team admin only): every automatic email, a contact@ reply and a
 // Compose mail, rendered with the real text builders and the shared template, using made-up sample data. Read only:
 // nothing is queued or sent. Each preview is its own tiny page with a strict CSP, shown in a sandbox.
-import { canPublish } from "./security.js";
+import { can } from "./permissions.js";
 import { outboxMessage, loginEmail } from "./mail.js";
 import {
   confirmationText,
@@ -238,7 +238,7 @@ export function installEmailPreviewRoutes(app, { store, fail, config }) {
   const all = async (req) =>
     previewMails(config, transport, req.query.theme === "dark" ? "dark" : "light");
   app.use("/api/email-previews", (req, _res, next) => {
-    if (!canPublish(req.actor.role)) throw fail(403, "Email previews are for owners and admins.");
+    if (!can(req.actor, "inbox.admin")) throw fail(403, "Email previews are for owners and admins.");
     next();
   });
   app.get("/api/email-previews", async (req, res) =>

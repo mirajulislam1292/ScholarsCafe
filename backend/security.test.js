@@ -69,6 +69,7 @@ test("Publishing rechecks revoked access inside the transaction", async () => {
       session: async () => ({ id: "1", role: "owner", csrf: "abc" }),
       transaction: (fn) => fn({}),
       query: async (sql) => {
+        if (sql.startsWith("SELECT kind FROM content")) return [{ kind: "faqs" }];
         assert.match(sql, /^SELECT role,active FROM users/);
         return [{ role: "editor", active: 1 }];
       },
@@ -112,7 +113,9 @@ test("Role management prevents editor escalation and admin ownership grants", ()
       assert.equal(canManage("editor", target, role), false);
   assert.equal(canManage("admin", "editor", "owner"), false);
   assert.equal(canManage("admin", "owner", "editor"), false);
-  assert.equal(canManage("admin", "editor", "editor"), true);
+  // Only the Owner manages users and roles.
+  assert.equal(canManage("admin", "editor", "editor"), false);
+  assert.equal(canManage("admin", "student", "student"), false);
   assert.equal(canManage("owner", "admin", "owner"), true);
 });
 test("Google email and nonce must be verified; third party emails are not trusted automatically", () => {
