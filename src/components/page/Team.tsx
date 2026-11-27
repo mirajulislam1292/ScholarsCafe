@@ -4,6 +4,7 @@ import { Facebook, Instagram, Linkedin } from "lucide-react";
 import { Reveal } from "../scholars/Reveal";
 
 type Member = {
+  id?: string;
   name: string;
   role: string;
   title?: string;
@@ -13,7 +14,11 @@ type Member = {
   linkedin?: string;
   instagram?: string;
   facebook?: string;
+  /** Section (a "teamSections" entry id) and order inside it, set in the visual editor. */
+  section?: string;
+  rank?: number;
 };
+type Section = { id: string; name: string };
 
 const DEFAULT_TEAM: Member[] = [
   ...SITE.team.founders.map((m) => ({ ...m, group: "founder" })),
@@ -84,7 +89,7 @@ function Person({ m, index }: { m: Member; index: number }) {
             )}
           </div>
           <div className="min-w-0">
-            <h3 className="type-h3 break-words text-neutral-900">{m.name}</h3>
+            <h4 className="type-h3 break-words text-neutral-900">{m.name}</h4>
             {role && <p className="type-caption mt-1 text-blue-700">{role}</p>}
             {m.line && <p className="type-body mt-1 max-w-[52ch] text-neutral-600">{m.line}</p>}
             <SocialLinks m={m} />
@@ -95,7 +100,8 @@ function Person({ m, index }: { m: Member; index: number }) {
   );
 }
 
-// Founders first, then mentors, then executive members, then any other group as it first appears.
+// Earlier order (before sections): founders, then mentors, then executive members, then any other
+// group as it first appears. People the owner hasn't placed yet keep this order.
 const LEGACY: Record<string, string> = { founder: "founders", mentor: "mentors" };
 const ORDER = ["founders", "mentors", "executive members"];
 const groupKey = (g?: string) => {
@@ -111,21 +117,56 @@ function inOrder(members: Member[]) {
   return [...members].sort((a, b) => rank(groupKey(a.group)) - rank(groupKey(b.group)));
 }
 
-/** "Our Team": one list of everyone, founders first. Edited in the admin under Our Team. */
+/** Until the owner arranges the team, everyone is in one "Leadership" section, in the earlier order. */
+const DEFAULT_SECTIONS: Section[] = [{ id: "team-section-leadership", name: "Leadership" }];
+
+/**
+ * The team split into its sections, in the owner's order. People without a (known) section go in
+ * the first one; inside a section, placed people come first in their order, the rest after them.
+ * Sections with nobody in them are left out. Same rules as the visual editor (backend/public/app.js).
+ */
+function teamSections(sections: Section[], members: Member[]) {
+  const list = sections.length ? sections : DEFAULT_SECTIONS;
+  const blocks = list.map((s) => ({ ...s, members: [] as Member[] }));
+  for (const m of inOrder(members))
+    (blocks.find((b) => b.id === m.section) || blocks[0]).members.push(m);
+  const order = (m: Member) => (typeof m.rank === "number" ? m.rank : 1e9);
+  for (const b of blocks) b.members.sort((a, b2) => order(a) - order(b2));
+  return blocks.filter((b) => b.members.length);
+}
+
+/** "Our Team": one block per section (Leadership, Mentors…). Arranged in the visual editor. */
 export function Team() {
   const team = { ...SITE.team, heading: useCmsValue("site.team.heading", SITE.team.heading) };
-  const members = inOrder(useCmsList<Member>("team", DEFAULT_TEAM).filter((m) => m.name?.trim()));
+  const members = useCmsList<Member>("team", DEFAULT_TEAM, (d, id) => ({
+    ...(d as Member),
+    id,
+  })).filter((m) => m.name?.trim());
+  const sections = useCmsList<Section>("teamSections", DEFAULT_SECTIONS, (d, id) => ({
+    id,
+    name: typeof d.name === "string" ? d.name : "",
+  }));
+  const blocks = teamSections(sections, members);
   return (
     <section id="team" className="tone-tint section-y">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal>
           <h2 className="type-h2 text-neutral-900">{team.heading}</h2>
         </Reveal>
-        <ul className="section-body max-w-3xl">
-          {members.map((m, i) => (
-            <Person key={m.name + i} m={m} index={i} />
-          ))}
-        </ul>
+        {blocks.map((b) => (
+          <div key={b.id} className="section-body max-w-3xl">
+            <Reveal>
+              <h3 className="type-caption border-b border-neutral-900/[0.12] pb-3 font-medium uppercase tracking-wider text-blue-700">
+                {b.name}
+              </h3>
+            </Reveal>
+            <ul className="mt-5 md:mt-6">
+              {b.members.map((m, i) => (
+                <Person key={(m.id || m.name) + i} m={m} index={i} />
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </section>
   );

@@ -24,9 +24,9 @@ function app(actor, query) {
   );
   return {
     sql,
-    post: (body) =>
+    post: (body, path = "/api/visual/edit") =>
       request(a)
-        .post("/api/visual/edit")
+        .post(path)
         .set("Cookie", cookie)
         .set("Origin", config.ADMIN_ORIGIN)
         .set("X-CSRF-Token", "c")
@@ -179,5 +179,167 @@ test("One line of a list (e.g. a program feature) can be edited in place", async
         : []),
   )
     .post({ target: { type: "entry", id: "course-1", field: "features.5" }, value: "X" })
+    .expect(400);
+});
+
+// ---------- Team sections (About page) ----------
+const person = (id, name, group, role, position) => ({
+  id,
+  draft: null,
+  published: {
+    name,
+    group,
+    role,
+    title: "",
+    line: "Bio of " + name,
+    photo: "/p/" + id + ".webp",
+    position,
+  },
+});
+const people = [
+  person("team-a", "A", "Founders", "Co-founder & CEO", 10),
+  person("team-b", "B", "Executive members", "COO", 30),
+  person("team-c", "C", "mentor", "Mentor", 50),
+];
+const teamDb =
+  (sections = []) =>
+  (q) =>
+    live(q) ||
+    (q.includes("kind='team'") ? people : q.includes("LIKE 'team-section-%'") ? sections : []);
+const layout = (sections) => ({ sections });
+
+test("Team layout: refused for anyone but the Super Admin", async () => {
+  const t = app({ role: "owner", email: "other.owner@gmail.com" }, teamDb());
+  await t
+    .post(
+      layout([{ id: "team-section-leadership", name: "Leadership", members: [] }]),
+      "/api/visual/team",
+    )
+    .expect(403);
+  assert.equal(t.sql.length, 0);
+});
+
+test("Team layout: sections are created, people placed and ordered, nothing else changes", async () => {
+  const t = app(superUser, teamDb());
+  const res = await t
+    .post(
+      layout([
+        {
+          id: "team-section-leadership",
+          name: "Leadership",
+          members: [
+            { id: "team-b", role: "COO" },
+            { id: "team-a", role: "Founder" },
+          ],
+        },
+        {
+          id: "team-section-mentors",
+          name: "Mentors",
+          members: [{ id: "team-c", role: "Mentor" }],
+        },
+      ]),
+      "/api/visual/team",
+    )
+    .expect(200);
+  assert.equal(res.body.sections, 2);
+  const inserts = t.sql.filter(([q]) => q.startsWith("INSERT INTO content"));
+  assert.deepEqual(
+    inserts.map(([, a]) => [a[0], a[1], JSON.parse(a[3])]),
+    [
+      ["team-section-leadership", "Leadership", { name: "Leadership", position: 0 }],
+      ["team-section-mentors", "Mentors", { name: "Mentors", position: 10 }],
+    ],
+  );
+  const updates = Object.fromEntries(
+    t.sql
+      .filter(([q]) => q.startsWith("UPDATE content SET draft=?,published=?"))
+      .map(([, a]) => [a[2], JSON.parse(a[1])]),
+  );
+  assert.deepEqual(updates["team-b"], {
+    ...people[1].published,
+    section: "team-section-leadership",
+    rank: 0,
+  });
+  assert.deepEqual(updates["team-a"], {
+    ...people[0].published,
+    role: "Founder",
+    section: "team-section-leadership",
+    rank: 10,
+  });
+  assert.deepEqual(updates["team-c"], {
+    ...people[2].published,
+    section: "team-section-mentors",
+    rank: 0,
+  });
+  assert.equal(t.sql.filter(([q]) => q.startsWith("INSERT INTO revisions")).length, 3);
+});
+
+test("Team layout: everyone must be listed once, and a removed section is deleted", async () => {
+  await app(superUser, teamDb())
+    .post(
+      layout([
+        {
+          id: "team-section-leadership",
+          name: "Leadership",
+          members: [{ id: "team-a", role: "" }],
+        },
+      ]),
+      "/api/visual/team",
+    )
+    .expect(409);
+  await app(superUser, teamDb())
+    .post(
+      layout([
+        { id: "team-section-x", name: "X", members: [{ id: "team-a", role: "" }] },
+        {
+          id: "team-section-y",
+          name: "Y",
+          members: [
+            { id: "team-a", role: "" },
+            { id: "team-b", role: "" },
+            { id: "team-c", role: "" },
+          ],
+        },
+      ]),
+      "/api/visual/team",
+    )
+    .expect(400);
+  await app(superUser, teamDb())
+    .post(layout([{ id: "team-section-x", name: "  ", members: [] }]), "/api/visual/team")
+    .expect(400);
+  const old = {
+    id: "team-section-old",
+    kind: "teamSections",
+    draft: { name: "Old", position: 0 },
+    published: { name: "Old", position: 0 },
+    deleted_at: null,
+  };
+  const t = app(superUser, teamDb([old]));
+  await t
+    .post(
+      layout([
+        {
+          id: "team-section-leadership",
+          name: "Leadership",
+          members: people.map((p) => ({ id: p.id, role: p.published.role })),
+        },
+      ]),
+      "/api/visual/team",
+    )
+    .expect(200);
+  const del = t.sql.find(([q]) => q.includes("deleted_at=UTC_TIMESTAMP()"));
+  assert.deepEqual(del[1], ["team-section-old"]);
+  const other = { ...old, id: "team-section-leadership", kind: "copy" };
+  await app(superUser, teamDb([other]))
+    .post(
+      layout([
+        {
+          id: "team-section-leadership",
+          name: "L",
+          members: people.map((p) => ({ id: p.id, role: "" })),
+        },
+      ]),
+      "/api/visual/team",
+    )
     .expect(400);
 });

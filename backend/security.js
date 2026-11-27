@@ -214,7 +214,18 @@ const fields = {
     instagram: safeUrl.optional(),
     facebook: safeUrl.optional(),
     position,
+    // Set by the visual editor's team layout: the section (a teamSections entry id) and the order
+    // inside it. Members without them sit in the first section, in the order they had before.
+    section: z
+      .string()
+      .regex(/^[a-zA-Z0-9_.-]+$/)
+      .max(120)
+      .optional(),
+    rank: position,
   }),
+  // Sections (divisions) of the team on the About page, e.g. "Leadership", "Mentors". Edited only in
+  // the visual editor; a section with nobody in it is hidden on the website.
+  teamSections: z.object({ name: z.string().trim().min(1).max(60), position }),
   faqs: z.object({ q: short, a: text, position }),
   // Public resources (guides, templates, live links). Package-only student material is private (Phase 3).
   resources: z.object({
