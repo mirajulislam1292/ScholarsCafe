@@ -2,18 +2,29 @@
 // Compose mail, rendered with the real text builders and the shared template, using made-up sample data. Read only:
 // nothing is queued or sent. Each preview is its own tiny page with a strict CSP, shown in a sandbox.
 import { canPublish } from "./security.js";
-import { outboxMessage, loginEmail, emailTagline } from "./mail.js";
-import { confirmationText, reminderText, cancelText, teamText } from "./booking.js";
-import { receiptText } from "./forms.js";
+import { outboxMessage, loginEmail } from "./mail.js";
+import {
+  confirmationText,
+  reminderText,
+  cancelText,
+  teamText,
+  confirmationLayout,
+  reminderLayout,
+  cancelLayout,
+  teamLayout,
+} from "./booking.js";
+import { receiptText, receiptLayout, responseLayout } from "./forms.js";
 import { alertBody, unsubscribeUrl } from "./eca.js";
-import { taskMail } from "./workspace.js";
+import { taskMail, taskLayout } from "./workspace.js";
+import { typedLayout } from "./inbox.js";
+import { inviteEmail, codeEmail, signedCopyText, signedCopyLayout } from "./agreements-mail.js";
 
 const at = (h) => new Date(Date.UTC(2026, 10, 24, 4 + h, 0));
 const booking = {
   name: "Rafi Ahmed",
   email: "rafi@example.com",
   phone: "+880 1700-000000",
-  topic: "Choosing between USA and Canada for undergrad",
+  topic: "Choosing universities in the USA for undergrad",
   starts_at: at(0),
   ends_at: new Date(at(0).getTime() + 30 * 60 * 1000),
 };
@@ -22,86 +33,188 @@ const task = {
   details: "Ask about earlier dates for Rafi.",
   due_at: at(26),
 };
+const answers = [
+  ["Full name", "Rafi Ahmed"],
+  ["Current level", "HSC 2026, Science"],
+  ["Target intake", "Fall 2027"],
+  ["Questions for us", "Which universities fit my budget, and when should I start my essays?"],
+];
+const json = (l) => JSON.stringify(l);
 
+/** Every email the app sends, with made-up sample data, rendered exactly as it would be sent. */
 export function previewMails(config, transport) {
   const admin = config.ADMIN_ORIGIN || "https://admin.scholarscafe.com";
   const meet = "https://meet.google.com/abc-defg-hij";
   const unsub = unsubscribeUrl({ ADMIN_ORIGIN: admin }, "sample-token");
   const row = (id, label, r) => ({ id, label, row: { id: "preview-" + id, ...r } });
+  const replyBody =
+    "Hi Rafi,\n\nYes, the package includes SAT guidance and two essay reviews. I have added both to your plan.\n\nBest wishes,\nTasnim\nScholars Cafe";
+  const composeBody =
+    "Here is what to focus on this month so your applications stay on track.\n\n- Finish the first draft of your **Common App personal essay**\n- Ask two teachers for recommendation letters\n- Book your IELTS or Duolingo test date\n\nIf anything is unclear, read [our free guides](https://scholarscafe.com/resources) or reply to this email.\n\nBest,\nThe Scholars Cafe team";
+  const ecaBody =
+    "Model UN 2026 is open for applications until **5 December**. It is a good fit for students interested in international relations and public speaking.\n\nApply here: https://scholarscafe.com/resources/eca";
+  // Agreements (sample values). The invite and the code go straight to the recipient (see below).
+  const agreement = {
+    name: "Rafi Ahmed",
+    email: booking.email,
+    title: "Mentorship Services Agreement",
+    ref: "SC-AGR-2026-0142",
+    docId: "SC-AGR-2026-0142-3F9A1C",
+    signedAt: "27 November 2026, 8:15 PM (Dhaka time)",
+    sha: "9f2c4e1a7b3d5f6081a2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6a7b8",
+  };
   return [
-    row("booking-confirmed", "Booking confirmed (to student)", {
-      subject: "Your Scholars Cafe session is booked",
-      body: confirmationText(booking, meet),
-      to_email: booking.email,
-    }),
-    row("booking-reminder", "Booking reminder (to student)", {
-      subject: "Reminder: your Scholars Cafe session starts soon",
-      body: reminderText(booking, meet),
-      to_email: booking.email,
-    }),
-    row("booking-cancelled", "Booking cancelled (to student)", {
-      subject: "Your Scholars Cafe session was cancelled",
-      body: cancelText(booking),
-      to_email: booking.email,
-    }),
-    row("booking-team", "New booking (to the team inbox)", {
-      subject: "New booking: Rafi Ahmed",
-      body: teamText(booking),
-      reply_to: booking.email,
-    }),
-    row("task-assigned", "Task assigned (to staff)", {
-      subject: "New task for you: " + task.title,
-      body: taskMail(config, task, "mahim assigned you a task."),
-      to_email: "staff@example.com",
-    }),
-    row("task-reminder", "Task deadline reminder (to staff)", {
-      subject: "Due tomorrow: " + task.title,
-      body: taskMail(config, task, "Reminder: this task is due in about 24 hours."),
-      to_email: "staff@example.com",
-    }),
-    row("form-receipt", "Form receipt (to the person who filled it in)", {
-      subject: "Your response: Free consultation",
-      body: receiptText(
-        "Free consultation",
-        "Rafi Ahmed",
-        "Name: Rafi Ahmed\nTarget: USA, Fall 2027",
-      ),
-      to_email: booking.email,
-      reply_to: "contact@scholarscafe.com",
-    }),
-    row("inquiry-team", "Website inquiry (to the team inbox)", {
-      subject: "New website inquiry",
-      body: "Name: Rafi Ahmed\nEmail: rafi@example.com\nPhone: +880 1700-000000\n\nI'd like help with my applications.",
-      reply_to: booking.email,
-    }),
-    row("eca-alert", "ECA alert (to subscribers, with unsubscribe)", {
-      subject: "New ECA open: Model UN 2026",
-      body: alertBody(
-        "Model UN 2026 is open for applications until 5 December.\n\nApply: https://scholarscafe.com/resources/eca",
-        unsub,
-      ),
-      to_email: "subscriber@example.com",
-      unsubscribe_url: unsub,
-    }),
-    row("contact-reply", "Reply from contact@ (Mail screen)", {
+    row("contact-reply", "1. Reply from contact@ (Mail screen)", {
       subject: "Re: Question about the USA package",
-      body: "Hi Rafi,\n\nYes, the package includes SAT guidance and two essay reviews.\n\nBest wishes,\nScholars Cafe team",
+      body: replyBody,
       to_email: booking.email,
       from_contact: 1,
       in_reply_to: "<q1@example.com>",
+      layout: json(
+        typedLayout(replyBody, {
+          name: "Rafi Ahmed",
+          quote: {
+            by: "On Mon, 24 Nov 2026, Rafi Ahmed wrote:",
+            text: "Hello, does the USA package include SAT guidance and essay reviews?",
+          },
+        }),
+      ),
     }),
-    row("contact-compose", "New email from contact@ (Compose, with formatting)", {
-      subject: "Your shortlist for Fall 2027",
-      body: "Hi Rafi,\n\nHere is your **updated university shortlist**. Before our next call, please read [our free guides](https://scholarscafe.com/resources) and send us your test dates.\n\nBest wishes,\nScholars Cafe team",
+    row("contact-compose", "2. New email (Compose)", {
+      subject: "Your application checklist for December",
+      body: composeBody,
       to_email: booking.email,
       from_contact: 1,
+      layout: json(typedLayout(composeBody, { name: "Rafi Ahmed" })),
+    }),
+    row("booking-confirmed", "3. Booking confirmed (to student)", {
+      subject: "Your Scholars Cafe session is booked",
+      body: confirmationText(booking, meet),
+      to_email: booking.email,
+      layout: json(confirmationLayout(booking, meet)),
+    }),
+    row("booking-reminder", "4. Booking reminder (to student)", {
+      subject: "Reminder: your Scholars Cafe session starts soon",
+      body: reminderText(booking, meet),
+      to_email: booking.email,
+      layout: json(reminderLayout(booking, meet)),
+    }),
+    row("booking-cancelled", "5. Booking cancelled (to student)", {
+      subject: "Your Scholars Cafe session was cancelled",
+      body: cancelText(booking),
+      to_email: booking.email,
+      layout: json(cancelLayout(booking)),
+    }),
+    row("form-receipt", "6. Form receipt (to the person who filled it in)", {
+      subject: "Your response: Free consultation",
+      body: receiptText("Free consultation", "Rafi Ahmed", "(answers)"),
+      to_email: booking.email,
+      reply_to: "contact@scholarscafe.com",
+      layout: json(receiptLayout("Free consultation", "Rafi Ahmed", answers)),
+    }),
+    row("task-assigned", "7. Task assigned (to staff)", {
+      subject: "New task for you: " + task.title,
+      body: taskMail(config, task, "mahim assigned you a task."),
+      to_email: "staff@example.com",
+      layout: json(
+        taskLayout(task, {
+          label: "New task",
+          heading: "A task has been assigned to you",
+          text: "mahim assigned you a task in the team workspace.",
+        }),
+      ),
+    }),
+    row("agreement-signed", "9. Agreement signed: the signer's copy (PDF attached)", {
+      subject: "Your signed copy: Mentorship Services Agreement",
+      body: signedCopyText(agreement),
+      to_email: booking.email,
+      layout: json(signedCopyLayout(agreement)),
+    }),
+    row("eca-alert", "10. ECA alert (newsletter layout, with Unsubscribe)", {
+      subject: "New ECA open: Model UN 2026",
+      body: alertBody(ecaBody, unsub),
+      to_email: "subscriber@example.com",
+      unsubscribe_url: unsub,
+      layout: json({
+        label: "ECA alert",
+        heading: "New ECA open: Model UN 2026",
+        text: ecaBody,
+        format: true,
+      }),
+    }),
+    row("booking-team", "Extra: New booking (to the team inbox)", {
+      subject: "New booking: Rafi Ahmed",
+      body: teamText(booking),
+      reply_to: booking.email,
+      layout: json(teamLayout(booking)),
+    }),
+    row("task-reminder", "Extra: Task due tomorrow (to staff)", {
+      subject: "Due tomorrow: " + task.title,
+      body: taskMail(config, task, "Reminder: this task is due in about 24 hours."),
+      to_email: "staff@example.com",
+      layout: json(
+        taskLayout(task, {
+          label: "Due tomorrow",
+          heading: "A task is due tomorrow",
+          text: "Reminder: this task is due in about 24 hours.",
+        }),
+      ),
+    }),
+    row("form-team", "Extra: New form response (to the team inbox)", {
+      subject: "New form submission: Free consultation",
+      body: "(answers)",
+      reply_to: booking.email,
+      layout: json(responseLayout("Free consultation", answers)),
+    }),
+    row("inquiry-team", "Extra: Website inquiry (to the team inbox)", {
+      subject: "New website inquiry",
+      body: "Name: Rafi Ahmed",
+      reply_to: booking.email,
+      layout: json({
+        label: "New inquiry",
+        heading: "New website inquiry",
+        details: [
+          ["Name", "Rafi Ahmed"],
+          ["Email", "rafi@example.com"],
+          ["Phone", "+880 1700-000000"],
+          ["Message", "I'd like help with my US applications for Fall 2027."],
+        ],
+        stacked: true,
+        button: { label: "View lead", screen: "Leads" },
+      }),
     }),
   ]
-    .map((p) => ({ ...p, message: outboxMessage(p.row, transport, p.tagline) }))
+    .map((p) => ({ ...p, message: outboxMessage(p.row, transport) }))
     .concat([
       {
+        id: "agreement-invite",
+        label: "9. Agreement invite (private link, sent directly)",
+        message: {
+          from: `Scholars Cafe <${transport.sender}>`,
+          to: booking.email,
+          ...inviteEmail({
+            title: agreement.title,
+            ref: agreement.ref,
+            issued: "27 November 2026",
+            expires: "4 December 2026",
+            name: agreement.name,
+            email: booking.email,
+            url: "https://scholarscafe.com/sign/sample",
+          }),
+        },
+      },
+      {
+        id: "agreement-code",
+        label: "9. Agreement code (identity check before signing)",
+        message: {
+          from: `Scholars Cafe <${transport.sender}>`,
+          to: booking.email,
+          ...codeEmail({ title: agreement.title, code: "731406", minutes: 10 }),
+        },
+      },
+      {
         id: "sign-in-code",
-        label: "Sign-in code (student portal)",
+        label: "8. Sign-in code (student portal)",
         message: loginEmail(
           transport,
           booking.email,
@@ -119,10 +232,7 @@ export function installEmailPreviewRoutes(app, { store, fail, config }) {
     adminOrigin: config.ADMIN_ORIGIN || "",
     contact: { sender: "contact@scholarscafe.com" },
   };
-  const all = async () => {
-    await emailTagline(store);
-    return previewMails(config, transport);
-  };
+  const all = async () => previewMails(config, transport);
   app.use("/api/email-previews", (req, _res, next) => {
     if (!canPublish(req.actor.role)) throw fail(403, "Email previews are for owners and admins.");
     next();

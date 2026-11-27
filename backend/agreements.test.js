@@ -346,19 +346,12 @@ test("invite email: letterhead, REF, button, private link note and the shared fo
     "single-use link",
     "n@example.com",
     "4 December 2026",
-    "Dear Nusrat",
-    "Mentor-led guidance",
+    "Hi Nusrat,",
+    "Signature requested",
   ])
     assert.ok(m.html.includes(s), s);
   assert.ok(m.text.includes("https://scholarscafe.com/sign/"));
-  assert.ok(
-    !/—/.test(
-      m.html
-        .replace(/<!--[\s\S]*?-->/g, "")
-        .split("Questions?")[0]
-        .split("<body")[1] || "",
-    ),
-  );
+  assert.ok(!/\u2014/.test(m.text), "no em-dashes in the copy");
 });
 
 test("the PDF is generated with the letterhead, fields and audit footer", async () => {

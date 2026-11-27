@@ -11,7 +11,6 @@ import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
 import { token, hash, equal } from "./security.js";
 import { newCode, CODE_MINUTES, CODE_ATTEMPTS, CODES_PER_DAY } from "./auth.js";
-import { emailTagline } from "./mail.js";
 import {
   BUILTIN_FIELDS,
   AUTO_FIELDS,
@@ -28,7 +27,14 @@ import {
   SAMPLE_TEMPLATE,
 } from "./agreements-text.js";
 import { agreementPdf } from "./agreements-pdf.js";
-import { sendInvite, sendCode, signedCopyText, teamSignedText } from "./agreements-mail.js";
+import {
+  sendInvite,
+  sendCode,
+  signedCopyText,
+  signedCopyLayout,
+  teamSignedText,
+  teamSignedLayout,
+} from "./agreements-mail.js";
 
 export const PROOF_MINUTES = 60;
 export const MAX_SIGNATURE_BYTES = 300 * 1024;
@@ -255,12 +261,11 @@ export function installAgreementPublicRoutes(
     });
     if (devLog) console.log(`[local only] agreement code for ${a.recipient_email}: ${code}`);
     else
-      await sendCode(
-        mailer,
-        a.recipient_email,
-        { title: a.title, code, minutes: CODE_MINUTES },
-        await emailTagline(store),
-      ).catch(() => {
+      await sendCode(mailer, a.recipient_email, {
+        title: a.title,
+        code,
+        minutes: CODE_MINUTES,
+      }).catch(() => {
         throw fail(502, "The code email could not be sent. Please try again in a minute.");
       });
     res.json({ ok: true, email: maskEmail(a.recipient_email), minutes: CODE_MINUTES });
@@ -450,7 +455,7 @@ export function installAgreementPublicRoutes(
       const when = dhakaTime(signedAt);
       const name = values.name || a.recipient_name;
       await store.query(
-        "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,attach_agreement_id) VALUES (?,?,?,?,?,?)",
+        "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,attach_agreement_id,layout) VALUES (?,?,?,?,?,?,?)",
         [
           randomUUID(),
           `Your signed copy: ${a.title}`.slice(0, 160),
@@ -458,11 +463,14 @@ export function installAgreementPublicRoutes(
           "contact@scholarscafe.com",
           a.recipient_email,
           a.id,
+          JSON.stringify(
+            signedCopyLayout({ name, title: a.title, ref: a.ref, docId, signedAt: when, sha }),
+          ),
         ],
         c,
       );
       await store.query(
-        "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,attach_agreement_id) VALUES (?,?,?,?,?,?)",
+        "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,attach_agreement_id,layout) VALUES (?,?,?,?,?,?,?)",
         [
           randomUUID(),
           `Agreement signed: ${name}, ${a.title}`.slice(0, 160),
@@ -478,6 +486,16 @@ export function installAgreementPublicRoutes(
           a.recipient_email,
           null,
           a.id,
+          JSON.stringify(
+            teamSignedLayout({
+              name,
+              email: a.recipient_email,
+              title: a.title,
+              ref: a.ref,
+              docId,
+              signedAt: when,
+            }),
+          ),
         ],
         c,
       );
@@ -637,19 +655,15 @@ export function installAgreementAdminRoutes(app, { store, fail, config, canPubli
       return false;
     }
     try {
-      await sendInvite(
-        mailer,
-        {
-          title: a.title,
-          ref: a.ref,
-          issued: dhakaDate(a.issued_at || Date.now()),
-          expires: link.expires,
-          name: a.recipient_name,
-          email: a.recipient_email,
-          url: link.url,
-        },
-        await emailTagline(store),
-      );
+      await sendInvite(mailer, {
+        title: a.title,
+        ref: a.ref,
+        issued: dhakaDate(a.issued_at || Date.now()),
+        expires: link.expires,
+        name: a.recipient_name,
+        email: a.recipient_email,
+        url: link.url,
+      });
       return true;
     } catch {
       console.error("Agreement email could not be sent.");

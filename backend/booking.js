@@ -197,9 +197,63 @@ export const teamText = (b) =>
     "Manage it in the admin app: Inbox → Bookings.",
   ].join("\n");
 
-const outbox = (store, c, { subject, body, replyTo, to }) =>
+// Layouts for the shared email template (heading, details box, button). The plain text above stays the
+// stored body; the template builds its own plain-text part from the layout.
+const BOOKED_BY =
+  "You are getting this email because this address was used to book a session at scholarscafe.com.";
+const sessionRows = (b, link) => [
+  ["When", dhakaLabel(b.starts_at, b.ends_at)],
+  ["Topic", b.topic],
+  ["Where", link || "We will email you the meeting link before the session."],
+];
+const joinButton = (link) => (link ? { label: "Join the session", url: link } : null);
+export const confirmationLayout = (b, link) => ({
+  label: "Booking confirmed",
+  heading: "Your session is booked",
+  firstName: b.name,
+  text: "Your 1-on-1 mentor session with Scholars Cafe is booked. We will send you a reminder about an hour before.",
+  details: sessionRows(b, link),
+  button: joinButton(link),
+  note: `If you can't make it, reply to this email so we can free the time for someone else.\n\n${BOOKED_BY}`,
+});
+export const reminderLayout = (b, link) => ({
+  label: "Reminder",
+  heading: "Your session starts soon",
+  firstName: b.name,
+  text: "A reminder: your 1-on-1 mentor session with Scholars Cafe starts soon.",
+  details: sessionRows(b, link),
+  button: joinButton(link),
+  note: BOOKED_BY,
+});
+export const cancelLayout = (b) => ({
+  label: "Booking cancelled",
+  heading: "Your session has been cancelled",
+  firstName: b.name,
+  text: "Your 1-on-1 mentor session with Scholars Cafe has been cancelled. Sorry for the change.",
+  details: [
+    ["When", dhakaLabel(b.starts_at, b.ends_at)],
+    ["Topic", b.topic],
+    ["Status", "Cancelled"],
+  ],
+  button: { label: "Book a new time", url: "https://scholarscafe.com/book" },
+  note: `You can also reply to this email and we will help you find a time.\n\n${BOOKED_BY}`,
+});
+export const teamLayout = (b) => ({
+  label: "New booking",
+  heading: "New mentor session booking",
+  details: [
+    ["When", dhakaLabel(b.starts_at, b.ends_at)],
+    ["Name", b.name],
+    ["Email", b.email],
+    ["Phone", b.phone || "-"],
+    ["Topic", b.topic],
+  ],
+  button: { label: "View booking", screen: "Bookings" },
+});
+
+const outbox = (store, c, { subject, body, replyTo, to, layout }) =>
   store.query(
-    "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email) VALUES (?,?,?,?,?)",
+    "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,layout) VALUES (?,?,?,?,?,?)",
     // Subjects can carry a visitor's name: no line breaks or control characters in a mail header.
     [
       randomUUID(),
@@ -207,6 +261,7 @@ const outbox = (store, c, { subject, body, replyTo, to }) =>
       body,
       replyTo || null,
       to || null,
+      layout ? JSON.stringify(layout) : null,
     ],
     c,
   );
@@ -239,6 +294,7 @@ export async function queueBookingReminders(store) {
       await outbox(store, c, {
         subject: "Reminder: your Scholars Cafe session starts soon",
         body: reminderText(b, link),
+        layout: reminderLayout(b, link),
         replyTo: "contact@scholarscafe.com",
         to: b.email,
       });
@@ -375,12 +431,14 @@ export function installPublicBookingRoutes(app, { store, fail, config, sharedLim
           await outbox(store, c, {
             subject: "Your Scholars Cafe session is booked",
             body: confirmationText(b, settings.link),
+            layout: confirmationLayout(b, settings.link),
             replyTo: "contact@scholarscafe.com",
             to: b.email,
           });
           await outbox(store, c, {
             subject: `New booking: ${b.name}, ${dhakaLabel(b.starts_at, b.ends_at).replace(/ \(Bangladesh.*$/, "")}`,
             body: teamText(b),
+            layout: teamLayout(b),
             replyTo: b.email,
           });
         });
@@ -461,6 +519,7 @@ export function installBookingAdminRoutes(app, { store, fail, canPublish }) {
         await outbox(store, c, {
           subject: "Your Scholars Cafe session was cancelled",
           body: cancelText(b),
+          layout: cancelLayout(b),
           replyTo: "contact@scholarscafe.com",
           to: b.email,
         });

@@ -291,14 +291,26 @@ export function createApp(
         "New website inquiry",
         data.email,
         `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n\n${data.message}`,
+        {
+          label: "New inquiry",
+          heading: "New website inquiry",
+          details: [
+            ["Name", data.name],
+            ["Email", data.email],
+            ["Phone", data.phone],
+            ["Message", data.message],
+          ],
+          stacked: true,
+          button: { label: "View lead", screen: "Leads" },
+        },
       );
     });
     res.status(201).json({ ok: true });
   });
-  async function queueNotification(c, subject, email, body) {
+  async function queueNotification(c, subject, email, body, layout = null) {
     await store.query(
-      "INSERT INTO mail_outbox (id,subject,body,reply_to) VALUES (?,?,?,?)",
-      [randomUUID(), subject, body, email],
+      "INSERT INTO mail_outbox (id,subject,body,reply_to,layout) VALUES (?,?,?,?,?)",
+      [randomUUID(), subject, body, email, layout ? JSON.stringify(layout) : null],
       c,
     );
   }
@@ -341,6 +353,29 @@ export function createApp(
             kind === "newsletter" ? "New newsletter signup" : "New private feedback",
             data.email,
             `Type: ${kind}\nName: ${data.name}\nEmail: ${data.email}\nConsent: given on the website\n\n${data.message}`,
+            kind === "newsletter"
+              ? {
+                  label: "New sign-up",
+                  heading: "New newsletter sign-up",
+                  details: [
+                    ["Name", data.name],
+                    ["Email", data.email],
+                    ["Consent", "Given on the website"],
+                  ],
+                  stacked: true,
+                  button: { label: "View sign-ups", screen: "Newsletter" },
+                }
+              : {
+                  label: "New feedback",
+                  heading: "New private feedback",
+                  details: [
+                    ["Name", data.name],
+                    ["Email", data.email],
+                    ["Feedback", data.message],
+                  ],
+                  stacked: true,
+                  button: { label: "View feedback", screen: "Private feedback" },
+                },
           );
       });
       // Same response for duplicates avoids exposing who is already subscribed.

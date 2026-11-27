@@ -182,11 +182,20 @@ export function installEcaAdminRoutes(app, { store, fail, canPublish, config }) 
             url,
             // Spaced out: the first goes at once, then one every ECA_GAP_SECONDS.
             (start + i) * ECA_GAP_SECONDS,
+            // The shared template adds the "you subscribed" line and the Unsubscribe link.
+            JSON.stringify({
+              label: "ECA alert",
+              heading: data.subject,
+              text: data.body,
+              format: true,
+            }),
           );
         });
         await store.query(
-          "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,unsubscribe_url,next_attempt_at) VALUES " +
-            chunk.map(() => "(?,?,?,?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL ? SECOND))").join(","),
+          "INSERT INTO mail_outbox (id,subject,body,reply_to,to_email,unsubscribe_url,next_attempt_at,layout) VALUES " +
+            chunk
+              .map(() => "(?,?,?,?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL ? SECOND),?)")
+              .join(","),
           args,
           c,
         );
