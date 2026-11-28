@@ -55,6 +55,7 @@ function writeSitemap(clientDir, pages) {
     "/contact": "0.8",
     "/colleges": "0.8",
   };
+  for (const p of pages) if (p.startsWith("/resources/blog/")) weight[p] = "0.7";
   const urls = pages
     .filter((p) => !p.startsWith("/forms/") && !p.startsWith("/sign/"))
     .map(
@@ -148,6 +149,14 @@ async function generateIndexHtml() {
     else collegeSlugs.add(item.data.slug);
   }
   pages.push("/colleges", ...[...collegeSlugs].map((slug) => `/colleges/${slug}`));
+  // Long-form guides (src/data/guides.ts), one page each under the blog.
+  const guideData = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "..", "src/data/guides.ts"),
+    "utf8",
+  );
+  const guideSlugs = [...guideData.matchAll(/^\s*slug: "([a-z0-9-]+)",$/gm)].map((m) => m[1]);
+  if (!guideSlugs.length) throw new Error("No guides found in src/data/guides.ts");
+  pages.push(...guideSlugs.map((slug) => `/resources/blog/${slug}`));
   const rendered = [];
   for (const path of pages) {
     const response = await serverEntry.default.fetch(new Request("https://example.com" + path));
