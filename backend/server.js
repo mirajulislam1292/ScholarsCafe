@@ -4,6 +4,7 @@ import { createMailer, deliverMail } from "./mail.js";
 import { seedFormTemplates } from "./forms.js";
 import { queueBookingReminders } from "./booking.js";
 import { queueTaskReminders } from "./workspace.js";
+import { queueCollegeReminders } from "./my-list.js";
 import { deliverPush, onPushQueued, vapidKeys } from "./push.js";
 import { pollInbox, imapConfigured, appendSent } from "./inbox.js";
 
@@ -92,6 +93,21 @@ async function start() {
     }
   }, 60000);
   bookingTimer.unref();
+  // My College List deadline reminders (14, 7 and 1 days before, from 9:00 Dhaka). Admin only; the
+  // college_reminders table makes each one go out once, across restarts.
+  let collegeReminding = false;
+  const collegeTimer = setInterval(async () => {
+    if (collegeReminding || process.env.PORTAL === "student") return;
+    collegeReminding = true;
+    try {
+      await queueCollegeReminders(store, process.env);
+    } catch {
+      console.error("College deadline reminder check failed");
+    } finally {
+      collegeReminding = false;
+    }
+  }, 300000);
+  collegeTimer.unref();
   // Web Push (admin app only): sent about a second after an event is queued, with a 15-second safety net.
   if (process.env.PORTAL !== "student") {
     await vapidKeys(store, process.env); // makes and stores the VAPID keys on first start

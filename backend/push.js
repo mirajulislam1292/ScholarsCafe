@@ -254,7 +254,42 @@ export const pushEndpointOk = (url) => {
     return false;
   }
 };
-const endpointHash = (e) => createHash("sha256").update(e).digest("hex");
+export const endpointHash = (e) => createHash("sha256").update(e).digest("hex");
+
+const subscription = z
+  .object({
+    endpoint: z.string().max(1000).refine(pushEndpointOk, "Unsupported push service."),
+    keys: z.object({ p256dh: z.string().min(20).max(200), auth: z.string().min(8).max(100) }),
+    expirationTime: z.number().nullable().optional(),
+    device: z.string().trim().max(120).default(""),
+  })
+  .strict();
+/** Saves this device for `userId` (also used by the student portal for deadline reminders). */
+export async function saveSubscription(store, userId, body, res) {
+  const s = subscription.parse(body);
+  const h = endpointHash(s.endpoint);
+  // One row per device (endpoint). Signing in as someone else on the same device moves it to them.
+  await store.query(
+    "INSERT INTO push_subscriptions (id,user_id,endpoint_hash,endpoint,p256dh,auth,device) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),p256dh=VALUES(p256dh),auth=VALUES(auth),device=VALUES(device)",
+    [randomUUID(), userId, h, s.endpoint, s.keys.p256dh, s.keys.auth, s.device],
+  );
+  res.status(201).json({ ok: true, key: h.slice(0, 16) });
+}
+/** Removes one of `userId`'s own devices, by endpoint or id. */
+export async function removeSubscription(store, fail, userId, body, res) {
+  const input = z
+    .object({ endpoint: z.string().max(1000).optional(), id: z.string().uuid().optional() })
+    .strict()
+    .parse(body);
+  if (!input.endpoint && !input.id) throw fail(400, "Choose a device.");
+  await store.query(
+    input.id
+      ? "DELETE FROM push_subscriptions WHERE id=? AND user_id=?"
+      : "DELETE FROM push_subscriptions WHERE endpoint_hash=? AND user_id=?",
+    [input.id || endpointHash(input.endpoint), userId],
+  );
+  res.json({ ok: true });
+}
 
 export function installPushRoutes(app, { store, fail, config }) {
   const staffOnly = (req) => {
@@ -281,39 +316,13 @@ export function installPushRoutes(app, { store, fail, config }) {
       })),
     });
   });
-  const subscription = z
-    .object({
-      endpoint: z.string().max(1000).refine(pushEndpointOk, "Unsupported push service."),
-      keys: z.object({ p256dh: z.string().min(20).max(200), auth: z.string().min(8).max(100) }),
-      expirationTime: z.number().nullable().optional(),
-      device: z.string().trim().max(120).default(""),
-    })
-    .strict();
   app.post("/api/push/subscribe", async (req, res) => {
     staffOnly(req);
-    const s = subscription.parse(req.body);
-    const h = endpointHash(s.endpoint);
-    // One row per device (endpoint). Signing in as someone else on the same device moves it to them.
-    await store.query(
-      "INSERT INTO push_subscriptions (id,user_id,endpoint_hash,endpoint,p256dh,auth,device) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),p256dh=VALUES(p256dh),auth=VALUES(auth),device=VALUES(device)",
-      [randomUUID(), req.actor.id, h, s.endpoint, s.keys.p256dh, s.keys.auth, s.device],
-    );
-    res.status(201).json({ ok: true, key: h.slice(0, 16) });
+    await saveSubscription(store, req.actor.id, req.body, res);
   });
   app.post("/api/push/unsubscribe", async (req, res) => {
     staffOnly(req);
-    const input = z
-      .object({ endpoint: z.string().max(1000).optional(), id: z.string().uuid().optional() })
-      .strict()
-      .parse(req.body);
-    if (!input.endpoint && !input.id) throw fail(400, "Choose a device.");
-    await store.query(
-      input.id
-        ? "DELETE FROM push_subscriptions WHERE id=? AND user_id=?"
-        : "DELETE FROM push_subscriptions WHERE endpoint_hash=? AND user_id=?",
-      [input.id || endpointHash(input.endpoint), req.actor.id],
-    );
-    res.json({ ok: true });
+    await removeSubscription(store, fail, req.actor.id, req.body, res);
   });
   app.post("/api/push/test", async (req, res) => {
     staffOnly(req);

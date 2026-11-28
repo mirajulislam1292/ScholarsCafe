@@ -6,6 +6,7 @@ import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { Reveal } from "@/components/scholars/Reveal";
 import { CtaBand, PageHero } from "@/components/page/PageParts";
+import { SaveToList } from "@/components/scholars/SaveToList";
 import { AID_LABEL, TEST_LABEL } from "@/data/state-universities";
 import type { AidPolicy, TestPolicy } from "@/data/state-universities";
 import {
@@ -194,8 +195,12 @@ function CollegesPage() {
 
             <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((c) => (
-                <li key={c.slug}>
+                <li key={c.slug} className="relative">
                   <CollegeCard c={c} />
+                  {/* Outside the card link (no button inside a link), over the photo's right corner. */}
+                  <div className="absolute right-3 top-3">
+                    <SaveToList slug={c.slug} name={c.name} compact />
+                  </div>
                 </li>
               ))}
             </ul>

@@ -6,6 +6,7 @@ import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { Reveal } from "@/components/scholars/Reveal";
 import { CtaBand, PageHero } from "@/components/page/PageParts";
+import { SaveToList } from "@/components/scholars/SaveToList";
 import { AID_LABEL, STATE_UNIVERSITIES, TEST_LABEL } from "@/data/state-universities";
 import {
   BDT_RATE,
@@ -105,6 +106,9 @@ function Profile({ c }: { c: College }) {
                   Stale: these figures are more than 12 months old.
                 </p>
               )}
+              <div className="mt-6">
+                <SaveToList slug={c.slug} name={c.name} />
+              </div>
             </Reveal>
 
             <div className="section-body grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">

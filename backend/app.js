@@ -20,6 +20,7 @@ import { installWorkspaceRoutes } from "./workspace.js";
 import { installEcaAdminRoutes, installEcaPublicRoutes } from "./eca.js";
 import { installBookingAdminRoutes, installPublicBookingRoutes } from "./booking.js";
 import { installPushRoutes, queuePush, idsWith } from "./push.js";
+import { installMyListRoutes, installSiteSaveRoutes } from "./my-list.js";
 import { installInboxRoutes } from "./inbox.js";
 import { installEmailPreviewRoutes } from "./email-previews.js";
 import { installAgreementPublicRoutes, installAgreementAdminRoutes } from "./agreements.js";
@@ -544,6 +545,32 @@ export function createApp(
   // Email code and password sign-in exist only on the student portal; the team admin is Google only.
   if (portal === "student")
     installAuthRoutes(app, { store, config, mailer, fail, startSession, setSession });
+  // My College List: the website's "Save to My List" button talks to the student portal (my-list.js).
+  if (portal === "student") {
+    installSiteSaveRoutes(app, {
+      store,
+      fail,
+      config,
+      sessionOf: async (req) => {
+        const raw = cookie(req, sessionCookie);
+        if (!raw || raw.length !== 64) return null;
+        const actor = await store.session(hash(raw));
+        return actor && roleFits(portal, actor.role) ? actor : null;
+      },
+      limiter: rateLimit({
+        windowMs: 60 * 1000,
+        limit: 60,
+        standardHeaders: "draft-8",
+        legacyHeaders: false,
+      }),
+    });
+    // The list page has its own address so links (website, emails) can open it.
+    const indexHtml = readFileSync(
+      fileURLToPath(new URL("./public/index.html", import.meta.url)),
+      "utf8",
+    );
+    app.get("/my-list", (_req, res) => res.type("html").send(indexHtml));
+  }
   app.use("/api", async (req, res, next) => {
     const raw = cookie(req, sessionCookie);
     if (!raw || raw.length !== 64) throw fail(401, "Please sign in.");
@@ -625,6 +652,8 @@ export function createApp(
     installEcaAdminRoutes(app, { store, fail, canPublish: inboxAdmin, config });
   // Push notifications for staff devices, and the contact@ mailbox (owners and admins). Team admin only.
   if (portal === "admin") installPushRoutes(app, { store, fail, config });
+  // My College List: students' own lists and reminder devices, and their lists for staff (my-list.js).
+  installMyListRoutes(app, { store, fail, config });
   if (portal === "admin")
     installInboxRoutes(app, { store, fail, config, connect: config.imapConnect });
   if (portal === "admin") installEmailPreviewRoutes(app, { store, fail, config });
