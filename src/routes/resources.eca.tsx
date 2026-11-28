@@ -8,7 +8,8 @@ export const Route = createFileRoute("/resources/eca")({
   head: () =>
     seo({
       path: "/resources/eca",
-      title: "ECA Notifications | Scholars Cafe",
+      title: "ECA Opportunity Alerts by Email | Scholars Cafe",
+      crumb: "ECA Notifications",
       description:
         "Get an email from Scholars Cafe whenever a new extracurricular activity (ECA) opportunity opens. Free, and you can unsubscribe at any time.",
     }),

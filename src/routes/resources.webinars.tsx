@@ -8,7 +8,8 @@ export const Route = createFileRoute("/resources/webinars")({
   head: () =>
     seo({
       path: "/resources/webinars",
-      title: "Webinars | Scholars Cafe",
+      title: "Free US Admissions Webinars | Scholars Cafe",
+      crumb: "Webinars",
       description:
         "Free Scholars Cafe webinars and live sessions for Bangladeshi students applying abroad, with recordings of past sessions.",
     }),

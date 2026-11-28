@@ -43,6 +43,8 @@ function FormsList() {
           srcSet="/media/pages/campus-early-fall-sm.webp 960w, /media/pages/campus-early-fall.webp 1920w"
           sizes="100vw"
           alt=""
+          width={1200}
+          height={1800}
           className="absolute inset-0 size-full scale-105 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/85 via-blue-950/45 to-blue-950/75" />

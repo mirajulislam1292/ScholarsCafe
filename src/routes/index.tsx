@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
   head: () =>
     seo({
       path: "/",
-      title: "Scholars Cafe",
+      title: "Scholars Cafe | Study in the USA from Bangladesh",
       description:
         "One-to-one mentors for Bangladeshi students applying to US universities: college lists, essays, scholarships, CSS Profile, ISFAA and F-1 visa prep.",
     }),

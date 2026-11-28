@@ -9,7 +9,8 @@ export const Route = createFileRoute("/book")({
   head: () =>
     seo({
       path: "/book",
-      title: "Book a Meeting | Scholars Cafe",
+      title: "Book a 1-on-1 Mentor Session | Scholars Cafe",
+      crumb: "Book a Meeting",
       description:
         "Pick an open day and time for a 1-on-1 online session with a Scholars Cafe mentor. Times are shown in Bangladesh time.",
     }),
@@ -26,6 +27,8 @@ function BookPage() {
           srcSet="/media/pages/library-sm.webp 960w, /media/pages/library.webp 1920w"
           sizes="100vw"
           alt=""
+          width={1920}
+          height={1280}
           className="absolute inset-0 size-full scale-105 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/85 via-blue-950/45 to-blue-950/75" />

@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { seo } from "@/lib/seo";
+import { fitTitle, seo } from "@/lib/seo";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { Reveal } from "@/components/scholars/Reveal";
@@ -26,8 +26,13 @@ export const Route = createFileRoute("/universities/$state")({
     s
       ? seo({
           path: `/universities/${s.slug}`,
-          title: `${s.university} | Scholars Cafe`,
-          description: `${s.university}, the top-ranked university in ${s.state}: English test scores, SAT/ACT policy, estimated cost and financial aid for international students, with official sources.`,
+          title: fitTitle(
+            `${s.university} for International Students | Scholars Cafe`,
+            `${s.university}: International Student Brief`,
+            `${s.university} | ${s.state}`,
+          ),
+          crumb: s.university,
+          description: `${s.university} in ${s.state}: English tests, SAT/ACT policy, cost and aid for international students, from official sources.`,
         })
       : { meta: [{ title: "Not found | Scholars Cafe" }] },
   component: StatePage,

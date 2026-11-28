@@ -31,9 +31,10 @@ export const Route = createFileRoute("/colleges/")({
   head: () =>
     seo({
       path: "/colleges",
-      title: "Colleges | Scholars Cafe",
+      title: "US College Profiles for Bangladeshi Students | Scholars Cafe",
+      crumb: "Colleges",
       description:
-        "Top US liberal arts colleges and national universities: admit rates, SAT/ACT, aid for international students and costs in taka, each figure linked to its official source.",
+        "US liberal arts colleges and national universities: admit rates, SAT/ACT, aid for international students and costs in taka, linked to official sources.",
     }),
   component: CollegesPage,
 });
@@ -232,6 +233,8 @@ function CollegeCard({ c }: { c: College }) {
           <img
             src={c.image.card}
             alt=""
+            width={640}
+            height={400}
             loading="lazy"
             decoding="async"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"

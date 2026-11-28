@@ -40,6 +40,8 @@ export function ParallaxImage({
         <img
           src={src}
           alt={alt}
+          width={1920}
+          height={1080}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : undefined}
           decoding="async"

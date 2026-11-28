@@ -12,8 +12,19 @@ export function FAQ() {
   const EMAIL = useCmsValue("data.EMAIL", CMS_DEFAULT_EMAIL);
 
   const [open, setOpen] = useState<number | null>(0);
+  // FAQPage structured data from the same questions shown below, so search results can show them.
+  const faqJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  }).replace(/</g, "\\u003c");
   return (
     <section id="faq" className="bg-white section-y">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqJsonLd }} />
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <Reveal className="max-w-2xl">
           <span className="hidden">

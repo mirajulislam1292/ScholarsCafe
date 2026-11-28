@@ -8,7 +8,8 @@ export const Route = createFileRoute("/resources/blog")({
   head: () =>
     seo({
       path: "/resources/blog",
-      title: "Blog | Scholars Cafe",
+      title: "Study in the USA Blog | Scholars Cafe",
+      crumb: "Blog",
       description:
         "Articles from Scholars Cafe mentors for Bangladeshi students applying abroad: applications, essays, scholarships and student life.",
     }),

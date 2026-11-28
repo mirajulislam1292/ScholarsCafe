@@ -164,6 +164,21 @@ async function generateIndexHtml() {
     writeFileSync(join(dir, "index.html"), html);
     rendered.push(html);
   }
+  // The "page not found" page. .htaccess serves it with a real 404 status for unknown addresses, so
+  // search engines drop dead links instead of indexing them as copies of the home page.
+  const missing = await serverEntry.default.fetch(new Request("https://example.com/404"));
+  if (missing.status !== 404)
+    throw new Error(`Expected the not-found page to render with 404, got ${missing.status}`);
+  const notFoundHtml = (await missing.text())
+    .replace(/\u0000/g, "\\u0000")
+    .replace(
+      "</head>",
+      '<title>Page not found | Scholars Cafe</title><meta name="robots" content="noindex"/></head>',
+    );
+  if (!notFoundHtml.includes("Page not found</h2>"))
+    throw new Error("Not-found page did not render its message");
+  writeFileSync(join(clientDir, "404.html"), notFoundHtml);
+  rendered.push(notFoundHtml);
   writeSecurityPolicy(clientDir, rendered.join("\n"));
   writeSitemap(clientDir, pages);
   console.log(`[OK] Pre-rendered ${pages.length} pages`);

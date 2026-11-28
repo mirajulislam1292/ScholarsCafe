@@ -48,6 +48,9 @@ AddType font/woff2 .woff2
   # Broadcast was renamed Podcast: keep old links working
   RewriteRule ^resources/broadcast/?$ /resources/podcast [R=301,L]
 
+  # The home page
+  RewriteRule ^$ /index.html [L]
+
   # Allow direct access to real files
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
@@ -64,6 +67,12 @@ AddType font/woff2 .woff2
   # Agreement signing links: every /sign/<token> uses the one pre-rendered signing shell (never indexed)
   RewriteRule ^sign/[0-9a-f]{64}/?$ /sign/_/index.html [L]
 
-  # Fallback all SPA routes to /index.html
-  RewriteRule ^ /index.html [L]
+  # Colleges added in the admin after the last build render in the browser from the home page shell
+  RewriteRule ^colleges/[a-z0-9-]+/?$ /index.html [L]
+  RewriteRule ^design-system/?$ /index.html [L]
+
+  # Anything else does not exist: answer with a real 404 and the "page not found" page
+  RewriteRule ^ - [R=404,L]
 </IfModule>
+
+ErrorDocument 404 /404.html

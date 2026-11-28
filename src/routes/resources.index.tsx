@@ -21,9 +21,10 @@ export const Route = createFileRoute("/resources/")({
   head: () =>
     seo({
       path: "/resources",
-      title: "Resources | Scholars Cafe",
+      title: "Free US Admissions Resources | Scholars Cafe",
+      crumb: "Resources",
       description:
-        "Free resources for Bangladeshi students applying to US universities: blog, ECA alerts, webinars, podcast episodes and guides on essays, scholarships, aid, tests and visas.",
+        "Free resources for Bangladeshi students applying to US universities: guides on essays, scholarships, aid, tests and visas, plus webinars and ECA alerts.",
     }),
   component: ResourcesPage,
 });
