@@ -11,9 +11,10 @@ export const Route = createFileRoute("/resources/tools")({
   head: () =>
     seo({
       path: "/resources/tools",
-      title: "Essay Tools | Scholars Cafe",
+      title: "Free Common App Essay Tools | Scholars Cafe",
+      crumb: "Essay Tools",
       description:
-        "Free tools for Bangladeshi students applying to US universities: find your core values, fit Common App activities into the character limits, and browse official supplemental essay prompts.",
+        "Free tools for US applicants: find your core values, fit Common App activities into the character limits, and browse official supplemental essay prompts.",
     }),
   component: ToolsPage,
 });

@@ -6,19 +6,62 @@ import { EMAIL, PHONE, WA_LINK } from "@/lib/scholars-data";
 export const SITE_URL = "https://scholarscafe.com";
 const OG_IMAGE = SITE_URL + "/og/scholars-cafe.jpg";
 
+// Section pages that a deeper page sits under, for the breadcrumb trail (only pages that exist).
+const SECTIONS: Record<string, string> = { "/resources": "Resources", "/colleges": "Colleges" };
+
+/** Home > section > this page, as schema.org BreadcrumbList (shown as the path in Google results). */
+function breadcrumbs(path: string, name: string) {
+  const parent = "/" + path.split("/")[1];
+  const trail = [
+    { name: "Home", url: SITE_URL + "/" },
+    ...(parent !== path && SECTIONS[parent]
+      ? [{ name: SECTIONS[parent], url: SITE_URL + parent }]
+      : []),
+    { name, url: SITE_URL + path },
+  ];
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: t.name,
+      item: t.url,
+    })),
+  });
+}
+
+/** The first title that fits in a Google result (about 60 characters); the last one is the fallback. */
+export function fitTitle(...candidates: string[]) {
+  return candidates.find((t) => t.length <= 60) ?? candidates[candidates.length - 1];
+}
+
 export function seo({
   path,
   title,
   description,
+  crumb,
   noindex = false,
 }: {
   path: string;
   title: string;
   description: string;
+  /** Short page name for the breadcrumb trail (defaults to the title before " | "). */
+  crumb?: string;
   noindex?: boolean;
 }) {
   const url = SITE_URL + (path === "/" ? "/" : path.replace(/\/$/, ""));
+  const scripts =
+    path === "/" || noindex
+      ? []
+      : [
+          {
+            type: "application/ld+json",
+            children: breadcrumbs(url.slice(SITE_URL.length), crumb || title.split(" | ")[0]),
+          },
+        ];
   return {
+    scripts,
     meta: [
       { title },
       { name: "description", content: description },

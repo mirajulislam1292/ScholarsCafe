@@ -14,7 +14,8 @@ export const Route = createFileRoute("/services")({
   head: () =>
     seo({
       path: "/services",
-      title: "Services | Scholars Cafe",
+      title: "College List, Essay and F-1 Visa Help | Scholars Cafe",
+      crumb: "Services",
       description:
         "Individual services for US university applications from Bangladesh: college list, Common App essays, CSS Profile and ISFAA, and F-1 visa interview prep.",
     }),

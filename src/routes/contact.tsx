@@ -12,7 +12,8 @@ export const Route = createFileRoute("/contact")({
   head: () =>
     seo({
       path: "/contact",
-      title: "Contact | Scholars Cafe",
+      title: "Contact Scholars Cafe | Free 30-Minute Consultation",
+      crumb: "Contact",
       description:
         "Talk to Scholars Cafe about applying to US universities from Bangladesh. Free 30-minute consultation; we reply within 24 hours.",
     }),

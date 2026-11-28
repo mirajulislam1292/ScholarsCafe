@@ -73,6 +73,8 @@ function Person({ m, index }: { m: Member; index: number }) {
               <img
                 src={m.photo}
                 alt={m.name}
+                width={96}
+                height={96}
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full object-cover"

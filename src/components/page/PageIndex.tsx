@@ -64,6 +64,8 @@ export function PageIndex() {
                     <img
                       src={e.image}
                       alt=""
+                      width={144}
+                      height={96}
                       loading="lazy"
                       decoding="async"
                       className="pointer-events-none absolute right-16 hidden h-24 w-36 rounded-2xl object-cover opacity-0 shadow-[0_24px_48px_rgb(4_28_49/0.18)] transition-[opacity,transform] duration-700 ease-premium group-hover:-translate-y-1 group-hover:opacity-100 lg:block"

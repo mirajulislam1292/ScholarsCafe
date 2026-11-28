@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { seo } from "@/lib/seo";
+import { fitTitle, seo } from "@/lib/seo";
 import { Navbar } from "@/components/scholars/Navbar";
 import { Footer } from "@/components/scholars/Footer";
 import { Reveal } from "@/components/scholars/Reveal";
@@ -38,8 +38,13 @@ export const Route = createFileRoute("/colleges/$slug")({
     return c
       ? seo({
           path: `/colleges/${c.slug}`,
-          title: `${c.name} | Scholars Cafe`,
-          description: `${c.name} (${c.city}, ${c.code}): admit rate, SAT/ACT, English test minimums, aid for international students, deadlines and cost in taka, from official sources.`,
+          title: fitTitle(
+            `${c.name} Admissions and Aid | Scholars Cafe`,
+            `${c.name} Admissions | Scholars Cafe`,
+            `${c.name} | Scholars Cafe`,
+          ),
+          crumb: c.name,
+          description: `${c.name} (${c.city}, ${c.code}): admit rate, SAT/ACT, English tests, international aid, deadlines and cost in taka, from official sources.`,
         })
       : seo({
           path: `/colleges/${params.slug}`,
