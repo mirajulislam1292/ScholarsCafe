@@ -7,16 +7,23 @@ export const SITE_URL = "https://scholarscafe.com";
 const OG_IMAGE = SITE_URL + "/og/scholars-cafe.jpg";
 
 // Section pages that a deeper page sits under, for the breadcrumb trail (only pages that exist).
-const SECTIONS: Record<string, string> = { "/resources": "Resources", "/colleges": "Colleges" };
+const SECTIONS: Record<string, string> = {
+  "/resources": "Resources",
+  "/resources/blog": "Blog",
+  "/colleges": "Colleges",
+};
 
 /** Home > section > this page, as schema.org BreadcrumbList (shown as the path in Google results). */
 function breadcrumbs(path: string, name: string) {
-  const parent = "/" + path.split("/")[1];
+  // Every section above this page, shallowest first (e.g. Resources > Blog for a blog post).
+  const parts = path.split("/").filter(Boolean);
+  const parents = parts
+    .slice(0, -1)
+    .map((_, i) => "/" + parts.slice(0, i + 1).join("/"))
+    .filter((p) => SECTIONS[p]);
   const trail = [
     { name: "Home", url: SITE_URL + "/" },
-    ...(parent !== path && SECTIONS[parent]
-      ? [{ name: SECTIONS[parent], url: SITE_URL + parent }]
-      : []),
+    ...parents.map((p) => ({ name: SECTIONS[p], url: SITE_URL + p })),
     { name, url: SITE_URL + path },
   ];
   return JSON.stringify({
